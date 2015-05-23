@@ -5,7 +5,7 @@ Bricklayer is a multiplayer, two-dimensional building game where users can build
 
 **For players**, Bricklayer is a simple building game where users can create their own levels, minigames, and artwork using blocks. For example, using gravity arrows, effect blocks, etc. to create challenges for other players. Bricklayer is a sandbox for players to interact and share their creations.
 
-**For developers, Bricklayer is a platform for creating your own “sandbox within a sandbox”. In Bricklayer, everything is modular. Using plugin and mod functionality through the API, server owners and developers can create their own game modes, mini games, and interactive levels. For example, they could create levels that dynamically place blocks, respond to user input, and more.**
+**For developers**, Bricklayer is a platform for creating your own “sandbox within a sandbox”. In Bricklayer, everything is modular. Using plugin and mod functionality through the API, server owners and developers can create their own game modes, mini games, and interactive levels. For example, they could create levels that dynamically place blocks, respond to user input, and more.
 
 ###Links:
  - [Game Design Document](https://docs.google.com/document/d/1CJTgZs1hhppzcEBHDBMLm7rMit3nmDtlJRfGPJ-XjMo/)
