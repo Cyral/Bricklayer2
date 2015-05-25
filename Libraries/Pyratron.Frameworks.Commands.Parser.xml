@@ -1,0 +1,578 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Pyratron.Frameworks.Commands.Parser</name>
+    </assembly>
+    <members>
+        <member name="T:Pyratron.Frameworks.Commands.Parser.Command">
+            <summary>
+            Represents a command that when called by its alias(es), executes a command with the specified parameters.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Command.AccessLevel">
+            <summary>
+            The permission level needed to invoke the command.
+            Primarily used for creating "ranks" for different users.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Command.Action">
+            <summary>
+            An action to be executed when the command is ran with successful input.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Command.Aliases">
+            <summary>
+            The strings that will call the command. The first alias is known as the default alias.
+            Aliases should not contain the command prefix.
+            </summary>
+            <example>
+            The alias "help" will cause the command to be called when the prefix, plus "help" is typed (Ex: /help)
+            </example>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Command.CanExecute">
+            <summary>
+            A rule that determines if the command can be executed, which is true by default.
+            Returns an error message if validation does not succeed. Function is called before the command arguments are parsed.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Command.Description">
+            <summary>
+            Describes the command and provides basic information about it.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Command.Name">
+            <summary>
+            Represents the command's name.
+            Used for help and a "friendly" name.
+            Use <c>Aliases</c> for the "short" version that calls the command.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Creates a command with a human friendly name and a command alias.
+            </summary>
+            <param name="name">Human friendly name.</param>
+            <param name="alias">Alias to use when sending the command. (Ex: "help", "exit")</param>
+            <param name="description">A description that provides basic information about the command.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.#ctor(System.String,System.String)">
+            <summary>
+            Creates a command with a human friendly name and a command alias.
+            </summary>
+            <param name="name">Human friendly name.</param>
+            <param name="alias">Alias to use when sending the command. (Ex: "help", "exit")</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.#ctor(System.String)">
+            <summary>
+            Creates a command with the specified name.
+            </summary>
+            <param name="name">Human friendly name</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.Create(System.String,System.String,System.String)">
+            <summary>
+            Creates a command with a human friendly name and a command alias.
+            </summary>
+            <param name="name">Human friendly name.</param>
+            <param name="alias">Alias to use when sending the command. (Ex: "help", "exit")</param>
+            <param name="description">A description that provides basic information about the command.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.Create(System.String,System.String)">
+            <summary>
+            Creates a command with a human friendly name and a command alias.
+            </summary>
+            <param name="name">Human friendly name.</param>
+            <param name="alias">Alias to use when sending the command. (Ex: "help", "exit")</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.Create(System.String)">
+            <summary>
+            Creates a command with the specified name.
+            </summary>
+            <param name="name">Human friendly name.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.ShowHelp(System.String)">
+            <summary>
+            Creates a help string giving information on the command.
+            </summary>
+            <example>
+            Example Result:
+            Ban - Bans a user (Usage: ban &lt;user&gt;)
+            </example>
+            <param name="alias">
+            Custom alias to use in the message. (Example, if user inputs "banuser" as an alias, but the real
+            input is "ban", make sure we use the alias in the message.)
+            </param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.GenerateUsage(System.String)">
+            <summary>
+            Generates help text defining the usage of the command and its arguments.
+            </summary>
+            <param name="alias">
+            Custom alias to use in the message. (Example, if user inputs "banuser" as an alias, but the real
+            input is "ban", make sure we use the alias in the message.)
+            </param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.SetName(System.String)">
+            <summary>
+            Sets a friendly name for the command.
+            Note that the actual "/command" is defined as an alias.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.AddAlias(System.String)">
+            <summary>
+            Adds a command alias that will call the command's action.
+            </summary>
+            <param name="alias">Alias that will call the action (Ex: "help", "exit")</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.AddAlias(System.String[])">
+            <summary>
+            Adds command aliases that will call the action.
+            </summary>
+            <param name="aliases">Aliases that will call the action (Ex: "help", "exit")</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.SetDescription(System.String)">
+            <summary>
+            Sets a description for the command.
+            </summary>
+            <param name="description">Describes the command and provides basic information about it.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.RestrictAccess(System.Int32)">
+            <summary>
+            Restricts the command from being run if the access level is below what is specified.
+            Useful for creating "ranks" where permission is needed to run a command.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.SetAction(System.Action{Pyratron.Frameworks.Commands.Parser.Argument[]})">
+            <summary>
+            Sets an action to be ran when the command is executed.
+            </summary>
+            <param name="action">
+            Action to be ran, which takes a <c>Argument</c> array parameter representing the passed
+            input.
+            </param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.Execute(Pyratron.Frameworks.Commands.Parser.Argument[])">
+            <summary>
+            Executes a command with the specified input and an optional access level.
+            If CanExecute returns false, the command is not run.
+            </summary>
+            <param name="arguments">The parsed input</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.SetExecutePredicate(System.Func{Pyratron.Frameworks.Commands.Parser.Command,System.String})">
+            <summary>
+            Sets the rule that determines if the command can be executed.
+            The function should return an error message if the command cannot be executed. Function is called before the command
+            arguments are parsed.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.AddArgument(Pyratron.Frameworks.Commands.Parser.Argument)">
+            <summary>
+            Add an argument to the command. All input are required by default, and are parsed in the order they are defined.
+            Optional arguments must come last.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.AddArguments(Pyratron.Frameworks.Commands.Parser.Argument[])">
+            <summary>
+            Adds an array of arguments to the command. Optional arguments must come last.
+            </summary>
+        </member>
+        <member name="T:Pyratron.Frameworks.Commands.Parser.Argument">
+            <summary>
+            Represents a parameter that is passed with command. Arguments may be required or optional, may contain a restricted set
+            of values, and have their own nested arguments.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Argument.Default">
+            <summary>
+            The default value when no value is specified. Only used for optional commands.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Argument.Enum">
+            <summary>
+            Indicates if the values should act as an enum, where each possible value must be added through <c>AddOption(..)</c>
+            </summary>
+            <remarks>
+            Use <c>AddOption</c> to add "options" to this argument.
+            </remarks>
+            <example>
+            For example, an argument that is set as an "enum" could have a few possible values added through <c>AddOption</c>.
+            You could add options such as "yes" and "no", which will only allow those two options to be used.
+            They will also be shown as choices in command help.
+            </example>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Argument.Name">
+            <summary>
+            The name to refer to this argument in documentation and/or help.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Argument.Optional">
+            <summary>
+            Indicates if this parameter is optional. All arguments are required by default.
+            </summary>
+            <remarks>
+            Use <c>Default</c> to set the default value if an optional parameter is not defined.
+            </remarks>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:Pyratron.Frameworks.Commands.Parser.Argument.Rule" -->
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Argument.Value">
+            <summary>
+            The value of this argument parsed from the command.
+            Threading may cause issues if two commands of the same instance are parsed at once.
+            </summary>
+            <remarks>
+            The parser will parse a command and set the value of on the actual instance of the argument.
+            </remarks>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.#ctor(System.String,System.Boolean)">
+            <summary>
+            Constructs a new command argument.
+            </summary>
+            <param name="name">The name to refer to this argument in documentation and/or help.</param>
+            <param name="optional">Indicates if this parameter is optional.</param>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Argument.Arguments">
+            <summary>
+            Nested arguments that are contained within this argument.
+            Example: [foo [bar]]
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.Create(System.String,System.Boolean)">
+            <summary>
+            Creases a new command argument.
+            </summary>
+            <param name="name">The name to refer to this argument in documentation/help.</param>
+            <param name="optional">Indicates if this parameter is optional.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.MakeOptional">
+            <summary>
+            Makes the argument an optional parameter.
+            Arguments are required by default.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.MakeRequired">
+            <summary>
+            Makes the argument a required parameter.
+            Arguments are required by default.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.SetValue(System.String)">
+            <summary>
+            Sets the value of the argument when parsing.
+            Do not use this method when creating arguments.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.SetValue(System.Object)">
+            <summary>
+            Sets the value of the argument when parsing.
+            Do not use this method when creating arguments.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.SetDefault(System.String)">
+            <summary>
+            Sets the default value for an optional parameter when no value is specified.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.SetDefault(System.Object)">
+            <summary>
+            Sets the default value for an optional parameter when no value is specified.
+            Only works on optional commands. (As required commands would not need a default value)
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.AddOption(Pyratron.Frameworks.Commands.Parser.Argument)">
+            <summary>
+            Adds an option to the argument. Options make the argument behave like an enum, where only certain string values are
+            allowed.
+            Each option can have children arguments.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.SetValidator(Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule)">
+            <summary>
+            Sets the validation rule that is used for this argument.
+            Validation rules verify the input is valid.
+            </summary>
+            <example>
+            <c>Argument.Create("email").SetValidator(Argument.ValidationRule.Email))</c>
+            This will cause the email argument to only allow valid emails.
+            Custom validators can also be created.
+            </example>
+            <remarks>
+            ValidationRules are run when the command is parsed, while <c>CanExecute</c> on the <c>Command</c> object verifies a command can run.
+            </remarks>
+            <param name="rule">Represents a rule to validate an argument value on.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.MakeEnum">
+            <summary>
+            Restricts the possible values to a list of specific values, acting as if it were an enum.
+            Each option can have children arguments that define specific behavior.
+            </summary>
+            <remarks>
+            Use <c>AddOption</c> to add "options" to this argument.
+            </remarks>
+            <example>
+            For example, an argument that is set as an "enum" could have a few possible values added through <c>AddOption</c>.
+            You could add options such as "yes" and "no", which will only allow those two options to be used.
+            They will also be shown as choices in command help.
+            </example>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.AddArgument(Pyratron.Frameworks.Commands.Parser.Argument)">
+            <summary>
+            Add a nested argument to the argument. All arguments are required by default, and are parsed in the order they are
+            defined.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.AddArguments(Pyratron.Frameworks.Commands.Parser.Argument[])">
+            <summary>
+            Adds an array nested arguments to the current argument. Optional arguments must come last.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.IsValid(System.String)">
+            <summary>
+            Checks if the specified string is valid for the validation rule.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.ResetValue">
+            <summary>
+            Resets a value to empty, bypassing any validation.
+            </summary>
+        </member>
+        <member name="T:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule">
+            <summary>
+            Represents a rule to validate an argument value on.
+            </summary>
+            <example>
+            <c>Argument.Create("email").SetValidator(Argument.ValidationRule.Email))</c>
+            This will cause the email argument to only allow valid emails.
+            Custom validators can also be created.
+            </example>
+            <remarks>
+            ValidationRules are run when the command is parsed, while <c>CanExecute</c> on the <c>Command</c> object verifies a command can run.
+            </remarks>
+        </member>
+        <member name="F:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.Integer">
+            <summary>
+            A rule that only allows <c>Int32</c> (whole) numbers.
+            </summary>
+        </member>
+        <member name="F:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.Double">
+            <summary>
+            A rule that only allows <c>Double</c> numbers.
+            </summary>
+        </member>
+        <member name="F:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.Email">
+            <summary>
+            A rule that only allows valid emails.
+            </summary>
+            <see cref="F:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.EmailRegex"/>
+        </member>
+        <member name="F:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.AlphaNumerical">
+            <summary>
+            A rule that only allows alphanumerical values.
+            </summary>
+            <see cref="F:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.AlphaNumericRegex"/>
+        </member>
+        <member name="F:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.IP">
+            <summary>
+            A rule that only allows valid IP addresses. (Using <c>IPAddress.TryParse</c>)
+            </summary>
+        </member>
+        <member name="F:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.AlwaysTrue">
+            <summary>
+            Rule that always returns true. This is the default rule for arguments.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.Name">
+            <summary>
+            A user friendly name that will be displayed in an error.
+            Example: "Must be a valid 'IP Address'" where "IP Address" is the name.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.Validate">
+            <summary>
+            A predicate that returns true if the string passed passes the rule.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.#ctor(System.String,System.Predicate{System.String})">
+            <summary>
+            Creates a new validation rule.
+            </summary>
+            <param name="friendlyName">A user friendly name that will be displayed in an error. Ex: "Must be a valid ____"</param>
+            <param name="validate">A function that returns true if the string passed passes the rule.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.Create(System.String,System.Predicate{System.String})">
+            <summary>
+            Creates a new validation rule.
+            </summary>
+            <param name="friendlyName">A user friendly name that will be displayed in an error. Ex: "Must be a valid ____"</param>
+            <param name="validate">A function that returns true if the string passed passes the rule.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Argument.ValidationRule.GetError">
+            <summary>
+            Returns the name of the rule that should be displayed in an error message.
+            </summary>
+        </member>
+        <member name="T:Pyratron.Frameworks.Commands.Parser.CommandParser">
+            <summary>
+            Handles and parses commands and their arguments.
+            </summary>
+            <example>
+            Create a new parser with:
+            Parser = CommandParser.CreateNew().UsePrefix("/").OnError(OnParseError);
+            Send commands to the parser with:
+            Parser.Parse(input);
+            </example>
+        </member>
+        <member name="T:Pyratron.Frameworks.Commands.Parser.CommandParser.ParseErrorHandler">
+            <summary>
+            Contains details on errors encountered during parsing, such as incorrect arguments, failed validation, etc.
+            </summary>
+            <param name="sender">The parser object that delivered the error.</param>
+            <param name="error">An error message describing the error. This should be outputted as a log, chat message, etc.</param>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.CommandParser.Commands">
+            <summary>
+            All of the commands in the parser.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.CommandParser.ParseError">
+            <summary>
+            Fired when an error occurs during parsing. Details on the error are returned such as incorrect arguments, failed
+            validation, etc.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.CommandParser.Prefix">
+            <summary>
+            The prefix, "/" by default, that all commands must be prefixed with.
+            Prefix is case-insensitive.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.CreateNew(System.String)">
+            <summary>
+            Creates a new command parser for handling commands.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.Execute(Pyratron.Frameworks.Commands.Parser.Command,Pyratron.Frameworks.Commands.Parser.Argument[])">
+            <summary>
+            Executes the command with the specified arguments.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.AddCommand(Pyratron.Frameworks.Commands.Parser.Command)">
+            <summary>
+            Adds a predefined command to the parser.
+            </summary>
+            <param name="command">The command to execute. Use <c>Command.Create()</c> to create a command.</param>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.UsePrefix(System.String)">
+            <summary>
+            Sets the prefix that the parser will use to identity commands. Defaults to "/".
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.OnError(System.Action{System.Object,System.String})">
+            <summary>
+            Sets an action to be ran when an error is encountered during parsing.
+            Details on the error are returned by the callback.
+            </summary>
+            <remarks>
+            Ideally used to display an error message if the command entered encounters an error.
+            </remarks>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.Parse(System.String,System.Int32)">
+            <summary>
+            Parses text in search of a command (with prefix), and runs it accordingly.
+            </summary>
+            <remarks>
+            Data does not need to be formatted in any way before parsing. Simply pass your input to the function and
+            it will determine if it is a valid command, check the command's <c>Command.CanExecute</c> function, and run the
+            command.
+            Use <c>Arguments[].FromName(...)</c> to get the values of the parsed arguments in the command action.
+            </remarks>
+            <param name="input">
+            A string inputted by a user. If the string does not start with the parser prefix, it will return
+            false, otherwise it will parse the command.
+            </param>
+            <param name="accessLevel">An optional level to limit executing commands if the user doesn't have permission.</param>
+            <returns>
+            True if the input is non-empty and starts with the <c>Prefix</c>.
+            If the input does not start with a prefix, it returns false so the message can be processed further. (As a chat
+            message, for example)
+            </returns>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.NoCommandsFound(System.Collections.Generic.List{System.String})">
+            <summary>
+            Ran when no commands are found. Will create an error detailing what went wrong.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.FormatRelatedCommands(System.Collections.Generic.List{System.String})">
+            <summary>
+            Takes input from <c>FindRelatedCommands</c> and generates a readable string.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.FindRelatedCommands(System.String)">
+            <summary>
+            Finds command aliases related to the input command that may have been spelled incorrectly.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.ResetArgs(Pyratron.Frameworks.Commands.Parser.IArguable)">
+            <summary>
+            Resets the command's arguments back to their default values.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.ParseArguments(System.Boolean,System.String,Pyratron.Frameworks.Commands.Parser.Command,Pyratron.Frameworks.Commands.Parser.IArguable,System.Collections.Generic.List{System.String},System.Collections.Generic.List{Pyratron.Frameworks.Commands.Parser.Argument})">
+            <summary>
+            Parses the command's arguments or nested argument and recursively parses their children.
+            </summary>
+            <returns>True if an error has occurred during parsing and the calling loop should break.</returns>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.CheckArgumentValidation(Pyratron.Frameworks.Commands.Parser.IArguable,System.Collections.Generic.List{System.String},System.Int32)">
+            <summary>
+            Checks the validation of arguments at the specified index.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.MergeLastArguments(System.Boolean,Pyratron.Frameworks.Commands.Parser.Command,Pyratron.Frameworks.Commands.Parser.IArguable,System.Collections.Generic.List{System.String},System.Int32)">
+            <summary>
+            If the arguments are longer than they should be, merge them into the last one.
+            This way a user does not need quotes for a chat message for example.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.GenerateEnumArguments(Pyratron.Frameworks.Commands.Parser.Argument)">
+            <summary>
+            Returns a list of possible values for an enum (type) argument in a readable format.
+            </summary>
+        </member>
+        <member name="T:Pyratron.Frameworks.Commands.Parser.CommandExtensions">
+            <summary>
+            Provides extension methods for arguments and commands that can be used with the library.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandExtensions.FromName(System.Collections.Generic.IEnumerable{Pyratron.Frameworks.Commands.Parser.Argument},System.String)">
+            <summary>
+            Retrieves an argument's value by it's name from an <c>Argument</c> collection or array.
+            </summary>
+            <example>
+                <code>
+                     private static void OnCommandExecuted(Argument[] args) {
+                     var user = args.FromName("user");
+                </code>
+            </example>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandExtensions.GenerateArgumentString(System.Collections.Generic.List{Pyratron.Frameworks.Commands.Parser.Argument})">
+            <summary>
+            Generates an readable argument string for the given arguments. (Ex: "&lt;player&gt; &lt;item&gt; [amount]")
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandExtensions.WriteArguments(System.Collections.Generic.List{Pyratron.Frameworks.Commands.Parser.Argument},System.Text.StringBuilder)">
+            <summary>
+            Generates an readable argument string for the given arguments. (Ex: "&lt;player&gt; &lt;item&gt; [amount]")
+            (Different than <see cref="M:Pyratron.Frameworks.Commands.Parser.CommandExtensions.GenerateArgumentString(System.Collections.Generic.List{Pyratron.Frameworks.Commands.Parser.Argument})" />, which is for public use and creates a <c>StringBuilder</c>)
+            </summary>
+        </member>
+        <member name="T:Pyratron.Frameworks.Commands.Parser.IArguable">
+            <summary>
+            Represents an object that has multiple arguments/parameters.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.Commands.Parser.IArguable.Arguments">
+            <summary>
+            The arguments the object contains. Arguments may be nested inside others to create links of arguments.
+            </summary>
+        </member>
+    </members>
+</doc>

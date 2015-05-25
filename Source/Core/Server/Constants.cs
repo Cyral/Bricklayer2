@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Properties;
 
 namespace Bricklayer.Core.Server
@@ -18,7 +14,14 @@ namespace Bricklayer.Core.Server
     /// </remarks>
     internal static class Constants
     {
+        /// <summary>
+        /// The current version of the server.
+        /// </summary>
         public static readonly Version Version = Assembly.GetEntryAssembly().GetName().Version;
+
+        /// <summary>
+        /// The version of the server in readable format. (Example: v0.2.0.0b)
+        /// </summary>
         public static readonly string VersionString = AssemblyVersionName.GetVersion();
 
         /// <summary>
