@@ -25,7 +25,7 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// Globably used strings.
         /// </summary>
-        public class Strings
+        public static class Strings
         {
             /// <summary>
             /// The app identification ID used for the Lidgren networking library.
@@ -37,7 +37,7 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// Globally used values.
         /// </summary>
-        public class Values
+        public static class Values
         {
             /// <summary>
             /// The default port for servers to run on.

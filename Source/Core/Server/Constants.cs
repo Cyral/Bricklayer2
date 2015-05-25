@@ -17,17 +17,17 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The current version of the server.
         /// </summary>
-        public static readonly Version Version = Assembly.GetEntryAssembly().GetName().Version;
+        public static Version Version { get; } = Assembly.GetEntryAssembly().GetName().Version;
 
         /// <summary>
         /// The version of the server in readable format. (Example: v0.2.0.0b)
         /// </summary>
-        public static readonly string VersionString = AssemblyVersionName.GetVersion();
+        public static string VersionString { get; } = AssemblyVersionName.GetVersion();
 
         /// <summary>
         /// Globably used strings.
         /// </summary>
-        public class Strings
+        public static class Strings
         {
             /// <summary>
             /// The title of the server console.

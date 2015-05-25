@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bricklayer.Core.Server.Net
 {
-    class MessageHandler
+    public class MessageHandler
     {
     }
 }
