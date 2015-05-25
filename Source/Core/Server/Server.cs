@@ -21,7 +21,7 @@ namespace Bricklayer.Core.Server
         public static IOComponent IO { get; set; }
 
         /// <summary>
-        /// The NetworkManager for handling recieving, sending, etc.
+        /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
         public static NetworkComponent Net { get; set; }
 

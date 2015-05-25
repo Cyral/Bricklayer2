@@ -221,10 +221,10 @@ namespace Bricklayer.Core.Server
                 Console.WriteLine(new string(' ', Math.Max(1, Console.WindowWidth - extra - 1)));
             }
 
-            Core.Server.WriteHeader();
-            Core.Server.WriteCommandCursor();
+            Core.Server.Server.WriteHeader();
+            Core.Server.Server.WriteCommandCursor();
 
-            if (Core.Server.IO != null) Core.Server.IO.LogMessage(this, text);
+            if (Core.Server.Server.IO != null) Core.Server.Server.IO.LogMessage(this, text);
         }
 
         /// <summary>
@@ -246,10 +246,10 @@ namespace Bricklayer.Core.Server
             Console.CursorLeft = extra;
             Console.WriteLine(new string(' ', Math.Max(1, Console.WindowWidth - extra - 1)));
 
-            Core.Server.WriteHeader();
-            Core.Server.WriteCommandCursor();
+            Core.Server.Server.WriteHeader();
+            Core.Server.Server.WriteCommandCursor();
 
-            if (Core.Server.IO != null) Core.Server.IO.LogMessage(this, text);
+            if (Core.Server.Server.IO != null) Core.Server.Server.IO.LogMessage(this, text);
         }
 
         #endregion

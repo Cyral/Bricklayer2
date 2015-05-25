@@ -18,7 +18,7 @@ namespace Bricklayer.Core.Server.Components
     /// Broadcast: Sends a message to each user in a room.
     /// Global: Sends a message to each user on the server.
     /// </summary>
-    public class NetworkManager : ServerComponent
+    public class NetworkComponent : ServerComponent
     {
         #region Properties
 
@@ -108,7 +108,7 @@ namespace Bricklayer.Core.Server.Components
 
             //Start message handler
             Messages = new MessageHandler();
-            Messages.Start();
+            //Messages.Start();
             Log("Message handler started.");
 
             return true; //No error
@@ -188,7 +188,7 @@ namespace Bricklayer.Core.Server.Components
         }
 
         /// <summary>
-        /// Disposes the NetworkManager
+        /// Disposes the NetworkComponent
         /// </summary>
         public void Dispose()
         {
