@@ -141,21 +141,22 @@
             Useful for creating "ranks" where permission is needed to run a command.
             </summary>
         </member>
-        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.SetAction(System.Action{Pyratron.Frameworks.Commands.Parser.Argument[]})">
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.SetAction(System.Action{Pyratron.Frameworks.Commands.Parser.Argument[],System.Object})">
             <summary>
             Sets an action to be ran when the command is executed.
             </summary>
             <param name="action">
             Action to be ran, which takes a <c>Argument</c> array parameter representing the passed
-            input.
+            input, as well as any kind of optional data to be sent to the command.
             </param>
         </member>
-        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.Execute(Pyratron.Frameworks.Commands.Parser.Argument[])">
+        <member name="M:Pyratron.Frameworks.Commands.Parser.Command.Execute(Pyratron.Frameworks.Commands.Parser.Argument[],System.Object)">
             <summary>
             Executes a command with the specified input and an optional access level.
             If CanExecute returns false, the command is not run.
             </summary>
             <param name="arguments">The parsed input</param>
+            <param name="data">Optional ata to be passed to the command.</param>
         </member>
         <member name="M:Pyratron.Frameworks.Commands.Parser.Command.SetExecutePredicate(System.Func{Pyratron.Frameworks.Commands.Parser.Command,System.String})">
             <summary>
@@ -415,9 +416,9 @@
             </summary>
             <example>
             Create a new parser with:
-            Parser = CommandParser.CreateNew().UsePrefix("/").OnError(OnParseError);
+               Parser = CommandParser.CreateNew().UsePrefix("/").OnError(OnParseError);
             Send commands to the parser with:
-            Parser.Parse(input);
+               Parser.Parse(input);
             </example>
         </member>
         <member name="T:Pyratron.Frameworks.Commands.Parser.CommandParser.ParseErrorHandler">
@@ -434,8 +435,7 @@
         </member>
         <member name="P:Pyratron.Frameworks.Commands.Parser.CommandParser.ParseError">
             <summary>
-            Fired when an error occurs during parsing. Details on the error are returned such as incorrect arguments, failed
-            validation, etc.
+            Fired when an error occurs during parsing. Details on the error are returned such as incorrect arguments, failed validation, etc.
             </summary>
         </member>
         <member name="P:Pyratron.Frameworks.Commands.Parser.CommandParser.Prefix">
@@ -484,15 +484,29 @@
             command.
             Use <c>Arguments[].FromName(...)</c> to get the values of the parsed arguments in the command action.
             </remarks>
-            <param name="input">
-            A string inputted by a user. If the string does not start with the parser prefix, it will return
-            false, otherwise it will parse the command.
-            </param>
+            <param name="input">A string inputted by a user. If the string does not start with the parser prefix, it will return false, otherwise it will parse the command.</param>
             <param name="accessLevel">An optional level to limit executing commands if the user doesn't have permission.</param>
             <returns>
             True if the input is non-empty and starts with the <c>Prefix</c>.
-            If the input does not start with a prefix, it returns false so the message can be processed further. (As a chat
-            message, for example)
+            If the input does not start with a prefix, it returns false so the message can be processed further. (As a chat message, for example)
+            </returns>
+        </member>
+        <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.Parse(System.String,System.Object,System.Int32)">
+            <summary>
+            Parses text in search of a command (with prefix), and runs it accordingly.
+            </summary>
+            <remarks>
+            Data does not need to be formatted in any way before parsing. Simply pass your input to the function and
+            it will determine if it is a valid command, check the command's <c>Command.CanExecute</c> function, and run the
+            command.
+            Use <c>Arguments[].FromName(...)</c> to get the values of the parsed arguments in the command action.
+            </remarks>
+            <param name="data">Data to pass to the command. This data can be used by the command when it is executed.</param>
+            <param name="input">A string inputted by a user. If the string does not start with the parser prefix, it will return false, otherwise it will parse the command.</param>
+            <param name="accessLevel">An optional level to limit executing commands if the user doesn't have permission.</param>
+            <returns>
+            True if the input is non-empty and starts with the <c>Prefix</c>.
+            If the input does not start with a prefix, it returns false so the message can be processed further. (As a chat message, for example)
             </returns>
         </member>
         <member name="M:Pyratron.Frameworks.Commands.Parser.CommandParser.NoCommandsFound(System.Collections.Generic.List{System.String})">

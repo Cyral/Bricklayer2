@@ -1667,6 +1667,11 @@
             Gets or sets the name of the library network thread. Cannot be changed once NetPeer is initialized.
             </summary>
         </member>
+        <member name="P:Lidgren.Network.NetPeerConfiguration.MaxTimeoutMisses">
+            <summary>
+            The number of times the client or server can exceed the timeout period before disconnecting.
+            </summary>
+        </member>
         <member name="P:Lidgren.Network.NetPeerConfiguration.MaximumConnections">
             <summary>
             Gets or sets the maximum amount of connections this peer can hold. Cannot be changed once NetPeer is initialized.
