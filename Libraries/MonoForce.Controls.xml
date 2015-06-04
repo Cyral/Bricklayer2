@@ -150,6 +150,11 @@
             Image is centered within the control.
             </summary>
         </member>
+        <member name="F:MonoForce.Controls.SizeMode.Fit">
+            <summary>
+            Image is scaled down but its aspect ratio stays the same.
+            </summary>
+        </member>
         <member name="F:MonoForce.Controls.SizeMode.Stretched">
             <summary>
             Image is scaled to fit in the control.

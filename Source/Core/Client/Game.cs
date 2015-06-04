@@ -1,20 +1,57 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Bricklayer.Client.Interface;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client
 {
     /// <summary>
-    /// This is the main type for your game.
+    /// The main class of the Bricklayer client.
     /// </summary>
     internal class Game : Microsoft.Xna.Framework.Game
     {
-        private GraphicsDeviceManager graphics;
-        private SpriteBatch spriteBatch;
+        /// <summary>
+        /// The game's graphics manager.
+        /// </summary>
+        public static GraphicsDeviceManager Graphics { get; private set; }
+
+        /// <summary>
+        /// The game's sprite batch for drawing content.
+        /// </summary>
+        public static SpriteBatch SpriteBatch { get; private set; }
+
+        /// <summary>
+        /// The main window, which is the root of all UI controls.
+        /// </summary>
+        public static MainWindow Window { get; private set; }
+
+        /// <summary>
+        /// The MonoForce UI manager.
+        /// </summary>
+        public static Manager UIManager { get; private set; }
+
+        /// <summary>
+        /// Texture loader for loading texture assets.
+        /// </summary>
+        public static TextureLoader TextureLoader { get; private set; }
+
+        /// <summary>
+        /// Manages and handles all game assets and content.
+        /// </summary>
+        public static new ContentManager Content { get; private set; }
 
         public Game()
         {
-            graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
+            Graphics = new GraphicsDeviceManager(this) { SynchronizeWithVerticalRetrace = false };
+            IsFixedTimeStep = false;
+
+            //Create the manager for MonoForce UI
+            UIManager = new Manager(this, "Bricklayer")
+            {
+                AutoCreateRenderTarget = true,
+                LogUnhandledExceptions = false,
+                ShowSoftwareCursor = true
+            };
         }
 
         /// <summary>
@@ -34,8 +71,28 @@ namespace Bricklayer.Core.Client
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            base.LoadContent();
+
+            IO.CheckFiles();
+            Content = new ContentManager();
+            TextureLoader = new TextureLoader(Graphics.GraphicsDevice);
+            Content.LoadTextures();
+
+            Graphics.PreferredBackBufferWidth = 1024;
+            Graphics.PreferredBackBufferHeight = 768;
+            GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+            Graphics.ApplyChanges();
+
+            //Initialize MonoForce after loading skins.
+            UIManager.Initialize();
+            SpriteBatch = UIManager.Renderer.SpriteBatch; //Set the spritebatch to the Neoforce managed one
+
+
+            //Create the main window for all content to be added to.
+            Window = new MainWindow(UIManager);
+            Window.Init();
+            UIManager.Add(Window);
+            Window.SendToBack();
         }
 
         /// <summary>
@@ -53,6 +110,7 @@ namespace Bricklayer.Core.Client
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
         protected override void Update(GameTime gameTime)
         {
+            UIManager.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -62,8 +120,12 @@ namespace Bricklayer.Core.Client
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
+            UIManager.BeginDraw(gameTime);
+            GraphicsDevice.Clear(Color.Black);
 
+            // TODO: Add your drawing code here
+
+            UIManager.EndDraw();
             base.Draw(gameTime);
         }
     }

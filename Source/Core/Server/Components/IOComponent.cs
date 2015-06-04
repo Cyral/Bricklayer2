@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Bricklayer.Core.Common;
 using Newtonsoft.Json;
 
 namespace Bricklayer.Core.Server.Components
@@ -45,8 +46,11 @@ namespace Bricklayer.Core.Server.Components
         {
             //Paths.
             ServerDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            LogDirectory = Path.Combine(ServerDirectory, "logs");
-            ConfigFile = Path.Combine(ServerDirectory, "config.json");
+            if (ServerDirectory != null)
+            {
+                LogDirectory = Path.Combine(ServerDirectory, "logs");
+                ConfigFile = Path.Combine(ServerDirectory, "config.json");
+            }
 
             //Create directories that don't exist.
             if (!Directory.Exists(LogDirectory))
@@ -57,7 +61,8 @@ namespace Bricklayer.Core.Server.Components
             //Set up JSON.net settings.
             serializationSettings = new JsonSerializerSettings
             {
-                Formatting = Formatting.Indented
+                Formatting = Formatting.Indented,
+                ContractResolver = new JsonContractResolver() //Use a custom contract resolver that can read private and internal properties
             };
 
             //Log a message to the log file stating the startup time and version.

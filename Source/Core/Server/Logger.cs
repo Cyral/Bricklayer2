@@ -181,7 +181,7 @@ namespace Bricklayer.Core.Server
 
             //Types
             Normal = new LogType("", ConsoleColor.White);
-            IO = new LogType("IOComponent", ConsoleColor.Cyan);
+            IO = new LogType("IO", ConsoleColor.Cyan);
             Net = new LogType("Net", ConsoleColor.Magenta);
             Error = new LogType("Error", ConsoleColor.Red);
             Server = new LogType("Server", ConsoleColor.Green);

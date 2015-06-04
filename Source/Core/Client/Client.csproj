@@ -52,14 +52,28 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
+    <Compile Include="ContentManager.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="Interface\Layout.cs" />
+    <Compile Include="Interface\Logic.cs" />
+    <Compile Include="Interface\Screens\BaseScreen.cs" />
+    <Compile Include="Interface\Screens\IScreen.cs" />
+    <Compile Include="Interface\Screens\LoginScreen.cs" />
+    <Compile Include="Interface\Screens\ScreenManager.cs" />
+    <Compile Include="IO.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextureLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Lidgren.Network, Version=3.4.0.456, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\Lidgren.Network.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoForce.Controls">
+      <HintPath>..\..\..\Libraries\MonoForce.Controls.dll</HintPath>
     </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MSBuildProgramFiles32)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
@@ -76,9 +90,17 @@
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Interface\Controls\" />
+    <Folder Include="Interface\Windows\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /s /i /y "$(SolutionDir)..\Content" "$(TargetDir)Content"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>xcopy /s /i /y "$(SolutionDir)..\Content" "$(TargetDir)Content"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
