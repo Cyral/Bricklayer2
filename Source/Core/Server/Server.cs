@@ -40,7 +40,7 @@ namespace Bricklayer.Core.Server
             input = string.Empty;
             clear = new string(' ', Console.WindowWidth);
             var stopwatch = Stopwatch.StartNew();
-            Logger.WriteLine(LogType.Server, $"{Constants.Strings.ServerTitle} {Constants.VersionString}");
+            Logger.WriteLine(LogType.Server, $"{Constants.Strings.ServerTitle}");
             Logger.WriteLine(LogType.Server, $"Server is starting now, on {DateTime.Now.ToString("U")}");
             
             //Initialize Properties

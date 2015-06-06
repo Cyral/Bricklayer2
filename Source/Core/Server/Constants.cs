@@ -32,7 +32,7 @@ namespace Bricklayer.Core.Server
             /// <summary>
             /// The title of the server console.
             /// </summary>
-            public static string ServerTitle { get; } = $"Bricklayer {VersionString}";
+            public static string ServerTitle { get; } = $"Bricklayer Server {VersionString}";
         }
     }
 }
