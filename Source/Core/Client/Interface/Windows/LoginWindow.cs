@@ -30,7 +30,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Movable = false;
             Resizable = false;
             Width = 450;
-            Height = 210;
+            Height = 218;
+            TopPanel.Height = 72;
             Shadow = true;
             Center();
 
