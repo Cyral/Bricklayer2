@@ -40,6 +40,8 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public static new ContentManager Content { get; private set; }
 
+        public static GameState State { get; set; }
+
         public Game()
         {
             Graphics = new GraphicsDeviceManager(this) { SynchronizeWithVerticalRetrace = false };
