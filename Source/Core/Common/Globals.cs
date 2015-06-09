@@ -37,16 +37,6 @@ namespace Bricklayer.Core.Common
             /// App identification for Auth server
             /// </summary>
             public static string AuthNetworkID { get; } = "BricklayerAuth";
-
-            /// <summary>
-            /// IP of the Bricklayer Auth server
-            /// </summary>
-            public static string AuthServerAddress { get; } = "127.0.0.1";
-
-            /// <summary>
-            /// Port of the Bricklayer Auth server
-            /// </summary>
-            public static int AuthServerPort { get; } = 52142;
         }
 
         /// <summary>
@@ -70,7 +60,7 @@ namespace Bricklayer.Core.Common
             /// The default address to send crededentials for authentication to.
             /// The actual address is configurable through the JSON config, although the auth address will most likely never change.
             /// </summary>
-            public static string DefaultAuthAddress { get; } = "auth.pyratron.com";
+            public static string DefaultAuthAddress { get; } = "127.0.0.1";
         }
     }
 }

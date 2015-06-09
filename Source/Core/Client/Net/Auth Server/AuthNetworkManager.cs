@@ -85,13 +85,13 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         }
 
         /// <summary>
-        /// Sends and encodes an IMessage to the server.
+        /// Sends and encodes an IMessage to the auth server.
         /// </summary>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void Send(IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            IPEndPoint receiver = new IPEndPoint(NetUtility.Resolve(Globals.Strings.AuthServerAddress), Globals.Strings.AuthServerPort); // Auth Server info
+            var receiver = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress), Globals.Values.DefaultAuthPort); // Auth Server info
             Client.SendUnconnectedMessage(message, receiver); //Send
         }
 

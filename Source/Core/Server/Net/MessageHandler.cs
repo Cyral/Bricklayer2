@@ -1,48 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
-using Lidgren.Network;
 using Bricklayer.Core.Common.Net.Messages;
-using System.Net;
+using Bricklayer.Core.Server.Components;
+using Lidgren.Network;
 
 namespace Bricklayer.Core.Server.Net
 {
     /// <summary>
-    /// Handles processing of incoming messages
+    /// Handles processing of incoming messages from the connected game server.
     /// </summary>
     public class MessageHandler
     {
-        #region Properties
-
-        public NetworkManager NetManager
-        {
-            get { return Server.Net; }
-        }
-
-        #endregion
+        private static NetworkComponent NetManager => Server.Net;
 
         /// <summary>
         /// Stored pending user sessions
         /// </summary>
-        internal Dictionary<string, NetConnection> PendingSessions = new Dictionary<string, NetConnection>();
-
-        /// <summary>
-        /// Start the message handler on a new thread
-        /// </summary>
-        public void Start()
-        {
-            networkThread = new Thread(ProcessNetworkMessages)
-            {
-                Name = "Message Handler",
-                Priority = ThreadPriority.AboveNormal
-            };
-            networkThread.Start();
-        }
+        private readonly Dictionary<int, NetConnection> pendingSessions = new Dictionary<int, NetConnection>();
 
         /// <summary>
         /// The process network messages such as users joining, moving, etc
@@ -61,7 +39,6 @@ namespace Bricklayer.Core.Server.Net
                 {
                     while ((inc = NetManager.ReadMessage()) != null)
                     {
-
                         switch (inc.MessageType)
                         {
                             case NetIncomingMessageType.Error:
@@ -73,94 +50,106 @@ namespace Bricklayer.Core.Server.Net
                                 break;
                             //ConnectionApproval messages are sent when a client would like to connect to the server
                             case NetIncomingMessageType.ConnectionApproval:
+                            {
+                                //If client does not send username information (Purposely trying to use a modded client?)
+                                if (inc.LengthBytes == 0)
                                 {
-                                    if (inc.LengthBytes == 0)
-                                    //If client does not send username information (Purposely trying to use a modded client?)
-                                    {
-                                        inc.SenderConnection?.Deny("Invalid Hail Message");
-                                        break;
-                                    }
-
-                                    var type =
-                                        (MessageTypes)Enum.Parse(typeof(MessageTypes), inc.ReadByte().ToString());
-                                    //Find message type
-                                    switch (type)
-                                    {
-
-                                        case MessageTypes.PublicKey: // The connection should come with a public key to verify the client's session
-                                        {
-                                                var msg = new PublicKeyMessage(inc, MessageContext.Client);
-                                                Logger.WriteLine(LogType.Net, msg.Username + " requesting to join. Verifying session..");
-                                                PendingSessions.Add(msg.Username, inc.SenderConnection);
-                                                var message = NetManager.EncodeMessage(new PublicKeyMessage(msg.Username, msg.PublicKey)); //Write packet ID and encode
-                                                IPEndPoint receiver = new IPEndPoint(NetUtility.Resolve(Globals.Strings.AuthServerAddress), Globals.Strings.AuthServerPort); // Auth Server info
-                                                NetManager.NetServer.SendUnconnectedMessage(message, receiver); //Send public key to auth server to verify if session is valid
-
-                                                break;
-                                        }
-                                    }
+                                    inc.SenderConnection?.Deny("Invalid Hail Message");
                                     break;
                                 }
+
+                                var type =
+                                    (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+                                //Find message type
+                                switch (type)
+                                {
+                                    case MessageTypes.PublicKey:
+                                        // The connection should come with a public key to verify the client's session
+                                    {
+                                        var msg = new PublicKeyMessage(inc, MessageContext.Client);
+                                        Logger.WriteLine(LogType.Net,
+                                            msg.Username + " requesting to join. Verifying public key with auth server.");
+                                        pendingSessions.Add(msg.ID, inc.SenderConnection);
+                                        var message = NetManager.EncodeMessage(msg);
+
+                                        var receiver =
+                                            new IPEndPoint(
+                                                NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress),
+                                                Server.IO.Config.Server.AuthServerPort); // Auth Server info
+                                        NetManager.NetServer.SendUnconnectedMessage(message, receiver);
+                                            //Send public key to auth server to verify if session is valid
+
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
                             //Data messages are all messages manually sent from client
                             //These are the bulk of the messages, used for Sender movement, block placing, etc
                             case NetIncomingMessageType.Data:
-                                {
-                                    ProcessDataMessage(inc);
-                                    break;
-                                }
+                            {
+                                ProcessDataMessage(inc);
+                                break;
+                            }
                             //StatusChanged messages occur when a client connects, disconnects, is approved, etc
                             //NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with Disconnect()
                             case NetIncomingMessageType.StatusChanged:
+                            {
+                                //The lines below can get spammy, used to show when statuses change
+                                //Logger.WriteLine(LogType.Net, "Status: {0} changed: {1}", "",inc.SenderConnection.Status.ToString());
+
+                                //When a Users connection is finalized
+                                if (inc.SenderConnection != null &&
+                                    inc.SenderConnection.Status == NetConnectionStatus.Connected)
                                 {
-                                    //The lines below can get spammy, used to show when statuses change
-                                    //Log.WriteLine(LogType.Status, "Status: {0} changed: {1}", name, inc.SenderConnection.Status.ToString());
+                                    //Log message
 
-                                    //When a Users connection is finalized
-                                    if (inc.SenderConnection != null &&
-                                        inc.SenderConnection.Status == NetConnectionStatus.Connected)
-                                    {
-                                        //Log message
-
-                                        break;
-                                    }
-                                    //When a client disconnects
-                                    if (inc.SenderConnection != null &&
-                                        (inc.SenderConnection.Status == NetConnectionStatus.Disconnected ||
-                                         inc.SenderConnection.Status == NetConnectionStatus.Disconnecting))
-                                    {
-                                       
-                                    }
                                     break;
                                 }
+                                //When a client disconnects
+                                if (inc.SenderConnection != null &&
+                                    (inc.SenderConnection.Status == NetConnectionStatus.Disconnected ||
+                                     inc.SenderConnection.Status == NetConnectionStatus.Disconnecting))
+                                {
+                                }
+                                break;
+                            }
+                            //Listen to data from the auth server.
                             case NetIncomingMessageType.UnconnectedData:
                             {
-                                    if (inc.SenderEndPoint.Address.ToString() == Globals.Strings.AuthServerAddress && inc.SenderEndPoint.Port == Globals.Strings.AuthServerPort)
+                                if (inc.SenderEndPoint.Address.ToString() == Server.IO.Config.Server.AuthServerAddress &&
+                                    inc.SenderEndPoint.Port == Server.IO.Config.Server.AuthServerPort)
+                                {
+                                    var type =
+                                        (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+
+                                    switch (type)
                                     {
-                                        var type = (MessageTypes)Enum.Parse(typeof(MessageTypes), inc.ReadByte().ToString());
-
-                                        switch (type)
+                                        //When the auth server confirms if a session is valid or not.
+                                        case MessageTypes.ValidSession:
                                         {
-                                            case MessageTypes.ValidSession:
-                                                {
-                                                    var msg = new ValidSessionMessage(inc, MessageContext.Client);
-                                                    if (msg.Valid)
-                                                    {
-                                                        PendingSessions[msg.Username].Approve(NetManager.EncodeMessage(new InitMessage()));
-                                                        PendingSessions.Remove(msg.Username);
-                                                        Logger.WriteLine(LogType.Net, "Allowing connection to for " + msg.Username);
-                                                    }
-                                                    else
-                                                    {
-                                                        PendingSessions[msg.Username].Deny("Invalid or expired session");
-                                                        PendingSessions.Remove(msg.Username);
-                                                        Logger.WriteLine(LogType.Net, "Invalid or expired session. Disallowing connection to for " + msg.Username);
-                                                    }
+                                            var msg = new ValidSessionMessage(inc, MessageContext.Server);
+                                            if (msg.Valid)
+                                            {
+                                                pendingSessions[msg.ID].Approve(
+                                                    NetManager.EncodeMessage(new InitMessage()));
+                                                pendingSessions.Remove(msg.ID);
+                                                Logger.WriteLine(LogType.Net,
+                                                    $"Session valid for '{msg.ID}'. (Allowed)");
+                                            }
+                                            else
+                                            {
+                                                pendingSessions[msg.ID].Deny("Invalid or expired session.");
+                                                pendingSessions.Remove(msg.ID);
+                                                Logger.WriteLine(LogType.Net,
+                                                    $"Session invalid for '{msg.ID}'. (Denied)");
+                                            }
 
-                                                    break;
-                                                }
+                                            break;
                                         }
                                     }
-                                    break;
+                                }
+                                break;
                             }
                         }
                         NetManager.Recycle(inc);
@@ -174,33 +163,31 @@ namespace Bricklayer.Core.Server.Net
         }
 
         /// <summary>
+        /// Start the message handler on a new thread
+        /// </summary>
+        public void Start()
+        {
+            networkThread = new Thread(ProcessNetworkMessages)
+            {
+                Name = "Auth Message Handler",
+                Priority = ThreadPriority.AboveNormal
+            };
+            networkThread.Start();
+        }
+
+        /// <summary>
         /// Handles all actions for recieving data messages (Such as movement, block placing, etc)
         /// </summary>
         /// <param name="inc">The incoming message</param>
         private async void ProcessDataMessage(NetIncomingMessage inc)
         {
-
-            var type = (MessageTypes)Enum.Parse(typeof(MessageTypes), inc.ReadByte().ToString());
+            var type = (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
             switch (type)
-            { 
+            {
+              
             }
         }
 
-        //private async Task HandleRequestMessage(NetIncomingMessage inc, User sender, Room room, MessageTypes type)
-        //{
-        //    switch (type)
-        //    {
-        //       
-        //    }
-        //}
-
-        #region Fields
-
         private Thread networkThread;
-
-        public Dictionary<short, User> Trackers = new Dictionary<short, User>();
-        //Store tracker entities so they can be removed if player disconnects
-
-        #endregion
     }
 }

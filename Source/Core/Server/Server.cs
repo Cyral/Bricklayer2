@@ -24,7 +24,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
-        public static NetworkManager Net { get; set; }
+        public static NetworkComponent Net { get; set; }
 
         /// <summary>
         /// Command parser for commmands ran in the console or by users.
@@ -57,7 +57,7 @@ namespace Bricklayer.Core.Server
 
             //Initialize Components
             IO = new IOComponent();
-            Net = new NetworkManager();
+            Net = new NetworkComponent();
 
             await IO.Init();
             await Net.Init();

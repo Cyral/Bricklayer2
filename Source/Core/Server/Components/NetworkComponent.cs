@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using System;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
@@ -13,10 +14,11 @@ using Lidgren.Network;
 namespace Bricklayer.Core.Server.Components
 {
     /// <summary>
-    /// Handles network functions for the server, such as port-forwarding, sending messages, etc.
-    /// Send: Sends a message to a user.
-    /// Broadcast: Sends a message to each user in a room.
-    /// Global: Sends a message to each user on the server.
+    /// Handles network functions for the server, such as port-forwarding, sending messages, etc
+    /// Send Function Guide:
+    /// Send: Sends a message to a Sender
+    /// Broadcast: Sends a message to each Sender in a room
+    /// Global: Sends a message to each Sender on the server
     /// </summary>
     public class NetworkComponent : ServerComponent
     {
@@ -25,24 +27,27 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// The underlying Lidgren server object
         /// </summary>
-        internal NetServer NetServer { get; set; }
+        public NetServer NetServer { get; set; }
 
         /// <summary>
         /// The message loop for handling messages
         /// </summary>
-        public MessageHandler Messages { get; set; }
+        public MessageHandler MsgHandler { get; set; }
 
         /// <summary>
         /// The server configuration
         /// </summary>
-        internal NetPeerConfiguration Config { get; set; }
+        public NetPeerConfiguration Config { get; set; }
 
         /// <summary>
-        /// Indicates if the server has shut down.
+        /// Net LogType
+        /// </summary>
+        protected override LogType LogType { get { return LogType.Net; } }
+
+        /// <summary>
+        /// Indicates if the server has shut down, meaning there is no need to save maps.
         /// </summary>
         public bool IsShutdown { get; set; }
-
-        protected override LogType LogType => LogType.Net;
 
         #endregion
 
@@ -60,14 +65,14 @@ namespace Bricklayer.Core.Server.Components
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
 
-            var result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
+            bool result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
             if (!result)
             {
                 Log("Aborting startup.");
                 Environment.Exit(0);
             }
 
-            await base.Init();
+            base.Init();
         }
 
         /// <summary>
@@ -81,14 +86,17 @@ namespace Bricklayer.Core.Server.Components
             Config = new NetPeerConfiguration(Globals.Strings.NetworkID)
             {
                 Port = port,
-                MaximumConnections = maxconnections
+                MaximumConnections = maxconnections,
             };
 
+            // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
             Config.EnableMessageType(NetIncomingMessageType.ConnectionApproval
                                      | NetIncomingMessageType.ErrorMessage
                                      | NetIncomingMessageType.WarningMessage
                                      | NetIncomingMessageType.Data
-                                     | NetIncomingMessageType.StatusChanged);
+                                     | NetIncomingMessageType.StatusChanged
+                                     | NetIncomingMessageType.UnconnectedData);
+            // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
             //Start Lidgren server
             NetServer = new NetServer(Config);
@@ -96,19 +104,19 @@ namespace Bricklayer.Core.Server.Components
             {
                 NetServer.Start();
             }
-            catch (SocketException ex)
+            // ReSharper disable once RedundantCatchClause
+            catch (System.Net.Sockets.SocketException ex)
             {
                 Logger.WriteLine(LogType.Error, ex.Message);
                 Server.IO.LogMessage(string.Format("SERVER EXIT: The server has exited because of an error on {0}",
                     DateTime.Now.ToString("U")));
                 return false;
             }
-            Log("Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(),
-                Config.MaximumConnections.ToString());
+            Log("Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(), Config.MaximumConnections.ToString());
 
             //Start message handler
-            Messages = new MessageHandler();
-            //Messages.Start();
+            MsgHandler = new MessageHandler();
+            MsgHandler.Start();
             Log("Message handler started.");
 
             return true; //No error
@@ -133,6 +141,20 @@ namespace Bricklayer.Core.Server.Components
         }
 
         /// <summary>
+        /// Encodes and sends a message to a specified Sender
+        /// </summary>
+        /// <param name="gameMessage">IMessage to send</param>
+        /// <param name="user">Sender to send to</param>
+        public void Send(IMessage gameMessage, User user)
+        {
+            var con =
+                NetServer.Connections.FirstOrDefault(
+                    x => x.RemoteUniqueIdentifier == user.Connection.RemoteUniqueIdentifier);
+            if (con != null)
+                Send(gameMessage, con);
+        }
+
+        /// <summary>
         /// Encodes and sends a message to a specified NetConnection recipient
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
@@ -142,6 +164,64 @@ namespace Bricklayer.Core.Server.Components
             if (recipient != null)
                 NetServer.SendMessage(EncodeMessage(gameMessage), recipient, deliveryMethod);
         }
+
+        /// <summary>
+        /// Broadcasts a message to all Users in a room, EXCEPT for the one specified
+        /// </summary>
+        /// <param name="gameMessage">IMessage to send</param>
+        /// <param name="user">Sender NOT to send to</param>
+        //public void BroadcastExcept(IMessage gameMessage, User user)
+        //{
+        //    var con =
+        //        NetServer.Connections.FirstOrDefault(
+        //            x => x.RemoteUniqueIdentifier == user.Connection.RemoteUniqueIdentifier &&
+        //                 Server.UserFromRUI(x.RemoteUniqueIdentifier, true).Room != null &&
+        //                 Server.UserFromRUI(x.RemoteUniqueIdentifier, true).Room.ID ==
+        //                 user.Room.ID);
+        //    if (con != null)
+        //        BroadcastExcept(gameMessage, con);
+        //}
+
+        /// <summary>
+        /// Broadcasts a message to all clients in a room, EXCEPT for the one specified
+        /// </summary>
+        /// <param name="gameMessage">IMessage to send</param>
+        /// <param name="recipient">Client NOT to send to</param>
+        //public void BroadcastExcept(IMessage gameMessage, NetConnection recipient)
+        //{
+        //    var message = EncodeMessage(gameMessage);
+        //
+        //    //Search for recipients
+        //    var recipients = NetServer.Connections.Where(
+        //        x => x.RemoteUniqueIdentifier != recipient.RemoteUniqueIdentifier &&
+        //             Server.UserFromRUI(x.RemoteUniqueIdentifier, true) != null &&
+        //             Server.UserFromRUI(x.RemoteUniqueIdentifier, true).Room != null &&
+        //             Server.UserFromRUI(x.RemoteUniqueIdentifier, true).Room.ID ==
+        //             Server.UserFromRUI(recipient.RemoteUniqueIdentifier).Room.ID)
+        //        .ToList();
+        //
+        //    if (recipients.Count > 0) //Send to recipients found
+        //        NetServer.SendMessage(message, recipients, deliveryMethod, 0);
+        //}
+
+        /// <summary>
+        /// Broadcasts a message to all Users in a room
+        /// </summary>
+        /// <param name="Room">Room/Room to send to</param>
+        /// <param name="gameMessage">IMessage to send</param>
+        //public void Broadcast(Room Room, IMessage gameMessage)
+        //{
+        //    var message = EncodeMessage(gameMessage);
+        //
+        //    //Search for recipients
+        //    var recipients = NetServer.Connections.Where(
+        //        x => Server.UserFromRUI(x.RemoteUniqueIdentifier, true) != null &&
+        //             Server.UserFromRUI(x.RemoteUniqueIdentifier, true).Room == Room)
+        //        .ToList();
+        //
+        //    if (recipients.Count > 0) //Send to recipients found
+        //        NetServer.SendMessage(message, recipients, deliveryMethod, 0);
+        //}
 
         /// <summary>
         /// Sends a message to all Users connected to the server
@@ -171,7 +251,7 @@ namespace Bricklayer.Core.Server.Components
         /// Shuts down the server and disconnects clients
         /// </summary>
         /// <param name="reason">Reason for shutting down</param>
-        public void Shutdown(string reason = "Auth server is shutting down.")
+        public void Shutdown(string reason = "Disconnected.")
         {
             IsShutdown = true;
             NetServer.Shutdown(reason);
@@ -188,7 +268,7 @@ namespace Bricklayer.Core.Server.Components
         }
 
         /// <summary>
-        /// Disposes the NetworkComponent
+        /// Disposes the NetworkManager
         /// </summary>
         public void Dispose()
         {

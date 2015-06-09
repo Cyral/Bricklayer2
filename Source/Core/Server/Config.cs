@@ -57,11 +57,23 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public int MaxPlayers { get; internal set; }
 
+        /// <summary>
+        /// The server address to use for authentication.
+        /// </summary>
+        public string AuthServerAddress { get; internal set; }
+
+        /// <summary>
+        /// The server port for authentication.
+        /// </summary>
+        public int AuthServerPort { get; internal set; }
+
         public static ServerConfig GenerateDefaultConfig()
         {
             return new ServerConfig
             {
                 Port = Common.Globals.Values.DefaultServerPort,
+                AuthServerAddress = Common.Globals.Values.DefaultAuthAddress,
+                AuthServerPort = Common.Globals.Values.DefaultServerPort,
                 MaxPlayers = 8,
                 Name = "Bricklayer Server",
                 Decription = "A Bricklayer Server running on the default configuration.\nPlease edit your Message Of The Day in the config file!",

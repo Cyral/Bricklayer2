@@ -60,9 +60,9 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         }
 
         /// <summary>
-        /// Connects to a given server.
+        /// Connects to the given game server.
         /// </summary>
-        public async Task Connect(string host, int port, string username, string password)
+        public async Task Connect(string host, int port, string username, int id, string publicKey)
         {
             await Task.Factory.StartNew(() =>
             {
@@ -75,17 +75,17 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
 
                 Handler.Start();
 
-                Join(host, port, username, password);
+                Join(host, port, username, id, publicKey);
             });
         }
 
         /// <summary>
         /// Sends a message once connected to join a server officially.
         /// </summary>
-        private void Join(string host, int port, string username, string publicKey)
+        private void Join(string host, int port, string username, int id, string publicKey)
         {
             Client.Connect(host, port,
-                EncodeMessage(new PublicKeyMessage(username, publicKey)));
+                EncodeMessage(new PublicKeyMessage(username, id, publicKey)));
         }
 
 

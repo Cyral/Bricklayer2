@@ -1,17 +1,14 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Net.Messages.AuthServer;
-//using Bricklayer.Core.Client.Net.Messages.GameServer;
-using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
-using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
 using Bricklayer.Core.Client.Net.Messages.GameServer;
+using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework.Input;
-using EventArgs = System.EventArgs;
 
 namespace Bricklayer.Core.Client
 {
@@ -119,8 +116,9 @@ namespace Bricklayer.Core.Client
             TokenKeys = new Token();
 
             // Listen for init response from auth server containing token keys
-            AuthNetwork.Handler.Init += (sender, privateKey, publicKey) =>
+            AuthNetwork.Handler.Init += (sender, id, privateKey, publicKey) =>
             {
+                TokenKeys.UID = id;
                 TokenKeys.PrivateKey = privateKey;
                 TokenKeys.PublicKey = publicKey;
                 Debug.WriteLine("Recieved Tokens:\nPrivate Key: " + privateKey + "\nPublic Key: " + publicKey);
@@ -157,7 +155,7 @@ namespace Bricklayer.Core.Client
             };
 
             // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
-            //ConnectToAuth();
+            ConnectToAuth();
         }
 
         // These three methods are here for testing reasons for the Auth system. They will be removed
@@ -168,12 +166,12 @@ namespace Bricklayer.Core.Client
 
         public void SendSessionRequest()
         {
-            AuthNetwork.Send(new SessionMessage("pugmatt", TokenKeys.PrivateKey, "127.0.0.1", 52300));
+            AuthNetwork.Send(new SessionMessage("pugmatt", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("127.0.0.1"), Globals.Values.DefaultServerPort));
         }
 
         public async void Connect()
         {
-            await Network.Connect("127.0.0.1", 52300, "pugmatt", TokenKeys.PublicKey);
+            await Network.Connect("127.0.0.1", Globals.Values.DefaultServerPort, "pugmatt", TokenKeys.UID, TokenKeys.PublicKey);
         }
         //
 

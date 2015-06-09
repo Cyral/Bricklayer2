@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 namespace Bricklayer.Core.Client
 {
     /// <summary>
-    /// Contains the 2 keys used for authentication
+    /// Contains the 2 keys used for authentication, as well as the database UID of the user.
     /// </summary>
     internal class Token
     {
+        internal int UID { get; set; }
         public string PublicKey { get; set; }
         public string PrivateKey { get; set; }
     }

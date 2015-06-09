@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Sent from Auth server to game server to inform whether or not the user with the public key has a valid session
+    /// Sent from Auth server to game server to inform whether or not the user with the public key has a valid session.
     /// </summary>
     public class ValidSessionMessage : IMessage
     {
         public double MessageTime { get; set; }
-        public string Username { get; set; }
+        public int ID { get; set; }
         public bool Valid { get; set; }
 
         public ValidSessionMessage(NetIncomingMessage im, MessageContext context)
@@ -22,9 +22,9 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public ValidSessionMessage(string username, bool valid)
+        public ValidSessionMessage(int id, bool valid)
         {
-            Username = username;
+            ID = id;
             Valid = valid;
             MessageTime = NetTime.Now;
         }
@@ -36,13 +36,13 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
-            Username = im.ReadString();
+            ID = im.ReadInt32();
             Valid = im.ReadBoolean();
         }
 
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write(Username);
+            om.Write(ID);
             om.Write(Valid);
         }
 
