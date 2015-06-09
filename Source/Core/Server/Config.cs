@@ -14,7 +14,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The configuration for the server settings, such as port number and max connections.
         /// </summary>
-        public ServerConfig Server { get; internal set; }
+        public ServerConfig Server;
 
         //More settings, such as database info will be provided in the future.
 
@@ -35,37 +35,37 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The name of the server.
         /// </summary>
-        public string Name { get; internal set; }
+        public string Name;
 
         /// <summary>
         /// The "Message of the day/Description", to be shown in the server list.
         /// </summary>
-        public string Decription { get; internal set; }
+        public string Decription;
 
         /// <summary>
         /// The extended MOTD, possibly showing news, stats, etc., displayed in the lobby.
         /// </summary>
-        public string Intro { get; internal set; }
+        public string Intro;
 
         /// <summary>
         /// The port the server should run on.
         /// </summary>
-        public int Port { get; internal set; }
+        public int Port;
 
         /// <summary>
         /// The maximum allowed players allowed to connect to the server. (not per room)
         /// </summary>
-        public int MaxPlayers { get; internal set; }
+        public int MaxPlayers;
 
         /// <summary>
         /// The server address to use for authentication.
         /// </summary>
-        public string AuthServerAddress { get; internal set; }
+        public string AuthServerAddress;
 
         /// <summary>
         /// The server port for authentication.
         /// </summary>
-        public int AuthServerPort { get; internal set; }
+        public int AuthServerPort;
 
         public static ServerConfig GenerateDefaultConfig()
         {

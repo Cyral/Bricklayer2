@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
-using System.Windows;
-using Lidgren.Network;
+using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
-using Bricklayer.Core.Common;
+using Lidgren.Network;
 
 namespace Bricklayer.Core.Client.Net.Messages.AuthServer
 {
@@ -28,7 +24,7 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         {
             MessageThread = new Thread(ProcessNetworkMessages)
             {
-                Name = "Message Handler"
+                Name = "Auth Message Handler"
             };
             MessageThread.SetApartmentState(ApartmentState.STA);
             MessageThread.Start();
