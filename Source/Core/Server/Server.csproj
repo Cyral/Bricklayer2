@@ -69,6 +69,7 @@
     <Compile Include="Components\ServerComponent.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="EventManager.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Net\MessageHandler.cs" />
     <Compile Include="Program.cs" />

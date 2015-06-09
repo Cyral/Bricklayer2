@@ -30,8 +30,15 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public static CommandParser Commands { get; set; }
 
+        /// <summary>
+        /// Manages and lists all server events.
+        /// </summary>
+        public static EventManager Events { get; private set; }
+
         public async Task Start()
         {
+            Events = new EventManager();
+
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Clear();
 

@@ -1,7 +1,10 @@
-﻿using Bricklayer.Client.Interface;
+﻿using System.Diagnostics;
+using Bricklayer.Client.Interface;
+using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
+using EventArgs = System.EventArgs;
 
 namespace Bricklayer.Core.Client
 {
@@ -10,6 +13,8 @@ namespace Bricklayer.Core.Client
     /// </summary>
     internal class Game : Microsoft.Xna.Framework.Game
     {
+        private static GameState state;
+
         /// <summary>
         /// The game's graphics manager.
         /// </summary>
@@ -40,10 +45,24 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public static new ContentManager Content { get; private set; }
 
-        public static GameState State { get; set; }
+        /// <summary>
+        /// Manages and lists all game events.
+        /// </summary>
+        public static EventManager Events { get; private set; }
+
+        public GameState State
+        {
+            get { return state; }
+            set
+            {
+                Events.Game.StateChanged.Invoke(new EventManager.GameEvents.GameStateEventArgs(State, value));
+                state = value; 
+            }
+        }
 
         public Game()
         {
+            Events = new EventManager();
             Graphics = new GraphicsDeviceManager(this) { SynchronizeWithVerticalRetrace = false };
             IsFixedTimeStep = false;
 

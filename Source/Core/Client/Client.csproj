@@ -53,8 +53,10 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="ContentManager.cs" />
+    <Compile Include="EventManager.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="GameState.cs" />
     <Compile Include="Interface\Layout.cs" />
     <Compile Include="Interface\Logic.cs" />
     <Compile Include="Interface\Screens\BaseScreen.cs" />
