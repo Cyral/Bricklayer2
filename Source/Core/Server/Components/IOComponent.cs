@@ -42,6 +42,11 @@ namespace Bricklayer.Core.Server.Components
         private StringBuilder sb;
         private JsonSerializerSettings serializationSettings;
 
+        public IOComponent(Server server) : base(server)
+        {
+
+        }
+
         public override async Task Init()
         {
             //Paths.

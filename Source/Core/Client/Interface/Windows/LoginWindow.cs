@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
@@ -18,11 +19,11 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private Button btnLoginAccount, btnLoginGuest;
         private LinkLabel lnkForgot, lnkCreateAccount;
         private ImageBox BodyImg, SmileyImg;
-        private ColorPicker BodyClr;
+        private ColorPicker bodyClr;
 
-        public LoginWindow(Manager manager) : base(manager)
+        public LoginWindow(Manager manager, Screen screen) : base(manager)
         {
-            //Game.State = GameState.Login;
+            screen.Client.State = GameState.Login;
 
             //Setup the window
             CaptionVisible = false;
@@ -102,25 +103,25 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(lnkCreateAccount);
 
             //Color selector
-            BodyClr = new ColorPicker(Manager) { Left = txtUsername.Right + 16, Top = txtUsername.Top, Width = txtUsername.Width - 18 - 8, Saturation = 210, Value = 250 };
-            BodyClr.Init();
-            BodyClr.ValueChanged += (sender, args) =>
+            bodyClr = new ColorPicker(Manager) { Left = txtUsername.Right + 16, Top = txtUsername.Top, Width = txtUsername.Width - 18 - 8, Saturation = 210, Value = 250 };
+            bodyClr.Init();
+            bodyClr.ValueChanged += (sender, args) =>
             {
-                BodyImg.Color = BodyClr.SelectedColor;
+                BodyImg.Color = bodyClr.SelectedColor;
                 //TODO: Update value in the game class
             };
-            Add(BodyClr);
+            Add(bodyClr);
 
-            BodyImg = new ImageBox(Manager) { Left = BodyClr.Right + 8, Top = BodyClr.Top, Width = 18, Height = 18, Image = Game.Content["entity.body"] };
+            BodyImg = new ImageBox(Manager) { Left = bodyClr.Right + 8, Top = bodyClr.Top, Width = 18, Height = 18, Image = screen.Client.Content["entity.body"] };
             BodyImg.Init();
             Add(BodyImg);
 
-            SmileyImg = new ImageBox(Manager) { Left = BodyImg.Left, Top = BodyImg.Top, Width = 18, Height = 18, Image = Game.Content["entity.smileys"], SourceRect = new Rectangle(0, 0, 18, 18) };
+            SmileyImg = new ImageBox(Manager) { Left = BodyImg.Left, Top = BodyImg.Top, Width = 18, Height = 18, Image = screen.Client.Content["entity.smileys"], SourceRect = new Rectangle(0, 0, 18, 18) };
             SmileyImg.Init();
             SmileyImg.ToolTip.Text = "I love this color!";
             Add(SmileyImg);
 
-            BodyClr.Hue = 1;
+            bodyClr.Hue = 1;
 
             BottomPanel.Height = lnkForgot.Bottom + 28;
             BottomPanel.Top = Height - BottomPanel.Height;

@@ -57,10 +57,10 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameState.cs" />
+    <Compile Include="InputHandler.cs" />
     <Compile Include="Interface\Layout.cs" />
     <Compile Include="Interface\Logic.cs" />
-    <Compile Include="Interface\Screens\BaseScreen.cs" />
-    <Compile Include="Interface\Screens\IScreen.cs" />
+    <Compile Include="Interface\Screens\Screen.cs" />
     <Compile Include="Interface\Screens\LoginScreen.cs" />
     <Compile Include="Interface\Screens\ScreenManager.cs" />
     <Compile Include="Interface\Windows\LoginWindow.cs" />

@@ -5,7 +5,7 @@ using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
-    internal class LoginScreen : BaseScreen
+    internal class LoginScreen : Screen
     {
         //Controls
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
@@ -78,7 +78,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             lblVersion.Text = Constants.VersionString;
             Window.Add(lblVersion);
 
-            wndLogin = new LoginWindow(Manager);
+            wndLogin = new LoginWindow(Manager, this);
             wndLogin.Init();
             //If the login window is overlapping the logo, push it down a bit. (For smaller screens)
             if (wndLogin.Top < imgLogo.Top + imgLogo.Height + 8)

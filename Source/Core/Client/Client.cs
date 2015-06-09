@@ -15,61 +15,64 @@ namespace Bricklayer.Core.Client
     /// <summary>
     /// The main class of the Bricklayer client.
     /// </summary>
-    internal class Game : Microsoft.Xna.Framework.Game
+    public class Client : Game
     {
-        private static GameState state;
-
         /// <summary>
         /// The game's graphics manager.
         /// </summary>
-        public static GraphicsDeviceManager Graphics { get; private set; }
+        public GraphicsDeviceManager Graphics { get; private set; }
 
         /// <summary>
         /// The game's sprite batch for drawing content.
         /// </summary>
-        public static SpriteBatch SpriteBatch { get; private set; }
+        public SpriteBatch SpriteBatch { get; private set; }
 
         /// <summary>
         /// The main window, which is the root of all UI controls.
         /// </summary>
-        public static MainWindow Window { get; private set; }
+        public MainWindow Window { get; private set; }
 
         /// <summary>
         /// The MonoForce UI manager.
         /// </summary>
-        public static Manager UIManager { get; private set; }
+        public Manager UIManager { get; private set; }
 
         /// <summary>
         /// Texture loader for loading texture assets.
         /// </summary>
-        public static TextureLoader TextureLoader { get; private set; }
+        internal TextureLoader TextureLoader { get; private set; }
 
         /// <summary>
         /// Manages and handles all game assets and content.
         /// </summary>
-        public static new ContentManager Content { get; private set; }
+        public new ContentManager Content { get; private set; }
 
         /// <summary>
         /// Handles receiving and sending of auth server network messages
         /// </summary>
-        public static AuthNetworkManager AuthNetwork { get; private set; }
+        public AuthNetworkManager AuthNetwork { get; private set; }
 
 
-        public static EventManager Events { get; private set; }
+        public EventManager Events { get; private set; }
 
         /// <summary>
         /// Handles receiving and sending of game server network messages
         /// </summary>
-        public static NetworkManager Network { get; private set; }
+        public NetworkManager Network { get; private set; }
 
         /// <summary>
         /// Contains the 2 keys used for authentication
         /// </summary>
-        internal static Token TokenKeys { get; set; }
+        internal Token TokenKeys { get; private set; }
 
-        KeyboardState oldKeyboardState,
-        currentKeyboardState;
+        /// <summary>
+        /// Manages and handles game input from the mouse and keyboard.
+        /// </summary>
+        public InputHandler Input { get; private set; }
 
+        /// <summary>
+        /// The current state of the game. (Login, server list, in game, etc.)
+        /// </summary>
         public GameState State
         {
             get { return state; }
@@ -79,8 +82,9 @@ namespace Bricklayer.Core.Client
                 state = value; 
             }
         }
+        private GameState state;
 
-        public Game()
+        public Client()
         {
             Events = new EventManager();
             Graphics = new GraphicsDeviceManager(this) { SynchronizeWithVerticalRetrace = false };
@@ -104,8 +108,8 @@ namespace Bricklayer.Core.Client
         protected override void Initialize()
         {
             base.Initialize();
-
-            currentKeyboardState = new KeyboardState();
+           
+            Input = new InputHandler();
 
             AuthNetwork = new AuthNetworkManager();
             AuthNetwork.Init();
@@ -187,7 +191,7 @@ namespace Bricklayer.Core.Client
             IO.CheckFiles();
             Content = new ContentManager();
             TextureLoader = new TextureLoader(Graphics.GraphicsDevice);
-            Content.LoadTextures();
+            Content.LoadTextures(this);
 
             Graphics.PreferredBackBufferWidth = 1024;
             Graphics.PreferredBackBufferHeight = 768;
@@ -200,7 +204,7 @@ namespace Bricklayer.Core.Client
 
 
             //Create the main window for all content to be added to.
-            Window = new MainWindow(UIManager);
+            Window = new MainWindow(UIManager, this);
             Window.Init();
             UIManager.Add(Window);
             Window.SendToBack();
@@ -222,12 +226,10 @@ namespace Bricklayer.Core.Client
         protected override void Update(GameTime gameTime)
         {
             UIManager.Update(gameTime);
+            Input.Update();
             base.Update(gameTime);
 
-            oldKeyboardState = currentKeyboardState;
-            currentKeyboardState = Keyboard.GetState();
-
-            if ((currentKeyboardState.IsKeyUp(Keys.Space)) && (oldKeyboardState.IsKeyDown(Keys.Space)))
+            if (Input.IsKeyPressed(Keys.Space))
             {
                 SendSessionRequest();
             }

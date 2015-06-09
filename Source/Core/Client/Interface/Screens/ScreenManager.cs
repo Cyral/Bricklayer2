@@ -15,7 +15,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// The current screen playing
         /// </summary>
-        public IScreen Current { get; set; }
+        public Screen Current { get; set; }
 
         /// <summary>
         /// The NeoForce UI manager for the Window
@@ -30,7 +30,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         private readonly ImageBox fadeImage;
         private readonly Texture2D fadeTexture;
         private float fadeAlpha = 1;
-        private IScreen fadeTo;
+        private Screen fadeTo;
         private FadeState state = FadeState.In;
 
         public ScreenManager(MainWindow window)
@@ -74,7 +74,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// Transitions from the current screen to the next
         /// </summary>
-        public void SwitchScreen(IScreen newScreen)
+        public void SwitchScreen(Screen newScreen)
         {
             //Set the new screen and start fading to it
             fadeTo = newScreen;

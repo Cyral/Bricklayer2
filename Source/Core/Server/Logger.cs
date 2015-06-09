@@ -13,6 +13,8 @@ namespace Bricklayer.Core.Server
             return DateTime.Now.ToString("[HH:mm:ss] ");
         }
 
+        internal static Server Server { get; set; }
+
         #region Console Helpers
 
         /// <summary>
@@ -221,10 +223,10 @@ namespace Bricklayer.Core.Server
                 Console.WriteLine(new string(' ', Math.Max(1, Console.WindowWidth - extra - 1)));
             }
 
-            Core.Server.Server.WriteHeader();
-            Core.Server.Server.WriteCommandCursor();
+            Logger.Server.WriteHeader();
+            Logger.Server.WriteCommandCursor();
 
-            if (Core.Server.Server.IO != null) Core.Server.Server.IO.LogMessage(this, text);
+            if (Logger.Server.IO != null) Logger.Server.IO.LogMessage(this, text);
         }
 
         /// <summary>
@@ -246,10 +248,10 @@ namespace Bricklayer.Core.Server
             Console.CursorLeft = extra;
             Console.WriteLine(new string(' ', Math.Max(1, Console.WindowWidth - extra - 1)));
 
-            Core.Server.Server.WriteHeader();
-            Core.Server.Server.WriteCommandCursor();
+            Logger.Server.WriteHeader();
+            Logger.Server.WriteCommandCursor();
 
-            if (Core.Server.Server.IO != null) Core.Server.Server.IO.LogMessage(this, text);
+            if (Logger.Server.IO != null) Logger.Server.IO.LogMessage(this, text);
         }
 
         #endregion

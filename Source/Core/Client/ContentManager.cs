@@ -37,7 +37,7 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// Load textures for a given pack
         /// </summary>
-        internal void LoadTextures()
+        internal void LoadTextures(Client client)
         {
             var directory = Path.Combine(IO.Directories["Content"], "Textures");
             var files = DirSearch(directory, ".png");
@@ -51,7 +51,7 @@ namespace Bricklayer.Core.Client
                 {
                     var name = Path.Combine(directoryName.Remove(0, directory.Length + 1), Path.GetFileNameWithoutExtension(file));
 
-                    var texture = Game.TextureLoader.FromFile(file);
+                    var texture = client.TextureLoader.FromFile(file);
 
                     //Add it to the dictionary
                     if (Textures.ContainsKey(name))
@@ -66,7 +66,7 @@ namespace Bricklayer.Core.Client
         /// Recursively search a directory for sub folders and files.
         /// </summary>
         /// <returns>A list of files within the folder or subfolders.</returns>
-        private static List<string> DirSearch(string directory, params string[] extensions)
+        private static IEnumerable<string> DirSearch(string directory, params string[] extensions)
         {
             var dir = new DirectoryInfo(directory);
 

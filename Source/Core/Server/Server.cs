@@ -12,39 +12,39 @@ namespace Bricklayer.Core.Server
     /// </summary>
     public class Server
     {
-        private static string clear, input;
-        private static bool showHeader;
-        private static DateTime start;
-
         /// <summary>
         /// IOComponent handles disk operations.
         /// </summary>
-        public static IOComponent IO { get; set; }
+        public IOComponent IO { get; set; }
 
         /// <summary>
         /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
-        public static NetworkComponent Net { get; set; }
+        public NetworkComponent Net { get; set; }
 
         /// <summary>
         /// Command parser for commmands ran in the console or by users.
         /// </summary>
-        public static CommandParser Commands { get; set; }
+        public CommandParser Commands { get; set; }
 
         /// <summary>
         /// Manages and lists all server events.
         /// </summary>
-        public static EventManager Events { get; private set; }
+        public EventManager Events { get; private set; }
+
+        private string clear, input;
+        private bool showHeader;
+        private DateTime start;
 
         public async Task Start()
         {
+            Logger.Server = this;
             Events = new EventManager();
 
+            //Setup server
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Clear();
-
             start = DateTime.Now;
-
             input = string.Empty;
             clear = new string(' ', Console.WindowWidth);
             var stopwatch = Stopwatch.StartNew();
@@ -56,8 +56,8 @@ namespace Bricklayer.Core.Server
             RegisterCommands();
 
             //Initialize Components
-            IO = new IOComponent();
-            Net = new NetworkComponent();
+            IO = new IOComponent(this);
+            Net = new NetworkComponent(this);
 
             await IO.Init();
             await Net.Init();
@@ -111,7 +111,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Register command parser commands.
         /// </summary>
-        private static void RegisterCommands()
+        private void RegisterCommands()
         {
             Commands.AddCommand(Command
                 .Create("Command Help")
@@ -155,7 +155,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Gracefully exits, saving all everything and broadcasting an exit message.
         /// </summary>
-        private static void SafeExit()
+        private void SafeExit()
         {
             Logger.WriteLine(LogType.Server, "\nSERVER SAFE EXIT:");
             Logger.WriteLine(LogType.Server, "Network disconnected.");
@@ -167,7 +167,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Writes the command cursor "$".
         /// </summary>
-        public static void WriteCommandCursor()
+        public void WriteCommandCursor()
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("$ ");
@@ -179,7 +179,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Writes the header at the top of the console.
         /// </summary>
-        public static void WriteHeader()
+        public void WriteHeader()
         {
             try
             {
@@ -212,7 +212,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Writes statistics to the console, such as the bandwidth used.
         /// </summary>
-        private static void WriteStats()
+        private void WriteStats()
         {
             string stats =
                 $"Sent: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.SentBytes / 1024d / 1024, 1))}MB | Recieved: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.ReceivedBytes / 1024d / 1024, 1))}MB | Uptime: {(DateTime.Now - start).ToString("d\\:hh\\:mm")}";
@@ -223,7 +223,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Helper method to write centered text.
         /// </summary>
-        private static void WriteCenteredText(string message)
+        private void WriteCenteredText(string message)
         {
             if (Console.WindowWidth - message.Length > 0)
             {
@@ -235,7 +235,7 @@ namespace Bricklayer.Core.Server
                 Console.Write(message);
         }
 
-        private static void OnParseError(object sender, string message)
+        private void OnParseError(object sender, string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(message);

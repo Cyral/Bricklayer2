@@ -22,8 +22,6 @@ namespace Bricklayer.Core.Server.Components
     /// </summary>
     public class NetworkComponent : ServerComponent
     {
-        #region Properties
-
         /// <summary>
         /// The underlying Lidgren server object
         /// </summary>
@@ -42,30 +40,27 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Net LogType
         /// </summary>
-        protected override LogType LogType { get { return LogType.Net; } }
+        protected override LogType LogType => LogType.Net;
 
         /// <summary>
         /// Indicates if the server has shut down, meaning there is no need to save maps.
         /// </summary>
         public bool IsShutdown { get; set; }
 
-        #endregion
-
-        #region Fields
-
-        private const NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered; //Message delivery method
+        private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered; //Message delivery method
         private bool isDisposed; //Is the instance disposed?
 
-        #endregion
+        public NetworkComponent(Server server) : base(server)
+        {
 
-        #region Methods
+        }
 
         public override async Task Init()
         {
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
 
-            bool result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
+            var result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
             if (!result)
             {
                 Log("Aborting startup.");
@@ -105,17 +100,17 @@ namespace Bricklayer.Core.Server.Components
                 NetServer.Start();
             }
             // ReSharper disable once RedundantCatchClause
-            catch (System.Net.Sockets.SocketException ex)
+            catch (SocketException ex)
             {
                 Logger.WriteLine(LogType.Error, ex.Message);
-                Server.IO.LogMessage(string.Format("SERVER EXIT: The server has exited because of an error on {0}",
-                    DateTime.Now.ToString("U")));
+                Server.IO.LogMessage(
+                    $"SERVER EXIT: The server has exited because of an error on {DateTime.Now.ToString("U")}");
                 return false;
             }
             Log("Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(), Config.MaximumConnections.ToString());
 
             //Start message handler
-            MsgHandler = new MessageHandler();
+            MsgHandler = new MessageHandler(Server);
             MsgHandler.Start();
             Log("Message handler started.");
 
@@ -286,7 +281,5 @@ namespace Bricklayer.Core.Server.Components
                 Shutdown();
             isDisposed = true;
         }
-
-        #endregion
     }
 }

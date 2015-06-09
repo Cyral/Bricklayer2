@@ -73,7 +73,7 @@ namespace Bricklayer.Core.Server
             {
                 Port = Common.Globals.Values.DefaultServerPort,
                 AuthServerAddress = Common.Globals.Values.DefaultAuthAddress,
-                AuthServerPort = Common.Globals.Values.DefaultServerPort,
+                AuthServerPort = Common.Globals.Values.DefaultAuthPort,
                 MaxPlayers = 8,
                 Name = "Bricklayer Server",
                 Decription = "A Bricklayer Server running on the default configuration.\nPlease edit your Message Of The Day in the config file!",

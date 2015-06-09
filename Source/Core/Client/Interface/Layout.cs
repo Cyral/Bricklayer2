@@ -5,6 +5,7 @@ using System.Text;
 using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
+using Bricklayer.Core.Client;
 
 namespace Bricklayer.Client.Interface
 {
@@ -14,14 +15,21 @@ namespace Bricklayer.Client.Interface
     public sealed partial class MainWindow : Window
     {
         /// <summary>
-        /// The main <c>ScreenManager</c> that handles control adding/removing
+        /// The game instance this window belongs to.
+        /// </summary>
+        public Core.Client.Client Client { get; }
+
+        /// <summary>
+        /// The main <c>ScreenManager</c> that handles control adding/removing.
         /// </summary>
         public static ScreenManager ScreenManager { get; set; }
+
         public static Color DefaultTextColor = new Color(32, 32, 32);
 
-        public MainWindow(Manager manager)
+        public MainWindow(Manager manager, Core.Client.Client client)
             : base(manager)
         {
+            Client = client;
             ElapsedTime = TimeSpan.Zero;
 
             //Make the window full size, without any border, disallow resize and move, etc., to use the entire screen size.

@@ -15,7 +15,8 @@ namespace Bricklayer.Core.Server.Net
     /// </summary>
     public class MessageHandler
     {
-        private static NetworkComponent NetManager => Server.Net;
+        private NetworkComponent NetManager => Server.Net;
+        private Server Server { get; set; }
 
         /// <summary>
         /// Stored pending user sessions
@@ -27,16 +28,15 @@ namespace Bricklayer.Core.Server.Net
         /// </summary>
         public async void ProcessNetworkMessages()
         {
-            //Used to store messages
-            NetIncomingMessage inc;
-
-            while (Server.Net.NetServer.Status == NetPeerStatus.Running)
+            while (NetManager.NetServer.Status == NetPeerStatus.Running)
             {
                 //If an issue occurs with this (again), see the discussion at:
                 //https://groups.google.com/forum/#!topic/lidgren-network-gen3/EN3vaykwBWM
-                Server.Net.NetServer.MessageReceivedEvent.WaitOne();
+                NetManager.NetServer.MessageReceivedEvent.WaitOne();
                 try
                 {
+                    NetIncomingMessage inc; //Used to store messages
+
                     while ((inc = NetManager.ReadMessage()) != null)
                     {
                         switch (inc.MessageType)
@@ -76,9 +76,8 @@ namespace Bricklayer.Core.Server.Net
                                             new IPEndPoint(
                                                 NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress),
                                                 Server.IO.Config.Server.AuthServerPort); // Auth Server info
+                                        //Send public key to auth server to verify if session is valid
                                         NetManager.NetServer.SendUnconnectedMessage(message, receiver);
-                                            //Send public key to auth server to verify if session is valid
-
                                         break;
                                     }
                                 }
@@ -189,5 +188,10 @@ namespace Bricklayer.Core.Server.Net
         }
 
         private Thread networkThread;
+
+        public MessageHandler(Server server)
+        {
+            Server = server;
+        }
     }
 }
