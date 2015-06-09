@@ -105,6 +105,11 @@ namespace Bricklayer.Core.Client
         {
             base.Initialize();
 
+            Events.Game.StateChanged.AddHandler((args =>
+            {
+                
+            }),EventPriority.Initial);
+
             currentKeyboardState = new KeyboardState();
 
             AuthNetwork = new AuthNetworkManager();
