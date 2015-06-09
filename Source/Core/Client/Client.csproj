@@ -39,8 +39,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mono|x86'">
     <OutputPath>bin\x86\Mono\</OutputPath>
@@ -54,14 +53,18 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="ContentManager.cs" />
+    <Compile Include="EventManager.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="GameState.cs" />
     <Compile Include="Interface\Layout.cs" />
     <Compile Include="Interface\Logic.cs" />
     <Compile Include="Interface\Screens\BaseScreen.cs" />
     <Compile Include="Interface\Screens\IScreen.cs" />
     <Compile Include="Interface\Screens\LoginScreen.cs" />
     <Compile Include="Interface\Screens\ScreenManager.cs" />
+    <Compile Include="Interface\Windows\LoginWindow.cs" />
+    <Compile Include="Interface\Windows\ServerWindow.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Net\Auth Server\AuthMessageHandler.cs" />
     <Compile Include="Net\Auth Server\AuthNetworkManager.cs" />
@@ -97,7 +100,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interface\Controls\" />
-    <Folder Include="Interface\Windows\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -31,8 +31,15 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public static CommandParser Commands { get; set; }
 
+        /// <summary>
+        /// Manages and lists all server events.
+        /// </summary>
+        public static EventManager Events { get; private set; }
+
         public async Task Start()
         {
+            Events = new EventManager();
+
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Clear();
 
@@ -41,7 +48,7 @@ namespace Bricklayer.Core.Server
             input = string.Empty;
             clear = new string(' ', Console.WindowWidth);
             var stopwatch = Stopwatch.StartNew();
-            Logger.WriteLine(LogType.Server, $"{Constants.Strings.ServerTitle} {Constants.VersionString}");
+            Logger.WriteLine(LogType.Server, $"{Constants.Strings.ServerTitle}");
             Logger.WriteLine(LogType.Server, $"Server is starting now, on {DateTime.Now.ToString("U")}");
             
             //Initialize Properties

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Bricklayer.Core.Client.Interface.Windows;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
@@ -9,6 +10,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         //Controls
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
         private Label lblVersion;
+        private LoginWindow wndLogin;
 
         /// <summary>
         /// Setup the login screen content and controls.
@@ -75,6 +77,13 @@ namespace Bricklayer.Core.Client.Interface.Screens
             lblVersion.SetPosition(8, Window.Height - lblVersion.Height - 8);
             lblVersion.Text = Constants.VersionString;
             Window.Add(lblVersion);
+
+            wndLogin = new LoginWindow(Manager);
+            wndLogin.Init();
+            //If the login window is overlapping the logo, push it down a bit. (For smaller screens)
+            if (wndLogin.Top < imgLogo.Top + imgLogo.Height + 8)
+                wndLogin.Top = imgLogo.Top + imgLogo.Height + 24;
+            Window.Add(wndLogin);
         }
 
         /// <summary>
@@ -85,6 +94,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Remove(imgLogo);
             Window.Remove(imgGithub);
             Window.Remove(lblVersion);
+            Window.Remove(wndLogin);
         }
     }
 }

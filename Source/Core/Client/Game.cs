@@ -1,6 +1,8 @@
-﻿using Bricklayer.Client.Interface;
+﻿using System.Diagnostics;
+using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Net.Messages.AuthServer;
 //using Bricklayer.Core.Client.Net.Messages.GameServer;
+using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
@@ -9,6 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using Bricklayer.Core.Client.Net.Messages.GameServer;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework.Input;
+using EventArgs = System.EventArgs;
 
 namespace Bricklayer.Core.Client
 {
@@ -17,6 +20,8 @@ namespace Bricklayer.Core.Client
     /// </summary>
     internal class Game : Microsoft.Xna.Framework.Game
     {
+        private static GameState state;
+
         /// <summary>
         /// The game's graphics manager.
         /// </summary>
@@ -52,6 +57,9 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public static AuthNetworkManager AuthNetwork { get; private set; }
 
+
+        public static EventManager Events { get; private set; }
+
         /// <summary>
         /// Handles receiving and sending of game server network messages
         /// </summary>
@@ -65,8 +73,19 @@ namespace Bricklayer.Core.Client
         KeyboardState oldKeyboardState,
         currentKeyboardState;
 
+        public GameState State
+        {
+            get { return state; }
+            set
+            {
+                Events.Game.StateChanged.Invoke(new EventManager.GameEvents.GameStateEventArgs(State, value));
+                state = value; 
+            }
+        }
+
         public Game()
         {
+            Events = new EventManager();
             Graphics = new GraphicsDeviceManager(this) { SynchronizeWithVerticalRetrace = false };
             IsFixedTimeStep = false;
 
@@ -138,7 +157,7 @@ namespace Bricklayer.Core.Client
             };
 
             // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
-            ConnectToAuth();
+            //ConnectToAuth();
         }
 
         // These three methods are here for testing reasons for the Auth system. They will be removed

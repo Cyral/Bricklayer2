@@ -1683,79 +1683,403 @@
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CheckLayer(MonoForce.Controls.SkinControl,System.Int32)" -->
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GetControl(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Add(MonoForce.Controls.Control)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Remove(MonoForce.Controls.Control)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Contains(MonoForce.Controls.Control,System.Boolean)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Invalidate" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.BringToFront" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.SendToBack" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Show" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Hide" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Refresh" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.SendMessage(MonoForce.Controls.Message,MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.MessageProcess(MonoForce.Controls.Message,MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GamePadPressProcess(MonoForce.Controls.GamePadEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GamePadUpProcess(MonoForce.Controls.GamePadEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GamePadDownProcess(MonoForce.Controls.GamePadEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.KeyPressProcess(MonoForce.Controls.KeyEventArgs)" -->
+        <member name="M:MonoForce.Controls.Control.Remove(MonoForce.Controls.Control)">
+            <summary>
+            Removes the specified control from the child control list.
+            </summary>
+            <param name="control">Control to remove from the child control list.</param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.Contains(MonoForce.Controls.Control,System.Boolean)">
+            <summary>
+            Determines if the specified control is a child or descendant of this control.
+            </summary>
+            <param name="control">Control to search for in the child control collection.</param>
+            <param name="recursively">Recursively check the children of children when searching.
+            If false is specified, only first-level children are checked.</param>
+            <returns>Returns true if the specified control is a child of this control.</returns>
+        </member>
+        <member name="M:MonoForce.Controls.Control.Invalidate">
+            <summary>
+            Invalidates the control and parent controls forcing a redraw.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.BringToFront">
+            <summary>
+            Brings the control to the front-most Z-order.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.SendToBack">
+            <summary>
+            Sends the control to the back of the Z-order.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.Show">
+            <summary>
+            Makes the control visible.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.Hide">
+            <summary>
+            Hides the control from rendering.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.Refresh">
+            <summary>
+            Refreshes the control.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.SendMessage(MonoForce.Controls.Message,MonoForce.Controls.EventArgs)">
+            <summary>
+            Sends an event message to the control. 
+            </summary>
+            <param name="message">Message to send to the control.</param>
+            <param name="e">Event arguments for the message.</param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.MessageProcess(MonoForce.Controls.Message,MonoForce.Controls.EventArgs)">
+            <summary>
+            Processes message events for the control.
+            </summary>
+            <param name="message">Event message to process.</param>
+            <param name="e">Event arguments for the message.</param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.GamePadPressProcess(MonoForce.Controls.GamePadEventArgs)">
+            <summary>
+            Processes gamepad button press events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.GamePadUpProcess(MonoForce.Controls.GamePadEventArgs)">
+            <summary>
+            Processes gamepad button up events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.GamePadDownProcess(MonoForce.Controls.GamePadEventArgs)">
+            <summary>
+            Processes gamepad button down events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.KeyPressProcess(MonoForce.Controls.KeyEventArgs)">
+            <summary>
+            Processes key press events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.KeyDownProcess(MonoForce.Controls.KeyEventArgs)" -->
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.KeyUpProcess(MonoForce.Controls.KeyEventArgs)" -->
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.MouseDownProcess(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.MouseUpProcess(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.MousePressProcess(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.MouseOverProcess(MonoForce.Controls.MouseEventArgs)" -->
+        <member name="M:MonoForce.Controls.Control.MouseUpProcess(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Processes mouse button up events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.MousePressProcess(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Processes mouse button press events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.MouseOverProcess(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Processes mouse over events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.MouseOutProcess(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.MouseMoveProcess(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.ClickProcess(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.ToolTipUpdate(Microsoft.Xna.Framework.GameTime)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.ToolTipOver" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.ToolTipOut" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CheckPosition(Microsoft.Xna.Framework.Point)" -->
+        <member name="M:MonoForce.Controls.Control.MouseMoveProcess(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Processes mouse move events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.ClickProcess(MonoForce.Controls.EventArgs)">
+            <summary>
+            Processes mouse button click events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.ToolTipUpdate(Microsoft.Xna.Framework.GameTime)">
+            <summary>
+            Updates the control's tool tip.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.ToolTipOver">
+            <summary>
+            Updates the tool tip delay timer when the control is hovered.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.ToolTipOut">
+            <summary>
+            Resets the tool tip delay timer when the mouse position leaves the control boundaries.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.CheckPosition(Microsoft.Xna.Framework.Point)">
+            <summary>
+            Determines if the specified point is within the bounds of the control.
+            </summary>
+            <param name="pos">Position to test.</param>
+            <returns>Returns true if "pos" if within the bounds of the control; false otherwise.</returns>
+        </member>
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CheckMovableArea(Microsoft.Xna.Framework.Point)" -->
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CheckResizableArea(Microsoft.Xna.Framework.Point)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CheckWidth(System.Int32@)" -->
+        <member name="M:MonoForce.Controls.Control.CheckWidth(System.Int32@)">
+            <summary>
+            
+            </summary>
+            <param name="w"></param>
+            <returns></returns>
+        </member>
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CheckHeight(System.Int32@)" -->
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.PerformResize(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GetResizeCursor" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GetResizePosition(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMouseUp(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMouseDown(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMouseMove(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMouseOver(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMouseOut(MonoForce.Controls.MouseEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnClick(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnDoubleClick(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMove(MonoForce.Controls.MoveEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnResize(MonoForce.Controls.ResizeEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnValidateResize(MonoForce.Controls.ResizeEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnValidateMove(MonoForce.Controls.MoveEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMoveBegin(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMoveEnd(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnResizeBegin(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnResizeEnd(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnParentResize(System.Object,MonoForce.Controls.ResizeEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnKeyUp(MonoForce.Controls.KeyEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnKeyDown(MonoForce.Controls.KeyEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnKeyPress(MonoForce.Controls.KeyEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnGamePadUp(MonoForce.Controls.GamePadEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnGamePadDown(MonoForce.Controls.GamePadEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnGamePadPress(MonoForce.Controls.GamePadEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnDraw(MonoForce.Controls.DrawEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnDrawTexture(MonoForce.Controls.DrawEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnColorChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnTextColorChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnBackColorChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnTextChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnAnchorChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnSkinChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnSkinChanging(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnParentChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnRootChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnVisibleChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnEnabledChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnAlphaChanged(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnFocusLost(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnFocusGained(MonoForce.Controls.EventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnMousePress(MonoForce.Controls.MouseEventArgs)" -->
+        <member name="M:MonoForce.Controls.Control.GetResizeCursor">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:MonoForce.Controls.Control.GetResizePosition(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMouseUp(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Handles mouse button up events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMouseDown(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Handles mouse button down events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMouseMove(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Handles mouse move events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMouseOver(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Handles mouse over events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMouseOut(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Handle mouse out events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnClick(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles mouse click events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnDoubleClick(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles double click events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMove(MonoForce.Controls.MoveEventArgs)">
+            <summary>
+            Handles move events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnResize(MonoForce.Controls.ResizeEventArgs)">
+            <summary>
+            Handles resize events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnValidateResize(MonoForce.Controls.ResizeEventArgs)">
+            <summary>
+            Handles validation of new sizes after a move event takes place.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnValidateMove(MonoForce.Controls.MoveEventArgs)">
+            <summary>
+            Handles validation of new positions after a move event takes place.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMoveBegin(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handler for when a move operation begins.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMoveEnd(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handler for when a move operation has finished.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnResizeBegin(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handler used when a resize operation has begun.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnResizeEnd(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handler used when a resize operation has completed.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnParentResize(System.Object,MonoForce.Controls.ResizeEventArgs)">
+            <summary>
+            Handles changes in the parent control's size for the control.
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnKeyUp(MonoForce.Controls.KeyEventArgs)">
+            <summary>
+            Handles key up events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnKeyDown(MonoForce.Controls.KeyEventArgs)">
+            <summary>
+            Handles key down events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnKeyPress(MonoForce.Controls.KeyEventArgs)">
+            <summary>
+            Handles key press events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnGamePadUp(MonoForce.Controls.GamePadEventArgs)">
+            <summary>
+            Handles gamepad button up events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnGamePadDown(MonoForce.Controls.GamePadEventArgs)">
+            <summary>
+            Handles gamepad button down events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnGamePadPress(MonoForce.Controls.GamePadEventArgs)">
+            <summary>
+            Handle gamepad button press events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnDraw(MonoForce.Controls.DrawEventArgs)">
+            <summary>
+            Handles draw events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnDrawTexture(MonoForce.Controls.DrawEventArgs)">
+            <summary>
+            Handles draw texture events for the control. (Drawing to the control's render target.)
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnColorChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles color change events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnTextColorChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes of the control's text color.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnBackColorChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes of the control's background color.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnTextChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes of the control's text.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnAnchorChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes of the control's anchor points.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnSkinChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles skin changed events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnSkinChanging(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles skin changing events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnParentChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes of the control's parent.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnRootChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes of the root control of the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnVisibleChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes in the visibility of the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnEnabledChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes in the enabled value of the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnAlphaChanged(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles changes in the alpha value of the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnFocusLost(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles focus lost events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnFocusGained(MonoForce.Controls.EventArgs)">
+            <summary>
+            Handles focus gained events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnMousePress(MonoForce.Controls.MouseEventArgs)">
+            <summary>
+            Handles mouse press events for the control.
+            </summary>
+            <param name="e"></param>
+        </member>
         <member name="T:MonoForce.Controls.ControlList`1">
             <summary>
             A listbox that can be used to create a list of any custom control, rather than simply text.
@@ -3071,6 +3395,26 @@
             <param name="node">Current XML node list.</param>
             <summary>
             Loads all properties defined in a layout XML file.
+            </summary>
+        </member>
+        <member name="T:MonoForce.Controls.LinkLabel">
+            <summary>
+            A label that opens a link when clicked.
+            </summary>
+        </member>
+        <member name="P:MonoForce.Controls.LinkLabel.URL">
+            <summary>
+            The URL or process to run.
+            </summary>
+        </member>
+        <member name="P:MonoForce.Controls.LinkLabel.HoverColor">
+            <summary>
+            Color to fade to on hover.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.LinkLabel.InitSkin">
+            <summary>
+            Initializes the skin of the track bar control.
             </summary>
         </member>
         <member name="T:MonoForce.Controls.ListBox">

@@ -38,7 +38,15 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public static string PyratronURL { get; } = "https://www.pyratron.com";
 
-            public static string Client_Close_Reason { get; } = "Disconnected.";
+            /// <summary>
+            /// URL to reset Pyratron account password.
+            /// </summary>
+            internal static string ForgotPasswordURL { get; } = "https://www.pyratron.com/component/users/?view=reset";
+
+            /// <summary>
+            /// URL to create a Pyratron account.
+            /// </summary>
+            internal static string CreateAccountURL { get; } = "https://www.pyratron.com/component/users/?view=registration&variant=Bricklayer";
         }
     }
 }
