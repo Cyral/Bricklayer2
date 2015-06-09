@@ -21,7 +21,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             base.Add(screenManager);
             imgBackground = new ImageBox(Manager)
             {
-                Image = Game.Content["gui.background"],
+                Image = Client.Content["gui.background"],
                 SizeMode = SizeMode.Stretched
             };
             imgBackground.SetSize(Window.Width, Window.Height);
@@ -30,7 +30,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Add(imgBackground);
 
             //Add the logo image
-            imgLogo = new ImageBox(Manager) {Image = Game.Content["gui.logosmall"], SizeMode = SizeMode.Normal};
+            imgLogo = new ImageBox(Manager) {Image = Client.Content["gui.logosmall"], SizeMode = SizeMode.Normal};
             imgLogo.Init();
             imgLogo.SetSize(imgLogo.Image.Width, imgLogo.Image.Height);
             imgLogo.SetPosition((Window.Width / 2) - (imgLogo.Image.Width / 2), 0);
@@ -39,7 +39,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             //Add github contribute link
             imgGithub = new ImageBox(Manager)
             {
-                Image = Game.Content["gui.icons.github"],
+                Image = Client.Content["gui.icons.github"],
                 SizeMode = SizeMode.Auto,
                 ToolTip = {Text = "Contribute to Bricklayer on GitHub."}
             };
@@ -56,7 +56,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             //Add Pyratron link
             imgPyratron = new ImageBox(Manager)
             {
-                Image = Game.Content["gui.icons.pyratron"],
+                Image = Client.Content["gui.icons.pyratron"],
                 SizeMode = SizeMode.Auto,
                 ToolTip = { Text = "Visit Pyratron Studios." }
             };

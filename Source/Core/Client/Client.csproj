@@ -55,7 +55,7 @@
     <Compile Include="ContentManager.cs" />
     <Compile Include="EventManager.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Game.cs" />
+    <Compile Include="Client.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="InputHandler.cs" />
     <Compile Include="Interface\Layout.cs" />

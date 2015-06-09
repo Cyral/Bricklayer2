@@ -165,17 +165,17 @@ namespace Bricklayer.Core.Client
         // These three methods are here for testing reasons for the Auth system. They will be removed
         public async void ConnectToAuth()
         {
-            await AuthNetwork.SendDetails("pugmatt", "$2y$10$4Vk/vuxSZQeXQdwpwQ14s.qYzShVXZX/33GlmelkCmEbq3v/XPfB6");
+            await AuthNetwork.SendDetails("test", "test");
         }
 
         public void SendSessionRequest()
         {
-            AuthNetwork.Send(new SessionMessage("pugmatt", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("127.0.0.1"), Globals.Values.DefaultServerPort));
+            AuthNetwork.Send(new SessionMessage("test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("127.0.0.1"), Globals.Values.DefaultServerPort));
         }
 
         public async void Connect()
         {
-            await Network.Connect("127.0.0.1", Globals.Values.DefaultServerPort, "pugmatt", TokenKeys.UID, TokenKeys.PublicKey);
+            await Network.Connect("127.0.0.1", Globals.Values.DefaultServerPort, "test", TokenKeys.UID, TokenKeys.PublicKey);
         }
         //
 
