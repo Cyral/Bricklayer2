@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Bricklayer.Core.Server.Components;
+using Bricklayer.Core.Server.Net;
 using Pyratron.Frameworks.Commands.Parser;
 
 namespace Bricklayer.Core.Server
@@ -23,7 +24,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
-        public static NetworkComponent Net { get; set; }
+        public static NetworkManager Net { get; set; }
 
         /// <summary>
         /// Command parser for commmands ran in the console or by users.
@@ -49,7 +50,7 @@ namespace Bricklayer.Core.Server
 
             //Initialize Components
             IO = new IOComponent();
-            Net = new NetworkComponent();
+            Net = new NetworkManager();
 
             await IO.Init();
             await Net.Init();

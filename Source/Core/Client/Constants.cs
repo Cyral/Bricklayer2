@@ -22,6 +22,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public static string VersionString { get; } = AssemblyVersionName.GetVersion();
 
+
         /// <summary>
         /// Globably used strings.
         /// </summary>
@@ -36,6 +37,8 @@ namespace Bricklayer.Core.Client
             /// URL to Pyratron Studios.
             /// </summary>
             public static string PyratronURL { get; } = "https://www.pyratron.com";
+
+            public static string Client_Close_Reason { get; } = "Disconnected.";
         }
     }
 }

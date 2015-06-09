@@ -32,6 +32,21 @@ namespace Bricklayer.Core.Common
             /// The client and server must have matching IDs in order to connect.
             /// </summary>
             public static string NetworkID { get; } = "Bricklayer01";
+
+            /// <summary>
+            /// App identification for Auth server
+            /// </summary>
+            public static string AuthNetworkID { get; } = "BricklayerAuth";
+
+            /// <summary>
+            /// IP of the Bricklayer Auth server
+            /// </summary>
+            public static string AuthServerAddress { get; } = "127.0.0.1";
+
+            /// <summary>
+            /// Port of the Bricklayer Auth server
+            /// </summary>
+            public static int AuthServerPort { get; } = 52142;
         }
 
         /// <summary>

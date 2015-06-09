@@ -1,7 +1,14 @@
 ﻿using Bricklayer.Client.Interface;
+using Bricklayer.Core.Client.Net.Messages.AuthServer;
+//using Bricklayer.Core.Client.Net.Messages.GameServer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
+using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
+using Bricklayer.Core.Client.Net.Messages.GameServer;
+using Bricklayer.Core.Common.Net.Messages;
+using Microsoft.Xna.Framework.Input;
 
 namespace Bricklayer.Core.Client
 {
@@ -40,6 +47,24 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public static new ContentManager Content { get; private set; }
 
+        /// <summary>
+        /// Handles receiving and sending of auth server network messages
+        /// </summary>
+        public static AuthNetworkManager AuthNetwork { get; private set; }
+
+        /// <summary>
+        /// Handles receiving and sending of game server network messages
+        /// </summary>
+        public static NetworkManager Network { get; private set; }
+
+        /// <summary>
+        /// Contains the 2 keys used for authentication
+        /// </summary>
+        internal static Token TokenKeys { get; set; }
+
+        KeyboardState oldKeyboardState,
+        currentKeyboardState;
+
         public Game()
         {
             Graphics = new GraphicsDeviceManager(this) { SynchronizeWithVerticalRetrace = false };
@@ -63,7 +88,76 @@ namespace Bricklayer.Core.Client
         protected override void Initialize()
         {
             base.Initialize();
+
+            currentKeyboardState = new KeyboardState();
+
+            AuthNetwork = new AuthNetworkManager();
+            AuthNetwork.Init();
+
+            Network = new NetworkManager();
+            Network.Init();
+
+            TokenKeys = new Token();
+
+            // Listen for init response from auth server containing token keys
+            AuthNetwork.Handler.Init += (sender, privateKey, publicKey) =>
+            {
+                TokenKeys.PrivateKey = privateKey;
+                TokenKeys.PublicKey = publicKey;
+                Debug.WriteLine("Recieved Tokens:\nPrivate Key: " + privateKey + "\nPublic Key: " + publicKey);
+            };
+
+            // Listen for failed login response from auth server
+            AuthNetwork.Handler.FailedLogin += (sender, errorMessage) =>
+            {
+                Debug.WriteLine("Failed to login. Error Message: " + errorMessage);
+            };
+
+            // Listen for verification result from the auth server
+            AuthNetwork.Handler.Verified += (sender, verified) =>
+            {
+                if (verified)
+                {
+                    Debug.WriteLine("Session verification Successful");
+                    Connect(); // Start connection process with game server once it gets session verification from the auth server
+                }
+                else
+                    Debug.WriteLine("Session verification failed");
+            };
+
+            // Listen for when user is fully connected to game server
+            Network.Handler.Connect += (sender) =>
+            {
+                Debug.WriteLine("Now connected to server!");
+            };
+
+            // If user was disconnected from the server
+            Network.Handler.Disconnect += (sender, reason) =>
+            {
+                Debug.WriteLine("Connection to game server failed: " + reason);
+            };
+
+            // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
+            ConnectToAuth();
         }
+
+        // These three methods are here for testing reasons for the Auth system. They will be removed
+        public async void ConnectToAuth()
+        {
+            await AuthNetwork.SendDetails("pugmatt", "$2y$10$4Vk/vuxSZQeXQdwpwQ14s.qYzShVXZX/33GlmelkCmEbq3v/XPfB6");
+        }
+
+        public void SendSessionRequest()
+        {
+            AuthNetwork.Send(new SessionMessage("pugmatt", TokenKeys.PrivateKey, "127.0.0.1", 52300));
+        }
+
+        public async void Connect()
+        {
+            await Network.Connect("127.0.0.1", 52300, "pugmatt", TokenKeys.PublicKey);
+        }
+        //
+
 
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
@@ -112,6 +206,14 @@ namespace Bricklayer.Core.Client
         {
             UIManager.Update(gameTime);
             base.Update(gameTime);
+
+            oldKeyboardState = currentKeyboardState;
+            currentKeyboardState = Keyboard.GetState();
+
+            if ((currentKeyboardState.IsKeyUp(Keys.Space)) && (oldKeyboardState.IsKeyDown(Keys.Space)))
+            {
+                SendSessionRequest();
+            }
         }
 
         /// <summary>

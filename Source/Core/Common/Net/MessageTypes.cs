@@ -5,7 +5,13 @@
     /// </summary>
     public enum MessageTypes : byte
     {
-        Login,
-        Init,
+        AuthLogin,
+        AuthInit,
+        FailedLogin,
+        Session,
+        PublicKey,
+        Verified,
+        ValidSession,
+        Init
     }
 }
