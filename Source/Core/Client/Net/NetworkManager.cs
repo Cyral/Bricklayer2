@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Runtime.Remoting;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
@@ -8,7 +9,7 @@ using Lidgren.Network;
 
 namespace Bricklayer.Core.Client.Net.Messages.GameServer
 {
-    public class NetworkManager
+    internal class NetworkManager
     {
         /// <summary>
         /// The underlying Lidgren NetClient.
@@ -16,28 +17,21 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         public NetClient NetClient { get; private set; }
 
         /// <summary>
-        /// The message handler
+        /// The message handler to handle incoming messages.
         /// </summary>
         public MessageHandler Handler { get; private set; }
 
         /// <summary>
-        /// The host server to connect to
-        /// </summary>
-        public string Host { get; set; }
-
-        /// <summary>
-        /// Configuration options for Lidgren messages
+        /// Configuration options for Lidgren messages.
         /// </summary>
         public NetPeerConfiguration Config { get; private set; }
 
         /// <summary>
-        /// The port of the server to connect to
+        /// Contains the 2 keys used for authentication
         /// </summary>
-        public int Port { get; set; }
+        public Token TokenKeys { get; private set; }
 
-
-        internal Client Client { get; set; }
-
+        internal Client Client { get; }
 
         public NetworkManager(Client client)
         {
@@ -46,13 +40,15 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
 
         private bool isDisposed;
 
-        private const NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;//Message delivery method
+        private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;//Message delivery method
 
         /// <summary>
         /// Initialization logic on app startup
         /// </summary>
         public void Init()
         {
+            TokenKeys = new Token();
+
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             Config = new NetPeerConfiguration(Globals.Strings.NetworkID);
 
@@ -72,18 +68,67 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                                      | NetIncomingMessageType.StatusChanged
                                      | NetIncomingMessageType.UnconnectedData);
             // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
+
+            // Listen for init response from auth server containing token keys
+            Client.Events.Network.Auth.Init.AddHandler(args =>
+            {
+                TokenKeys.UID = args.DatabaseId;
+                TokenKeys.PrivateKey = args.PrivateKey;
+                TokenKeys.PublicKey = args.PublicKey;
+                Debug.WriteLine("Recieved Tokens:\nPrivate Key: " + args.PrivateKey + "\nPublic Key: " + args.PublicKey);
+            });
+
+            // Listen for failed login response from auth server
+            Client.Events.Network.Auth.FailedLogin.AddHandler(args =>
+            {
+                Debug.WriteLine("Failed to login. Error Message: " + args.ErrorMessage);
+            });
+
+            // Listen for verification result from the auth server
+            Client.Events.Network.Auth.Verified.AddHandler(async args =>
+            {
+                if (args.Verified)
+                {
+                    Debug.WriteLine("Session verification Successful");
+                    await ConnectToServer("127.0.0.1", Globals.Values.DefaultServerPort, "Test", TokenKeys.UID, TokenKeys.PublicKey); // Start connection process with game server once it gets session verification from the auth server
+                }
+                else
+                    Debug.WriteLine("Session verification failed");
+            });
+
+            // Listen for when user is fully connected to game server
+            Client.Events.Network.Game.Connect.AddHandler(args =>
+            {
+                Debug.WriteLine("Now connected to a server!");
+            });
+            // If user was disconnected from the server
+            Client.Events.Network.Game.Disconnect.AddHandler(args =>
+            {
+                Debug.WriteLine("Disconnected or connection failed.");
+            });
+
+        }
+
+        /// <summary>
+        /// Sends login information to the authentication server.
+        /// </summary>
+        public void ConnectToAuth(string username, string password)
+        {
+            SendUnconnected(new AuthLoginMessage(Constants.Version, username, password));
+        }
+
+        public void SendSessionRequest(string username, string host, int port)
+        {
+            SendUnconnected(new SessionMessage(username, TokenKeys.UID, TokenKeys.PrivateKey, host, port));
         }
 
         /// <summary>
         /// Connects to the given game server.
         /// </summary>
-        public async Task Connect(string host, int port, string username, int id, string publicKey)
+        public async Task ConnectToServer(string host, int port, string username, int id, string publicKey)
         {
             await Task.Factory.StartNew(() =>
             {
-                Host = host;
-                Port = port;
-
                 // Create new client, with previously created configs
                 NetClient = new NetClient(Config);
                 NetClient.Start();
@@ -105,7 +150,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
 
 
         /// <summary>
-        /// Creates a NetOutgoingMessage from the interal Client object.
+        /// Creates a NetOutgoingMessage from the interal client object.
         /// </summary>
         /// <returns>A new NetOutgoingMessage.</returns>
         public NetOutgoingMessage CreateMessage()
@@ -123,7 +168,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         }
 
         /// <summary>
-        /// Sends and encodes an IMessage to the server.
+        /// Sends and encodes an IMessage to the connected game server.
         /// </summary>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void Send(IMessage gameMessage)
@@ -133,7 +178,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         }
 
         /// <summary>
-        /// Sends and encodes an IMessage to the auth server.
+        /// Sends an unconnected message to the auth server.
         /// </summary>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void SendUnconnected(IMessage gameMessage)
@@ -170,7 +215,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// </summary>
         public NetConnectionStatus GetConnectionStatus()
         {
-            return NetClient != null ? NetClient.ConnectionStatus : NetConnectionStatus.None;
+            return NetClient?.ConnectionStatus ?? NetConnectionStatus.None;
         }
 
         /// <summary>
@@ -225,9 +270,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
             if (!isDisposed)
             {
                 if (disposing)
-                {
                     Disconnect();
-                }
                 isDisposed = true;
             }
         }
