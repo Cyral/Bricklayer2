@@ -23,7 +23,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         public LoginWindow(Manager manager, Screen screen) : base(manager)
         {
-            screen.Client.State = GameState.Login;
+            screen.Client.State = GameState.Game;
 
             //Setup the window
             CaptionVisible = false;

@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Common
     /// </summary>
     /// <typeparam name="THandler">The type of delegate each handler must be.</typeparam>
     /// <typeparam name="TArgs">The type of arguments for the handler.</typeparam>
-    public class Event<THandler, TArgs> where TArgs : EventArgs
+    public class Event<TArgs> where TArgs : EventArgs
     {
         private readonly List<PrioritizedEventHandler<TArgs>> handlers;
 
@@ -59,10 +59,8 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// Removes a handler from this event.
         /// </summary>
-        public void RemoveHandler(THandler handler)
+        public void RemoveHandler(EventHandler handler)
         {
-            if (!(handler is Delegate))
-                throw new ArgumentException($"{nameof(handler)} must be an delegate.");
             handlers.Remove(handlers.FirstOrDefault(e => Equals(e.Event, handler)));
         }
 
