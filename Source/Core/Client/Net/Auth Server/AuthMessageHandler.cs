@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
@@ -50,7 +51,7 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
                         {
                             case NetIncomingMessageType.UnconnectedData:
                                 {
-                                   if (im.SenderEndPoint.Address.ToString() == Globals.Values.DefaultAuthAddress && im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort) 
+                                   if (Equals(im.SenderEndPoint.Address, Dns.GetHostEntry(Globals.Values.DefaultAuthAddress).AddressList[0]) && im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort) 
                                          HandleUnconnectedMessage(im);
                                     break;
                                 }
@@ -68,9 +69,6 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         {
             if (im == null) throw new ArgumentNullException(nameof(im));
 
-            if (im.SenderEndPoint.Address.ToString() == Globals.Values.DefaultAuthAddress
-                && im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort) // Check if incoming data is from real auth server
-            {
                 var messageType = (MessageTypes)im.ReadByte(); //Find the type of data message sent
                 switch (messageType)
                 {
@@ -96,7 +94,6 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
                             break;
                         }
                 }
-            }
         }
 
         private readonly AuthNetworkManager networkManager;

@@ -27,7 +27,7 @@ namespace Bricklayer.Core.Client
             //Delegates define the arguments/structure of each event.
             #region Delegates
 
-            public delegate void GameStateEventHandler(GameState newState, GameState oldState);
+            public delegate void GameStateEventHandler(GameStateEventArgs args);
             #endregion
 
             //Arguments define what values are passed to the event handler(s).
@@ -82,9 +82,9 @@ namespace Bricklayer.Core.Client
 
                 #region Delegates
 
-                public delegate void InitEventHandler(int databaseID, string privateKey, string publicKey);
-                public delegate void FailedLoginEventHandler(string errorMessage);
-                public delegate void VerifiedEventHandler(bool verified);
+                public delegate void InitEventHandler(InitEventArgs args);
+                public delegate void FailedLoginEventHandler(FailedLoginEventArgs args);
+                public delegate void VerifiedEventHandler(VerifiedEventArgs args);
 
                 #endregion
 
@@ -164,7 +164,13 @@ namespace Bricklayer.Core.Client
 
                 #region Delegates
 
-                public delegate void InitEventHandler();
+                public delegate void InitEventHandler(InitEventArgs args);
+
+                public delegate void DisconnectEventHandler(DisconnectEventArgs args);
+
+                public delegate void LatencyUpdatedEventHandler(LatencyUpdatedEventArgs args);
+
+                public delegate void ConnectEventHandler(ConnectEventArgs args);
 
                 #endregion
 
@@ -174,10 +180,37 @@ namespace Bricklayer.Core.Client
 
                 public class InitEventArgs : EventArgs
                 {
-
                     public InitEventArgs()
                     {
 
+                    }
+                }
+
+                public class DisconnectEventArgs : EventArgs
+                {
+                    public string Reason { get; private set; }
+
+                    public DisconnectEventArgs(string reason)
+                    {
+                        Reason = reason;
+                    }
+                }
+
+                public class ConnectEventArgs : EventArgs
+                {
+                    public ConnectEventArgs()
+                    {
+
+                    }
+                }
+
+                public class LatencyUpdatedEventArgs : EventArgs
+                {
+                    public float Ping { get; private set; }
+
+                    public LatencyUpdatedEventArgs(float ping)
+                    {
+                        Ping = ping;
                     }
                 }
 
@@ -189,10 +222,24 @@ namespace Bricklayer.Core.Client
                 #region Events
 
                 /// <summary>
-                /// When client recieves Init message from Auth server
+                /// When client recieves Init message from the game server.
                 /// </summary>
-                public Event<InitEventHandler, InitEventArgs> Init { get; } =
-                    new Event<InitEventHandler, InitEventArgs>();
+                public Event<InitEventHandler, InitEventArgs> Init { get; } = new Event<InitEventHandler, InitEventArgs>();
+
+                /// <summary>
+                /// When the client is disconnected from the game server.
+                /// </summary>
+                public Event<DisconnectEventHandler, DisconnectEventArgs> Disconnect { get; } = new Event<DisconnectEventHandler, DisconnectEventArgs>();
+
+                /// <summary>
+                /// When the client is fully connected to a game server
+                /// </summary>
+                public Event<ConnectEventHandler, ConnectEventArgs> Connect { get; } = new Event<ConnectEventHandler, ConnectEventArgs>();
+
+                /// <summary>
+                /// When the connection latency (ping) is updated after a successful ping/pong message.
+                /// </summary>
+                public Event<LatencyUpdatedEventHandler, LatencyUpdatedEventArgs> LatencyUpdated { get; } = new Event<LatencyUpdatedEventHandler,LatencyUpdatedEventArgs>(); 
 
                 #endregion
             }

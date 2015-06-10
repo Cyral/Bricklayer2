@@ -120,43 +120,42 @@ namespace Bricklayer.Core.Client
             TokenKeys = new Token();
 
             // Listen for init response from auth server containing token keys
-            //AuthNetwork.Handler.Init += (sender, id, privateKey, publicKey) =>
-            //{
-            //    TokenKeys.UID = id;
-            //    TokenKeys.PrivateKey = privateKey;
-            //    TokenKeys.PublicKey = publicKey;
-            //    Debug.WriteLine("Recieved Tokens:\nPrivate Key: " + privateKey + "\nPublic Key: " + publicKey);
-            //};
+            Events.Network.Auth.Init.AddHandler(args =>
+            {
+                 TokenKeys.UID = args.DatabaseId;
+                TokenKeys.PrivateKey = args.PrivateKey;
+                TokenKeys.PublicKey = args.PublicKey;
+                Debug.WriteLine("Recieved Tokens:\nPrivate Key: " + args.PrivateKey + "\nPublic Key: " + args.PublicKey);
+            });
 
-            //// Listen for failed login response from auth server
-            //AuthNetwork.Handler.FailedLogin += (sender, errorMessage) =>
-            //{
-            //    Debug.WriteLine("Failed to login. Error Message: " + errorMessage);
-            //};
+            // Listen for failed login response from auth server
+            Events.Network.Auth.FailedLogin.AddHandler(args =>
+            {
+                Debug.WriteLine("Failed to login. Error Message: " + args.ErrorMessage);
+            });
 
-            //// Listen for verification result from the auth server
-            //AuthNetwork.Handler.Verified += (sender, verified) =>
-            //{
-            //    if (verified)
-            //    {
-            //        Debug.WriteLine("Session verification Successful");
-            //        Connect(); // Start connection process with game server once it gets session verification from the auth server
-            //    }
-            //    else
-            //        Debug.WriteLine("Session verification failed");
-            //};
+            // Listen for verification result from the auth server
+            Events.Network.Auth.Verified.AddHandler(args =>
+            {
+                if (args.Verified)
+                {
+                    Debug.WriteLine("Session verification Successful");
+                    Connect(); // Start connection process with game server once it gets session verification from the auth server
+                }
+                else
+                    Debug.WriteLine("Session verification failed");
+            });
 
             // Listen for when user is fully connected to game server
-            Network.Handler.Connect += (sender) =>
+            Events.Network.Game.Connect.AddHandler(args =>
             {
-                Debug.WriteLine("Now connected to server!");
-            };
-
+                Debug.WriteLine("Now connected to a server!");
+            });
             // If user was disconnected from the server
-            Network.Handler.Disconnect += (sender, reason) =>
+            Events.Network.Game.Disconnect.AddHandler(args =>
             {
-                Debug.WriteLine("Connection to game server failed: " + reason);
-            };
+                Debug.WriteLine("Disconnected or connection failed.");
+            });
 
             // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
             ConnectToAuth();
@@ -170,7 +169,7 @@ namespace Bricklayer.Core.Client
 
         public void SendSessionRequest()
         {
-            AuthNetwork.Send(new SessionMessage("Test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("127.0.0.1"), Globals.Values.DefaultServerPort));
+            AuthNetwork.Send(new SessionMessage("Test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("71.3.34.68"), Globals.Values.DefaultServerPort));
         }
 
         public async void Connect()
