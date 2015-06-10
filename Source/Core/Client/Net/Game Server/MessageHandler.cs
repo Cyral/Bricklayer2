@@ -41,12 +41,12 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         {
             NetIncomingMessage im; //Holder for the incoming message
 
-            while (networkManager.Client.Status == NetPeerStatus.Running)
+            while (networkManager.NetClient.Status == NetPeerStatus.Running)
             {
-                if (networkManager.Client != null)
+                if (networkManager.NetClient != null)
                 {
                     //Block thread until next message
-                    networkManager.Client.MessageReceivedEvent.WaitOne();
+                    networkManager.NetClient.MessageReceivedEvent.WaitOne();
 
                     while ((im = networkManager.ReadMessage()) != null)
                     {
@@ -89,7 +89,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                                             }
                                         case NetConnectionStatus.RespondedAwaitingApproval:
                                             {
-                                                im.SenderConnection.Approve(networkManager.CreateMessage());
+                                                im.SenderConnection.Approve();
                                                 break;
                                             }
                                     }
@@ -114,23 +114,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         {
             if (im == null) throw new ArgumentNullException("im");
 
-            var messageType = (MessageTypes)im.ReadByte(); //Find the type of data message sent
-//            switch (messageType)
-//            {
-//                case MessageTypes.Chat:
-//                    {
-//                        var msg = new ChatMessage(im, MessageContext.Client);
-//                        if (!msg.System)
-//                            OnChat(new ChatLine(App.Session.Users.FirstOrDefault(user => user.ID == msg.UserID), msg.Text,
-//                                DateTime.Now));
-//#if !MONO
-//                        else
-//                            OnChat(new ChatLine(msg.Color, msg.Text,
-//                                DateTime.Now));
-//#endif
-//                        break;
-//                    }
-//            }
+            var messageType = (MessageTypes)im.ReadByte(); 
         }
 
         #region Events
