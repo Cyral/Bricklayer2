@@ -111,22 +111,22 @@ namespace Bricklayer.Core.Client
 
 
             // Listen for init response from auth server containing token keys
-            Events.Network.Auth.Init.AddHandler((args =>
+            Events.Network.Auth.Init.AddHandler(args =>
             {
-                TokenKeys.UID = args.DatabaseId;
+                 TokenKeys.UID = args.DatabaseId;
                 TokenKeys.PrivateKey = args.PrivateKey;
                 TokenKeys.PublicKey = args.PublicKey;
                 Debug.WriteLine("Recieved Tokens:\nPrivate Key: " + args.PrivateKey + "\nPublic Key: " + args.PublicKey);
-            }),EventPriority.Initial);
+            });
 
-            //// Listen for failed login response from auth server
-            Events.Network.Auth.FailedLogin.AddHandler((args =>
+            // Listen for failed login response from auth server
+            Events.Network.Auth.FailedLogin.AddHandler(args =>
             {
                 Debug.WriteLine("Failed to login. Error Message: " + args.ErrorMessage);
-            }), EventPriority.Initial);
+            });
 
-            //// Listen for verification result from the auth server
-            Events.Network.Auth.Verified.AddHandler((args =>
+            // Listen for verification result from the auth server
+            Events.Network.Auth.Verified.AddHandler(args =>
             {
                 if (args.Verified)
                 {
@@ -135,35 +135,32 @@ namespace Bricklayer.Core.Client
                 }
                 else
                     Debug.WriteLine("Session verification failed");
-            }), EventPriority.Initial);
+            });
 
             // Listen for when user is fully connected to game server
-            Events.Network.Game.Connected.AddHandler((args =>
+            Events.Network.Game.Connect.AddHandler(args =>
             {
-                Debug.WriteLine("Now connected to server!");
-            }), EventPriority.Initial);
-
-
+                Debug.WriteLine("Now connected to a server!");
+            });
             // If user was disconnected from the server
-            Events.Network.Game.Disconnected.AddHandler((args =>
+            Events.Network.Game.Disconnect.AddHandler(args =>
             {
-                Debug.WriteLine("Connection to game server failed: " + args.Reason);
-            }), EventPriority.Initial);
+                Debug.WriteLine("Disconnected or connection failed.");
+            });
 
             // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
             ConnectToAuth();
         }
 
         // These three methods are here for testing reasons for the Auth system. They will be removed
-        public void ConnectToAuth()
+        public async void ConnectToAuth()
         {
             Network.SendUnconnected(new AuthLoginMessage(Constants.Version, "Test", "test"));
         }
 
         public void SendSessionRequest()
         {
-            Network.SendUnconnected(new SessionMessage("Test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("127.0.0.1"), Globals.Values.DefaultServerPort));
-
+            Network.SendUnconnected(new SessionMessage("Test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("IP Here"), Globals.Values.DefaultServerPort));
         }
 
         public async void Connect()

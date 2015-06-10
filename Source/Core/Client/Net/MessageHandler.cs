@@ -9,6 +9,7 @@ using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
+using System.Net;
 
 namespace Bricklayer.Core.Client.Net.Messages.GameServer
 {
@@ -54,7 +55,8 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                         switch (im.MessageType)
                         {
                             case NetIncomingMessageType.ConnectionLatencyUpdated:
-                                OnLatencyUpdated(im.ReadSingle());
+                                networkManager.Client.Events.Network.Game.LatencyUpdated.Invoke(
+                                    new EventManager.NetEvents.GameServerEvents.LatencyUpdatedEventArgs(im.ReadSingle()));
                                 break;
                             case NetIncomingMessageType.VerboseDebugMessage:
                             case NetIncomingMessageType.DebugMessage:
@@ -69,8 +71,8 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                                     {
                                         case NetConnectionStatus.None:
                                             {
-                                                networkManager.Client.Events.Network.Game.Disconnected.Invoke(
-                                                new EventManager.NetEvents.GameServerEvents.DisconnectedEventArgs("Error connecting to the server."));
+                                                networkManager.Client.Events.Network.Game.Disconnect.Invoke(
+                                                new EventManager.NetEvents.GameServerEvents.DisconnectEventArgs("Error connecting to the server."));
                                                 break;
                                             }
                                         //When connected to the server
@@ -79,16 +81,16 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                                                 //Must read the first byte of the hail message, which should correspond to the byte of the Init type
                                                 im.SenderConnection.RemoteHailMessage.ReadByte(); //Throw it away
                                                 var msg = new InitMessage(im.SenderConnection.RemoteHailMessage, MessageContext.Client);
-                                                networkManager.Client.Events.Network.Game.Connected.Invoke(
-                                               new EventManager.NetEvents.GameServerEvents.ConnectedEventArgs());
+                                                networkManager.Client.Events.Network.Game.Connect.Invoke(
+                                               new EventManager.NetEvents.GameServerEvents.ConnectEventArgs());
                                                 break;
                                             }
                                         //When disconnected from the server
                                         case NetConnectionStatus.Disconnected:
                                             {
                                                 var reason = im.ReadString();
-                                                networkManager.Client.Events.Network.Game.Disconnected.Invoke(
-                                               new EventManager.NetEvents.GameServerEvents.DisconnectedEventArgs(reason));
+                                                networkManager.Client.Events.Network.Game.Disconnect.Invoke(
+                                               new EventManager.NetEvents.GameServerEvents.DisconnectEventArgs(reason));
                                                 break;
                                             }
                                         case NetConnectionStatus.RespondedAwaitingApproval:
@@ -106,7 +108,6 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                                 }
                             case NetIncomingMessageType.UnconnectedData:
                                 {
-                                    if (im.SenderEndPoint.Address.ToString() == Globals.Values.DefaultAuthAddress && im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
                                         HandleUnconnectedMessage(im);
                                     break;
                                 }
@@ -125,9 +126,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         {
             if (im == null) throw new ArgumentNullException(nameof(im));
 
-            if (im.SenderEndPoint.Address.ToString() == Globals.Values.DefaultAuthAddress
-                && im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort) // Check if incoming data is from real auth server
-            {
+            if (Equals(im.SenderEndPoint.Address, Dns.GetHostEntry(Globals.Values.DefaultAuthAddress).AddressList[0]) && im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort) { 
                 var messageType = (MessageTypes)im.ReadByte(); //Find the type of data message sent
                 switch (messageType)
                 {
@@ -166,42 +165,6 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
             var messageType = (MessageTypes)im.ReadByte(); 
         }
 
-        #region Events
-
-        //Event Arguments & Handlers
-
-        #region Delegates
-
-        public delegate void LatencyUpdatedEventHandler(object sender, float ping);
-
-        public delegate void ConnectEventHandler(object sender);
-
-        public delegate void DisconnectEventHandler(object sender, string reason);
-
-
-        #endregion
-
-        //Public Events
-        public event LatencyUpdatedEventHandler LatencyUpdated;
-        public event ConnectEventHandler Connect;
-        public event DisconnectEventHandler Disconnect;
-
-        //Private Callers
-        private void OnLatencyUpdated(float ping) => LatencyUpdated?.Invoke(this, ping);
-
-        private void OnConnect()
-            => Connect?.Invoke(this);
-
-        private void OnDisconnect(string reason = "") => Disconnect?.Invoke(this, reason);
-
-        #endregion //Events
-
-        #region Fields
-
         private readonly NetworkManager networkManager;
-
-        private bool recievedInit = false; //Have we recieved the init message yet?
-
-        #endregion //Fields
     }
 }

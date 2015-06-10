@@ -54,13 +54,13 @@ namespace Bricklayer.Core.Common
             /// The default port for to send crededentials for authentication to.
             /// The actual port is configurable through the JSON config, although the auth port will most likely never change.
             /// </summary>
-            public static int DefaultAuthPort { get; } = 52421;
+            public static int DefaultAuthPort { get; } = 52400;
 
             /// <summary>
             /// The default address to send crededentials for authentication to.
             /// The actual address is configurable through the JSON config, although the auth address will most likely never change.
             /// </summary>
-            public static string DefaultAuthAddress { get; } = "127.0.0.1";
+            public static string DefaultAuthAddress { get; } = "auth.pyratron.com";
         }
     }
 }

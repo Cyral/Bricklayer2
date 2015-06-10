@@ -24,12 +24,6 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public sealed class GameEvents
         {
-            //Delegates define the arguments/structure of each event.
-            #region Delegates
-
-            public delegate void GameStateEventHandler(GameState newState, GameState oldState);
-            #endregion
-
             //Arguments define what values are passed to the event handler(s).
             #region Arguments
 
@@ -48,12 +42,13 @@ namespace Bricklayer.Core.Client
 
             //Events represent a collection of event handlers.
             //(Note: These are not standard .NET events, see the Event class)
+
             #region Events
 
             /// <summary>
             /// When the state of the game is changed. (From login to lobby, server list to game screen, etc.)
             /// </summary>
-            public Event<GameStateEventHandler, GameStateEventArgs> StateChanged { get; } = new Event<GameStateEventHandler, GameStateEventArgs>();
+            public Event<GameStateEventArgs> StateChanged { get; } = new Event<GameStateEventArgs>();
             #endregion
         }
 
@@ -78,18 +73,7 @@ namespace Bricklayer.Core.Client
             /// </summary>
             internal sealed class AuthServerEvents
             {
-                //Delegates define the arguments/structure of each event.
-
-                #region Delegates
-
-                public delegate void InitEventHandler(int databaseID, string privateKey, string publicKey);
-                public delegate void FailedLoginEventHandler(string errorMessage);
-                public delegate void VerifiedEventHandler(bool verified);
-
-                #endregion
-
                 //Arguments define what values are passed to the event handler(s).
-
                 #region Arguments
 
                 public class InitEventArgs : EventArgs
@@ -136,20 +120,20 @@ namespace Bricklayer.Core.Client
                 /// <summary>
                 /// When client recieves Init message from Auth server
                 /// </summary>
-                public Event<InitEventHandler, InitEventArgs> Init { get; } =
-                    new Event<InitEventHandler, InitEventArgs>();
+                public Event<InitEventArgs> Init { get; } =
+                    new Event<InitEventArgs>();
 
                 /// <summary>
                 /// When client recieves a FailedLogin message from the Auth server
                 /// </summary>
-                public Event<FailedLoginEventHandler, FailedLoginEventArgs> FailedLogin { get; } =
-                    new Event<FailedLoginEventHandler, FailedLoginEventArgs>();
+                public Event<FailedLoginEventArgs> FailedLogin { get; } =
+                    new Event<FailedLoginEventArgs>();
 
                 /// <summary>
                 /// When client recieves verification of session from the Auth server
                 /// </summary>
-                public Event<VerifiedEventHandler, VerifiedEventArgs> Verified { get; } =
-                    new Event<VerifiedEventHandler, VerifiedEventArgs>();
+                public Event<VerifiedEventArgs> Verified { get; } =
+                    new Event<VerifiedEventArgs>();
 
 
                 #endregion
@@ -160,37 +144,43 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public sealed class GameServerEvents
             {
-                //Delegates define the arguments/structure of each event.
-
-                #region Delegates
-
-                public delegate void InitEventHandler();
-                public delegate void ConnectedEventHandler();
-                public delegate void DisconnectedEventHandler();
-
-                #endregion
-
                 //Arguments define what values are passed to the event handler(s).
 
                 #region Arguments
 
-
-                public class ConnectedEventArgs : EventArgs
+                public class InitEventArgs : EventArgs
                 {
-
-                    public ConnectedEventArgs()
+                    public InitEventArgs()
                     {
 
                     }
                 }
 
-                public class DisconnectedEventArgs : EventArgs
+                public class DisconnectEventArgs : EventArgs
                 {
                     public string Reason { get; private set; }
 
-                    public DisconnectedEventArgs(string reason)
+                    public DisconnectEventArgs(string reason)
                     {
                         Reason = reason;
+                    }
+                }
+
+                public class ConnectEventArgs : EventArgs
+                {
+                    public ConnectEventArgs()
+                    {
+
+                    }
+                }
+
+                public class LatencyUpdatedEventArgs : EventArgs
+                {
+                    public float Ping { get; private set; }
+
+                    public LatencyUpdatedEventArgs(float ping)
+                    {
+                        Ping = ping;
                     }
                 }
 
@@ -202,17 +192,25 @@ namespace Bricklayer.Core.Client
                 #region Events
 
                 /// <summary>
-                /// When client fully connects to the game server
+                /// When client recieves Init message from the game server.
                 /// </summary>
-                public Event<ConnectedEventHandler, ConnectedEventArgs> Connected { get; } =
-                    new Event<ConnectedEventHandler, ConnectedEventArgs>();
+                public Event<InitEventArgs> Init { get; } = new Event<InitEventArgs>();
 
                 /// <summary>
-                /// When client is disconnected from the game server
+                /// When the client is disconnected from the game server.
                 /// </summary>
-                public Event<DisconnectedEventHandler, DisconnectedEventArgs> Disconnected { get; } =
-                    new Event<DisconnectedEventHandler, DisconnectedEventArgs>();
-                
+                public Event<DisconnectEventArgs> Disconnect { get; } = new Event<DisconnectEventArgs>();
+
+                /// <summary>
+                /// When the client is fully connected to a game server
+                /// </summary>
+                public Event<ConnectEventArgs> Connect { get; } = new Event<ConnectEventArgs>();
+
+                /// <summary>
+                /// When the connection latency (ping) is updated after a successful ping/pong message.
+                /// </summary>
+                public Event<LatencyUpdatedEventArgs> LatencyUpdated { get; } = new Event<LatencyUpdatedEventArgs>(); 
+
                 #endregion
             }
 
