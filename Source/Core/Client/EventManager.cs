@@ -63,9 +63,20 @@ namespace Bricklayer.Core.Client
         public sealed class NetEvents
         {
             /// <summary>
-            /// Events related to the Auth Server
+            /// Events related to the authentication server and proccess.
             /// </summary>
-            internal sealed class AuthEvents
+            internal AuthServerEvents Auth { get; }
+
+            /// <summary>
+            /// Events related to networking from the game server.
+            /// </summary>
+            public GameServerEvents Game { get; }
+
+
+            /// <summary>
+            /// Events related to the authentication server and proccess.
+            /// </summary>
+            internal sealed class AuthServerEvents
             {
                 //Delegates define the arguments/structure of each event.
 
@@ -145,7 +156,7 @@ namespace Bricklayer.Core.Client
             }
 
             /// <summary>
-            /// Events related to the Game Server
+            /// Events related to networking from the game server.
             /// </summary>
             public sealed class GameServerEvents
             {
@@ -184,6 +195,13 @@ namespace Bricklayer.Core.Client
                     new Event<InitEventHandler, InitEventArgs>();
 
                 #endregion
+            }
+
+
+            internal NetEvents()
+            {
+                Game = new GameServerEvents();
+                Auth = new AuthServerEvents();
             }
         }
 

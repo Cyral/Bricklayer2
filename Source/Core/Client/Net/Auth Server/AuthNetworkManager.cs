@@ -13,13 +13,14 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         /// <summary>
         /// The underlying Lidgren NetClient.
         /// </summary>
-        public NetClient Client { get; private set; }
+        public NetClient NetClient { get; private set; }
 
         /// <summary>
         /// The message handler
         /// </summary>
         public AuthMessageHandler Handler { get; private set; }
 
+        internal Client Client { get; set; }
 
         /// <summary>
         /// Configuration options for Lidgren messages
@@ -29,6 +30,12 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         private bool isDisposed;
 
         private const NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;//Message delivery method
+
+        public AuthNetworkManager(Client client)
+        {
+            Client = client;
+        }
+
 
         /// <summary>
         /// Initialization logic on app startup
@@ -56,8 +63,8 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
             {
 
                 // Create new client, with previously created configs
-                Client = new NetClient(Config);
-                Client.Start();
+                NetClient = new NetClient(Config);
+                NetClient.Start();
 
                 Handler.Start();
 
@@ -72,7 +79,7 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         /// <returns>A new NetOutgoingMessage.</returns>
         public NetOutgoingMessage CreateMessage()
         {
-            return Client.CreateMessage();
+            return NetClient.CreateMessage();
         }
 
         /// <summary>
@@ -81,7 +88,7 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         /// <returns>The latest NetIncomingMessage, ready for processing, null if no message waiting.</returns>
         public NetIncomingMessage ReadMessage()
         {
-            return Client.ReadMessage();
+            return NetClient.ReadMessage();
         }
 
         /// <summary>
@@ -92,7 +99,7 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         {
             var message = EncodeMessage(gameMessage); //Write packet ID and encode
             var receiver = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress), Globals.Values.DefaultAuthPort); // Auth Server info
-            Client.SendUnconnectedMessage(message, receiver); //Send
+            NetClient.SendUnconnectedMessage(message, receiver); //Send
         }
 
         /// <summary>
@@ -101,7 +108,7 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         public NetOutgoingMessage EncodeMessage(IMessage gameMessage)
         {
             gameMessage.Context = MessageContext.Client;
-            var message = Client.CreateMessage();
+            var message = NetClient.CreateMessage();
             //Write packet type ID
             message.Write((byte)gameMessage.MessageType);
             gameMessage.Encode(message);
@@ -115,7 +122,7 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         /// <returns></returns>
         public NetPeerStatistics GetPeerStats()
         {
-            return Client.Statistics;
+            return NetClient.Statistics;
         }
 
         /// <summary>
@@ -124,7 +131,7 @@ namespace Bricklayer.Core.Client.Net.Messages.AuthServer
         /// <param name="im">Message to recylce</param>
         public void Recycle(NetIncomingMessage im)
         {
-            Client.Recycle(im);
+            NetClient.Recycle(im);
         }
 
     }

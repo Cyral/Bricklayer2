@@ -111,10 +111,10 @@ namespace Bricklayer.Core.Client
            
             Input = new InputHandler();
 
-            AuthNetwork = new AuthNetworkManager();
+            AuthNetwork = new AuthNetworkManager(this);
             AuthNetwork.Init();
 
-            Network = new NetworkManager();
+            Network = new NetworkManager(this);
             Network.Init();
 
             TokenKeys = new Token();
@@ -165,17 +165,17 @@ namespace Bricklayer.Core.Client
         // These three methods are here for testing reasons for the Auth system. They will be removed
         public async void ConnectToAuth()
         {
-            await AuthNetwork.SendDetails("test", "test");
+            await AuthNetwork.SendDetails("Test", "test");
         }
 
         public void SendSessionRequest()
         {
-            AuthNetwork.Send(new SessionMessage("test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("127.0.0.1"), Globals.Values.DefaultServerPort));
+            AuthNetwork.Send(new SessionMessage("Test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("127.0.0.1"), Globals.Values.DefaultServerPort));
         }
 
         public async void Connect()
         {
-            await Network.Connect("127.0.0.1", Globals.Values.DefaultServerPort, "test", TokenKeys.UID, TokenKeys.PublicKey);
+            await Network.Connect("127.0.0.1", Globals.Values.DefaultServerPort, "Test", TokenKeys.UID, TokenKeys.PublicKey);
         }
         //
 

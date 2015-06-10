@@ -13,7 +13,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// <summary>
         /// The underlying Lidgren NetClient.
         /// </summary>
-        public NetClient Client { get; private set; }
+        public NetClient NetClient { get; private set; }
 
         /// <summary>
         /// The message handler
@@ -34,6 +34,15 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// The port of the server to connect to
         /// </summary>
         public int Port { get; set; }
+
+
+        internal Client Client { get; set; }
+
+
+        public NetworkManager(Client client)
+        {
+            Client = client;
+        }
 
         private bool isDisposed;
 
@@ -70,8 +79,8 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                 Port = port;
 
                 // Create new client, with previously created configs
-                Client = new NetClient(Config);
-                Client.Start();
+                NetClient = new NetClient(Config);
+                NetClient.Start();
 
                 Handler.Start();
 
@@ -84,7 +93,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// </summary>
         private void Join(string host, int port, string username, int id, string publicKey)
         {
-            Client.Connect(host, port,
+            NetClient.Connect(host, port,
                 EncodeMessage(new PublicKeyMessage(username, id, publicKey)));
         }
 
@@ -95,7 +104,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// <returns>A new NetOutgoingMessage.</returns>
         public NetOutgoingMessage CreateMessage()
         {
-            return Client.CreateMessage();
+            return NetClient.CreateMessage();
         }
 
         /// <summary>
@@ -104,7 +113,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// <returns>The latest NetIncomingMessage, ready for processing, null if no message waiting.</returns>
         public NetIncomingMessage ReadMessage()
         {
-            return Client.ReadMessage();
+            return NetClient.ReadMessage();
         }
 
         /// <summary>
@@ -114,7 +123,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         public void Send(IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            Client.SendMessage(message, deliveryMethod); //Send
+            NetClient.SendMessage(message, deliveryMethod); //Send
         }
 
         /// <summary>
@@ -123,7 +132,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         public NetOutgoingMessage EncodeMessage(IMessage gameMessage)
         {
             gameMessage.Context = MessageContext.Client;
-            var message = Client.CreateMessage();
+            var message = NetClient.CreateMessage();
             //Write packet type ID
             message.Write((byte)gameMessage.MessageType);
             gameMessage.Encode(message);
@@ -136,7 +145,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// <param name="reason">Reason to tell the server for disconnecting.</param>
         public void Disconnect(string reason = "Disconnected.")
         {
-            if (Client != null) Client.Disconnect(reason);
+            if (NetClient != null) NetClient.Disconnect(reason);
         }
 
         /// <summary>
@@ -144,7 +153,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// </summary>
         public NetConnectionStatus GetConnectionStatus()
         {
-            return Client != null ? Client.ConnectionStatus : NetConnectionStatus.None;
+            return NetClient != null ? NetClient.ConnectionStatus : NetConnectionStatus.None;
         }
 
         /// <summary>
@@ -152,7 +161,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// </summary>
         public NetConnectionStatistics GetConnectionStats()
         {
-            return Client.ServerConnection.Statistics;
+            return NetClient.ServerConnection.Statistics;
         }
 
         /// <summary>
@@ -161,7 +170,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// <returns></returns>
         public NetPeerStatus GetPeerStatus()
         {
-            return Client.Status;
+            return NetClient.Status;
         }
 
         /// <summary>
@@ -170,7 +179,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// <returns></returns>
         public NetPeerStatistics GetPeerStats()
         {
-            return Client.Statistics;
+            return NetClient.Statistics;
         }
 
         /// <summary>
@@ -179,7 +188,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// <param name="im">Message to recylce</param>
         public void Recycle(NetIncomingMessage im)
         {
-            Client.Recycle(im);
+            NetClient.Recycle(im);
         }
 
         /// <summary>
