@@ -67,10 +67,8 @@
     <Compile Include="Interface\Windows\LoginWindow.cs" />
     <Compile Include="Interface\Windows\ServerWindow.cs" />
     <Compile Include="IO.cs" />
-    <Compile Include="Net\Auth Server\AuthMessageHandler.cs" />
-    <Compile Include="Net\Auth Server\AuthNetworkManager.cs" />
-    <Compile Include="Net\Game Server\MessageHandler.cs" />
-    <Compile Include="Net\Game Server\NetworkManager.cs" />
+    <Compile Include="Net\MessageHandler.cs" />
+    <Compile Include="Net\NetworkManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextureLoader.cs" />

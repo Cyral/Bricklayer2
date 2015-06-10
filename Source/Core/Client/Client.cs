@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using Bricklayer.Client.Interface;
-using Bricklayer.Core.Client.Net.Messages.AuthServer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
@@ -46,12 +45,6 @@ namespace Bricklayer.Core.Client
         /// Manages and handles all game assets and content.
         /// </summary>
         public new ContentManager Content { get; private set; }
-
-        /// <summary>
-        /// Handles receiving and sending of auth server network messages
-        /// </summary>
-        public AuthNetworkManager AuthNetwork { get; private set; }
-
 
         public EventManager Events { get; private set; }
 
@@ -116,13 +109,11 @@ namespace Bricklayer.Core.Client
            
             Input = new InputHandler();
 
-            AuthNetwork = new AuthNetworkManager(this);
-            AuthNetwork.Init();
-
             Network = new NetworkManager(this);
             Network.Init();
 
             TokenKeys = new Token();
+
 
             // Listen for init response from auth server containing token keys
             Events.Network.Auth.Init.AddHandler(args =>
@@ -169,17 +160,18 @@ namespace Bricklayer.Core.Client
         // These three methods are here for testing reasons for the Auth system. They will be removed
         public async void ConnectToAuth()
         {
-            await AuthNetwork.SendDetails("Test", "test");
+            Network.SendUnconnected(new AuthLoginMessage(Constants.Version, "Test", "test"));
         }
 
         public void SendSessionRequest()
         {
-            AuthNetwork.Send(new SessionMessage("Test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("71.3.34.68"), Globals.Values.DefaultServerPort));
+            Network.SendUnconnected(new SessionMessage("Test", TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse("IP Here"), Globals.Values.DefaultServerPort));
         }
 
         public async void Connect()
         {
             await Network.Connect("127.0.0.1", Globals.Values.DefaultServerPort, "Test", TokenKeys.UID, TokenKeys.PublicKey);
+
         }
         //
 

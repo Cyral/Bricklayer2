@@ -116,8 +116,8 @@ namespace Bricklayer.Core.Server.Net
                             //Listen to data from the auth server.
                             case NetIncomingMessageType.UnconnectedData:
                             {
-                               if (Equals(inc.SenderEndPoint.Address, Dns.GetHostEntry(Globals.Values.DefaultAuthAddress).AddressList[0]) && inc.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
-                               {
+                                    if (Equals(inc.SenderEndPoint.Address, Dns.GetHostEntry(Globals.Values.DefaultAuthAddress).AddressList[0]) && inc.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)           
+                                    {
                                     var type =
                                         (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
 
