@@ -59,6 +59,12 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
             //Create message handler (So events are initialized, but don't start it)
             Handler = new MessageHandler(this);
 
+            // Create new client, with previously created configs
+            NetClient = new NetClient(Config);
+            NetClient.Start();
+
+            Handler.Start();
+
             // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
             Config.EnableMessageType(NetIncomingMessageType.ConnectionApproval
                                      | NetIncomingMessageType.Data
@@ -124,6 +130,17 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         {
             var message = EncodeMessage(gameMessage); //Write packet ID and encode
             NetClient.SendMessage(message, deliveryMethod); //Send
+        }
+
+        /// <summary>
+        /// Sends and encodes an IMessage to the auth server.
+        /// </summary>
+        /// <param name="gameMessage">IMessage to write ID and send.</param>
+        public void SendUnconnected(IMessage gameMessage)
+        {
+            var message = EncodeMessage(gameMessage); //Write packet ID and encode
+            var receiver = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress), Globals.Values.DefaultAuthPort); // Auth Server info
+            NetClient.SendUnconnectedMessage(message, receiver); //Send
         }
 
         /// <summary>
