@@ -45,6 +45,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             txtUsername.Left = 8;
             txtUsername.Top = TopPanel.Bottom + 8;
             txtUsername.Placeholder = "Username";
+            txtUsername.Text = screen.Client.IO.Config.Client.Username;
             Add(txtUsername);
 
             txtPassword = new TextBox(Manager);
@@ -53,6 +54,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             txtPassword.Left = txtUsername.Left;
             txtPassword.Top = txtUsername.Bottom + 8;
             txtPassword.Placeholder = "Password";
+            txtPassword.Text = screen.Client.IO.GetPassword();
             txtPassword.Mode = TextBoxMode.Password;
             Add(txtPassword);
 
@@ -62,6 +64,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             chkRemember.Left = txtUsername.Right + 16;
             chkRemember.Top = txtPassword.Top + 3;
             chkRemember.Text = "Remember Me";
+            chkRemember.Checked = screen.Client.IO.Config.Client.RememberMe;
             Add(chkRemember);
 
             //Sign in buttons
@@ -121,7 +124,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             SmileyImg.ToolTip.Text = "I love this color!";
             Add(SmileyImg);
 
-            bodyClr.Hue = 1;
+            bodyClr.Hue = screen.Client.IO.Config.Client.Color;
 
             BottomPanel.Height = lnkForgot.Bottom + 28;
             BottomPanel.Top = Height - BottomPanel.Height;

@@ -165,7 +165,7 @@ namespace Bricklayer.Core.Server.Components
                 if (!File.Exists(ConfigFile))
                 {
                     Config = Config.GenerateDefaultConfig();
-                    await SaveSettings(Config);
+                    await SaveConfig(Config);
                     Log("Configuration created successfully.");
                     return;
                 }
@@ -178,7 +178,7 @@ namespace Bricklayer.Core.Server.Components
                 {
                     var config = Config.GenerateDefaultConfig();
                     json = config.ToString();
-                    await SaveSettings(config);
+                    await SaveConfig(config);
                 }
 
                 await
@@ -196,7 +196,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Saves server settings to the server config.
         /// </summary>
-        internal async Task SaveSettings(Config settings)
+        internal async Task SaveConfig(Config settings)
         {
             try
             {

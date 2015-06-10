@@ -71,6 +71,11 @@ namespace Bricklayer.Core.Client
         public InputHandler Input { get; private set; }
 
         /// <summary>
+        /// Manages and handles file operations.
+        /// </summary>
+        public IO IO { get; set; }
+
+        /// <summary>
         /// The current state of the game. (Login, server list, in game, etc.)
         /// </summary>
         public GameState State
@@ -183,18 +188,20 @@ namespace Bricklayer.Core.Client
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
-        protected override void LoadContent()
+        protected async override void LoadContent()
         {
             base.LoadContent();
 
+            IO = new IO();
+            await IO.LoadConfig();
             IO.CheckFiles();
+
             Content = new ContentManager();
             TextureLoader = new TextureLoader(Graphics.GraphicsDevice);
             Content.LoadTextures(this);
 
-            Graphics.PreferredBackBufferWidth = 1024;
-            Graphics.PreferredBackBufferHeight = 768;
-            GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+            Graphics.PreferredBackBufferWidth = IO.Config.Client.Resolution.X;
+            Graphics.PreferredBackBufferHeight = IO.Config.Client.Resolution.Y;
             Graphics.ApplyChanges();
 
             //Initialize MonoForce after loading skins.
