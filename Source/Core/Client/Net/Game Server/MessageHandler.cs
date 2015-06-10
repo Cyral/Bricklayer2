@@ -68,7 +68,8 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                                     {
                                         case NetConnectionStatus.None:
                                             {
-                                                OnDisconnect("Error connecting to the server.");
+                                                networkManager.Client.Events.Network.Game.Disconnected.Invoke(
+                                                new EventManager.NetEvents.GameServerEvents.DisconnectedEventArgs("Error connecting to the server."));
                                                 break;
                                             }
                                         //When connected to the server
@@ -77,14 +78,16 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                                                 //Must read the first byte of the hail message, which should correspond to the byte of the Init type
                                                 im.SenderConnection.RemoteHailMessage.ReadByte(); //Throw it away
                                                 var msg = new InitMessage(im.SenderConnection.RemoteHailMessage, MessageContext.Client);
-                                                OnConnect();
+                                                networkManager.Client.Events.Network.Game.Connected.Invoke(
+                                               new EventManager.NetEvents.GameServerEvents.ConnectedEventArgs());
                                                 break;
                                             }
                                         //When disconnected from the server
                                         case NetConnectionStatus.Disconnected:
                                             {
                                                 var reason = im.ReadString();
-                                                OnDisconnect(reason);
+                                                networkManager.Client.Events.Network.Game.Disconnected.Invoke(
+                                               new EventManager.NetEvents.GameServerEvents.DisconnectedEventArgs(reason));
                                                 break;
                                             }
                                         case NetConnectionStatus.RespondedAwaitingApproval:

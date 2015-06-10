@@ -165,6 +165,8 @@ namespace Bricklayer.Core.Client
                 #region Delegates
 
                 public delegate void InitEventHandler();
+                public delegate void ConnectedEventHandler();
+                public delegate void DisconnectedEventHandler();
 
                 #endregion
 
@@ -172,12 +174,23 @@ namespace Bricklayer.Core.Client
 
                 #region Arguments
 
-                public class InitEventArgs : EventArgs
+
+                public class ConnectedEventArgs : EventArgs
                 {
 
-                    public InitEventArgs()
+                    public ConnectedEventArgs()
                     {
 
+                    }
+                }
+
+                public class DisconnectedEventArgs : EventArgs
+                {
+                    public string Reason { get; private set; }
+
+                    public DisconnectedEventArgs(string reason)
+                    {
+                        Reason = reason;
                     }
                 }
 
@@ -189,11 +202,17 @@ namespace Bricklayer.Core.Client
                 #region Events
 
                 /// <summary>
-                /// When client recieves Init message from Auth server
+                /// When client fully connects to the game server
                 /// </summary>
-                public Event<InitEventHandler, InitEventArgs> Init { get; } =
-                    new Event<InitEventHandler, InitEventArgs>();
+                public Event<ConnectedEventHandler, ConnectedEventArgs> Connected { get; } =
+                    new Event<ConnectedEventHandler, ConnectedEventArgs>();
 
+                /// <summary>
+                /// When client is disconnected from the game server
+                /// </summary>
+                public Event<DisconnectedEventHandler, DisconnectedEventArgs> Disconnected { get; } =
+                    new Event<DisconnectedEventHandler, DisconnectedEventArgs>();
+                
                 #endregion
             }
 
