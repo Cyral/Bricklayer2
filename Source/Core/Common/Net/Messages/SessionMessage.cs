@@ -8,7 +8,7 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class SessionMessage : IMessage
     {
-        public string Address { get; set; }
+        public IPAddress Address { get; set; }
         public double MessageTime { get; set; }
         public int Port { get; set; }
         public string PrivateKey { get; set; }
@@ -21,7 +21,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public SessionMessage(string username, int id, string privateKey, string address, int port)
+        public SessionMessage(string username, int id, string privateKey, IPAddress address, int port)
         {
             ID = id;
             Username = username;
@@ -41,7 +41,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             Username = im.ReadString();
             PrivateKey = im.ReadString();
             ID = im.ReadInt32();
-            Address = im.ReadString();
+            Address = IPAddress.Parse(im.ReadString());
             Port = im.ReadInt32();
         }
 
@@ -50,7 +50,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             om.Write(Username);
             om.Write(PrivateKey);
             om.Write(ID);
-            om.Write(Address);
+            om.Write(Address.ToString());
             om.Write(Port);
         }
 

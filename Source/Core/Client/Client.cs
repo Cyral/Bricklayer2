@@ -106,9 +106,6 @@ namespace Bricklayer.Core.Client
 
             Network = new NetworkManager(this);
             Network.Init();
-
-            // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
-            Network.ConnectToAuth("Test", "test");
         }
 
 

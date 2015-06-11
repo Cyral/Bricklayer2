@@ -1,4 +1,5 @@
-﻿using Bricklayer.Client.Interface;
+﻿using System;
+using Bricklayer.Client.Interface;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
@@ -72,7 +73,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
         }
 
         /// <summary>
-        /// Transitions from the current screen to the next
+        /// Transitions from the current screen to the next.
+        /// If the screen is the same screen as the current screeen, it will simply fade in and out without removing and adding the controls.
         /// </summary>
         public void SwitchScreen(Screen newScreen)
         {
@@ -104,10 +106,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 fadeImage.Color = Color.White * fadeImage.Alpha;
                 if (fadeAlpha >= 1) //Done fading to black, now set new screen and fade into it
                 {
+                    Window.Client.Events.Game.ScreenChanged.Invoke(new EventManager.GameEvents.GameScreenEventArgs(fadeTo, Current));
                     //Destory objects from the first screen
-                    Current?.Remove();
-                    Current = fadeTo;
-                    Current.Add(this);
+                    if (Current != fadeTo)
+                    {
+                        Current?.Remove();
+                        Current = fadeTo;
+                        Current.Add(this);
+                    }
                     state = FadeState.In;
                     fadeImage.BringToFront();
                 }

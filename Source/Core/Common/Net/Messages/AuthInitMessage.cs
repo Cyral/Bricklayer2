@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Sends the initialization response to the client.
+    /// Sends the initialization response to the client after logging in.
     /// Auth Server => Client
+    /// String: User's username (In case of incorrect case, or automatically assigned guest username)
     /// Int: User's ID (From database)
     /// String: Public Key
     /// String: Private Key
@@ -21,6 +22,7 @@ namespace Bricklayer.Core.Common.Net.Messages
         public string PrivateKey { get; set; }
         public string PublicKey { get; set; }
         public int UID { get; set; }
+        public string Username { get; set; }
 
         public AuthInitMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -28,8 +30,9 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public AuthInitMessage(int databaseID, string privateKey, string publicKey)
+        public AuthInitMessage(string username, int databaseID, string privateKey, string publicKey)
         {
+            Username = username;
             UID = databaseID;
             PrivateKey = privateKey;
             PublicKey = publicKey;
@@ -43,6 +46,7 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
+            Username = im.ReadString();
             UID = im.ReadInt32();
             PrivateKey = im.ReadString();
             PublicKey = im.ReadString();
@@ -50,6 +54,7 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Encode(NetOutgoingMessage om)
         {
+            om.Write(Username);
             om.Write(UID);
             om.Write(PrivateKey);
             om.Write(PublicKey);

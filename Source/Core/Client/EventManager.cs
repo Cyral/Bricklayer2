@@ -1,4 +1,5 @@
 ﻿using System;
+using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 
 namespace Bricklayer.Core.Client
@@ -38,6 +39,18 @@ namespace Bricklayer.Core.Client
                     OldState = oldState;
                 }
             }
+
+            public class GameScreenEventArgs : EventArgs
+            {
+                public Screen NewScreen { get; private set; }
+                public Screen OldScreen { get; private set; }
+
+                public GameScreenEventArgs(Screen newScreen, Screen oldScreen)
+                {
+                    NewScreen = newScreen;
+                    OldScreen = oldScreen;
+                }
+            }
             #endregion
 
             //Events represent a collection of event handlers.
@@ -49,6 +62,11 @@ namespace Bricklayer.Core.Client
             /// When the state of the game is changed. (From login to lobby, server list to game screen, etc.)
             /// </summary>
             public Event<GameStateEventArgs> StateChanged { get; } = new Event<GameStateEventArgs>();
+
+            /// <summary>
+            /// When the current UI screen of the game is changed. (Example: From login to in-game)
+            /// </summary>
+            public Event<GameScreenEventArgs> ScreenChanged { get; } = new Event<GameScreenEventArgs>();
             #endregion
         }
 
@@ -79,11 +97,13 @@ namespace Bricklayer.Core.Client
                 public class InitEventArgs : EventArgs
                 {
                     public int DatabaseId { get; private set; }
+                    public string Username { get; private set; }
                     public string PrivateKey { get; private set; }
                     public string PublicKey { get; private set; }
 
-                    public InitEventArgs(int databaseId, string privateKey, string publicKey)
+                    public InitEventArgs(string username, int databaseId, string privateKey, string publicKey)
                     {
+                        Username = username;
                         DatabaseId = databaseId;
                         PrivateKey = privateKey;
                         PublicKey = publicKey;

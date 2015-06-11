@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Bricklayer.Core.Client.Interface.Windows;
+using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
@@ -11,14 +12,27 @@ namespace Bricklayer.Core.Client.Interface.Screens
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
         private Label lblVersion;
         private LoginWindow wndLogin;
+        private ServerWindow wndServer;
 
         /// <summary>
-        /// Setup the login screen content and controls.
+        /// Setup the login and serverlist screen content and controls.
         /// </summary>
         /// <param name="screenManager"></param>
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);
+            //When we fade out after logging in, display the new server window
+            Client.Events.Game.ScreenChanged.AddHandler(args =>
+            {
+                if (args.NewScreen == this && args.OldScreen == this)
+                {
+                    wndServer = new ServerWindow(Manager, this) {Top = wndLogin.Top};
+                    wndServer.Init();
+                    Window.Remove(wndLogin);
+                    Window.Add(wndServer);
+                }
+            }, EventPriority.Initial);
+
             imgBackground = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.background"],

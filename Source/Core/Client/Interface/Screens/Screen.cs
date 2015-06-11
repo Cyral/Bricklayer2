@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// The controlling <c>ScreenManager</c>.
         /// </summary>
-        protected ScreenManager ScreenManager { get; private set; }
+        internal ScreenManager ScreenManager { get; private set; }
 
         /// <summary>
         /// The window this screen is attached to.
@@ -25,11 +25,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
         protected Manager Manager => ScreenManager.Manager;
 
         /// <summary>
-        /// Action to be performed when the screen is initialized. (When the controls are added)
-        /// </summary>
-        public Action Initialized { get; set; }
-
-        /// <summary>
         /// The game/client instance this screen belongs to.
         /// </summary>
         protected internal Client Client => ScreenManager.Window.Client;
@@ -39,7 +34,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// </summary>
         public virtual void Add(ScreenManager screenManager)
         {
-            Initialized?.Invoke();
             ScreenManager = screenManager;
         }
 

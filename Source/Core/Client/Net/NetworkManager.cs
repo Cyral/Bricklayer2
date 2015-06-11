@@ -69,19 +69,13 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                                      | NetIncomingMessageType.UnconnectedData);
             // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
-            // Listen for init response from auth server containing token keys
+            //Listen for init response from auth server containing token keys
             Client.Events.Network.Auth.Init.AddHandler(args =>
             {
+                TokenKeys.Username = args.Username;
                 TokenKeys.UID = args.DatabaseId;
                 TokenKeys.PrivateKey = args.PrivateKey;
                 TokenKeys.PublicKey = args.PublicKey;
-                Debug.WriteLine("Recieved Tokens:\nPrivate Key: " + args.PrivateKey + "\nPublic Key: " + args.PublicKey);
-            });
-
-            // Listen for failed login response from auth server
-            Client.Events.Network.Auth.FailedLogin.AddHandler(args =>
-            {
-                Debug.WriteLine("Failed to login. Error Message: " + args.ErrorMessage);
             });
 
             // Listen for verification result from the auth server
@@ -119,7 +113,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
 
         public void SendSessionRequest(string username, string host, int port)
         {
-            SendUnconnected(new SessionMessage(username, TokenKeys.UID, TokenKeys.PrivateKey, host, port));
+            SendUnconnected(new SessionMessage(username, TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse(host), port));
         }
 
         /// <summary>

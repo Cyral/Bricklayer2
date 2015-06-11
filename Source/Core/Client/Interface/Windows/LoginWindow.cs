@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Bricklayer.Core.Client.Interface.Screens;
+using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
+using EventArgs = MonoForce.Controls.EventArgs;
 
 namespace Bricklayer.Core.Client.Interface.Windows
 {
@@ -20,16 +23,38 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private LinkLabel lnkForgot, lnkCreateAccount;
         private ImageBox BodyImg, SmileyImg;
         private ColorPicker bodyClr;
+        private LoginScreen screen;
 
-        public LoginWindow(Manager manager, Screen screen) : base(manager)
+        public LoginWindow(Manager manager, LoginScreen screen) : base(manager)
         {
-            screen.Client.State = GameState.Game;
+            this.screen = screen;
+            screen.Client.State = GameState.Login;
+
+            //Events
+
+            //Listen for valid response from auth server
+            screen.Client.Events.Network.Auth.Init.AddHandler(async args =>
+            {
+                //Save username and other data to the config file once logged in
+                if (chkRemember.Checked)
+                screen.Client.IO.SetPassword(txtPassword.Text);
+                screen.Client.IO.Config.Client.Username = chkRemember.Checked ? txtUsername.Text : string.Empty;
+                screen.Client.IO.Config.Client.RememberMe = chkRemember.Checked;
+                screen.Client.IO.Config.Client.Color = chkRemember.Checked ? bodyClr.Hue : 40;
+                await screen.Client.IO.SaveConfig(screen.Client.IO.Config);
+            }, EventPriority.Initial);
+
+            //Listen for failed login response from auth server
+            screen.Client.Events.Network.Auth.FailedLogin.AddHandler(args =>
+            {
+               ShowError(manager, $"Failed to login:\n{args.ErrorMessage}.");
+            }, EventPriority.Initial);
 
             //Setup the window
             CaptionVisible = false;
             Caption.Text = "Welcome to Bricklayer!";
             Description.Text =
-                "An open source, fully moddable and customizable 2D\nbuilding game built with the community in mind.";
+                "An open source, fully moddable and customizable 2D\nbuilding game.";
             Movable = false;
             Resizable = false;
             Width = 450;
@@ -73,10 +98,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnLoginAccount.Width = txtUsername.Width;
             btnLoginAccount.Left = txtUsername.Left;
             btnLoginAccount.Top = 8;
+            btnLoginAccount.Click += LoginAccountClick;
             btnLoginAccount.Text = "Sign in";
             BottomPanel.Add(btnLoginAccount);
 
             btnLoginGuest = new Button(Manager);
+            btnLoginGuest.Enabled = false;
             btnLoginGuest.Init();
             btnLoginGuest.Width = btnLoginAccount.Width;
             btnLoginGuest.Left = btnLoginAccount.Right + 16;
@@ -128,6 +155,24 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             BottomPanel.Height = lnkForgot.Bottom + 28;
             BottomPanel.Top = Height - BottomPanel.Height;
+        }
+
+        private void ShowError(Manager manager, string message)
+        {
+            var msgBox = new MessageBox(Manager, MessageBoxType.Warning, message, "Error");
+            msgBox.Init();
+            manager.Add(msgBox);
+            msgBox.ShowModal();
+            btnLoginAccount.Text = "Sign In";
+            btnLoginAccount.Enabled = true;
+        }
+
+        private void LoginAccountClick(object sender, EventArgs eventArgs)
+        {
+            // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
+            screen.Client.Network.ConnectToAuth(txtUsername.Text, txtPassword.Text);
+            btnLoginAccount.Enabled = btnLoginGuest.Enabled = false;
+            btnLoginAccount.Text = "Signing In...";
         }
     }
 }

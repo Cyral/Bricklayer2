@@ -57,7 +57,7 @@ namespace Bricklayer.Core.Client.Net
                     {
                         var msg = new AuthInitMessage(im, MessageContext.Client);
                         networkManager.Client.Events.Network.Auth.Init.Invoke(
-                            new EventManager.NetEvents.AuthServerEvents.InitEventArgs(msg.UID, msg.PrivateKey,
+                            new EventManager.NetEvents.AuthServerEvents.InitEventArgs(msg.Username, msg.UID, msg.PrivateKey,
                                 msg.PublicKey));
                         break;
                     }
