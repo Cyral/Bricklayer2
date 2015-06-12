@@ -51,6 +51,11 @@ namespace Bricklayer.Core.Server.Components
         public bool IsShutdown { get; set; }
 
         /// <summary>
+        /// The IP of the auth server.
+        /// </summary>
+        internal IPEndPoint AuthEndpoint { get; private set; }
+
+        /// <summary>
         /// Stored pending user sessions
         /// </summary>
         private readonly Dictionary<int, NetConnection> pendingSessions = new Dictionary<int, NetConnection>();

@@ -34,6 +34,9 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
 
         internal Client Client { get; }
 
+        /// <summary>
+        /// The IP of the auth server.
+        /// </summary>
         internal IPEndPoint AuthEndpoint { get; private set; }
 
         public NetworkManager(Client client)
