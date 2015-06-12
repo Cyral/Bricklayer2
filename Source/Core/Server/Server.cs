@@ -104,6 +104,8 @@ namespace Bricklayer.Core.Server
                 WriteHeader();
             }
             // ReSharper disable once FunctionNeverReturns
+
+
         }
 
         #region Console Stuff

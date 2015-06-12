@@ -19,11 +19,6 @@ namespace Bricklayer.Core.Server.Net
         private Server Server { get; set; }
 
         /// <summary>
-        /// Stored pending user sessions
-        /// </summary>
-        private readonly Dictionary<int, NetConnection> pendingSessions = new Dictionary<int, NetConnection>();
-
-        /// <summary>
         /// The process network messages such as users joining, moving, etc
         /// </summary>
         public async void ProcessNetworkMessages()
@@ -67,13 +62,10 @@ namespace Bricklayer.Core.Server.Net
                                         // The connection should come with a public key to verify the client's session
                                     {
                                         var msg = new PublicKeyMessage(inc, MessageContext.Client);
-                                        Logger.WriteLine(LogType.Net,
-                                            msg.Username + " requesting to join. Verifying public key with auth server.");
-                                        pendingSessions.Add(msg.ID, inc.SenderConnection);
-                                        var message = NetManager.EncodeMessage(msg);
-                                                
-                                        //Send public key to auth server to verify if session is valid
-                                        NetManager.NetServer.SendUnconnectedMessage(message, NetManager.AuthEndpoint);
+
+                                        Server.Events.Connection.PreLogin.Invoke(
+                                          new EventManager.ConnectionEvents.PreLoginEventArgs(msg.Username, msg.ID, msg.PublicKey, inc.SenderConnection));
+
                                         break;
                                     }
                                 }
@@ -97,16 +89,19 @@ namespace Bricklayer.Core.Server.Net
                                 if (inc.SenderConnection != null &&
                                     inc.SenderConnection.Status == NetConnectionStatus.Connected)
                                 {
-                                    //Log message
+                                        Server.Events.Connection.Connection.Invoke(
+                                              new EventManager.ConnectionEvents.ConnectionEventArgs("user here"));
 
-                                    break;
+                                        break;
                                 }
                                 //When a client disconnects
                                 if (inc.SenderConnection != null &&
                                     (inc.SenderConnection.Status == NetConnectionStatus.Disconnected ||
                                      inc.SenderConnection.Status == NetConnectionStatus.Disconnecting))
                                 {
-                                }
+                                        Server.Events.Connection.Disconnection.Invoke(
+                                             new EventManager.ConnectionEvents.DisconnectionEventArgs("user here", "Reason here"));
+                                    }
                                 break;
                             }
                             //Listen to data from the auth server.
@@ -125,18 +120,13 @@ namespace Bricklayer.Core.Server.Net
                                             var msg = new ValidSessionMessage(inc, MessageContext.Server);
                                             if (msg.Valid)
                                             {
-                                                pendingSessions[msg.ID].Approve(
-                                                    NetManager.EncodeMessage(new InitMessage()));
-                                                pendingSessions.Remove(msg.ID);
-                                                Logger.WriteLine(LogType.Net,
-                                                    $"Session valid for '{msg.ID}'. (Allowed)");
+                                                        Server.Events.Connection.Valid.Invoke(
+                                                            new EventManager.ConnectionEvents.ValidSessionEventArgs(msg.Username, msg.ID));
                                             }
                                             else
                                             {
-                                                pendingSessions[msg.ID].Deny("Invalid or expired session.");
-                                                pendingSessions.Remove(msg.ID);
-                                                Logger.WriteLine(LogType.Net,
-                                                    $"Session invalid for '{msg.ID}'. (Denied)");
+                                                        Server.Events.Connection.Invalid.Invoke(
+                                                             new EventManager.ConnectionEvents.InvalidSessionEventArgs(msg.Username, msg.ID));
                                             }
 
                                             break;

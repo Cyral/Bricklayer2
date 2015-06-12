@@ -1,12 +1,14 @@
 ﻿#region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
+using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Net;
 using Lidgren.Network;
 
@@ -48,7 +50,10 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public bool IsShutdown { get; set; }
 
-        internal IPEndPoint AuthEndpoint { get; private set; }
+        /// <summary>
+        /// Stored pending user sessions
+        /// </summary>
+        private readonly Dictionary<int, NetConnection> pendingSessions = new Dictionary<int, NetConnection>();
 
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered; //Message delivery method
         private bool isDisposed; //Is the instance disposed?
@@ -56,6 +61,37 @@ namespace Bricklayer.Core.Server.Components
         public NetworkComponent(Server server) : base(server)
         {
 
+            Server.Events.Connection.PreLogin.AddHandler(args =>
+            {
+                Logger.WriteLine(LogType.Net,
+                args.Username + " requesting to join. Verifying public key with auth server.");
+                pendingSessions.Add(args.Id, args.Connection);
+                var message = EncodeMessage(new PublicKeyMessage(args.Username, args.Id, args.PublicKey));
+
+                var receiver =
+                    new IPEndPoint(
+                        NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress),
+                        Server.IO.Config.Server.AuthServerPort); // Auth Server info
+                                                                 //Send public key to auth server to verify if session is valid
+                NetServer.SendUnconnectedMessage(message, receiver);
+            });
+
+            Server.Events.Connection.Valid.AddHandler(args =>
+            {
+                pendingSessions[args.Id].Approve(EncodeMessage(new InitMessage()));
+                pendingSessions.Remove(args.Id);
+                Logger.WriteLine(LogType.Net,
+                    $"Session valid for '{args.Id}'. (Allowed)");
+            });
+
+
+            Server.Events.Connection.Invalid.AddHandler(args =>
+            {
+                pendingSessions[args.Id].Deny("Invalid or expired session.");
+                pendingSessions.Remove(args.Id);
+                Logger.WriteLine(LogType.Net,
+                    $"Session invalid for '{args.Id}'. (Denied)");
+            });
         }
 
         public override async Task Init()
