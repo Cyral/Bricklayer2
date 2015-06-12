@@ -71,13 +71,9 @@ namespace Bricklayer.Core.Server.Net
                                             msg.Username + " requesting to join. Verifying public key with auth server.");
                                         pendingSessions.Add(msg.ID, inc.SenderConnection);
                                         var message = NetManager.EncodeMessage(msg);
-
-                                        var receiver =
-                                            new IPEndPoint(
-                                                NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress),
-                                                Server.IO.Config.Server.AuthServerPort); // Auth Server info
+                                                
                                         //Send public key to auth server to verify if session is valid
-                                        NetManager.NetServer.SendUnconnectedMessage(message, receiver);
+                                        NetManager.NetServer.SendUnconnectedMessage(message, NetManager.AuthEndpoint);
                                         break;
                                     }
                                 }
@@ -116,7 +112,7 @@ namespace Bricklayer.Core.Server.Net
                             //Listen to data from the auth server.
                             case NetIncomingMessageType.UnconnectedData:
                             {
-                                    if (Equals(inc.SenderEndPoint.Address, Dns.GetHostEntry(Globals.Values.DefaultAuthAddress).AddressList[0]) && inc.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)           
+                                    if (Equals(inc.SenderEndPoint, NetManager.AuthEndpoint))           
                                     {
                                     var type =
                                         (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());

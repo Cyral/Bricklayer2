@@ -47,8 +47,9 @@ namespace Bricklayer.Core.Client.Net
         {
             if (im == null) throw new ArgumentNullException(nameof(im));
 
-            if (Equals(im.SenderEndPoint.Address, Dns.GetHostEntry(Globals.Values.DefaultAuthAddress).AddressList[0]) &&
-                im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
+            //Make sure the unconnected message is coming from the real auth server.
+            if (Equals(im.SenderEndPoint, networkManager.AuthEndpoint) &&
+                im.SenderEndPoint.Port == networkManager.Client.IO.Config.Client.AuthServerPort)
             {
                 var messageType = (MessageTypes)im.ReadByte(); //Find the type of data message sent
                 switch (messageType)

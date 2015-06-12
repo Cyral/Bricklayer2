@@ -103,9 +103,6 @@ namespace Bricklayer.Core.Client
             base.Initialize();
            
             Input = new InputHandler();
-
-            Network = new NetworkManager(this);
-            Network.Init();
         }
 
 
@@ -120,6 +117,9 @@ namespace Bricklayer.Core.Client
             IO = new IO();
             await IO.LoadConfig();
             IO.CheckFiles();
+
+            Network = new NetworkManager(this);
+            Network.Init();
 
             Content = new ContentManager();
             TextureLoader = new TextureLoader(Graphics.GraphicsDevice);
@@ -162,7 +162,7 @@ namespace Bricklayer.Core.Client
 
             if (Input.IsKeyPressed(Keys.Space))
             {
-                Network.SendSessionRequest("Test", "Your External IP", Globals.Values.DefaultServerPort);
+                Network.SendSessionRequest("71.3.34.68", Globals.Values.DefaultServerPort);
             }
         }
 

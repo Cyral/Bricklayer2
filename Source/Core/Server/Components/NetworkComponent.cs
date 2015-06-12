@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
@@ -47,6 +48,8 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public bool IsShutdown { get; set; }
 
+        internal IPEndPoint AuthEndpoint { get; private set; }
+
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered; //Message delivery method
         private bool isDisposed; //Is the instance disposed?
 
@@ -59,6 +62,8 @@ namespace Bricklayer.Core.Server.Components
         {
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
+
+            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress), Server.IO.Config.Server.AuthServerPort); //Find the address of the auth server
 
             var result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
             if (!result)
