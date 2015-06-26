@@ -6,6 +6,7 @@ using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Lidgren.Network;
+using Bricklayer.Core.Common.Net;
 
 namespace Bricklayer.Core.Client.Net.Messages.GameServer
 {
@@ -33,6 +34,11 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
 
         internal Client Client { get; }
 
+        /// <summary>
+        /// The IP of the auth server.
+        /// </summary>
+        internal IPEndPoint AuthEndpoint { get; private set; }
+
         public NetworkManager(Client client)
         {
             Client = client;
@@ -47,6 +53,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// </summary>
         public void Init()
         {
+            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Client.IO.Config.Client.AuthServerAddress), Client.IO.Config.Client.AuthServerPort); //Find the address of the auth server
             TokenKeys = new Token();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
@@ -111,9 +118,9 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
             SendUnconnected(new AuthLoginMessage(Constants.Version, username, password));
         }
 
-        public void SendSessionRequest(string username, string host, int port)
+        public void SendSessionRequest(string host, int port)
         {
-            SendUnconnected(new SessionMessage(username, TokenKeys.UID, TokenKeys.PrivateKey, IPAddress.Parse(host), port));
+            SendUnconnected(new SessionMessage(TokenKeys.Username, TokenKeys.UID, TokenKeys.PrivateKey, NetUtility.Resolve(host), port));
         }
 
         /// <summary>

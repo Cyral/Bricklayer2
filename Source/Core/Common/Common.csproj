@@ -80,6 +80,7 @@
     <Compile Include="Net\Messages\ValidSessionMessage.cs" />
     <Compile Include="Net\Messages\VerifiedMessage.cs" />
     <Compile Include="Net\MessageTypes.cs" />
+    <Compile Include="Net\Utils.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="User.cs" />

@@ -51,6 +51,11 @@ namespace Bricklayer.Core.Server.Components
         public bool IsShutdown { get; set; }
 
         /// <summary>
+        /// The IP of the auth server.
+        /// </summary>
+        internal IPEndPoint AuthEndpoint { get; private set; }
+
+        /// <summary>
         /// Stored pending user sessions
         /// </summary>
         private readonly Dictionary<int, NetConnection> pendingSessions = new Dictionary<int, NetConnection>();
@@ -98,6 +103,8 @@ namespace Bricklayer.Core.Server.Components
         {
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
+
+            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress), Server.IO.Config.Server.AuthServerPort); //Find the address of the auth server
 
             var result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
             if (!result)

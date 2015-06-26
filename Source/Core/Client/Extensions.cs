@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
@@ -30,7 +31,7 @@ namespace Bricklayer.Core.Client
     }
 
     /// <summary>
-    ///  Encrypts and decrypts string for saving password configs for example
+    /// Encrypts and decrypts string for saving password configs for example
     /// </summary>
     /// <see cref="https://stackoverflow.com/questions/8871337/how-can-i-encrypt-user-settings-such-as-passwords-in-my-application" />
     internal static class ProtectString
