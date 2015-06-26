@@ -16,12 +16,13 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// <summary>
     /// A control for displaying a servers name, players online, motd, etc in the serverlist
     /// </summary>
-    internal class ServerDataControl : Control
+    internal sealed ServerDataControl : Control
     {
         public ServerSaveData Data;
 
-        private Label Name, Motd, Stats, Host;
-        private StatusBar Gradient;
+        private Label lblName, lblDescription, lblStats, lblHost;
+        private ImageBox imgStatus;
+        private StatusBar gradient;
 
         private readonly Color offlineColor = Color.Red, onlineColor = new Color(0, 205, 5);
 
@@ -38,37 +39,30 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
             //Background "gradient" image
             //TODO: Make an actual control. not a statusbar
-            Gradient = new StatusBar(manager);
-            Gradient.Init();
-            Gradient.Alpha = .8f;
-            Add(Gradient);
+            gradient = new StatusBar(manager);
+            gradient.Init();
+            gradient.Alpha = .8f;
+            Add(gradient);
 
             //Add controls
-            Name = new Label(Manager) { Width = this.Width, Text = server.Name, Left = 4, Top = 4, Font = FontSize.Default14, Alignment = Alignment.TopLeft };
-            Name.Init();
-            Add(Name);
+            lblName = new Label(Manager) { Width = Width, Text = server.Name, Left = 4, Top = 4, Font = FontSize.Default14, Alignment = Alignment.TopLeft };
+            lblName.Init();
+            Add(lblName);
 
-            Stats = new Label(Manager) { Width = this.Width, Text = string.Empty, Alignment = Alignment.TopLeft, Top = 4, Font = FontSize.Default14, };
-            Stats.Init();
-            Add(Stats);
+            lblStats = new Label(Manager) { Width = Width, Text = string.Empty, Alignment = Alignment.TopLeft, Top = 4, Font = FontSize.Default14, };
+            lblStats.Init();
+            Add(lblStats);
 
-            Motd = new Label(Manager) { Width = this.Width, Left = 4, Top = Name.Bottom + 8, Font = FontSize.Default8, Alignment = Alignment.TopLeft };
-            Motd.Init();
-            Motd.Text = "Querying server for data...";
-            Motd.Height = (int)Manager.Skin.Fonts["Default8"].Height * 2;
-            Add(Motd);
+            lblDescription = new Label(Manager) { Width = Width, Left = 4, Top = lblName.Bottom + 4, Font = FontSize.Default8, Alignment = Alignment.TopLeft };
+            lblDescription.Init();
+            lblDescription.Text = "Querying server for data...";
+            lblDescription.Height = Manager.Skin.Fonts["Default8"].Height * 2;
+            Add(lblDescription);
 
-            Host = new Label(Manager) { Width = this.Width, Text = server.GetHostString(), Alignment = Alignment.TopLeft, Left = 4, Top = Motd.Bottom, TextColor = Color.LightGray };
-            Host.Init();
-            Add(Host);
-
-            Screen.Client.Events.Network.Game.ServerInfo.AddHandler(args =>
-            {
-                Stats.Text = args.Players + "/" + args.MaxPlayers;
-                Motd.Text = args.Description;
-
-                Stats.TextColor = onlineColor;
-            });
+            //imgStatus = new ImageBox(Manager) {Top = lblDescription.Bottom + 2, Left = 4, Width = Height = 8, };
+            //imgStatus.Init();
+            //imgStatus.Color = Color.Green;
+            //Add(imgStatus);
 
         }
 
