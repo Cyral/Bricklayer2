@@ -190,6 +190,16 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         }
 
         /// <summary>
+        /// Sends an unconnected message to the endpoint
+        /// </summary>
+        /// <param name="gameMessage">IMessage to write ID and send.</param>
+        public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
+        {
+            var message = EncodeMessage(gameMessage); //Write packet ID and encode
+            NetClient.SendUnconnectedMessage(message, receiver); //Send
+        }
+
+        /// <summary>
         /// Writes an IMessage's packet ID and encodes it's data into a NetOutgoingMessage.
         /// </summary>
         public NetOutgoingMessage EncodeMessage(IMessage gameMessage)

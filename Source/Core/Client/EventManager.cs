@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 
@@ -199,12 +200,14 @@ namespace Bricklayer.Core.Client
                     public string Description { get; private set; }
                     public int Players { get; private set; }
                     public int MaxPlayers { get; private set; }
+                    public IPEndPoint Host { get; private set; }
 
-                    public ServerInfoEventArgs(string description, int players, int maxPlayers)
+                    public ServerInfoEventArgs(string description, int players, int maxPlayers, IPEndPoint host)
                     {
                         Description = description;
                         Players = players;
                         MaxPlayers = maxPlayers;
+                        Host = host;
                     }
                 }
 

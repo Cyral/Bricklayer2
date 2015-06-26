@@ -90,7 +90,7 @@ namespace Bricklayer.Core.Client.Net
 
                         networkManager.Client.Events.Network.Game.ServerInfo.Invoke(
                             new EventManager.NetEvents.GameServerEvents.ServerInfoEventArgs(msg.Description, msg.Players,
-                                msg.MaxPlayers));
+                                msg.MaxPlayers, im.SenderEndPoint));
                         break;
                     }
 
