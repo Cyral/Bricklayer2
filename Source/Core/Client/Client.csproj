@@ -59,11 +59,13 @@
     <Compile Include="Client.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="InputHandler.cs" />
+    <Compile Include="Interface\Controls\ServerDataControl.cs" />
     <Compile Include="Interface\Layout.cs" />
     <Compile Include="Interface\Logic.cs" />
     <Compile Include="Interface\Screens\Screen.cs" />
     <Compile Include="Interface\Screens\LoginScreen.cs" />
     <Compile Include="Interface\Screens\ScreenManager.cs" />
+    <Compile Include="Interface\Windows\AddServerDialog.cs" />
     <Compile Include="Interface\Windows\LoginWindow.cs" />
     <Compile Include="Interface\Windows\ServerWindow.cs" />
     <Compile Include="IO.cs" />
@@ -98,9 +100,7 @@
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Interface\Controls\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Icon.ico" />
   </ItemGroup>

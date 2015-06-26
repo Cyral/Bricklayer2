@@ -50,14 +50,15 @@ namespace Bricklayer.Core.Client.Net
             if (Equals(im.SenderEndPoint.Address, Dns.GetHostEntry(Globals.Values.DefaultAuthAddress).AddressList[0]) &&
                 im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
             {
-                var messageType = (MessageTypes)im.ReadByte(); //Find the type of data message sent
+                var messageType = (MessageTypes) im.ReadByte(); //Find the type of data message sent
                 switch (messageType)
                 {
                     case MessageTypes.AuthInit:
                     {
                         var msg = new AuthInitMessage(im, MessageContext.Client);
                         networkManager.Client.Events.Network.Auth.Init.Invoke(
-                            new EventManager.NetEvents.AuthServerEvents.InitEventArgs(msg.Username, msg.UID, msg.PrivateKey,
+                            new EventManager.NetEvents.AuthServerEvents.InitEventArgs(msg.Username, msg.UID,
+                                msg.PrivateKey,
                                 msg.PublicKey));
                         break;
                     }
@@ -76,6 +77,10 @@ namespace Bricklayer.Core.Client.Net
                         break;
                     }
                 }
+            }
+            else
+            {
+                
             }
         }
 

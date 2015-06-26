@@ -12,6 +12,7 @@
         PublicKey,
         Verified,
         ValidSession,
-        Init
+        Init,
+        ServerInfo
     }
 }

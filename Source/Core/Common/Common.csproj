@@ -58,6 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\LobbySaveData.cs" />
+    <Compile Include="Data\ServerSaveData.cs" />
     <Compile Include="Entity\Direction.cs" />
     <Compile Include="Entity\EntityState.cs" />
     <Compile Include="Entity\Player.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="Net\Messages\InitMessage.cs" />
     <Compile Include="Net\Messages\LoginMessage.cs" />
     <Compile Include="Net\Messages\PublicKeyMessage.cs" />
+    <Compile Include="Net\Messages\ServerInfoMessage.cs" />
     <Compile Include="Net\Messages\SessionMessage.cs" />
     <Compile Include="Net\Messages\ValidSessionMessage.cs" />
     <Compile Include="Net\Messages\VerifiedMessage.cs" />

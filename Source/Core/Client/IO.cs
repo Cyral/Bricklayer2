@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Security;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Server.Data;
 using Newtonsoft.Json;
 
 namespace Bricklayer.Core.Client
@@ -43,6 +44,11 @@ namespace Bricklayer.Core.Client
         /// The path to the configuration file.
         /// </summary>
         public static string ConfigFile { get; }
+
+        /// <summary>
+        /// File containing list of servers
+        /// </summary>
+        private static readonly string serverFile = MainDirectory + "\\servers.config";
 
         static IO()
         {
@@ -151,6 +157,49 @@ namespace Bricklayer.Core.Client
                 var json = JsonConvert.SerializeObject(settings, serializationSettings);
                 File.WriteAllText(ConfigFile, json);
             });
+        }
+
+        /// <summary>
+        /// Reads a list of servers from the json server config file
+        /// </summary>
+        public static List<ServerSaveData> ReadServers()
+        {
+            string fileName = serverFile;
+            List<ServerSaveData> servers;
+            if (!File.Exists(fileName))
+            {
+                //If server config does not exist, create it and write the default server to it
+                WriteServers(new List<ServerSaveData>() { CreateDefaultServer() });
+            }
+            string json = File.ReadAllText(fileName);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                WriteServers(new List<ServerSaveData>() { CreateDefaultServer() });
+                json = File.ReadAllText(fileName);
+            }
+            servers = JsonConvert.DeserializeObject<List<ServerSaveData>>(json);
+            return servers;
+        }
+
+        private static ServerSaveData CreateDefaultServer()
+        {
+            return new ServerSaveData("Local Server", "127.0.0.1", Globals.Values.DefaultServerPort);
+        }
+
+
+        /// <summary>
+        /// Save servers into a configurable json file
+        /// </summary>
+        public static void WriteServers(List<ServerSaveData> servers)
+        {
+            string fileName = serverFile;
+            if (!File.Exists(fileName))
+            {
+                FileStream str = File.Create(fileName);
+                str.Close();
+            }
+            string json = JsonConvert.SerializeObject(servers, serializationSettings);
+            File.WriteAllText(fileName, json);
         }
     }
 }
