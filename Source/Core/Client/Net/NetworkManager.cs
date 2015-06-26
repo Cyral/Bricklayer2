@@ -115,12 +115,12 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// </summary>
         public void ConnectToAuth(string username, string password)
         {
-            SendUnconnected(new AuthLoginMessage(Constants.Version, username, password));
+            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort, new AuthLoginMessage(Constants.Version, username, password));
         }
 
         public void SendSessionRequest(string host, int port)
         {
-            SendUnconnected(new SessionMessage(TokenKeys.Username, TokenKeys.UID, TokenKeys.PrivateKey, NetUtility.Resolve(host), port));
+            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort, new SessionMessage(TokenKeys.Username, TokenKeys.UID, TokenKeys.PrivateKey, NetUtility.Resolve(host), port));
         }
 
         /// <summary>
@@ -179,13 +179,13 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         }
 
         /// <summary>
-        /// Sends an unconnected message to the auth server.
+        /// Sends an unconnected message to the endpoint
         /// </summary>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
-        public void SendUnconnected(IMessage gameMessage)
+        public void SendUnconnected(string ip, int port, IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            var receiver = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress), Globals.Values.DefaultAuthPort); // Auth Server info
+            var receiver = new IPEndPoint(NetUtility.Resolve(ip), port); // Auth Server info
             NetClient.SendUnconnectedMessage(message, receiver); //Send
         }
 

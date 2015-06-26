@@ -69,8 +69,6 @@
     <Compile Include="Components\ServerComponent.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Data\LobbySaveData.cs" />
-    <Compile Include="Data\ServerSaveData.cs" />
     <Compile Include="EventManager.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Net\MessageHandler.cs" />

@@ -107,10 +107,10 @@ namespace Bricklayer.Core.Server.Net
                             //Listen to data from the auth server.
                             case NetIncomingMessageType.UnconnectedData:
                             {
-                                    if (Equals(inc.SenderEndPoint, NetManager.AuthEndpoint))           
-                                    {
+                                if (Equals(inc.SenderEndPoint, NetManager.AuthEndpoint))
+                                {
                                     var type =
-                                        (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+                                        (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
 
                                     switch (type)
                                     {
@@ -120,16 +120,36 @@ namespace Bricklayer.Core.Server.Net
                                             var msg = new ValidSessionMessage(inc, MessageContext.Server);
                                             if (msg.Valid)
                                             {
-                                                        Server.Events.Connection.Valid.Invoke(
-                                                            new EventManager.ConnectionEvents.ValidSessionEventArgs(msg.Username, msg.ID));
+                                                Server.Events.Connection.Valid.Invoke(
+                                                    new EventManager.ConnectionEvents.ValidSessionEventArgs(
+                                                        msg.Username, msg.ID));
                                             }
                                             else
                                             {
-                                                        Server.Events.Connection.Invalid.Invoke(
-                                                             new EventManager.ConnectionEvents.InvalidSessionEventArgs(msg.Username, msg.ID));
+                                                Server.Events.Connection.Invalid.Invoke(
+                                                    new EventManager.ConnectionEvents.InvalidSessionEventArgs(
+                                                        msg.Username, msg.ID));
                                             }
 
                                             break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    var type =
+                                        (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+
+                                    switch (type)
+                                    {
+                                        //When the auth server confirms if a session is valid or not.
+                                        case MessageTypes.RequestInfo:
+                                        {
+                                                    var msg = new RequestServerInfo(inc, MessageContext.Server);
+                                                    Server.Events.Connection.RequestInfo.Invoke(
+                                                            new EventManager.ConnectionEvents.RequestInfoEventArgs(
+                                                                inc.SenderEndPoint));
+                                                    break;
                                         }
                                     }
                                 }

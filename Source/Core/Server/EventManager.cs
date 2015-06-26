@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
@@ -88,6 +89,18 @@ namespace Bricklayer.Core.Server
                     Id = id;
                 }
             }
+
+
+            public class RequestInfoEventArgs : EventArgs
+            {
+                public string Username;
+                public IPEndPoint Host;
+
+                public RequestInfoEventArgs(IPEndPoint host)
+                {
+                    Host = host;
+                }
+            }
             #endregion
 
             //Events represent a collection of event handlers.
@@ -118,6 +131,11 @@ namespace Bricklayer.Core.Server
             /// When Auth server sends back invalidation of user session
             /// </summary>
             public Event<InvalidSessionEventArgs> Invalid { get; } = new Event<InvalidSessionEventArgs>();
+
+            /// <summary>
+            /// When client is requesting info about the server for it's userlist
+            /// </summary>
+            public Event<RequestInfoEventArgs> RequestInfo { get; } = new Event<RequestInfoEventArgs>();
             #endregion
         }
 

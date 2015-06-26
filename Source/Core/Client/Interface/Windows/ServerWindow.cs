@@ -26,9 +26,11 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private Label NameLbl, ColorLbl;
         private ImageBox BodyImg, SmileyImg;
         private ColorPicker BodyClr;
+        private LoginScreen Screen;
 
-        public ServerWindow(Manager manager) : base(manager)
+        public ServerWindow(Manager manager, LoginScreen screen) : base(manager)
         {
+            Screen = screen;
             //Setup the window
             CaptionVisible = false;
             Caption.Text = "Welcome to Bricklayer!";
@@ -133,8 +135,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
             //Read the servers from config
             Servers = IO.ReadServers();
             //Populate the list 
-            for (int i = 0; i < Servers.Count; i++)
-                ServerListCtrl.Items.Add(new ServerDataControl(Manager, Servers[i]));
+            foreach (var server in Servers)
+            {
+                var control = new ServerDataControl(Screen, Manager, server);
+                ServerListCtrl.Items.Add(control);
+                control.PingServer();
+            }
             if (ServerListCtrl.Items.Count > 0)
                 ServerListCtrl.ItemIndex = 0;
         }

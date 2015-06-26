@@ -194,6 +194,21 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
+                public class ServerInfoEventArgs : EventArgs
+                {
+                    public string Description { get; private set; }
+                    public int Players { get; private set; }
+                    public int MaxPlayers { get; private set; }
+
+                    public ServerInfoEventArgs(string description, int players, int maxPlayers)
+                    {
+                        Description = description;
+                        Players = players;
+                        MaxPlayers = maxPlayers;
+                    }
+                }
+
+
                 public class LatencyUpdatedEventArgs : EventArgs
                 {
                     public float Ping { get; private set; }
@@ -229,7 +244,12 @@ namespace Bricklayer.Core.Client
                 /// <summary>
                 /// When the connection latency (ping) is updated after a successful ping/pong message.
                 /// </summary>
-                public Event<LatencyUpdatedEventArgs> LatencyUpdated { get; } = new Event<LatencyUpdatedEventArgs>(); 
+                public Event<LatencyUpdatedEventArgs> LatencyUpdated { get; } = new Event<LatencyUpdatedEventArgs>();
+
+                /// <summary>
+                /// When server sends player info to display on serverlist
+                /// </summary>
+                public Event<ServerInfoEventArgs> ServerInfo { get; } = new Event<ServerInfoEventArgs>();
 
                 #endregion
             }

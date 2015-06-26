@@ -81,7 +81,20 @@ namespace Bricklayer.Core.Client.Net
             }
             else
             {
-                
+                var messageType = (MessageTypes) im.ReadByte(); //Find the type of data message sent
+                switch (messageType)
+                {
+                    case MessageTypes.ServerInfo:
+                    {
+                        var msg = new ServerInfoMessage(im, MessageContext.Client);
+
+                        networkManager.Client.Events.Network.Game.ServerInfo.Invoke(
+                            new EventManager.NetEvents.GameServerEvents.ServerInfoEventArgs(msg.Description, msg.Players,
+                                msg.MaxPlayers));
+                        break;
+                    }
+
+                }
             }
         }
 

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bricklayer.Core.Client.Interface.Screens;
+using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Data;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
@@ -13,7 +16,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// <summary>
     /// A control for displaying a servers name, players online, motd, etc in the serverlist
     /// </summary>
-    public class ServerDataControl : Control
+    internal class ServerDataControl : Control
     {
         public ServerSaveData Data;
 
@@ -22,9 +25,11 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
         private readonly Color offlineColor = Color.Red, onlineColor = new Color(0, 205, 5);
 
-        public ServerDataControl(Manager manager, ServerSaveData server)
+        private LoginScreen Screen;
+        public ServerDataControl(LoginScreen screen, Manager manager, ServerSaveData server)
             : base(manager)
         {
+            Screen = screen;
             //Setup
             Passive = false;
             Height = 76;
@@ -57,31 +62,29 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Host.Init();
             Add(Host);
 
+            Screen.Client.Events.Network.Game.ServerInfo.AddHandler(args =>
+            {
+                Stats.Text = args.Players + "/" + args.MaxPlayers;
+                Motd.Text = args.Description;
+
+                Stats.TextColor = onlineColor;
+            });
+
         }
-        //private void PingServer(ServerPinger pinger)
-        //{
-        //    string error = "";
-        //    ServerPingData ping = pinger.PingServer(Data.IP, Data.Port, out error);
-        //    Ping = ping;
-        //    //If no error
-        //    if (error == string.Empty)
-        //    {
-        //        //Set the controls with the recieved data
-        //        Stats.Text = ping.Online + "/" + ping.MaxOnline;
-        //        Motd.Text = ping.Description;
-        //
-        //        Stats.TextColor = onlineColor;
-        //    }
-        //    else
-        //    {
-        //        //Error text
-        //        Stats.Text = "X";
-        //        Stats.TextColor = offlineColor;
-        //
-        //        Motd.Text = error;
-        //    }
-        //    Stats.Left = (ClientWidth - (int)Manager.Skin.Fonts["Default14"].Resource.MeasureString(Stats.Text).X) - 4 - 32;
-        //}
+
+        public void PingServer()
+        {
+            
+            Screen.Client.Network.SendUnconnected(Data.IP, Data.Port, new RequestServerInfo());
+
+              //  //Error text
+              //  Stats.Text = "X";
+              //  Stats.TextColor = offlineColor;
+              //
+              //  Motd.Text = error;
+            Stats.Left = (ClientWidth - (int)Manager.Skin.Fonts["Default14"].Resource.MeasureString(Stats.Text).X) - 4 - 32;
+        }
+
         public override void DrawControl(Renderer renderer, Rectangle rect, GameTime gameTime)
         {
             //Don't draw anything

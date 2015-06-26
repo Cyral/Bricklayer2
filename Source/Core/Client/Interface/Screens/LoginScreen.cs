@@ -26,7 +26,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             {
                 if (args.NewScreen == this && args.OldScreen == this)
                 {
-                    wndServer = new ServerWindow(Manager) {Top = wndLogin.Top};
+                    wndServer = new ServerWindow(Manager, this) {Top = wndLogin.Top};
                     wndServer.Init();
                     Window.Remove(wndLogin);
                     Window.Add(wndServer);

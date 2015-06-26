@@ -13,6 +13,7 @@
         Verified,
         ValidSession,
         Init,
-        ServerInfo
+        ServerInfo,
+        RequestInfo
     }
 }

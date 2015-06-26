@@ -97,6 +97,13 @@ namespace Bricklayer.Core.Server.Components
                 Logger.WriteLine(LogType.Net,
                     $"Session invalid for '{args.Id}'. (Denied)");
             });
+
+            Server.Events.Connection.RequestInfo.AddHandler(args =>
+            {
+                Logger.WriteLine(LogType.Net,
+                    "Requesting info");
+                SendUnconnected(args.Host, new ServerInfoMessage(Server.IO.Config.Server.Decription, Server.Net.NetServer.ConnectionsCount, Server.IO.Config.Server.MaxPlayers));
+            });
         }
 
         public override async Task Init()
@@ -193,6 +200,17 @@ namespace Bricklayer.Core.Server.Components
                     x => x.RemoteUniqueIdentifier == user.Connection.RemoteUniqueIdentifier);
             if (con != null)
                 Send(gameMessage, con);
+        }
+
+
+        /// <summary>
+        /// Sends an unconnected message to the endpoint
+        /// </summary>
+        /// <param name="gameMessage">IMessage to write ID and send.</param>
+        public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
+        {
+            var message = EncodeMessage(gameMessage); //Write packet ID and encode
+            NetServer.SendUnconnectedMessage(message, receiver); //Send
         }
 
         /// <summary>
