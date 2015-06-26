@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Data;
@@ -16,7 +10,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// <summary>
     /// A control for displaying a servers name, players online, motd, etc in the serverlist
     /// </summary>
-    internal sealed ServerDataControl : Control
+    internal sealed class ServerDataControl : Control
     {
         public ServerSaveData Data;
 
@@ -27,8 +21,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private readonly Color offlineColor = Color.Red, onlineColor = new Color(0, 205, 5);
 
         private LoginScreen Screen;
-        public ServerDataControl(LoginScreen screen, Manager manager, ServerSaveData server)
-            : base(manager)
+        public ServerDataControl(LoginScreen screen, Manager manager, ServerSaveData server) : base(manager)
         {
             Screen = screen;
             //Setup
@@ -41,6 +34,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             //TODO: Make an actual control. not a statusbar
             gradient = new StatusBar(manager);
             gradient.Init();
+            gradient.Height = ClientHeight;
             gradient.Alpha = .8f;
             Add(gradient);
 
@@ -59,24 +53,29 @@ namespace Bricklayer.Core.Client.Interface.Controls
             lblDescription.Height = Manager.Skin.Fonts["Default8"].Height * 2;
             Add(lblDescription);
 
-            //imgStatus = new ImageBox(Manager) {Top = lblDescription.Bottom + 2, Left = 4, Width = Height = 8, };
+            //imgStatus = new ImageBox(Manager) { Top = lblDescription.Bottom + 2, Left = 4, Width = Height = 8, };
             //imgStatus.Init();
-            //imgStatus.Color = Color.Green;
+            //imgStatus.Image = screen.Client.Content["gui.icons.ping"];
+            //imgStatus.Color = Color.LawnGreen;
             //Add(imgStatus);
 
+            lblHost = new Label(Manager) { Width = Width, Text = server.Name, Alignment = Alignment.TopLeft, Left = 4, Top = lblDescription.Bottom, TextColor = Color.LightGray };
+            lblHost.Init();
+            Add(lblHost);
+
+            Screen.Client.Events.Network.Game.ServerInfo.AddHandler(args =>
+            {
+                lblStats.Text = args.Players + "/" + args.MaxPlayers;
+                lblDescription.Text = args.Description;
+                
+                lblStats.TextColor = onlineColor;
+                lblStats.Left = (ClientWidth - (int)Manager.Skin.Fonts["Default14"].Resource.MeasureString(lblStats.Text).X) - 4 - 32;
+            });
         }
 
         public void PingServer()
         {
-            
-            Screen.Client.Network.SendUnconnected(Data.IP, Data.Port, new RequestServerInfo());
-
-              //  //Error text
-              //  Stats.Text = "X";
-              //  Stats.TextColor = offlineColor;
-              //
-              //  Motd.Text = error;
-            Stats.Left = (ClientWidth - (int)Manager.Skin.Fonts["Default14"].Resource.MeasureString(Stats.Text).X) - 4 - 32;
+            Screen.Client.Network.SendUnconnected(Data.Host, Data.Port, new RequestServerInfo());
         }
 
         public override void DrawControl(Renderer renderer, Rectangle rect, GameTime gameTime)

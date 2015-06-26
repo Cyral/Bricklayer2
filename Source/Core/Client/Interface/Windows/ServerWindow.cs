@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
+using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Server.Data;
 using MonoForce.Controls;
 
@@ -19,10 +20,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly ControlList<ServerDataControl> lstServers; //The listbox of server control items
         private List<ServerSaveData> servers; //The list of loaded servers
 
-        private LoginScreen Screen;
+        private LoginScreen screen;
         public ServerWindow(Manager manager, LoginScreen screen) : base(manager)
         {
-            Screen = screen;
+            this.screen = screen;
             //Setup the window
             CaptionVisible = false;
             TopPanel.Visible = false;
@@ -128,20 +129,21 @@ namespace Bricklayer.Core.Client.Interface.Windows
             IO.WriteServers(servers);
             RefreshServerList();
         }
+
         private void RefreshServerList()
         {
-            ServerListCtrl.Items.Clear();
+            lstServers.Items.Clear();
             //Read the servers from config
-            Servers = IO.ReadServers();
+            servers = IO.ReadServers();
             //Populate the list 
-            foreach (var server in Servers)
+            foreach (var server in servers)
             {
-                var control = new ServerDataControl(Screen, Manager, server);
-                ServerListCtrl.Items.Add(control);
+                var control = new ServerDataControl(screen, Manager, server);
+                lstServers.Items.Add(control);
                 control.PingServer();
             }
-            if (ServerListCtrl.Items.Count > 0)
-                ServerListCtrl.ItemIndex = 0;
+            if (lstServers.Items.Count > 0)
+                lstServers.ItemIndex = 0;
         }
 
         internal void Disconnected(string message, string title)
@@ -156,20 +158,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 Manager.Add(error);
                 error.Show();
             }
-        }
-
-        private void RefreshServerList()
-        {
-            lstServers.Items.Clear();
-
-            //Read the servers from config
-            servers = IO.ReadServers();
-
-            //Populate the list 
-            foreach (var server in servers)
-                lstServers.Items.Add(new ServerDataControl(Manager, server));
-            if (lstServers.Items.Count > 0)
-                lstServers.ItemIndex = 0;
         }
     }
 }
