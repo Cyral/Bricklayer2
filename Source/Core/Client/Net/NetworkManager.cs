@@ -34,6 +34,13 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
 
         internal Client Client { get; }
 
+
+        /// <summary>
+        /// Temporaryly store these while in the server joining process
+        /// </summary>
+        internal string Host;
+        internal int Port;
+
         /// <summary>
         /// The IP of the auth server.
         /// </summary>
@@ -47,6 +54,8 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         private bool isDisposed;
 
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;//Message delivery method
+
+
 
         /// <summary>
         /// Initialization logic on app startup
@@ -91,22 +100,12 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                 if (args.Verified)
                 {
                     Debug.WriteLine("Session verification Successful");
-                    await ConnectToServer("127.0.0.1", Globals.Values.DefaultServerPort, "Test", TokenKeys.UID, TokenKeys.PublicKey); // Start connection process with game server once it gets session verification from the auth server
+                    await Join(Host, Port, TokenKeys.Username, TokenKeys.UID, TokenKeys.PublicKey); // Start connection process with game server once it gets session verification from the auth server
                 }
                 else
                     Debug.WriteLine("Session verification failed");
             });
 
-            // Listen for when user is fully connected to game server
-            Client.Events.Network.Game.Connect.AddHandler(args =>
-            {
-                Debug.WriteLine("Now connected to a server!");
-            });
-            // If user was disconnected from the server
-            Client.Events.Network.Game.Disconnect.AddHandler(args =>
-            {
-                Debug.WriteLine("Disconnected or connection failed.");
-            });
 
         }
 
@@ -118,35 +117,28 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
             SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort, new AuthLoginMessage(Constants.Version, username, password));
         }
 
+        /// <summary>
+        /// Send request to auth server for request to server
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="port"></param>
         public void SendSessionRequest(string host, int port)
         {
+            Host = host;
+            Port = port;
             SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort, new SessionMessage(TokenKeys.Username, TokenKeys.UID, TokenKeys.PrivateKey, NetUtility.Resolve(host), port));
-        }
-
-        /// <summary>
-        /// Connects to the given game server.
-        /// </summary>
-        public async Task ConnectToServer(string host, int port, string username, int id, string publicKey)
-        {
-            await Task.Factory.StartNew(() =>
-            {
-                // Create new client, with previously created configs
-                NetClient = new NetClient(Config);
-                NetClient.Start();
-
-                Handler.Start();
-
-                Join(host, port, username, id, publicKey);
-            });
         }
 
         /// <summary>
         /// Sends a message once connected to join a server officially.
         /// </summary>
-        private void Join(string host, int port, string username, int id, string publicKey)
+        public async Task Join(string host, int port, string username, int id, string publicKey)
         {
-            NetClient.Connect(host, port,
-                EncodeMessage(new PublicKeyMessage(username, id, publicKey)));
+            await Task.Factory.StartNew(() =>
+            {
+                NetClient.Connect(host, port,
+                    EncodeMessage(new PublicKeyMessage(username, id, publicKey)));
+            });
         }
 
 

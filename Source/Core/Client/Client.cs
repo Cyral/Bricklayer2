@@ -63,6 +63,13 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public IO IO { get; set; }
 
+
+        /// <summary>
+        /// Temporary variables for storing user
+        /// </summary>
+        public string user;
+        public int id;
+
         /// <summary>
         /// The current state of the game. (Login, server list, in game, etc.)
         /// </summary>
@@ -160,10 +167,6 @@ namespace Bricklayer.Core.Client
             Input.Update();
             base.Update(gameTime);
 
-            if (Input.IsKeyPressed(Keys.Space))
-            {
-                Network.SendSessionRequest("71.3.34.68", Globals.Values.DefaultServerPort);
-            }
         }
 
         /// <summary>

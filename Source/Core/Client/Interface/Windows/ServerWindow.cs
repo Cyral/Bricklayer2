@@ -23,6 +23,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private LoginScreen screen;
         public ServerWindow(Manager manager, LoginScreen screen) : base(manager)
         {
+
             this.screen = screen;
             //Setup the window
             CaptionVisible = false;
@@ -49,7 +50,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
             //Add controls to the bottom panel. (Add server, edit server, etc.)
             btnJoin = new Button(manager) {Text = "Connect", Left = 24, Top = 8, Width = 100};
             btnJoin.Init();
-            btnJoin.Click += delegate { };
+            btnJoin.Click += delegate
+            {
+                screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host , servers[lstServers.ItemIndex].Port);
+            };
             BottomPanel.Add(btnJoin);
 
             btnAdd = new Button(manager) {Text = "Add", Left = btnJoin.Right + 8, Top = 8, Width = 64};
@@ -114,6 +118,23 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(btnRefresh);
 
             MainWindow.ScreenManager.FadeIn();
+
+            // Listen for when user is fully connected to game server
+            screen.Client.Events.Network.Game.Connect.AddHandler(args =>
+            {
+                var msgBox = new MessageBox(Manager, MessageBoxType.Okay, "Connected :D Welp.", "Connected!");
+                msgBox.Init();
+                manager.Add(msgBox);
+                msgBox.ShowModal();
+            });
+            // If user was disconnected from the server
+           screen.Client.Events.Network.Game.Disconnect.AddHandler(args =>
+            {
+                var msgBox = new MessageBox(Manager, MessageBoxType.Warning, args.Reason, "Error Connecting to Server");
+                msgBox.Init();
+                manager.Add(msgBox);
+                msgBox.ShowModal();
+            });
         }
 
         public void AddServer(ServerSaveData server)
