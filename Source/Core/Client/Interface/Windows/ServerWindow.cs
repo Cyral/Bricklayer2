@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
+using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.Data;
 using MonoForce.Controls;
 
@@ -58,7 +60,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             {
                 //Show add server dialog
                 var window = new AddServerDialog(manager, this, lstServers.ItemIndex, false, string.Empty,
-                    string.Empty);
+                    string.Empty, Globals.Values.DefaultServerPort);
                 window.Init();
                 Manager.Add(window);
                 window.Show();
@@ -72,7 +74,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 if (lstServers.Items.Count > 0)
                 {
                     var window = new AddServerDialog(manager, this, lstServers.ItemIndex, true,
-                        servers[lstServers.ItemIndex].Name, servers[lstServers.ItemIndex].Host);
+                        servers[lstServers.ItemIndex].Name, servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
                     window.Init();
                     Manager.Add(window);
                     window.Show();

@@ -92,11 +92,10 @@ namespace Bricklayer.Core.Client.Interface.Controls
             lblHost = new Label(Manager)
             {
                 Width = Width,
-                Text = server.Name,
+                Text = server.GetHostString(),
                 Alignment = Alignment.TopLeft,
                 Left = 4,
                 Top = lblDescription.Bottom,
-                TextColor = Color.LightGray
             };
             lblHost.Init();
             Add(lblHost);

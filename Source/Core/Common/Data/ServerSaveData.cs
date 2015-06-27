@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Bricklayer.Core.Common;
 
 namespace Bricklayer.Core.Server.Data
 {
@@ -30,7 +31,7 @@ namespace Bricklayer.Core.Server.Data
         {
             Name = name;
             Host = host;
-            Port = port;
+            Port = port == 0 ? Globals.Values.DefaultServerPort : port;
         }
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace Bricklayer.Core.Server.Data
         /// </summary>
         public string GetHostString()
         {
-            return Port == 0 ? Host : Host + ":" + Port;
+            return Port == 0 || Port == Globals.Values.DefaultServerPort ? Host : $"{Host}:{Port}";
         }
     }
 }
