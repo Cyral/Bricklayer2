@@ -82,7 +82,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnSave.Init();
             btnSave.Left = (Width / 2) - (btnSave.Width / 2);
             btnSave.Click += BtnSaveClick;
-            btnSave.Enabled = false;
             BottomPanel.Add(btnSave);
 
             if (this.edit)
@@ -113,16 +112,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         private void Validate()
         {
-            //Validate name
-            txtName.TextColor = MainWindow.DefaultTextColor;
-            txtHost.TextColor = MainWindow.DefaultTextColor;
-            btnSave.Enabled = true;
-
-            if (string.IsNullOrWhiteSpace(txtName.Text))
-            {
-                txtName.TextColor = Color.Red;
-                btnSave.Enabled = false;
-            }
             var address = txtHost.Text.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
             port = 0;

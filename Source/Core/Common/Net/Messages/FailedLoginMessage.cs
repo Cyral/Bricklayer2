@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Message sent from server to inform client of wrong login credentials
+    /// Message sent from server to inform client of wrong login credentials.
+    /// String: Error message
     /// </summary>
     public class FailedLoginMessage : IMessage
     {
