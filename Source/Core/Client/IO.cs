@@ -164,8 +164,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public static List<ServerSaveData> ReadServers()
         {
-            string fileName = serverFile;
-            List<ServerSaveData> servers;
+            var fileName = serverFile;
             if (!File.Exists(fileName))
             {
                 //If server config does not exist, create it and write the default server to it
@@ -177,7 +176,7 @@ namespace Bricklayer.Core.Client
                 WriteServers(new List<ServerSaveData>() { CreateDefaultServer() });
                 json = File.ReadAllText(fileName);
             }
-            servers = JsonConvert.DeserializeObject<List<ServerSaveData>>(json);
+            var servers = JsonConvert.DeserializeObject<List<ServerSaveData>>(json);
             return servers;
         }
 
@@ -192,13 +191,13 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public static void WriteServers(List<ServerSaveData> servers)
         {
-            string fileName = serverFile;
+            var fileName = serverFile;
             if (!File.Exists(fileName))
             {
-                FileStream str = File.Create(fileName);
+                var str = File.Create(fileName);
                 str.Close();
             }
-            string json = JsonConvert.SerializeObject(servers, serializationSettings);
+            var json = JsonConvert.SerializeObject(servers, serializationSettings);
             File.WriteAllText(fileName, json);
         }
     }

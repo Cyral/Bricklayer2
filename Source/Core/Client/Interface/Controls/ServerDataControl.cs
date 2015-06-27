@@ -136,7 +136,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         public async void PingServer()
         {
             //Resolve IP from host/address and port
-            if (!resolvedHost && !string.IsNullOrEmpty(data.Host))
+            if (!resolvedHost && !string.IsNullOrEmpty(data.Host) && data.Port > 0 && data.Port < ushort.MaxValue)
             {
                 await Task.Factory.StartNew(() =>
                 {
