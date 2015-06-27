@@ -1,8 +1,6 @@
 ﻿using System;
-using Bricklayer.Client.Interface;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.Data;
-using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 using EventArgs = MonoForce.Controls.EventArgs;
 
@@ -13,7 +11,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
     /// </summary>
     internal sealed class AddServerDialog : Dialog
     {
-        //Controls
         private readonly Button btnSave;
 
         /// <summary>
@@ -35,7 +32,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private string host;
         private int port;
 
-        public AddServerDialog(Manager manager, ServerWindow parent, int index, bool edit, string name, string host, int port)
+        public AddServerDialog(Manager manager, ServerWindow parent, int index, bool edit, string name, string host,
+            int port)
             : base(manager)
         {
             //Are we editing a server or adding one (They use same dialog)
@@ -89,10 +87,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
         }
 
         /// <summary>
-        /// When the save button is clicked
+        /// When the save button is clicked, add the server or edit the existing one
         /// </summary>
         private void BtnSaveClick(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(txtName.Text) || string.IsNullOrEmpty(txtHost.Text))
+                return;
             if (edit)
                 wndServer.EditServer(index, new ServerSaveData(txtName.Text, host, port));
             else
@@ -100,15 +100,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Close();
         }
 
-        private void TxtHostTextChanged(object sender, EventArgs e)
-        {
-            Validate();
-        }
+        private void TxtHostTextChanged(object sender, EventArgs e) => Validate();
 
-        private void TxtNameTextChanged(object sender, EventArgs e)
-        {
-            Validate();
-        }
+        private void TxtNameTextChanged(object sender, EventArgs e) => Validate();
 
         private void Validate()
         {

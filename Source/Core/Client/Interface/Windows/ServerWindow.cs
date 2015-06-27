@@ -119,8 +119,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnRefresh.Click += delegate { RefreshServerList(); };
             BottomPanel.Add(btnRefresh);
 
-            MainWindow.ScreenManager.FadeIn();
-
             // Listen for when user is fully connected to game server
             screen.Client.Events.Network.Game.Connect.AddHandler(args =>
             {
@@ -129,8 +127,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 manager.Add(msgBox);
                 msgBox.ShowModal();
             });
+
             // If user was disconnected from the server
-           screen.Client.Events.Network.Game.Disconnect.AddHandler(args =>
+            screen.Client.Events.Network.Game.Disconnect.AddHandler(args =>
             {
                 var msgBox = new MessageBox(Manager, MessageBoxType.Warning, args.Reason, "Error Connecting to Server");
                 msgBox.Init();

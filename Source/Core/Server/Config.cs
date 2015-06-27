@@ -74,9 +74,9 @@ namespace Bricklayer.Core.Server
                 Port = Common.Globals.Values.DefaultServerPort,
                 AuthServerAddress = Common.Globals.Values.DefaultAuthAddress,
                 AuthServerPort = Common.Globals.Values.DefaultAuthPort,
-                MaxPlayers = 8,
+                MaxPlayers = 64,
                 Name = "Bricklayer Server",
-                Decription = "A Bricklayer Server running on the default configuration.\nPlease edit your Message Of The Day in the config file!",
+                Decription = "A Bricklayer Server running on the default configuration.\nEdit this message in the config file.",
                 Intro = "Welcome to $Name!\nWe currently have $Online player(s) in $Rooms room(s).\n\nServer News:\n-\n-\n-\n\nServer Rules:\n-\n-\n-\n\n\n\n\n...",
             };
         }

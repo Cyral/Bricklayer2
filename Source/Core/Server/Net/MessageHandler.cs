@@ -169,7 +169,7 @@ namespace Bricklayer.Core.Server.Net
         {
             networkThread = new Thread(ProcessNetworkMessages)
             {
-                Name = "Auth Message Handler",
+                Name = "Message Handler",
                 Priority = ThreadPriority.AboveNormal
             };
             networkThread.Start();
