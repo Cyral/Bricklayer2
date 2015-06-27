@@ -73,12 +73,8 @@ namespace Bricklayer.Core.Server.Components
                 pendingSessions.Add(args.Id, args.Connection);
                 var message = EncodeMessage(new PublicKeyMessage(args.Username, args.Id, args.PublicKey));
 
-                var receiver =
-                    new IPEndPoint(
-                        NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress),
-                        Server.IO.Config.Server.AuthServerPort); // Auth Server info
-                                                                 //Send public key to auth server to verify if session is valid
-                NetServer.SendUnconnectedMessage(message, receiver);
+                //Send public key to auth server to verify if session is valid
+                NetServer.SendUnconnectedMessage(message, AuthEndpoint);
             });
 
             Server.Events.Connection.Valid.AddHandler(args =>
@@ -100,8 +96,6 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Connection.RequestInfo.AddHandler(args =>
             {
-                Logger.WriteLine(LogType.Net,
-                    "Requesting info");
                 SendUnconnected(args.Host, new ServerInfoMessage(Server.IO.Config.Server.Decription, Server.Net.NetServer.ConnectionsCount, Server.IO.Config.Server.MaxPlayers));
             });
         }
@@ -111,7 +105,11 @@ namespace Bricklayer.Core.Server.Components
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
 
-            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress), Server.IO.Config.Server.AuthServerPort); //Find the address of the auth server
+            //Find the address of the auth server
+            await Task.Factory.StartNew(() =>
+            {
+                AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress), Server.IO.Config.Server.AuthServerPort);
+            });
 
             var result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
             if (!result)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Data;
@@ -26,6 +28,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private Timer pingTimer;
         private IPEndPoint endPoint;
         private LoginScreen Screen;
+        private bool resolvedHost;
 
         public ServerDataControl(LoginScreen screen, Manager manager, ServerSaveData server) : base(manager)
         {
@@ -92,23 +95,17 @@ namespace Bricklayer.Core.Client.Interface.Controls
             lblHost = new Label(Manager)
             {
                 Width = Width,
-                Text = server.Name,
+                Text = server.GetHostString(),
                 Alignment = Alignment.TopLeft,
                 Left = 4,
                 Top = lblDescription.Bottom,
-                TextColor = Color.LightGray
             };
             lblHost.Init();
             Add(lblHost);
 
-            endPoint = new IPEndPoint(
-                NetUtility.Resolve(Data.Host),
-                Data.Port);
-
-
             Screen.Client.Events.Network.Game.ServerInfo.AddHandler(args =>
             {
-                if (args.Host.Equals(endPoint))
+                if (endPoint != null && args.Host.Equals(endPoint))
                 {
                     pingTimer.Dispose();
 
@@ -123,28 +120,43 @@ namespace Bricklayer.Core.Client.Interface.Controls
             });
         }
 
-        public void PingServer()
+        public async void PingServer()
         {
-            // Setup Ping timer to 8 seconds
+            //Resolve IP from host/address and port
+            if (!resolvedHost)
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var host =
+                        NetUtility.Resolve(Data.Host);
+                    if (host != null)
+                        endPoint = new IPEndPoint(host,
+                            Data.Port);
+                    resolvedHost = true;
+                });
+            }
+
+            //Setup ping timer for 5 seconds
             pingTimer = new Timer(state =>
             {
-                TimeElapsed();
-            }, null, 8000, Timeout.Infinite);
-            Screen.Client.Network.SendUnconnected(endPoint, new RequestServerInfo());
+                Error("Connection timed out.");
+            }, null, 5000, Timeout.Infinite);
+            if (endPoint != null)
+                Screen.Client.Network.SendUnconnected(endPoint, new ServerInfoMessage());
+            else
+                Error("Invalid host.");
         }
 
         /// <summary>
-        ///  If connection is taking up to 8 seconds, assume timeout error.
+        /// Display an error for the server, such as connection timeout.
         /// </summary>
-        private void TimeElapsed()
+        private void Error(string error)
         {
             pingTimer.Dispose();
 
             lblStats.Text = "X";
             lblStats.TextColor = offlineColor;
-
-            lblDescription.Text = "Timed out connection";
-
+            lblDescription.Text = error;
             lblStats.Left = (ClientWidth -
                                     (int)Manager.Skin.Fonts["Default14"].Resource.MeasureString(lblStats.Text).X) - 4 -
                                    32;

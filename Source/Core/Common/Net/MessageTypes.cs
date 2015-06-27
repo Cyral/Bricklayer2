@@ -14,6 +14,5 @@
         ValidSession,
         Init,
         ServerInfo,
-        RequestInfo
     }
 }

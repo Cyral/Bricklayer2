@@ -82,36 +82,34 @@ namespace Bricklayer.Core.Server.Net
                             //NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with Disconnect()
                             case NetIncomingMessageType.StatusChanged:
                             {
-                                //The lines below can get spammy, used to show when statuses change
-                                //Logger.WriteLine(LogType.Net, "Status: {0} changed: {1}", "",inc.SenderConnection.Status.ToString());
-
                                 //When a Users connection is finalized
                                 if (inc.SenderConnection != null &&
                                     inc.SenderConnection.Status == NetConnectionStatus.Connected)
                                 {
-                                        Server.Events.Connection.Connection.Invoke(
-                                              new EventManager.ConnectionEvents.ConnectionEventArgs("user here"));
+                                    Server.Events.Connection.Connection.Invoke(
+                                        new EventManager.ConnectionEvents.ConnectionEventArgs("user here"));
 
-                                        break;
+                                    break;
                                 }
                                 //When a client disconnects
                                 if (inc.SenderConnection != null &&
                                     (inc.SenderConnection.Status == NetConnectionStatus.Disconnected ||
                                      inc.SenderConnection.Status == NetConnectionStatus.Disconnecting))
                                 {
-                                        Server.Events.Connection.Disconnection.Invoke(
-                                             new EventManager.ConnectionEvents.DisconnectionEventArgs("user here", "Reason here"));
-                                    }
+                                    Server.Events.Connection.Disconnection.Invoke(
+                                        new EventManager.ConnectionEvents.DisconnectionEventArgs("user here",
+                                            inc.ReadString()));
+                                }
                                 break;
                             }
-                            //Listen to data from the auth server.
+                            //Listen to unconnected data
                             case NetIncomingMessageType.UnconnectedData:
                             {
+                                var type = (MessageTypes)Enum.Parse(typeof(MessageTypes), inc.ReadByte().ToString());
+
+                                //Handle messages from the auth server differently then ones from players (ping requests)
                                 if (Equals(inc.SenderEndPoint, NetManager.AuthEndpoint))
                                 {
-                                    var type =
-                                        (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
-
                                     switch (type)
                                     {
                                         //When the auth server confirms if a session is valid or not.
@@ -137,19 +135,17 @@ namespace Bricklayer.Core.Server.Net
                                 }
                                 else
                                 {
-                                    var type =
-                                        (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
-
                                     switch (type)
                                     {
                                         //When the auth server confirms if a session is valid or not.
-                                        case MessageTypes.RequestInfo:
+                                        case MessageTypes.ServerInfo:
                                         {
-                                                    var msg = new RequestServerInfo(inc, MessageContext.Server);
-                                                    Server.Events.Connection.RequestInfo.Invoke(
-                                                            new EventManager.ConnectionEvents.RequestInfoEventArgs(
-                                                                inc.SenderEndPoint));
-                                                    break;
+                                            // ReSharper disable once UnusedVariable
+                                            var msg = new ServerInfoMessage(inc, MessageContext.Server);
+                                            Server.Events.Connection.RequestInfo.Invoke(
+                                                new EventManager.ConnectionEvents.RequestInfoEventArgs(
+                                                    inc.SenderEndPoint));
+                                            break;
                                         }
                                     }
                                 }
