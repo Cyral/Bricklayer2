@@ -36,7 +36,7 @@ namespace Bricklayer.Core.Server.Components
         #pragma warning restore 1998
         {
             Initialized = true;
-            Logger.WriteLine(LogType ?? LogType.Server, "Intialized.");
+            Logger.WriteLine(LogType ?? LogType.Normal, "Intialized.");
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         protected virtual void Log(string message)
         {
-            Logger.WriteLine(LogType ?? LogType.Server, message);
+            Logger.WriteLine(LogType ?? LogType.Normal, message);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         protected virtual void Log(string message, params object[] args)
         {
-            Logger.WriteLine(LogType ?? LogType.Server, string.Format(message, args));
+            Logger.WriteLine(LogType ?? LogType.Normal, string.Format(message, args));
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Bricklayer.Core.Server.Components
         protected virtual void Log(string message, ConsoleColor color)
         {
             Console.SetCursorPosition(0, Console.CursorTop);
-            Logger.WriteLine(LogType ?? LogType.Server, color, message);
+            Logger.WriteLine(LogType ?? LogType.Normal, color, message);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         protected virtual void Log(string message, ConsoleColor color, params object[] args)
         {
-            Logger.WriteLine(LogType ?? LogType.Server, color, string.Format(message, args));
+            Logger.WriteLine(LogType ?? LogType.Normal, color, string.Format(message, args));
         }
     }
 }

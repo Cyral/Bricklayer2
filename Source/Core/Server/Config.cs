@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Bricklayer.Core.Common;
 
 namespace Bricklayer.Core.Server
 {
@@ -12,17 +8,52 @@ namespace Bricklayer.Core.Server
     public sealed class Config
     {
         /// <summary>
+        /// The configuration for database settings. By default, SQLite is used (bundled with Bricklayer)
+        /// </summary>
+        public DatabaseConfig Database;
+
+        /// <summary>
         /// The configuration for the server settings, such as port number and max connections.
         /// </summary>
         public ServerConfig Server;
-
-        //More settings, such as database info will be provided in the future.
 
         public static Config GenerateDefaultConfig()
         {
             return new Config
             {
                 Server = ServerConfig.GenerateDefaultConfig(),
+                Database = DatabaseConfig.GenerateDefaultConfig()
+            };
+        }
+    }
+
+    /// <summary>
+    /// Represents the database specific configuration elements.
+    /// </summary>
+    public sealed class DatabaseConfig
+    {
+        /// <summary>
+        /// The DB connection string used to connect to the DB.
+        /// </summary>
+        /// <example>
+        /// SQLite: Data Source=c:\mydb.db;Version=3;
+        /// MySQL: Server=myServerAddress;Database=myDataBase;Uid=myUsername;Pwd=myPassword;
+        /// See http://www.connectionstrings.com for the appropriate connection string for your database provider.
+        /// </example>
+        public string Connection;
+
+        /// <summary>
+        /// The database provider/system used.
+        /// </summary>
+        public string Provider;
+
+        public static DatabaseConfig GenerateDefaultConfig()
+        {
+            return new DatabaseConfig
+            {
+                //Bricklayer uses SQLite by default
+                Provider = "System.Data.SQLite",
+                Connection = "Data Source = database.sqlite; Version = 3"
             };
         }
     }
@@ -33,9 +64,14 @@ namespace Bricklayer.Core.Server
     public sealed class ServerConfig
     {
         /// <summary>
-        /// The name of the server.
+        /// The server address to use for authentication.
         /// </summary>
-        public string Name;
+        public string AuthServerAddress;
+
+        /// <summary>
+        /// The server port for authentication.
+        /// </summary>
+        public int AuthServerPort;
 
         /// <summary>
         /// The "Message of the day/Description", to be shown in the server list.
@@ -48,36 +84,33 @@ namespace Bricklayer.Core.Server
         public string Intro;
 
         /// <summary>
-        /// The port the server should run on.
-        /// </summary>
-        public int Port;
-
-        /// <summary>
         /// The maximum allowed players allowed to connect to the server. (not per room)
         /// </summary>
         public int MaxPlayers;
 
         /// <summary>
-        /// The server address to use for authentication.
+        /// The name of the server.
         /// </summary>
-        public string AuthServerAddress;
+        public string Name;
 
         /// <summary>
-        /// The server port for authentication.
+        /// The port the server should run on.
         /// </summary>
-        public int AuthServerPort;
+        public int Port;
 
         public static ServerConfig GenerateDefaultConfig()
         {
             return new ServerConfig
             {
-                Port = Common.Globals.Values.DefaultServerPort,
-                AuthServerAddress = Common.Globals.Values.DefaultAuthAddress,
-                AuthServerPort = Common.Globals.Values.DefaultAuthPort,
+                Port = Globals.Values.DefaultServerPort,
+                AuthServerAddress = Globals.Values.DefaultAuthAddress,
+                AuthServerPort = Globals.Values.DefaultAuthPort,
                 MaxPlayers = 64,
                 Name = "Bricklayer Server",
-                Decription = "A Bricklayer Server running on the default configuration.\nEdit this message in the config file.",
-                Intro = "Welcome to $Name!\nWe currently have $Online player(s) in $Rooms room(s).\n\nServer News:\n-\n-\n-\n\nServer Rules:\n-\n-\n-\n\n\n\n\n...",
+                Decription =
+                    "A Bricklayer Server running on the default configuration.\nEdit this message in the config file.",
+                Intro =
+                    "Welcome to $Name!\nWe currently have $Online player(s) in $Rooms room(s).\n\nServer News:\n-\n-\n-\n\nServer Rules:\n-\n-\n-\n\n\n\n\n..."
             };
         }
     }
