@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -183,7 +185,11 @@ namespace Bricklayer.Core.Server.Components
 
                 await
                     Task.Factory.StartNew(
-                        () => Config = JsonConvert.DeserializeObject<Config>(json, serializationSettings));
+                        delegate
+                        {
+                            Config = JsonConvert.DeserializeObject<Config>(json, serializationSettings);
+                        });
+
 
                 Log("Configuration loaded. Port: {0}", Config.Server.Port.ToString());
             }

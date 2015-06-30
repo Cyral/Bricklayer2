@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Pyratron.Bricklayer.Auth.Components;
 
 namespace Bricklayer.Core.Server
 {
@@ -22,10 +23,7 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public static void WriteLine(string text)
         {
-            Console.WriteLine(text);
-
-            Server.WriteHeader();
-            if (Server.IO != null) Server.IO.LogMessage(text);
+            LogType.Normal.WriteText(text);
         }
 
         /// <summary>
@@ -46,7 +44,7 @@ namespace Bricklayer.Core.Server
             Console.ForegroundColor = ConsoleColor.White;
 
             Server.WriteHeader();
-            if (Server.IO != null) Server.IO.LogMessage(text);
+            Server.IO?.LogMessage(text);
         }
 
         /// <summary>
@@ -173,21 +171,21 @@ namespace Bricklayer.Core.Server
         internal static LogType Normal { get; private set; }
 
         /// <summary>
-        /// Used for general server messages.
+        /// Used for messages from the database manager.
         /// </summary>
-        internal static LogType Server { get; private set; }
+        internal static LogType Database { get; private set; }
 
         static LogType()
         {
             sb = new StringBuilder();
 
             //Types
-            Normal = new LogType("", ConsoleColor.White);
+            Normal = new LogType("Server", ConsoleColor.White);
             IO = new LogType("IO", ConsoleColor.Cyan);
             Net = new LogType("Net", ConsoleColor.Magenta);
             Error = new LogType("Error", ConsoleColor.Red);
-            Server = new LogType("Server", ConsoleColor.Green);
-            Plugin = new LogType("Plugin", ConsoleColor.Yellow);
+            Plugin = new LogType("Plugin", ConsoleColor.Green);
+            Database = new LogType("Database", ConsoleColor.Yellow);
         }
 
         #region Instance

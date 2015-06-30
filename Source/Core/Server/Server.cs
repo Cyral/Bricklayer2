@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Bricklayer.Core.Server.Components;
 using Bricklayer.Core.Server.Net;
+using Pyratron.Bricklayer.Auth.Components;
 using Pyratron.Frameworks.Commands.Parser;
 
 namespace Bricklayer.Core.Server
@@ -21,6 +22,11 @@ namespace Bricklayer.Core.Server
         /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
         public NetworkComponent Net { get; set; }
+
+        /// <summary>
+        /// The DatabaseComponent for handling database operations.
+        /// </summary>
+        public DatabaseComponent Database { get; set; }
 
         /// <summary>
         /// Command parser for commmands ran in the console or by users.
@@ -48,8 +54,8 @@ namespace Bricklayer.Core.Server
             input = string.Empty;
             clear = new string(' ', Console.WindowWidth);
             var stopwatch = Stopwatch.StartNew();
-            Logger.WriteLine(LogType.Server, $"{Constants.Strings.ServerTitle}");
-            Logger.WriteLine(LogType.Server, $"Server is starting now, on {DateTime.Now.ToString("U")}");
+            Logger.WriteLine($"{Constants.Strings.ServerTitle}");
+            Logger.WriteLine($"Server is starting now, on {DateTime.Now.ToString("U")}");
             
             //Initialize Properties
             Commands = CommandParser.CreateNew().UsePrefix(string.Empty).OnError(OnParseError);
@@ -57,14 +63,16 @@ namespace Bricklayer.Core.Server
 
             //Initialize Components
             IO = new IOComponent(this);
+            Database = new DatabaseComponent(this);
             Net = new NetworkComponent(this);
 
             await IO.Init();
+            await Database.Init();
             await Net.Init();
 
             stopwatch.Stop();
             Logger.WriteBreak();
-            Logger.WriteLine(LogType.Server, "Ready. ({0}s) Type /help for commands.",
+            Logger.WriteLine("Ready. ({0}s) Type /help for commands.",
                 Math.Round(stopwatch.Elapsed.TotalSeconds, 2));
             Logger.WriteBreak();
 
@@ -159,8 +167,8 @@ namespace Bricklayer.Core.Server
         /// </summary>
         private void SafeExit()
         {
-            Logger.WriteLine(LogType.Server, "\nSERVER SAFE EXIT:");
-            Logger.WriteLine(LogType.Server, "Network disconnected.");
+            Logger.WriteLine("\nSERVER SAFE EXIT:");
+            Logger.WriteLine("Network disconnected.");
             Net.Shutdown("The server has shut down. This may be a quick restart, or regular maintenance");
             IO.LogMessage($"SERVER EXIT: The server has gracefully exited on {DateTime.Now.ToString("U")}\n");
             Environment.Exit(0); //Peace out dudes and dudettes <3 Yay to the woo

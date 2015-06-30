@@ -60,10 +60,9 @@ namespace Bricklayer.Core.Client
                 //Use a custom contract resolver that can read private and internal properties
             };
 
-            if (MainDirectory != null)
-            {
-                ConfigFile = Path.Combine(MainDirectory, "config.json");
-            }
+            if (!Directory.Exists(MainDirectory))
+                Directory.CreateDirectory(MainDirectory);
+            ConfigFile = Path.Combine(MainDirectory, "config.json");
 
             //Add the sub-directories to the directory list
             Directories.Add("Content", Path.Combine(ExecutableDirectory, "Content"));
