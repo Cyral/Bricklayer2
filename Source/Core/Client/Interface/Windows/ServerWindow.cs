@@ -122,10 +122,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             // Listen for when user is fully connected to game server
             screen.Client.Events.Network.Game.Connect.AddHandler(args =>
             {
-                var msgBox = new MessageBox(Manager, MessageBoxType.Okay, "Connected :D Welp.", "Connected!");
-                msgBox.Init();
-                manager.Add(msgBox);
-                msgBox.ShowModal();
+                screen.ScreenManager.SwitchScreen(new LobbyScreen());
+
             });
 
             // If user was disconnected from the server

@@ -6,6 +6,7 @@ using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 using Bricklayer.Core.Client;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Bricklayer.Client.Interface
 {
@@ -26,9 +27,12 @@ namespace Bricklayer.Client.Interface
 
         public static Color DefaultTextColor = new Color(32, 32, 32);
 
+        public static SpriteFont DefaultSpriteFont;
+
         public MainWindow(Manager manager, Core.Client.Client client)
             : base(manager)
         {
+            DefaultSpriteFont = Manager.Skin.Fonts["Default8"].Resource;
             Client = client;
             ElapsedTime = TimeSpan.Zero;
 

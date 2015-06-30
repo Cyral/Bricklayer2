@@ -14,5 +14,6 @@
         ValidSession,
         Init,
         ServerInfo,
+        CreateRoom
     }
 }

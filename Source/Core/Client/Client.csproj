@@ -59,13 +59,17 @@
     <Compile Include="Client.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="InputHandler.cs" />
+    <Compile Include="Interface\Controls\LobbyDataControl.cs" />
     <Compile Include="Interface\Controls\ServerDataControl.cs" />
     <Compile Include="Interface\Layout.cs" />
     <Compile Include="Interface\Logic.cs" />
+    <Compile Include="Interface\Screens\LobbyScreen.cs" />
     <Compile Include="Interface\Screens\Screen.cs" />
     <Compile Include="Interface\Screens\LoginScreen.cs" />
     <Compile Include="Interface\Screens\ScreenManager.cs" />
     <Compile Include="Interface\Windows\AddServerDialog.cs" />
+    <Compile Include="Interface\Windows\CreateWorldDialog.cs" />
+    <Compile Include="Interface\Windows\LobbyWindow.cs" />
     <Compile Include="Interface\Windows\LoginWindow.cs" />
     <Compile Include="Interface\Windows\ServerWindow.cs" />
     <Compile Include="IO.cs" />
@@ -81,11 +85,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\Lidgren.Network.dll</HintPath>
     </Reference>
-    <Reference Include="MonoForce.Controls">
-      <HintPath>..\..\..\Libraries\MonoForce.Controls.dll</HintPath>
+    <Reference Include="MonoForce.Controls, Version=3.4.0.456, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Users\pugma_000\Documents\Games\MonoForce.Controls.dll</HintPath>
     </Reference>
-    <Reference Include="MonoGame.Framework">
-      <HintPath>$(MSBuildProgramFiles32)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
+    <Reference Include="MonoGame.Framework, Version=3.4.0.456, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Users\pugma_000\Documents\Games\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\Libraries\Newtonsoft.Json.dll</HintPath>
