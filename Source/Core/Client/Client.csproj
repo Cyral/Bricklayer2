@@ -87,7 +87,7 @@
     </Reference>
     <Reference Include="MonoForce.Controls, Version=3.4.0.456, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Users\pugma_000\Documents\Games\MonoForce.Controls.dll</HintPath>
+      <HintPath>..\..\..\Libraries\MonoForce.Controls.dll</HintPath>
     </Reference>
     <Reference Include="MonoGame.Framework, Version=3.4.0.456, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
