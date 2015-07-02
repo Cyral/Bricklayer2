@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using Bricklayer.Core.Common;
@@ -181,10 +182,22 @@ namespace Bricklayer.Core.Server.Net
         /// <param name="inc">The incoming message</param>
         private async void ProcessDataMessage(NetIncomingMessage inc)
         {
+            //The type of message being recieved
             var type = (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
-            switch (type)
+            //The user who sent the message
+            var sender = Server.UserFromRUI(inc.SenderConnection.RemoteUniqueIdentifier);
+            if (sender != null)
             {
-              
+                switch (type)
+                {
+                    //If the user requests a message to be sent, send it back
+                    case MessageTypes.Request:
+                    {
+                        var msg = new RequestMessage(inc, MessageContext.Server);
+                        Server.Events.Connection.RequestMessage.Invoke(new EventManager.ConnectionEvents.RequestMessageEventArgs(msg.Type, sender));
+                        break;
+                    }
+                }
             }
         }
 

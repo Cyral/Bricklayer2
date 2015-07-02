@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Net;
 using Lidgren.Network;
 
 namespace Bricklayer.Core.Server
@@ -93,12 +94,32 @@ namespace Bricklayer.Core.Server
 
             public class RequestInfoEventArgs : EventArgs
             {
-                public IPEndPoint Host;
+                public IPEndPoint Host { get; private set; }
 
                 public RequestInfoEventArgs(IPEndPoint host)
                 {
                     Host = host;
                 }
+            }
+
+            public class RequestMessageEventArgs : EventArgs
+            {
+                /// <summary>
+                /// The type of message requested.
+                /// </summary>
+                public MessageTypes Type { get; private set; }
+
+                /// <summary>
+                /// The user who requested the message.
+                /// </summary>
+                public User Sender { get; set; }
+
+                public RequestMessageEventArgs(MessageTypes type, User sender)
+                {
+                    Type = type;
+                    Sender = sender;
+                }
+
             }
             #endregion
 
@@ -107,34 +128,39 @@ namespace Bricklayer.Core.Server
             #region Events
 
             /// <summary>
-            /// When a player requests to join with a public key
+            /// When a player requests to join with a public key.
             /// </summary>
             public Event<PreLoginEventArgs> PreLogin { get; } = new Event<PreLoginEventArgs>();
 
             /// <summary>
-            /// When a player fully connects 
+            /// When a player fully connects.
             /// </summary>
             public Event<ConnectionEventArgs> Connection { get; } = new Event<ConnectionEventArgs>();
 
             /// <summary>
-            /// When a player disconnects 
+            /// When a player disconnects.
             /// </summary>
             public Event<DisconnectionEventArgs> Disconnection { get; } = new Event<DisconnectionEventArgs>();
 
             /// <summary>
-            /// When Auth server sends back validation of user session
+            /// When Auth server sends back validation of user session.
             /// </summary>
             public Event<ValidSessionEventArgs> Valid { get; } = new Event<ValidSessionEventArgs>();
 
             /// <summary>
-            /// When Auth server sends back invalidation of user session
+            /// When Auth server sends back invalidation of user session.
             /// </summary>
             public Event<InvalidSessionEventArgs> Invalid { get; } = new Event<InvalidSessionEventArgs>();
 
             /// <summary>
-            /// When client is requesting info about the server for it's userlist
+            /// When client pings the server for information for the serverlist.
             /// </summary>
             public Event<RequestInfoEventArgs> RequestInfo { get; } = new Event<RequestInfoEventArgs>();
+
+            /// <summary>
+            /// When the client request the server sends a specific message back.
+            /// </summary>
+            public Event<RequestMessageEventArgs> RequestMessage { get; } = new Event<RequestMessageEventArgs>(); 
             #endregion
         }
 

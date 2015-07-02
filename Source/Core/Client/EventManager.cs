@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Data;
 
 namespace Bricklayer.Core.Client
@@ -183,18 +185,15 @@ namespace Bricklayer.Core.Client
 
                 public class ConnectEventArgs : EventArgs
                 {
-                    public string ServerName { get; private set; }
-                    public string Description { get; private set; }
-                    public string Intro { get; private set; }
-                    public int Online { get; private set; }
-                    public List<LobbySaveData> Rooms { get; private set; }
-                    public ConnectEventArgs(string serverName, string description, string intro, int online, List<LobbySaveData> rooms)
+                }
+
+                public class InitEventArgs : EventArgs
+                {
+                    public InitMessage Message;
+
+                    public InitEventArgs(InitMessage message)
                     {
-                        ServerName = serverName;
-                        Description = description;
-                        Intro = intro;
-                        Online = online;
-                        Rooms = rooms;
+                        Message = message;
                     }
                 }
 
@@ -238,9 +237,14 @@ namespace Bricklayer.Core.Client
                 public Event<DisconnectEventArgs> Disconnect { get; } = new Event<DisconnectEventArgs>();
 
                 /// <summary>
-                /// When the client is fully connected to a game server
+                /// When the client is fully connected to a game server.
                 /// </summary>
                 public Event<ConnectEventArgs> Connect { get; } = new Event<ConnectEventArgs>();
+
+                /// <summary>
+                /// When an init message is recieved, containing list of rooms and server info. (On connect and when reload button is pressed)
+                /// </summary>
+                public Event<InitEventArgs> Init { get; } = new Event<InitEventArgs>();
 
                 /// <summary>
                 /// When the connection latency (ping) is updated after a successful ping/pong message.

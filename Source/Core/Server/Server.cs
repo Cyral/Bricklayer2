@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.Components;
 using Bricklayer.Core.Server.Data;
-using Bricklayer.Core.Server.Net;
 using Pyratron.Bricklayer.Auth.Components;
 using Pyratron.Frameworks.Commands.Parser;
 
@@ -16,6 +17,21 @@ namespace Bricklayer.Core.Server
     public class Server
     {
         /// <summary>
+        /// Command parser for commmands ran in the console or by users.
+        /// </summary>
+        public CommandParser Commands { get; set; }
+
+        /// <summary>
+        /// The DatabaseComponent for handling database operations.
+        /// </summary>
+        public DatabaseComponent Database { get; set; }
+
+        /// <summary>
+        /// Manages and lists all server events.
+        /// </summary>
+        public EventManager Events { get; private set; }
+
+        /// <summary>
         /// IOComponent handles disk operations.
         /// </summary>
         public IOComponent IO { get; set; }
@@ -25,23 +41,13 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public NetworkComponent Net { get; set; }
 
-        /// <summary>
-        /// The DatabaseComponent for handling database operations.
-        /// </summary>
-        public DatabaseComponent Database { get; set; }
-
-        /// <summary>
-        /// Command parser for commmands ran in the console or by users.
-        /// </summary>
-        public CommandParser Commands { get; set; }
-
-        /// <summary>
-        /// Manages and lists all server events.
-        /// </summary>
-        public EventManager Events { get; private set; }
-
         // Temporary List of rooms. This will not be here later
-        public List<LobbySaveData> Rooms;
+        public List<LobbySaveData> Rooms { get; set; }
+
+        /// <summary>
+        /// List of users online the server.
+        /// </summary>
+        public List<User> Users;
 
         private string clear, input;
         private bool showHeader;
@@ -51,12 +57,15 @@ namespace Bricklayer.Core.Server
         {
             Logger.Server = this;
             Events = new EventManager();
+            Users = new List<User>();
 
             // Temporary code. This will not be here later
             Rooms = new List<LobbySaveData>();
-            Rooms.Add(new LobbySaveData("DogeBall", 0, "A game of dodge ball, but the ball being a doge head. Wow!", 6, 23, 4));
-            Rooms.Add(new LobbySaveData("Terrain", 1, "Beatiful terrain environment builds for your eyes to look at! Enjoy :)", 3, 20, 5));
-            Rooms.Add(new LobbySaveData("pls r8 5", 2,  "pls r8 5. thats al i evr wanted in life.", 0, 7, 1));
+            Rooms.Add(new LobbySaveData("DogeBall", 0, "A game of dodge ball, but the ball being a doge head. Wow!", 6,
+                23, 4));
+            Rooms.Add(new LobbySaveData("Terrain", 1,
+                "Beatiful terrain environment builds for your eyes to look at! Enjoy :)", 3, 20, 5));
+            Rooms.Add(new LobbySaveData("pls r8 5", 2, "pls r8 5. thats al i evr wanted in life.", 0, 7, 1));
 
             //Setup server
             Console.BackgroundColor = ConsoleColor.Black;
@@ -67,7 +76,7 @@ namespace Bricklayer.Core.Server
             var stopwatch = Stopwatch.StartNew();
             Logger.WriteLine($"{Constants.Strings.ServerTitle}");
             Logger.WriteLine($"Server is starting now, on {DateTime.Now.ToString("U")}");
-            
+
             //Initialize Properties
             Commands = CommandParser.CreateNew().UsePrefix(string.Empty).OnError(OnParseError);
             RegisterCommands();
@@ -123,8 +132,6 @@ namespace Bricklayer.Core.Server
                 WriteHeader();
             }
             // ReSharper disable once FunctionNeverReturns
-
-
         }
 
         #region Console Stuff
@@ -239,6 +246,38 @@ namespace Bricklayer.Core.Server
                 $"Sent: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.SentBytes / 1024d / 1024, 1))}MB | Recieved: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.ReceivedBytes / 1024d / 1024, 1))}MB | Uptime: {(DateTime.Now - start).ToString("d\\:hh\\:mm")}";
 
             WriteCenteredText(stats);
+        }
+
+        /// <summary>
+        /// Finds a Sender from a remote unique identifier
+        /// </summary>
+        /// <param name="remoteUniqueIdentifier">The RUI to find</param>
+        /// <param name="ignoreError">If a Sender is not found, should an error be thrown?</param>
+        public User UserFromRUI(long remoteUniqueIdentifier, bool ignoreError = false)
+        {
+            User found = null;
+            foreach (var user in Users)
+            {
+                if (user.Connection.RemoteUniqueIdentifier == remoteUniqueIdentifier)
+                    found = user;
+            }
+            if (found != null) return found;
+            if (ignoreError) return null;
+            throw new KeyNotFoundException($"Could not find user from RemoteUniqueIdentifier: {remoteUniqueIdentifier}");
+        }
+
+
+        /// <summary>
+        /// Finds an empty slot to use as a user's ID
+        /// </summary>
+        public short FindAvailableUserID()
+        {
+            for (var i = 1; i < IO.Config.Server.MaxPlayers; i++)
+                if (Users.All(x => x.ID != i))
+                    return (short)i;
+            Logger.WriteLine(LogType.Error, "Could not find empty user ID! (Max Users: {0})",
+                IO.Config.Server.MaxPlayers);
+            return 0;
         }
 
         /// <summary>

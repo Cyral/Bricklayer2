@@ -35,9 +35,19 @@ namespace Bricklayer.Core.Client.Net
         /// </summary>
         private void HandleDataMessage(NetIncomingMessage im)
         {
-            if (im == null) throw new ArgumentNullException("im");
+            if (im == null) throw new ArgumentNullException(nameof(im));
 
-            var messageType = (MessageTypes)im.ReadByte();
+            var type = (MessageTypes)im.ReadByte();
+
+            switch (type)
+            {
+                case MessageTypes.Init:
+                {
+                    var msg = new InitMessage(im, MessageContext.Client);
+                    networkManager.Client.Events.Network.Game.Init.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -79,7 +89,7 @@ namespace Bricklayer.Core.Client.Net
                     }
                 }
             }
-            else
+            else //Message not from auth server, instead from a game server
             {
                 var messageType = (MessageTypes) im.ReadByte(); //Find the type of data message sent
                 switch (messageType)
@@ -144,8 +154,11 @@ namespace Bricklayer.Core.Client.Net
                                         im.SenderConnection.RemoteHailMessage.ReadByte(); //Throw it away
                                         var msg = new InitMessage(im.SenderConnection.RemoteHailMessage,
                                             MessageContext.Client);
+                                        //Fire connect event
                                         networkManager.Client.Events.Network.Game.Connect.Invoke(
-                                            new EventManager.NetEvents.GameServerEvents.ConnectEventArgs(msg.ServerName, msg.Description, msg.Intro, msg.Online, msg.Rooms));
+                                            new EventManager.NetEvents.GameServerEvents.ConnectEventArgs());
+                                        //And init message with actual data
+                                        networkManager.Client.Events.Network.Game.Init.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
                                         break;
                                     }
                                     //When disconnected from the server

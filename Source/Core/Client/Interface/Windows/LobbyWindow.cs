@@ -174,6 +174,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             BottomPanel.Add(btnDisconnect);
 
+            screen.Client.Events.Network.Game.Init.AddHandler(args =>
+            {
+                screen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
+                    args.Message.Intro, args.Message.Online, args.Message.Rooms));
+                LoadRooms();
+            });
+
             LoadRooms();
         }
 

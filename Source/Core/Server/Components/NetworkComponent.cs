@@ -82,10 +82,21 @@ namespace Bricklayer.Core.Server.Components
                 pendingSessions[args.UUID].Approve(EncodeMessage(
                     new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
                     Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, Server.Rooms)));
+                Server.Users.Add(new User(args.Username, pendingSessions[args.UUID], Server.FindAvailableUserID()));
                 pendingSessions.Remove(args.UUID);
                 Logger.WriteLine(LogType.Net,
                     $"Session valid for '{args.Username}'. (Allowed)");
             }, EventPriority.Final);
+
+            Server.Events.Connection.RequestMessage.AddHandler(args =>
+            {
+                //When the client request an init message (refreshing the lobby)
+                if (args.Type == MessageTypes.Init)
+                {
+                    Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
+                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, Server.Rooms), args.Sender);
+                }
+            });
 
 
             Server.Events.Connection.Invalid.AddHandler(args =>
