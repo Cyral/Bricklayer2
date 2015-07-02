@@ -1,37 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
-using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Server.Data;
-using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
 {
-    public class LobbyWindow : Dialog
+    public sealed class LobbyWindow : Dialog
     {
-        private const string searchStr = "Search...";
-        private readonly List<string> sortFilters = new List<string>() { "Online", "Rating", "Plays", "Random", "Mine" };
+        private static readonly string searchStr = "Search...";
+        private readonly ComboBox cmbSort;
+        private readonly GroupPanel grpServer;
+        private readonly Label lblName, lblDescription, lblInfo;
+        private readonly LobbyScreen lobbyScreen;
+        private readonly ControlList<LobbyDataControl> lstRooms;
+        private readonly List<string> sortFilters = new List<string> {"Online", "Rating", "Plays", "Random", "Mine"};
         //Controls
-        private TextBox txtSearch;
-        private ComboBox cmbSort;
-        private Button btnJoin, btnCreate, btnDisconnect, btnReload;
-        private GroupPanel grpLobby, grpServer;
-        private Label lblName, lblDescription, lblInfo;
-
-        public ControlList<LobbyDataControl> RoomListCtrl;
-
-        public LobbyScreen lobbyScreen;
+        private readonly TextBox txtSearch;
 
         public LobbyWindow(Manager manager, LobbyScreen screen)
             : base(manager)
         {
-
             lobbyScreen = screen;
             //Setup the window
             CaptionVisible = false;
@@ -44,118 +35,154 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Center();
 
             //Group panels
-            grpLobby = new GroupPanel(Manager) { Width = ClientWidth / 2, Height = ClientHeight - BottomPanel.Height + 2, Text = "Rooms" };
+            var grpLobby = new GroupPanel(Manager)
+            {
+                Width = ClientWidth / 2,
+                Height = ClientHeight - BottomPanel.Height + 2,
+                Text = "Rooms"
+            };
             grpLobby.Init();
             Add(grpLobby);
 
-            grpServer = new GroupPanel(Manager) { Left = (ClientWidth / 2) - 1, Width = (ClientWidth / 2) + 1, Height = ClientHeight - BottomPanel.Height + 2, Text = "Server" };
+            grpServer = new GroupPanel(Manager)
+            {
+                Left = (ClientWidth / 2) - 1,
+                Width = (ClientWidth / 2) + 1,
+                Height = ClientHeight - BottomPanel.Height + 2,
+                Text = "Server"
+            };
             grpServer.Init();
             Add(grpServer);
 
             //Top controls
-            txtSearch = new TextBox(Manager) { Left = 8, Top = 8, Width = (ClientWidth / 4) - 16, };
+            txtSearch = new TextBox(Manager) {Left = 8, Top = 8, Width = (ClientWidth / 4) - 16};
             txtSearch.Init();
             txtSearch.Text = searchStr;
-            txtSearch.TextChanged += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
-            {
-                RefreshRooms();
-            });
+            txtSearch.TextChanged += delegate { RefreshRooms(); };
             //Show "Search..." text, but make it dissapear on focus
-            txtSearch.FocusGained += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
+            txtSearch.FocusGained += delegate
             {
                 if (txtSearch.Text.Trim() == searchStr)
                     txtSearch.Text = string.Empty;
-            });
-            txtSearch.FocusLost += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
+            };
+            txtSearch.FocusLost += delegate
             {
                 if (txtSearch.Text.Trim() == string.Empty)
                     txtSearch.Text = searchStr;
-            });
+            };
             grpLobby.Add(txtSearch);
 
-            cmbSort = new ComboBox(Manager) { Left = txtSearch.Right + 8, Top = 8, Width = (ClientWidth / 4) - 16 - 20, };
+            cmbSort = new ComboBox(Manager) {Left = txtSearch.Right + 8, Top = 8, Width = (ClientWidth / 4) - 16 - 20};
             cmbSort.Init();
             cmbSort.Items.AddRange(sortFilters);
             cmbSort.ItemIndex = 0;
-            cmbSort.ItemIndexChanged += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
-            {
-                RefreshRooms();
-            });
+            cmbSort.ItemIndexChanged += delegate { RefreshRooms(); };
             grpLobby.Add(cmbSort);
 
-            btnReload = new Button(Manager) { Left = cmbSort.Right + 8, Top = 8, Width = 20, Height = 20, Text = string.Empty, };
-            btnReload.Init();
-            //btnReload.Glyph = new Glyph(ContentPack.Textures["gui\\icons\\refresh"]);
-            btnReload.ToolTip.Text = "Refresh";
-            btnReload.Click += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
+            var btnReload = new Button(Manager)
             {
-               // Game.NetManager.Send(new RequestMessage(MessageTypes.Lobby));
-            });
+                Left = cmbSort.Right + 8,
+                Top = 8,
+                Width = 20,
+                Height = 20,
+                Text = string.Empty
+            };
+            btnReload.Init();
+            btnReload.Glyph = new Glyph(screen.Client.Content["gui.icons.refresh"]);
+            btnReload.ToolTip.Text = "Refresh";
+            btnReload.Click += delegate
+            {
+                // Game.NetManager.Send(new RequestMessage(MessageTypes.Lobby));
+            };
             grpLobby.Add(btnReload);
 
             //Main room list
-            RoomListCtrl = new ControlList<LobbyDataControl>(Manager) { Left = 8, Top = txtSearch.Bottom + 8, Width = grpLobby.Width - 16, Height = grpLobby.Height - 16 - txtSearch.Bottom - 24 };
-            RoomListCtrl.Init();
-            grpLobby.Add(RoomListCtrl);
+            lstRooms = new ControlList<LobbyDataControl>(Manager)
+            {
+                Left = 8,
+                Top = txtSearch.Bottom + 8,
+                Width = grpLobby.Width - 16,
+                Height = grpLobby.Height - 16 - txtSearch.Bottom - 24
+            };
+            lstRooms.Init();
+            grpLobby.Add(lstRooms);
 
             //Server info labels
-            lblName = new Label(Manager) { Text = "Loading...", Top = 8, Font = FontSize.Default20, Left = 8, Alignment = Alignment.MiddleCenter, Height = 30, Width = grpServer.ClientWidth - 16 };
+            lblName = new Label(Manager)
+            {
+                Text = "Loading...",
+                Top = 8,
+                Font = FontSize.Default20,
+                Left = 8,
+                Alignment = Alignment.MiddleCenter,
+                Height = 30,
+                Width = grpServer.ClientWidth - 16
+            };
             lblName.Init();
             grpServer.Add(lblName);
 
-            lblDescription = new Label(Manager) { Text = string.Empty, Top = 8 + lblName.Bottom, Left = 8, Alignment = Alignment.MiddleCenter, Width = grpServer.ClientWidth - 16 };
+            lblDescription = new Label(Manager)
+            {
+                Text = string.Empty,
+                Top = 8 + lblName.Bottom,
+                Left = 8,
+                Alignment = Alignment.MiddleCenter,
+                Width = grpServer.ClientWidth - 16
+            };
             lblDescription.Init();
             grpServer.Add(lblDescription);
 
-            lblInfo = new Label(Manager) { Text = string.Empty, Top = 8 + lblDescription.Bottom, Left = 8, Alignment = Alignment.TopLeft, Width = grpServer.ClientWidth - 16, Height = grpServer.Height };
+            lblInfo = new Label(Manager)
+            {
+                Text = string.Empty,
+                Top = 8 + lblDescription.Bottom,
+                Left = 8,
+                Alignment = Alignment.TopLeft,
+                Width = grpServer.ClientWidth - 16,
+                Height = grpServer.Height
+            };
             lblInfo.Init();
             grpServer.Add(lblInfo);
             //Bottom buttons
-            btnCreate = new Button(Manager) { Top = 8, Text = "Create" };
+            var btnCreate = new Button(Manager) {Top = 8, Text = "Create"};
             btnCreate.Left = (ClientWidth / 2) - (btnCreate.Width / 2);
             btnCreate.Init();
-            btnCreate.Click += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
+            btnCreate.Click += delegate
             {
-                CreateWorldDialog window = new CreateWorldDialog(manager, this);
+                var window = new CreateWorldDialog(manager, this);
                 window.Init();
                 Manager.Add(window);
                 window.Show();
-            });
+            };
             BottomPanel.Add(btnCreate);
 
-            btnJoin = new Button(Manager) { Right = btnCreate.Left - 8, Top = 8, Text = "Join" };
+            var btnJoin = new Button(Manager) {Right = btnCreate.Left - 8, Top = 8, Text = "Join"};
             btnJoin.Init();
-            btnJoin.Click += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
-            {
-                JoinRoom(RoomListCtrl.ItemIndex);
-            });
+            btnJoin.Click += delegate { JoinRoom(lstRooms.ItemIndex); };
             BottomPanel.Add(btnJoin);
 
-            btnDisconnect = new Button(Manager) { Left = btnCreate.Right + 8, Top = 8, Text = "Quit" };
+            var btnDisconnect = new Button(Manager) {Left = btnCreate.Right + 8, Top = 8, Text = "Quit"};
             btnDisconnect.Init();
-            btnDisconnect.Click += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
+            btnDisconnect.Click += delegate
             {
                 screen.Client.Network.NetClient.Disconnect("Left Lobby");
                 screen.Client.State = GameState.Lobby;
                 MainWindow.ScreenManager.SwitchScreen(new LoginScreen());
-            });
+            };
             BottomPanel.Add(btnDisconnect);
 
             //When finished, request server send lobby data
             //Game.NetManager.Send(new RequestMessage(MessageTypes.Lobby));
 
-            // Test code
-             //
+            //Todo: This is test code!
             lobbyScreen.Intro = "Eyy welcome";
             lobbyScreen.Description = "Woazers! You're in our server!";
             lobbyScreen.Name = "Example Server";
             lobbyScreen.Rooms.Add(new LobbySaveData("Test", 1337,
                 "Check out this amazing level. It will blow your butt off. Neat!", 10, 9001, 5));
             LoadRooms();
-             //
-            // Test code
-
         }
+
         /// <summary>
         /// Joins a world
         /// </summary>
@@ -165,18 +192,45 @@ namespace Bricklayer.Core.Client.Interface.Windows
             {
                 //MainWindow.ScreenManager.SwitchScreen(new Screen(new Action((new Action(() =>
                 //{
-                   // screen.Client.Network.Send(new Bricklayer.Common.Networking.Messages.JoinRoomMessage(
-                   //     (RoomListCtrl.Items[index] as LobbyDataControl).Data.ID));
-               // })))));
+                // screen.Client.Network.Send(new Bricklayer.Common.Networking.Messages.JoinRoomMessage(
+                //     (RoomListCtrl.Items[index] as LobbyDataControl).Data.ID));
+                // })))));
             }
         }
+
+        private void FilterRooms()
+        {
+            //Filter search results
+            if (txtSearch.Text != searchStr && !string.IsNullOrWhiteSpace(txtSearch.Text))
+                lstRooms.Items =
+                    lstRooms.Items.Where(
+                        x => ((LobbyDataControl)x).Data.Name.ToLower().Contains(txtSearch.Text.ToLower())).ToList();
+
+            //Filter by category
+            switch (cmbSort.ItemIndex)
+            {
+                case 0:
+                    lstRooms.Items = lstRooms.Items.OrderByDescending(x => ((LobbyDataControl)x).Data.Online).ToList();
+                    break;
+                case 1:
+                    lstRooms.Items = lstRooms.Items.OrderByDescending(x => ((LobbyDataControl)x).Data.Rating).ToList();
+                    break;
+                case 2:
+                    lstRooms.Items = lstRooms.Items.OrderByDescending(x => ((LobbyDataControl)x).Data.Plays).ToList();
+                    break;
+                case 3:
+                    lstRooms.Items.Shuffle();
+                    break;
+            }
+        }
+
         /// <summary>
         /// Loads rooms from the recieved lobby message
         /// </summary>
-        public void LoadRooms()
+        private void LoadRooms()
         {
             //Set text with what has been recieved
-            grpServer.Text = "Server [" + lobbyScreen.Client.Network.NetClient.ServerConnection.RemoteEndPoint.ToString() + "]";
+            grpServer.Text = "Server [" + lobbyScreen.Client.Network.NetClient.ServerConnection.RemoteEndPoint + "]";
             lblName.Text = lobbyScreen.Name;
             lblDescription.Text = lobbyScreen.Description;
             lblDescription.Height = (int)MainWindow.DefaultSpriteFont.MeasureRichString(lblDescription.Text, Manager).Y;
@@ -190,38 +244,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         private void RefreshRooms()
         {
-            LobbyScreen screen = MainWindow.ScreenManager.Current as LobbyScreen;
-            RoomListCtrl.Items.Clear();
-            foreach (LobbySaveData s in screen.Rooms)
-                RoomListCtrl.Items.Add(new LobbyDataControl(Manager, s));
+            var screen = MainWindow.ScreenManager.Current as LobbyScreen;
+            lstRooms.Items.Clear();
+            if (screen != null)
+                foreach (var s in screen.Rooms)
+                    lstRooms.Items.Add(new LobbyDataControl(screen, Manager, s));
             FilterRooms();
         }
 
-        private void FilterRooms()
-        {
-            //Filter search results
-            if (txtSearch.Text != searchStr && !string.IsNullOrWhiteSpace(txtSearch.Text))
-            {
-                for (int i = 0; i < RoomListCtrl.Items.Count; i++)
-                {
-                    if (!(RoomListCtrl.Items[i] as LobbyDataControl).Data.Name.ToLower().Contains(txtSearch.Text.ToLower()))
-                    {
-                        RoomListCtrl.Items.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
-            //Filter by category
-            if (cmbSort.ItemIndex == 0) //Online
-                RoomListCtrl.Items = RoomListCtrl.Items.OrderByDescending(x => (x as LobbyDataControl).Data.Online).ToList();
-            //RoomListCtrl.Items.Sort((x, y) => (x as LobbyDataControl).Data.Players.CompareTo((y as LobbyDataControl).Data.Players));
-            else if (cmbSort.ItemIndex == 1)
-                RoomListCtrl.Items = RoomListCtrl.Items.OrderByDescending(x => (x as LobbyDataControl).Data.Rating).ToList();
-            else if (cmbSort.ItemIndex == 2)
-                RoomListCtrl.Items = RoomListCtrl.Items.OrderByDescending(x => (x as LobbyDataControl).Data.Plays).ToList();
-            else if (cmbSort.ItemIndex == 3)
-                RoomListCtrl.Items.Shuffle();
-        }
         /// <summary>
         /// Replaces variables like "$Online" with text in the server info
         /// </summary>

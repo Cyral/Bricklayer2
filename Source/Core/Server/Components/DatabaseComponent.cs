@@ -18,8 +18,8 @@ namespace Pyratron.Bricklayer.Auth.Components
         private string connectionString;
 
         private string setupQuery =
-            "CREATE TABLE IF NOT EXISTS `Levels` (`GUID` GUID,`Name` TEXT,`Description` TEXT,PRIMARY KEY(GUID));";
-        private string getRoomsQuery = "SELECT `guid`, `name`, `description` FROM `Levels`";
+            "CREATE TABLE IF NOT EXISTS `Levels` (`GUID` GUID,`Name` TEXT,`Description` TEXT,`Plays` INTEGER,PRIMARY KEY(GUID));";
+        private string getRoomsQuery = "SELECT `guid`, `name`, `description`, `plays` FROM `Levels`";
         private DbProviderFactory providerFactory;
 
         public DatabaseComponent(Server server) : base(server)
