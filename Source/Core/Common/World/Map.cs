@@ -48,7 +48,7 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// The number of players online
         /// </summary>
-        public virtual int Online { get { return Players.Count; } }
+        public virtual int Online => Players.Count;
 
         /// <summary>
         /// The map's play count

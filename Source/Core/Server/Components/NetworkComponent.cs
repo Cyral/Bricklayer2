@@ -77,24 +77,24 @@ namespace Bricklayer.Core.Server.Components
                 NetServer.SendUnconnectedMessage(message, AuthEndpoint);
             });
 
-            Server.Events.Connection.Valid.AddHandler(args =>
+            Server.Events.Connection.Valid.AddHandler(async args =>
             {
                 pendingSessions[args.UUID].Approve(EncodeMessage(
                     new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
-                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, Server.Rooms)));
+                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllRooms())));
                 Server.Users.Add(new User(args.Username, pendingSessions[args.UUID], Server.FindAvailableUserID()));
                 pendingSessions.Remove(args.UUID);
                 Logger.WriteLine(LogType.Net,
                     $"Session valid for '{args.Username}'. (Allowed)");
             }, EventPriority.Final);
 
-            Server.Events.Connection.RequestMessage.AddHandler(args =>
+            Server.Events.Connection.RequestMessage.AddHandler(async args =>
             {
                 //When the client request an init message (refreshing the lobby)
                 if (args.Type == MessageTypes.Init)
                 {
                     Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
-                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, Server.Rooms), args.Sender);
+                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllRooms()), args.Sender);
                 }
             });
 
