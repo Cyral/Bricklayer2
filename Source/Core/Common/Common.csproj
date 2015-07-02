@@ -77,6 +77,7 @@
     <Compile Include="Net\Messages\InitMessage.cs" />
     <Compile Include="Net\Messages\LoginMessage.cs" />
     <Compile Include="Net\Messages\PublicKeyMessage.cs" />
+    <Compile Include="Net\Messages\RequestMessage.cs" />
     <Compile Include="Net\Messages\ServerInfoMessage.cs" />
     <Compile Include="Net\Messages\SessionMessage.cs" />
     <Compile Include="Net\Messages\ValidSessionMessage.cs" />

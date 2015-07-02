@@ -24,6 +24,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
         public int Online;
         public List<LobbySaveData> Rooms = new List<LobbySaveData>();
 
+        public LobbyScreen(string description, string name, string intro, int online, List<LobbySaveData> rooms)
+        {
+            Description = description;
+            Name = name;
+            Intro = intro;
+            Online = online;
+            Rooms = rooms;
+        }
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);

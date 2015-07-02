@@ -144,16 +144,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             //When finished, request server send lobby data
             //Game.NetManager.Send(new RequestMessage(MessageTypes.Lobby));
 
-            // Test code
-             //
-            lobbyScreen.Intro = "Eyy welcome";
-            lobbyScreen.Description = "Woazers! You're in our server!";
-            lobbyScreen.Name = "Example Server";
-            lobbyScreen.Rooms.Add(new LobbySaveData("Test", 1337,
-                "Check out this amazing level. It will blow your butt off. Neat!", 10, 9001, 5));
             LoadRooms();
-             //
-            // Test code
 
         }
         /// <summary>

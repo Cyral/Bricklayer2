@@ -79,7 +79,7 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Connection.Valid.AddHandler(args =>
             {
-                pendingSessions[args.Id].Approve(EncodeMessage(new InitMessage()));
+                pendingSessions[args.Id].Approve(EncodeMessage(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription, Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, Server.Rooms)));
                 pendingSessions.Remove(args.Id);
                 Logger.WriteLine(LogType.Net,
                     $"Session valid for '{args.Id}'. (Allowed)");
