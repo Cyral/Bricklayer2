@@ -5,6 +5,11 @@ namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
     /// Info sent from client to auth server to request session for a game server.
+    /// String: Username
+    /// String: Private Key
+    /// Int: ID
+    /// String: Host's IP
+    /// Int: Host's Port
     /// </summary>
     public class SessionMessage : IMessage
     {
@@ -13,7 +18,7 @@ namespace Bricklayer.Core.Common.Net.Messages
         public int Port { get; set; }
         public string PrivateKey { get; set; }
         public string Username { get; set; }
-        public int ID { get; set; }
+        public string UUID { get; set; }
 
         public SessionMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -21,9 +26,9 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public SessionMessage(string username, int id, string privateKey, IPAddress address, int port)
+        public SessionMessage(string username, string uuid, string privateKey, IPAddress address, int port)
         {
-            ID = id;
+            UUID = uuid;
             Username = username;
             PrivateKey = privateKey;
             Address = address;
@@ -40,7 +45,7 @@ namespace Bricklayer.Core.Common.Net.Messages
         {
             Username = im.ReadString();
             PrivateKey = im.ReadString();
-            ID = im.ReadInt32();
+            UUID = im.ReadString();
             Address = IPAddress.Parse(im.ReadString());
             Port = im.ReadInt32();
         }
@@ -49,7 +54,7 @@ namespace Bricklayer.Core.Common.Net.Messages
         {
             om.Write(Username);
             om.Write(PrivateKey);
-            om.Write(ID);
+            om.Write(UUID);
             om.Write(Address.ToString());
             om.Write(Port);
         }

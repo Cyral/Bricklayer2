@@ -89,7 +89,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
             Client.Events.Network.Auth.Init.AddHandler(args =>
             {
                 TokenKeys.Username = args.Username;
-                TokenKeys.UID = args.DatabaseId;
+                TokenKeys.UUID = args.UUID;
                 TokenKeys.PrivateKey = args.PrivateKey;
                 TokenKeys.PublicKey = args.PublicKey;
             });
@@ -100,7 +100,7 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                 if (args.Verified)
                 {
                     Debug.WriteLine("Session verification Successful");
-                    await Join(Host, Port, TokenKeys.Username, TokenKeys.UID, TokenKeys.PublicKey); // Start connection process with game server once it gets session verification from the auth server
+                    await Join(Host, Port, TokenKeys.Username, TokenKeys.UUID, TokenKeys.PublicKey); // Start connection process with game server once it gets session verification from the auth server
                 }
                 else
                     Debug.WriteLine("Session verification failed");
@@ -126,13 +126,13 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         {
             Host = host;
             Port = port;
-            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort, new SessionMessage(TokenKeys.Username, TokenKeys.UID, TokenKeys.PrivateKey, NetUtility.Resolve(host), port));
+            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort, new SessionMessage(TokenKeys.Username, TokenKeys.UUID, TokenKeys.PrivateKey, NetUtility.Resolve(host), port));
         }
 
         /// <summary>
         /// Sends a message once connected to join a server officially.
         /// </summary>
-        public async Task Join(string host, int port, string username, int id, string publicKey)
+        public async Task Join(string host, int port, string username, string id, string publicKey)
         {
             await Task.Factory.StartNew(() =>
             {

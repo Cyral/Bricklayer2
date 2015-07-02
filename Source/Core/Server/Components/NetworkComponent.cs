@@ -56,9 +56,9 @@ namespace Bricklayer.Core.Server.Components
         internal IPEndPoint AuthEndpoint { get; private set; }
 
         /// <summary>
-        /// Stored pending user sessions
+        /// Stored pending user sessions. (The users UUID and connection)
         /// </summary>
-        private readonly Dictionary<int, NetConnection> pendingSessions = new Dictionary<int, NetConnection>();
+        private readonly Dictionary<string, NetConnection> pendingSessions = new Dictionary<string, NetConnection>();
 
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered; //Message delivery method
         private bool isDisposed; //Is the instance disposed?
@@ -70,8 +70,8 @@ namespace Bricklayer.Core.Server.Components
             {
                 Logger.WriteLine(LogType.Net,
                 args.Username + " requesting to join. Verifying public key with auth server.");
-                pendingSessions.Add(args.Id, args.Connection);
-                var message = EncodeMessage(new PublicKeyMessage(args.Username, args.Id, args.PublicKey));
+                pendingSessions.Add(args.UUID, args.Connection);
+                var message = EncodeMessage(new PublicKeyMessage(args.Username, args.UUID, args.PublicKey));
 
                 //Send public key to auth server to verify if session is valid
                 NetServer.SendUnconnectedMessage(message, AuthEndpoint);
@@ -79,19 +79,19 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Connection.Valid.AddHandler(args =>
             {
-                pendingSessions[args.Id].Approve(EncodeMessage(new InitMessage()));
-                pendingSessions.Remove(args.Id);
+                pendingSessions[args.UUID].Approve(EncodeMessage(new InitMessage()));
+                pendingSessions.Remove(args.UUID);
                 Logger.WriteLine(LogType.Net,
-                    $"Session valid for '{args.Id}'. (Allowed)");
+                    $"Session valid for '{args.UUID}'. (Allowed)");
             });
 
 
             Server.Events.Connection.Invalid.AddHandler(args =>
             {
-                pendingSessions[args.Id].Deny("Invalid or expired session.");
-                pendingSessions.Remove(args.Id);
+                pendingSessions[args.UUID].Deny("Invalid or expired session.");
+                pendingSessions.Remove(args.UUID);
                 Logger.WriteLine(LogType.Net,
-                    $"Session invalid for '{args.Id}'. (Denied)");
+                    $"Session invalid for '{args.UUID}'. (Denied)");
             });
 
             Server.Events.Connection.RequestInfo.AddHandler(args =>

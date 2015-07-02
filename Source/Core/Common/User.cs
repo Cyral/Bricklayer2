@@ -10,26 +10,26 @@ namespace Bricklayer.Core.Common
     public class User : UserData
     {
         /// <summary>
-        /// Represents an anonymous user
+        /// Indicates if the user is not signed in.
         /// </summary>
-        public bool IsGuest { get; set; }
+        public bool IsGuest { get; private set; }
 
         /// <summary>
-        /// The numerical ID of the user, for keeping track of connections
+        /// The numerical ID of the user, for keeping track of connections.
         /// </summary>
-        public short ID { get; set; }
+        public short ID { get; private set; }
 
         /// <summary>
-        /// The user's underlying Lidgren connection
+        /// The user's underlying network connection.
         /// </summary>
-        public NetConnection Connection { get; set; }
+        public NetConnection Connection { get; private set; }
 
         public User(string username, NetConnection connection, short id)
         {
             Username = username;
             Connection = connection;
             ID = id;
-            DatabaseID = -1;
+            UUID = string.Empty;
         }
     }
 }

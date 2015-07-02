@@ -9,13 +9,16 @@ namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
     /// Contains the public key and the username that goes with it. 
-    /// Client sends this to Game server and Game server sends this to the Auth server to confirm.
+    /// Client => Game Server => Auth Server
+    /// String: Username
+    /// String: UUID
+    /// String: Public Key
     /// </summary>
     public class PublicKeyMessage : IMessage
     {
         public double MessageTime { get; set; }
         public string Username { get; set; }
-        public int ID { get; set; }
+        public string UUID { get; set; }
         public string PublicKey { get; set; }
 
         public PublicKeyMessage(NetIncomingMessage im, MessageContext context)
@@ -24,9 +27,9 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public PublicKeyMessage(string username, int id, string publicKey)
+        public PublicKeyMessage(string username, string uuid, string publicKey)
         {
-            ID = id;
+            UUID = uuid;
             Username = username;
             PublicKey = publicKey;
             MessageTime = NetTime.Now;
@@ -40,14 +43,14 @@ namespace Bricklayer.Core.Common.Net.Messages
         public void Decode(NetIncomingMessage im)
         {
             Username = im.ReadString();
-            ID = im.ReadInt32();
+            UUID = im.ReadString();
             PublicKey = im.ReadString();
         }
 
         public void Encode(NetOutgoingMessage om)
         {
             om.Write(Username);
-            om.Write(ID);
+            om.Write(UUID);
             om.Write(PublicKey);
         }
 

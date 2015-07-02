@@ -1,10 +1,4 @@
-﻿using Bricklayer.Core.Common.Net;
-using Lidgren.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
@@ -12,31 +6,21 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// Sends the initialization response to the client after logging in.
     /// Auth Server => Client
     /// String: User's username (In case of incorrect case, or automatically assigned guest username)
-    /// Int: User's ID (From database)
+    /// String: User's UUID
     /// String: Public Key
     /// String: Private Key
     /// </summary>
     public class AuthInitMessage : IMessage
     {
-        public double MessageTime { get; set; }
         public string PrivateKey { get; set; }
         public string PublicKey { get; set; }
-        public int UID { get; set; }
         public string Username { get; set; }
+        public string UUID { get; set; }
 
         public AuthInitMessage(NetIncomingMessage im, MessageContext context)
         {
             Context = context;
             Decode(im);
-        }
-
-        public AuthInitMessage(string username, int databaseID, string privateKey, string publicKey)
-        {
-            Username = username;
-            UID = databaseID;
-            PrivateKey = privateKey;
-            PublicKey = publicKey;
-            MessageTime = NetTime.Now;
         }
 
         #region IMessage Members
@@ -47,7 +31,7 @@ namespace Bricklayer.Core.Common.Net.Messages
         public void Decode(NetIncomingMessage im)
         {
             Username = im.ReadString();
-            UID = im.ReadInt32();
+            UUID = im.ReadString();
             PrivateKey = im.ReadString();
             PublicKey = im.ReadString();
         }
@@ -55,7 +39,7 @@ namespace Bricklayer.Core.Common.Net.Messages
         public void Encode(NetOutgoingMessage om)
         {
             om.Write(Username);
-            om.Write(UID);
+            om.Write(UUID);
             om.Write(PrivateKey);
             om.Write(PublicKey);
         }

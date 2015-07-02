@@ -30,14 +30,14 @@ namespace Bricklayer.Core.Server
             public class PreLoginEventArgs : EventArgs
             {
                 public string Username { get; private set; }
-                public int Id { get; private set; }
+                public string UUID { get; private set; }
                 public string PublicKey { get; private set; }
                 public NetConnection Connection { get; private set; }
 
-                public PreLoginEventArgs(string username, int id, string publicKey, NetConnection connection)
+                public PreLoginEventArgs(string username, string uuid, string publicKey, NetConnection connection)
                 {
                     Username = username;
-                    Id = id;
+                    UUID = uuid;
                     PublicKey = publicKey;
                     Connection = connection;
                 }
@@ -69,31 +69,30 @@ namespace Bricklayer.Core.Server
             public class ValidSessionEventArgs : EventArgs
             {
                 public string Username { get; private set; }
-                public int Id { get; private set; }
+                public string UUID { get; private set; }
 
-                public ValidSessionEventArgs(string username, int id )
+                public ValidSessionEventArgs(string username, string uuid)
                 {
                     Username = username;
-                    Id = id;
+                    UUID = uuid;
                 }
             }
 
             public class InvalidSessionEventArgs : EventArgs
             {
                 public string Username { get; private set; }
-                public int Id { get; private set; }
+                public string UUID { get; private set; }
 
-                public InvalidSessionEventArgs(string username, int id)
+                public InvalidSessionEventArgs(string username, string uuid)
                 {
                     Username = username;
-                    Id = id;
+                    UUID = uuid;
                 }
             }
 
 
             public class RequestInfoEventArgs : EventArgs
             {
-                public string Username;
                 public IPEndPoint Host;
 
                 public RequestInfoEventArgs(IPEndPoint host)

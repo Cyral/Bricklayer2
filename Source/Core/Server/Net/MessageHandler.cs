@@ -64,7 +64,7 @@ namespace Bricklayer.Core.Server.Net
                                         var msg = new PublicKeyMessage(inc, MessageContext.Client);
 
                                         Server.Events.Connection.PreLogin.Invoke(
-                                          new EventManager.ConnectionEvents.PreLoginEventArgs(msg.Username, msg.ID, msg.PublicKey, inc.SenderConnection));
+                                          new EventManager.ConnectionEvents.PreLoginEventArgs(msg.Username, msg.UUID, msg.PublicKey, inc.SenderConnection));
 
                                         break;
                                     }
@@ -120,13 +120,13 @@ namespace Bricklayer.Core.Server.Net
                                             {
                                                 Server.Events.Connection.Valid.Invoke(
                                                     new EventManager.ConnectionEvents.ValidSessionEventArgs(
-                                                        msg.Username, msg.ID));
+                                                        msg.Username, msg.UUID));
                                             }
                                             else
                                             {
                                                 Server.Events.Connection.Invalid.Invoke(
                                                     new EventManager.ConnectionEvents.InvalidSessionEventArgs(
-                                                        msg.Username, msg.ID));
+                                                        msg.Username, msg.UUID));
                                             }
 
                                             break;

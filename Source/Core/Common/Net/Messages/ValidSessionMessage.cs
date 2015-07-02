@@ -1,9 +1,4 @@
 ﻿using Lidgren.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
@@ -13,27 +8,29 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// Bool: Valid
     /// If Valid:
     /// String: Username
-    /// Int: ID
+    /// String: Unique ID
     /// </summary>
     public class ValidSessionMessage : IMessage
     {
-        public double MessageTime { get; set; }
+        /// <summary>
+        /// The user's name.
+        /// </summary>
         public string Username { get; set; }
-        public int ID { get; set; }
+
+        /// <summary>
+        /// The user's unique ID.
+        /// </summary>
+        public string UUID { get; set; }
+
+        /// <summary>
+        /// Is the session valid?
+        /// </summary>
         public bool Valid { get; set; }
 
         public ValidSessionMessage(NetIncomingMessage im, MessageContext context)
         {
             Context = context;
             Decode(im);
-        }
-
-        public ValidSessionMessage(string username, int id, bool valid)
-        {
-            Username = username;
-            ID = id;
-            Valid = valid;
-            MessageTime = NetTime.Now;
         }
 
         #region IMessage Members
@@ -47,7 +44,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             if (Valid)
             {
                 Username = im.ReadString();
-                ID = im.ReadInt32();
+                UUID = im.ReadString();
             }
         }
 
@@ -57,7 +54,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             if (Valid)
             {
                 om.Write(Username);
-                om.Write(ID);
+                om.Write(UUID);
             }
         }
 

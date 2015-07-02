@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Client
     internal class Token
     {
         public string Username { get; set; }
-        internal int UID { get; set; }
+        internal string UUID { get; set; }
         public string PublicKey { get; set; }
         public string PrivateKey { get; set; }
     }

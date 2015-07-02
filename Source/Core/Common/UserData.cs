@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bricklayer.Core.Common
 {
+    /// <summary>
     /// Represents the most basic form of user data, straight from the Joomla! database (Containing only name and ID)
     /// </summary>
     public class UserData 
@@ -16,23 +17,22 @@ namespace Bricklayer.Core.Common
         public string Username { get; set; }
 
         /// <summary>
-        /// The database ID of the user, defined in the Joomla! database
+        /// The permanent unique ID of the user.
         /// </summary>
         /// <remarks>
-        /// Note that this is different than any other IDs used, such as those to identify the connection number
-        /// Guests will have a DatabaseID equal to their ID, negative
+        /// This ID is different than the temporary server ID assigned.
         /// </remarks>
-        public int DatabaseID { get; set; }
+        public string UUID { get; set; }
 
         public UserData()
         {
 
         }
 
-        public UserData(string userName, int databaseId)
+        public UserData(string username, string uuid)
         {
-            Username = userName;
-            DatabaseID = databaseId;
+            Username = username;
+            UUID = uuid;
         }
     }
 }

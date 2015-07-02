@@ -97,15 +97,15 @@ namespace Bricklayer.Core.Client
 
                 public class InitEventArgs : EventArgs
                 {
-                    public int DatabaseId { get; private set; }
+                    public string UUID { get; private set; }
                     public string Username { get; private set; }
-                    public string PrivateKey { get; private set; }
+                    internal string PrivateKey { get; private set; }
                     public string PublicKey { get; private set; }
 
-                    public InitEventArgs(string username, int databaseId, string privateKey, string publicKey)
+                    public InitEventArgs(string username, string uuid, string privateKey, string publicKey)
                     {
                         Username = username;
-                        DatabaseId = databaseId;
+                        UUID = uuid;
                         PrivateKey = privateKey;
                         PublicKey = publicKey;
                     }
