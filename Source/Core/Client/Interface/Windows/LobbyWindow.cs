@@ -3,7 +3,10 @@ using System.Linq;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
+using Bricklayer.Core.Common.Net;
+using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Data;
+using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
@@ -92,7 +95,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnReload.ToolTip.Text = "Refresh";
             btnReload.Click += delegate
             {
-                // Game.NetManager.Send(new RequestMessage(MessageTypes.Lobby));
+                screen.Client.Network.Send(new RequestMessage(MessageTypes.Init));
             };
             grpLobby.Add(btnReload);
 
@@ -170,9 +173,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 MainWindow.ScreenManager.SwitchScreen(new LoginScreen());
             };
             BottomPanel.Add(btnDisconnect);
-
-            //When finished, request server send lobby data
-            //Game.NetManager.Send(new RequestMessage(MessageTypes.Lobby));
 
             LoadRooms();
         }

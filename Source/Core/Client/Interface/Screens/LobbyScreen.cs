@@ -15,14 +15,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
     public class LobbyScreen : Screen
     {
         //Controls
-        public LobbyWindow Lobby;
-
+        private LobbyWindow wndLobby;
         private ImageBox  imgBackground;
-        public string Description;
-        public string Name;
-        public string Intro;
-        public int Online;
-        public List<LobbySaveData> Rooms = new List<LobbySaveData>();
+
+        public string Description { get; }
+        public string Name { get; }
+        public string Intro { get; }
+        public int Online { get; }
+
+        public List<LobbySaveData> Rooms { get; private set; }
 
         public LobbyScreen(string description, string name, string intro, int online, List<LobbySaveData> rooms)
         {
@@ -48,15 +49,16 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Add(imgBackground);
 
             //Add the login window
-            Lobby = new LobbyWindow(Manager, this);
-            Lobby.Init();
-            Window.Add(Lobby);
-            Lobby.Show();
+            wndLobby = new LobbyWindow(Manager, this);
+            wndLobby.Init();
+            Window.Add(wndLobby);
+            wndLobby.Show();
 
         }
+
         public override void Remove()
         {
-            Window.Remove(Lobby);
+            Window.Remove(wndLobby);
             Window.Remove(imgBackground);
         }
     }

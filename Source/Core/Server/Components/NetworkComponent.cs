@@ -79,11 +79,13 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Connection.Valid.AddHandler(args =>
             {
-                pendingSessions[args.UUID].Approve(EncodeMessage(new InitMessage()));
+                pendingSessions[args.UUID].Approve(EncodeMessage(
+                    new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
+                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, Server.Rooms)));
                 pendingSessions.Remove(args.UUID);
                 Logger.WriteLine(LogType.Net,
-                    $"Session valid for '{args.UUID}'. (Allowed)");
-            });
+                    $"Session valid for '{args.Username}'. (Allowed)");
+            }, EventPriority.Final);
 
 
             Server.Events.Connection.Invalid.AddHandler(args =>
@@ -91,7 +93,7 @@ namespace Bricklayer.Core.Server.Components
                 pendingSessions[args.UUID].Deny("Invalid or expired session.");
                 pendingSessions.Remove(args.UUID);
                 Logger.WriteLine(LogType.Net,
-                    $"Session invalid for '{args.UUID}'. (Denied)");
+                    $"Session invalid for '{args.Username}'. (Denied)");
             });
 
             Server.Events.Connection.RequestInfo.AddHandler(args =>

@@ -8,20 +8,18 @@ using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
+    /// <summary>
+    /// Sends initial server data to the client.
+    /// Server => Client
+    /// </summary>
     public class InitMessage : IMessage
     {
         public double MessageTime { get; set; }
-
         public string ServerName { get; set; }
-
         public string Description { get; set; }
-
         public string Intro { get; set; }
-
         public int Online { get; set; }
-
         public List<LobbySaveData> Rooms { get; set; }
-
 
         public InitMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -32,11 +30,11 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public InitMessage(string serverName, string description, string intro, int online, List<LobbySaveData> rooms)
         {
-            this.ServerName = serverName;
-            this.Description = description;
-            this.Intro = intro;
-            this.Rooms = rooms;
-            this.Online = (byte)online;
+            ServerName = serverName;
+            Description = description;
+            Intro = intro;
+            Rooms = rooms;
+            Online = (byte)online;
             MessageTime = NetTime.Now;
         }
 
@@ -48,12 +46,12 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
-            this.ServerName = im.ReadString();
-            this.Description = im.ReadString();
-            this.Intro = im.ReadString();
-            this.Online = im.ReadInt32();
+            ServerName = im.ReadString();
+            Description = im.ReadString();
+            Intro = im.ReadString();
+            Online = im.ReadInt32();
             int roomsLength = im.ReadByte();
-            for (int i = 0; i < roomsLength; i++)
+            for (var i = 0; i < roomsLength; i++)
             {
                 Rooms.Add(new LobbySaveData(im.ReadString(), im.ReadInt16(), im.ReadString(), im.ReadByte(), im.ReadInt16(), im.ReadDouble()));
             }
@@ -61,19 +59,19 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write(this.ServerName);
-            om.Write(this.Description);
-            om.Write(this.Intro);
-            om.Write(this.Online);
+            om.Write(ServerName);
+            om.Write(Description);
+            om.Write(Intro);
+            om.Write(Online);
             om.Write((byte)Rooms.Count);
-            for (int i = 0; i < Rooms.Count; i++)
+            foreach (var data in Rooms)
             {
-                om.Write(Rooms[i].Name);
-                om.Write((short)Rooms[i].ID);
-                om.Write(Rooms[i].Description);
-                om.Write((byte)Rooms[i].Online);
-                om.Write((short)Rooms[i].Plays);
-                om.Write(Rooms[i].Rating);
+                om.Write(data.Name);
+                om.Write((short)data.ID);
+                om.Write(data.Description);
+                om.Write((byte)data.Online);
+                om.Write((short)data.Plays);
+                om.Write(data.Rating);
             }
         }
 
