@@ -21,9 +21,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly Button btnRemove;
         private readonly ControlList<ServerDataControl> lstServers; //The listbox of server control items
         private List<ServerSaveData> servers; //The list of loaded servers
+        private readonly ServerScreen screen;
 
-        private LoginScreen screen;
-        public ServerWindow(Manager manager, LoginScreen screen) : base(manager)
+        public ServerWindow(Manager manager, ServerScreen screen) : base(manager)
         {
 
             this.screen = screen;
@@ -120,16 +120,31 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(btnRefresh);
 
             // Listen for when init message is recieved
-            screen.Client.Events.Network.Game.Init.AddHandler(args => screen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName, args.Message.Intro, args.Message.Online, args.Message.Rooms)));
+            screen.Client.Events.Network.Game.Init.AddHandler(OnInit);
 
             // If user was disconnected from the server
-            screen.Client.Events.Network.Game.Disconnect.AddHandler(args =>
-            {
-                var msgBox = new MessageBox(Manager, MessageBoxType.Warning, args.Reason, "Error Connecting to Server");
-                msgBox.Init();
-                manager.Add(msgBox);
-                msgBox.ShowModal();
-            });
+            screen.Client.Events.Network.Game.Disconnect.AddHandler(OnDisconnect);
+        }
+
+        private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
+        {
+            screen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
+                args.Message.Intro, args.Message.Online, args.Message.Rooms));
+        }
+
+        private void OnDisconnect(EventManager.NetEvents.GameServerEvents.DisconnectEventArgs args)
+        {
+            var msgBox = new MessageBox(Manager, MessageBoxType.Warning, args.Reason, "Error Connecting to Server");
+            msgBox.Init();
+            screen.ScreenManager.Manager.Add(msgBox);
+            msgBox.ShowModal();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            screen.Client.Events.Network.Game.Init.RemoveHandler(OnInit);
+            screen.Client.Events.Network.Game.Disconnect.RemoveHandler(OnDisconnect);
+            base.Dispose(disposing);
         }
 
         public void AddServer(ServerSaveData server)

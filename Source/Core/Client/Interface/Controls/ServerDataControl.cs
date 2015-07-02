@@ -21,14 +21,14 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private readonly Label lblName;
         private readonly Label lblStats;
         private readonly Color offlineColor = Color.Red, onlineColor = new Color(0, 205, 5);
-        private readonly LoginScreen screen;
+        private readonly ServerScreen screen;
         private readonly ServerSaveData data;
         private IPEndPoint endPoint;
         private ImageBox imgStatus;
         private Timer pingTimer;
         private bool resolvedHost;
 
-        public ServerDataControl(LoginScreen screen, Manager manager, ServerSaveData server) : base(manager)
+        public ServerDataControl(ServerScreen screen, Manager manager, ServerSaveData server) : base(manager)
         {
             this.screen = screen;
 
@@ -112,7 +112,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             {
                 if (endPoint != null && args.Host.Equals(endPoint))
                 {
-                    pingTimer.Dispose();
+                    pingTimer?.Dispose();
 
                     lblStats.Text = args.Players + "/" + args.MaxPlayers;
                     lblDescription.Text = args.Description;

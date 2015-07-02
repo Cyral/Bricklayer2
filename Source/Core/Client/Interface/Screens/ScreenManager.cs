@@ -113,6 +113,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                         Current?.Remove();
                         Current = fadeTo;
                         Current.Add(this);
+                        Window.Client.State = Current.State;
                     }
                     state = FadeState.In;
                     fadeImage.BringToFront();

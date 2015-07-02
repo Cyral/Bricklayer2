@@ -12,29 +12,13 @@ using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
-    public class LobbyScreen : Screen
+    public class ServerScreen : Screen
     {
         //Controls
-        private LobbyWindow wndLobby;
-        private ImageBox  imgBackground;
+        private ServerWindow wndServer;
+        private ImageBox imgBackground;
 
-        public string Description { get; }
-        public string Name { get; }
-        public string Intro { get; }
-        public int Online { get; }
-
-        public List<LobbySaveData> Rooms { get; private set; }
-
-        public LobbyScreen(string description, string name, string intro, int online, List<LobbySaveData> rooms)
-        {
-            Description = description;
-            Name = name;
-            Intro = intro;
-            Online = online;
-            Rooms = rooms;
-        }
-
-        protected internal override GameState State => GameState.Lobby;
+        protected internal override GameState State => GameState.Server;
 
         public override void Add(ScreenManager screenManager)
         {
@@ -51,17 +35,17 @@ namespace Bricklayer.Core.Client.Interface.Screens
             imgBackground.Init();
             Window.Add(imgBackground);
 
-            //Add the login window
-            wndLobby = new LobbyWindow(Manager, this);
-            wndLobby.Init();
-            Window.Add(wndLobby);
-            wndLobby.Show();
+            //Add the server window
+            wndServer = new ServerWindow(Manager, this);
+            wndServer.Init();
+            Window.Add(wndServer);
+            wndServer.Show();
         }
 
         public override void Remove()
         {
-            Window.Remove(wndLobby);
-            wndLobby.Dispose();
+            Window.Remove(wndServer);
+            wndServer.Dispose();
             Window.Remove(imgBackground);
         }
     }

@@ -59,9 +59,11 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// Removes a handler from this event.
         /// </summary>
-        public void RemoveHandler(EventHandler handler)
+        public void RemoveHandler(EventHandler<TArgs> handler)
         {
-            handlers.Remove(handlers.FirstOrDefault(e => Equals(e.Event, handler)));
+            Console.WriteLine("In: " +handlers.Count);
+            handlers.RemoveAll(e => e.Event.Equals(handler));
+            Console.WriteLine("Out: " + handlers.Count);
         }
 
         /// <summary>

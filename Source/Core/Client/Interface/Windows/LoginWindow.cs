@@ -28,27 +28,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
         public LoginWindow(Manager manager, LoginScreen screen) : base(manager)
         {
             this.screen = screen;
-            screen.Client.State = GameState.Login;
 
             //Events
 
             //Listen for valid response from auth server
-            screen.Client.Events.Network.Auth.Init.AddHandler(async args =>
-            {
-                //Save username and other data to the config file once logged in
-                if (chkRemember.Checked)
-                screen.Client.IO.SetPassword(txtPassword.Text);
-                screen.Client.IO.Config.Client.Username = chkRemember.Checked ? txtUsername.Text : string.Empty;
-                screen.Client.IO.Config.Client.RememberMe = chkRemember.Checked;
-                screen.Client.IO.Config.Client.Color = chkRemember.Checked ? bodyClr.Hue : 40;
-                await screen.Client.IO.SaveConfig(screen.Client.IO.Config);
-            }, EventPriority.Initial);
+            screen.Client.Events.Network.Auth.Init.AddHandler(OnInit, EventPriority.Initial);
 
             //Listen for failed login response from auth server
-            screen.Client.Events.Network.Auth.FailedLogin.AddHandler(args =>
-            {
-               ShowError(manager, $"Failed to login:\n{args.ErrorMessage}.");
-            }, EventPriority.Initial);
+            screen.Client.Events.Network.Auth.FailedLogin.AddHandler(OnFailedLogin, EventPriority.Initial);
 
             //Setup the window
             CaptionVisible = false;
@@ -155,6 +142,28 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             BottomPanel.Height = lnkForgot.Bottom + 28;
             BottomPanel.Top = Height - BottomPanel.Height;
+        }
+
+        private void OnFailedLogin(EventManager.NetEvents.AuthServerEvents.FailedLoginEventArgs args)
+        {
+            ShowError(screen.ScreenManager.Manager, $"Failed to login:\n{args.ErrorMessage}.");
+        }
+
+        private async void OnInit(EventManager.NetEvents.AuthServerEvents.InitEventArgs args)
+        {
+            if (chkRemember.Checked)
+                screen.Client.IO.SetPassword(txtPassword.Text);
+            screen.Client.IO.Config.Client.Username = chkRemember.Checked ? txtUsername.Text : string.Empty;
+            screen.Client.IO.Config.Client.RememberMe = chkRemember.Checked;
+            screen.Client.IO.Config.Client.Color = chkRemember.Checked ? bodyClr.Hue : 40;
+            await screen.Client.IO.SaveConfig(screen.Client.IO.Config);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            screen.Client.Events.Network.Auth.Init.RemoveHandler(OnInit);
+            screen.Client.Events.Network.Auth.FailedLogin.RemoveHandler(OnFailedLogin);
+            base.Dispose(disposing);
         }
 
         private void ShowError(Manager manager, string message)

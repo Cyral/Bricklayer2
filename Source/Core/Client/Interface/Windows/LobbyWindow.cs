@@ -169,19 +169,26 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnDisconnect.Click += delegate
             {
                 screen.Client.Network.NetClient.Disconnect("Left Lobby");
-                screen.Client.State = GameState.Lobby;
                 MainWindow.ScreenManager.SwitchScreen(new LoginScreen());
             };
             BottomPanel.Add(btnDisconnect);
 
-            screen.Client.Events.Network.Game.Init.AddHandler(args =>
-            {
-                screen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
-                    args.Message.Intro, args.Message.Online, args.Message.Rooms));
-                LoadRooms();
-            });
+            screen.Client.Events.Network.Game.Init.AddHandler(OnInit);
 
             LoadRooms();
+        }
+
+        private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
+        {
+            lobbyScreen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
+               args.Message.Intro, args.Message.Online, args.Message.Rooms));
+            LoadRooms();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            lobbyScreen.Client.Events.Network.Game.Init.RemoveHandler(OnInit);
+            base.Dispose(disposing);
         }
 
         /// <summary>
