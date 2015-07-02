@@ -36,7 +36,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Height = 76;
             data = server;
 
-            Width = parent.ClientWidth;
+            Width = parent.Width + 8;
             //Background "gradient" image
             //TODO: Make an actual control. not a statusbar
             gradient = new StatusBar(manager);

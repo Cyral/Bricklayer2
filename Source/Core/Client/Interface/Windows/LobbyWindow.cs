@@ -95,6 +95,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnReload.ToolTip.Text = "Refresh";
             btnReload.Click += delegate
             {
+                btnReload.Enabled = false;
                 screen.Client.Network.Send(new RequestMessage(MessageTypes.Init));
             };
             grpLobby.Add(btnReload);
@@ -182,7 +183,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
         {
             lobbyScreen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
                args.Message.Intro, args.Message.Online, args.Message.Rooms));
-            LoadRooms();
         }
 
         protected override void Dispose(bool disposing)
