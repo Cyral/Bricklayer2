@@ -145,7 +145,7 @@ namespace Bricklayer.Core.Client.Net
                                         var msg = new InitMessage(im.SenderConnection.RemoteHailMessage,
                                             MessageContext.Client);
                                         networkManager.Client.Events.Network.Game.Connect.Invoke(
-                                            new EventManager.NetEvents.GameServerEvents.ConnectEventArgs());
+                                            new EventManager.NetEvents.GameServerEvents.ConnectEventArgs(msg.ServerName, msg.Description, msg.Intro, msg.Online, msg.Rooms));
                                         break;
                                     }
                                     //When disconnected from the server

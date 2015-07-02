@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Bricklayer.Core.Server.Components;
+using Bricklayer.Core.Server.Data;
 using Bricklayer.Core.Server.Net;
 using Pyratron.Bricklayer.Auth.Components;
 using Pyratron.Frameworks.Commands.Parser;
@@ -38,6 +40,9 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public EventManager Events { get; private set; }
 
+        // Temporary List of rooms. This will not be here later
+        public List<LobbySaveData> Rooms;
+
         private string clear, input;
         private bool showHeader;
         private DateTime start;
@@ -46,6 +51,12 @@ namespace Bricklayer.Core.Server
         {
             Logger.Server = this;
             Events = new EventManager();
+
+            // Temporary code. This will not be here later
+            Rooms = new List<LobbySaveData>();
+            Rooms.Add(new LobbySaveData("DogeBall", 0, "A game of dodge ball, but the ball being a doge head. Wow!", 6, 23, 4));
+            Rooms.Add(new LobbySaveData("Terrain", 1, "Beatiful terrain environment builds for your eyes to look at! Enjoy :)", 3, 20, 5));
+            Rooms.Add(new LobbySaveData("pls r8 5", 2,  "pls r8 5. thats al i evr wanted in life.", 0, 7, 1));
 
             //Setup server
             Console.BackgroundColor = ConsoleColor.Black;

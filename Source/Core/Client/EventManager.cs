@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Server.Data;
 
 namespace Bricklayer.Core.Client
 {
@@ -169,14 +171,6 @@ namespace Bricklayer.Core.Client
 
                 #region Arguments
 
-                public class InitEventArgs : EventArgs
-                {
-                    public InitEventArgs()
-                    {
-
-                    }
-                }
-
                 public class DisconnectEventArgs : EventArgs
                 {
                     public string Reason { get; private set; }
@@ -189,9 +183,18 @@ namespace Bricklayer.Core.Client
 
                 public class ConnectEventArgs : EventArgs
                 {
-                    public ConnectEventArgs()
+                    public string ServerName { get; private set; }
+                    public string Description { get; private set; }
+                    public string Intro { get; private set; }
+                    public int Online { get; private set; }
+                    public List<LobbySaveData> Rooms { get; private set; }
+                    public ConnectEventArgs(string serverName, string description, string intro, int online, List<LobbySaveData> rooms)
                     {
-
+                        ServerName = serverName;
+                        Description = description;
+                        Intro = intro;
+                        Online = online;
+                        Rooms = rooms;
                     }
                 }
 
@@ -228,11 +231,6 @@ namespace Bricklayer.Core.Client
                 //(Note: These are not standard .NET events, see the Event class)
 
                 #region Events
-
-                /// <summary>
-                /// When client recieves Init message from the game server.
-                /// </summary>
-                public Event<InitEventArgs> Init { get; } = new Event<InitEventArgs>();
 
                 /// <summary>
                 /// When the client is disconnected from the game server.
