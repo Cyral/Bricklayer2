@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using Bricklayer.Core.Server;
-using Bricklayer.Core.Server.Components;
 using Bricklayer.Core.Server.Data;
 
-namespace Pyratron.Bricklayer.Auth.Components
+namespace Bricklayer.Core.Server.Components
 {
     /// <summary>
     /// Handles user authentication and other database functions

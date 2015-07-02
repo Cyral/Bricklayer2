@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.Components;
 using Bricklayer.Core.Server.Data;
-using Pyratron.Bricklayer.Auth.Components;
 using Pyratron.Frameworks.Commands.Parser;
 
 namespace Bricklayer.Core.Server

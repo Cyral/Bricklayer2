@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using Pyratron.Bricklayer.Auth.Components;
 
 namespace Bricklayer.Core.Server
 {
