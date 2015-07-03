@@ -72,6 +72,7 @@
     <Compile Include="Net\IMessage.cs" />
     <Compile Include="Net\MessageContext.cs" />
     <Compile Include="Net\Messages\AuthLoginMessage.cs" />
+    <Compile Include="Net\Messages\BannerMessage.cs" />
     <Compile Include="Net\Messages\CreateRoomMessage.cs" />
     <Compile Include="Net\Messages\FailedLoginMessage.cs" />
     <Compile Include="Net\Messages\AuthInitMessage.cs" />
