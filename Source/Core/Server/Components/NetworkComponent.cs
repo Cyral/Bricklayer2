@@ -95,11 +95,12 @@ namespace Bricklayer.Core.Server.Components
                 {
                     Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
                     Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllRooms()), args.Sender);
-                    Send(new BannerMessage(Server.Banner), args.Sender);
+                    Send(new BannerMessage(Server.IO.Banner), args.Sender);
                 }
                 else if (args.Type == MessageTypes.Banner)
                 {
-                    Send(new BannerMessage(Server.Banner), args.Sender);
+                    if(Server.IO.Banner != null)
+                     Send(new BannerMessage(Server.IO.Banner), args.Sender);
                 }
             });
 

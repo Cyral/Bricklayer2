@@ -8,6 +8,8 @@ using Bricklayer.Core.Server.Components;
 using Bricklayer.Core.Server.Data;
 using Pyratron.Frameworks.Commands.Parser;
 using System.IO;
+using System.Net.Mime;
+using System.Drawing;
 
 namespace Bricklayer.Core.Server
 {
@@ -45,8 +47,6 @@ namespace Bricklayer.Core.Server
         /// List of users online the server.
         /// </summary>
         public List<User> Users;
-
-        public byte[] Banner;
 
         private string clear, input;
         private bool showHeader;
@@ -88,13 +88,7 @@ namespace Bricklayer.Core.Server
 
             WriteHeader();
 
-            FileInfo info = new FileInfo(IO.ServerDirectory + "\\banner.png");
-            Banner = new byte[info.Length];
-
-            using (FileStream fs = info.OpenRead())
-            {
-                fs.Read(Banner, 0, Banner.Length);
-            }
+            IO.LoadBanner();
 
 
             while (true) //Parse commands now that messaging has been handed off to another thread

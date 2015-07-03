@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SQLite;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -36,6 +37,8 @@ namespace Bricklayer.Core.Server.Components
         /// The path to the server root directory.
         /// </summary>
         public string ServerDirectory { get; private set; }
+
+        internal byte[] Banner { get; private set; }
 
         protected override LogType LogType => LogType.IO;
 
@@ -80,6 +83,31 @@ namespace Bricklayer.Core.Server.Components
             await LoadConfig();
 
             await base.Init();
+        }
+
+
+        internal async void LoadBanner()
+        {
+            if (File.Exists(ServerDirectory + "\\banner.png"))
+            {
+                var img = Image.FromFile(ServerDirectory + "\\banner.png");
+
+                if (img.Height <= Constants.MaxBannerHeight && img.Width <= Constants.MaxBannerWidth)
+                {
+                    var info = new FileInfo(ServerDirectory + "\\banner.png");
+                    Banner = new byte[info.Length];
+                    using (FileStream fs = info.OpenRead())
+                    {
+                        fs.Read(Banner, 0, Banner.Length);
+                    }
+                }
+                else
+                {
+                    Logger.WriteLine("Banner size exceeds the size limit of " + Constants.MaxBannerWidth + "x" +
+                                     Constants.MaxBannerHeight);
+                }
+
+            }
         }
 
         /// <summary>

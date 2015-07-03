@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
@@ -7,6 +8,7 @@ using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Data;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
@@ -22,6 +24,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly List<string> sortFilters = new List<string> {"Online", "Rating", "Plays", "Random", "Mine"};
         //Controls
         private readonly TextBox txtSearch;
+
+        private ImageBox imgBanner;
+        private byte[] bannerInfo;
 
         public LobbyWindow(Manager manager, LobbyScreen screen)
             : base(manager)
@@ -111,6 +116,31 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lstRooms.Init();
             grpLobby.Add(lstRooms);
 
+            // When client gets banner data from server
+            screen.Client.Events.Network.Game.LobbyBannerRecieved.AddHandler(args =>
+            {
+                bannerInfo = args.Banner;
+                var stream = new MemoryStream(bannerInfo);
+                Texture2D image = Texture2D.FromStream(screen.Client.GraphicsDevice, stream);
+
+                if (image.Height <= Constants.MaxBannerHeight && image.Width <= Constants.MaxBannerWidth)
+                {
+                    imgBanner = new ImageBox(Manager)
+                    {
+                        Image = image,
+
+                    };
+                    imgBanner.SetPosition((grpServer.Width / 2) - (imgBanner.Image.Width / 2), 10);
+                    imgBanner.SetSize(547, image.Height);
+                    imgBanner.Init();
+                    grpServer.Add(imgBanner);
+
+                    lblName.Top = imgBanner.Bottom + 8;
+                    lblDescription.Top = 8 + lblName.Bottom;
+                    lblInfo.Top = 8 + lblDescription.Bottom;
+                }
+            });
+
             //Server info labels
             lblName = new Label(Manager)
             {
@@ -177,6 +207,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             screen.Client.Events.Network.Game.Init.AddHandler(OnInit);
 
             LoadRooms();
+
+            screen.Client.Network.Send(new RequestMessage(MessageTypes.Banner));
         }
 
         private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
