@@ -197,6 +197,16 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
+                public class BannerEventArgs : EventArgs
+                {
+                    public byte[] Banner { get; private set; }
+
+                    public BannerEventArgs(byte[] banner)
+                    {
+                        Banner = banner;
+                    }
+                }
+
                 public class ServerInfoEventArgs : EventArgs
                 {
                     public string Description { get; private set; }
@@ -255,6 +265,11 @@ namespace Bricklayer.Core.Client
                 /// When server sends player info to display on serverlist
                 /// </summary>
                 public Event<ServerInfoEventArgs> ServerInfo { get; } = new Event<ServerInfoEventArgs>();
+
+                /// <summary>
+                /// When server sends player lobby banner
+                /// </summary>
+                public Event<BannerEventArgs> LobbyBannerRecieved { get; } = new Event<BannerEventArgs>();
 
                 #endregion
             }

@@ -8,6 +8,7 @@ using Bricklayer.Core.Server.Components;
 using Bricklayer.Core.Server.Data;
 using Pyratron.Bricklayer.Auth.Components;
 using Pyratron.Frameworks.Commands.Parser;
+using System.IO;
 
 namespace Bricklayer.Core.Server
 {
@@ -43,6 +44,8 @@ namespace Bricklayer.Core.Server
 
         // Temporary List of rooms. This will not be here later
         public List<LobbySaveData> Rooms { get; set; }
+
+        public byte[] Banner { get; set; }
 
         /// <summary>
         /// List of users online the server.
@@ -89,7 +92,6 @@ namespace Bricklayer.Core.Server
             await IO.Init();
             await Database.Init();
             await Net.Init();
-
             stopwatch.Stop();
             Logger.WriteBreak();
             Logger.WriteLine("Ready. ({0}s) Type /help for commands.",
@@ -97,6 +99,15 @@ namespace Bricklayer.Core.Server
             Logger.WriteBreak();
 
             WriteHeader();
+
+            FileInfo info = new FileInfo(IO.ServerDirectory + "\\banner.png");
+            Banner = new byte[info.Length];
+
+            using (FileStream fs = info.OpenRead())
+            {
+                fs.Read(Banner, 0, Banner.Length);
+            }
+
 
             while (true) //Parse commands now that messaging has been handed off to another thread
             {

@@ -15,6 +15,7 @@
         Init,
         ServerInfo,
         CreateRoom,
-        Request
+        Request,
+        Banner
     }
 }

@@ -47,6 +47,12 @@ namespace Bricklayer.Core.Client.Net
                     networkManager.Client.Events.Network.Game.Init.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
                     break;
                 }
+                case MessageTypes.Banner:
+                {
+                    var msg = new BannerMessage(im, MessageContext.Client);
+                    networkManager.Client.Events.Network.Game.Banner.Invoke(new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
+                    break;
+                }
             }
         }
 
