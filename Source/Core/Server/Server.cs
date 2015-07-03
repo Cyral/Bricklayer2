@@ -46,6 +46,8 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public List<User> Users;
 
+        public byte[] Banner;
+
         private string clear, input;
         private bool showHeader;
         private DateTime start;

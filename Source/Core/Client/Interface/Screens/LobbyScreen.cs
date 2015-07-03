@@ -61,7 +61,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Add(imgBackground);
 
             // When client gets banner data from server
-            Client.Events.Network.Game.Banner.AddHandler(args =>
+            Client.Events.Network.Game.LobbyBannerRecieved.AddHandler(args =>
             {
                 bannerInfo = args.Banner;
                 var stream = new MemoryStream(bannerInfo);
@@ -89,8 +89,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
         public override void Remove()
         {
             Window.Remove(wndLobby);
-            wndLobby.Dispose();
             Window.Remove(imgBackground);
+            Window.Remove(imgBanner);
         }
     }
 }

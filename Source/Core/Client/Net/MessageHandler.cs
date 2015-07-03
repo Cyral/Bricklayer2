@@ -50,7 +50,7 @@ namespace Bricklayer.Core.Client.Net
                 case MessageTypes.Banner:
                 {
                     var msg = new BannerMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.Banner.Invoke(new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
+                    networkManager.Client.Events.Network.Game.LobbyBannerRecieved.Invoke(new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
                     break;
                 }
             }

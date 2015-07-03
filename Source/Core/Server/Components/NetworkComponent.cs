@@ -94,7 +94,7 @@ namespace Bricklayer.Core.Server.Components
                 if (args.Type == MessageTypes.Init)
                 {
                     Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
-                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, Server.Rooms), args.Sender);
+                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllRooms()), args.Sender);
                     Send(new BannerMessage(Server.Banner), args.Sender);
                 }
                 else if (args.Type == MessageTypes.Banner)
