@@ -83,6 +83,7 @@
     <Compile Include="Components\DatabaseComponent.cs" />
     <Compile Include="Components\IOComponent.cs" />
     <Compile Include="Components\NetworkComponent.cs" />
+    <Compile Include="Components\PluginComponent.cs" />
     <Compile Include="Components\ServerComponent.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="ServerPlugin.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

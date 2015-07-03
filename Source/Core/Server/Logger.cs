@@ -59,7 +59,7 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public static void WriteLine(LogType type, string text)
         {
-            type.WriteText(text);
+           type.WriteText(text);
         }
 
 

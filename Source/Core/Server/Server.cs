@@ -41,6 +41,11 @@ namespace Bricklayer.Core.Server
         public NetworkComponent Net { get; set; }
 
         /// <summary>
+        /// The PluginComponent for loading and managing plugins.
+        /// </summary>
+        public PluginComponent Plugins { get; set; }
+
+        /// <summary>
         /// List of users online the server.
         /// </summary>
         public List<User> Users;
@@ -49,7 +54,7 @@ namespace Bricklayer.Core.Server
         private bool showHeader;
         private DateTime start;
 
-        public async Task Start()
+        internal async Task Start()
         {
             Logger.Server = this;
             Events = new EventManager();
@@ -71,10 +76,12 @@ namespace Bricklayer.Core.Server
 
             //Initialize Components
             IO = new IOComponent(this);
+            Plugins = new PluginComponent(this);
             Database = new DatabaseComponent(this);
             Net = new NetworkComponent(this);
 
             await IO.Init();
+            await Plugins.Init();
             await Database.Init();
             await Net.Init();
 

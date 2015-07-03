@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -31,14 +29,18 @@ namespace Bricklayer.Core.Server.Components
         /// The path to the logging directory, where a file is created each day for logging.
         /// </summary>
         public string LogDirectory { get; private set; }
-        
+
+        /// <summary>
+        /// The path to the plugins directory, which contains the plugin .dlls
+        /// </summary>
+        public string PluginsDirectory { get; private set; }
+
         /// <summary>
         /// The path to the server root directory.
         /// </summary>
         public string ServerDirectory { get; private set; }
 
         protected override LogType LogType => LogType.IO;
-
         private DateTime lastLog;
         private StreamWriter logWriter;
         private StringBuilder sb;
@@ -46,7 +48,15 @@ namespace Bricklayer.Core.Server.Components
 
         public IOComponent(Server server) : base(server)
         {
+        }
 
+        /// <summary>
+        /// Returns a list of paths to the plugins in the plugins directory.
+        /// </summary>
+        public List<string> GetPlugins()
+        {
+            var dirs = Directory.GetDirectories(PluginsDirectory);
+            return dirs.Select(dir => Path.Combine(dir, "plugin.dll")).Where(File.Exists).ToList();
         }
 
         public override async Task Init()
@@ -56,12 +66,15 @@ namespace Bricklayer.Core.Server.Components
             if (ServerDirectory != null)
             {
                 LogDirectory = Path.Combine(ServerDirectory, "logs");
+                PluginsDirectory = Path.Combine(ServerDirectory, "plugins");
                 ConfigFile = Path.Combine(ServerDirectory, "config.json");
             }
 
             //Create directories that don't exist.
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
+            if (!Directory.Exists(PluginsDirectory))
+                Directory.CreateDirectory(PluginsDirectory);
 
             sb = new StringBuilder();
 
@@ -69,7 +82,8 @@ namespace Bricklayer.Core.Server.Components
             serializationSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
-                ContractResolver = new JsonContractResolver() //Use a custom contract resolver that can read private and internal properties
+                ContractResolver = new JsonContractResolver()
+                //Use a custom contract resolver that can read private and internal properties
             };
 
             //Log a message to the log file stating the startup time and version.
@@ -80,6 +94,55 @@ namespace Bricklayer.Core.Server.Components
             await LoadConfig();
 
             await base.Init();
+        }
+
+        /// <summary>
+        /// Loads a plugin from the specified path.
+        /// </summary>
+        public Assembly LoadPlugin(AppDomain domain, string path)
+        {
+            //Load the raw bytes of the file, to prevent locking it while the server is running, then load that into the assembly
+            return domain.Load(File.ReadAllBytes(path));
+        }
+
+        /// <summary>
+        /// Opens the server settings and loads them into the config
+        /// </summary>
+        internal async Task LoadConfig()
+        {
+            try
+            {
+                //If server config does not exist, create it and write the default settings
+                if (!File.Exists(ConfigFile))
+                {
+                    Config = Config.GenerateDefaultConfig();
+                    await SaveConfig(Config);
+                    Log("Configuration created successfully.");
+                    return;
+                }
+
+                var json = string.Empty;
+                await Task.Factory.StartNew(() => json = File.ReadAllText(ConfigFile));
+
+                //If config is empty, regenerate and read again
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    var config = Config.GenerateDefaultConfig();
+                    json = config.ToString();
+                    await SaveConfig(config);
+                }
+
+                await
+                    Task.Factory.StartNew(
+                        delegate { Config = JsonConvert.DeserializeObject<Config>(json, serializationSettings); });
+
+
+                Log("Configuration loaded. Port: {0}", Config.Server.Port.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteLine(LogType.Error, "IOComponent.LoadConfig - {0}", ex.ToString());
+            }
         }
 
         /// <summary>
@@ -154,49 +217,6 @@ namespace Bricklayer.Core.Server.Components
         internal void LogMessage(LogType logType, string message)
         {
             LogMessage(sb.Clear().Append(logType.Prefix).Append(": ").Append(message).ToString());
-        }
-
-        /// <summary>
-        /// Opens the server settings and loads them into the config
-        /// </summary>
-        internal async Task LoadConfig()
-        {
-            try
-            {
-                //If server config does not exist, create it and write the default settings
-                if (!File.Exists(ConfigFile))
-                {
-                    Config = Config.GenerateDefaultConfig();
-                    await SaveConfig(Config);
-                    Log("Configuration created successfully.");
-                    return;
-                }
-
-                var json = string.Empty;
-                await Task.Factory.StartNew(() => json = File.ReadAllText(ConfigFile));
-
-                //If config is empty, regenerate and read again
-                if (string.IsNullOrWhiteSpace(json))
-                {
-                    var config = Config.GenerateDefaultConfig();
-                    json = config.ToString();
-                    await SaveConfig(config);
-                }
-
-                await
-                    Task.Factory.StartNew(
-                        delegate
-                        {
-                            Config = JsonConvert.DeserializeObject<Config>(json, serializationSettings);
-                        });
-
-
-                Log("Configuration loaded. Port: {0}", Config.Server.Port.ToString());
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteLine(LogType.Error, "IOComponent.LoadConfig - {0}", ex.ToString());
-            }
         }
 
         /// <summary>
