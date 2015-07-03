@@ -30,6 +30,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
         protected internal Client Client => ScreenManager.Window.Client;
 
         /// <summary>
+        /// The game state associated with this screen.
+        /// </summary>
+        protected internal abstract GameState State { get; }
+
+        /// <summary>
         /// Adds the controls for this screen to the window.
         /// </summary>
         public virtual void Add(ScreenManager screenManager)

@@ -50,12 +50,11 @@ namespace Bricklayer.Client.Interface
 
             //Set up the ScreenManager which will handle all of the controls from here
             ScreenManager = new ScreenManager(this);
-            var loginScreen = new LoginScreen();
-            ScreenManager.SwitchScreen(loginScreen);
+            ScreenManager.SwitchScreen(new LoginScreen());
 
             Client.Events.Network.Auth.Init.AddHandler(args =>
             {
-                ScreenManager.SwitchScreen(loginScreen);
+                ScreenManager.SwitchScreen(new ServerScreen());
             });
         }
     }

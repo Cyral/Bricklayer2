@@ -16,13 +16,13 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private readonly Label lblName, lblDescription, lblStats;
         private readonly LobbyScreen screen;
 
-        public LobbyDataControl(LobbyScreen screen, Manager manager, LobbySaveData data)
+        public LobbyDataControl(LobbyScreen screen, Manager manager, LobbySaveData data, Control parent)
             : base(manager)
         {
             //Setup
             Passive = false;
             Height = 60;
-            ClientWidth = (700 / 2) - 16;
+            Width = parent.ClientWidth;
             this.screen = screen;
             Data = data;
 

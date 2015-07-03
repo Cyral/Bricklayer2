@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Client
     public enum GameState
     {
         Login,
-        Servers,
+        Server,
         Lobby,
         Game,
     }

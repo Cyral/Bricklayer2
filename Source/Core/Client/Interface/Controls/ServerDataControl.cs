@@ -15,30 +15,28 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// </summary>
     internal sealed class ServerDataControl : Control
     {
-        private readonly StatusBar gradient;
-        private readonly Label lblDescription;
-        private readonly Label lblHost;
-        private readonly Label lblName;
-        private readonly Label lblStats;
+        private StatusBar gradient;
+        private readonly Label lblDescription, lblHost, lblName, lblStats;
         private readonly Color offlineColor = Color.Red, onlineColor = new Color(0, 205, 5);
-        private readonly LoginScreen screen;
+        private readonly ServerScreen screen;
+        private readonly Manager manager;
         private readonly ServerSaveData data;
         private IPEndPoint endPoint;
-        private ImageBox imgStatus;
+        private readonly ImageBox imgStatus;
         private Timer pingTimer;
         private bool resolvedHost;
 
-        public ServerDataControl(LoginScreen screen, Manager manager, ServerSaveData server) : base(manager)
+        public ServerDataControl(ServerScreen screen, Manager manager, ServerSaveData server, Control parent) : base(manager)
         {
             this.screen = screen;
-
+            this.manager = manager;
 
             //Setup
             Passive = false;
             Height = 76;
-            ClientWidth = 450 - 16;
             data = server;
 
+            Width = parent.Width + 8;
             //Background "gradient" image
             //TODO: Make an actual control. not a statusbar
             gradient = new StatusBar(manager);
@@ -51,7 +49,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             lblName = new Label(Manager)
             {
                 Width = Width,
-                Text = server.Name,
+                Text = data.Name,
                 Left = 4,
                 Top = 4,
                 Font = FontSize.Default14,
@@ -99,7 +97,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             lblHost = new Label(Manager)
             {
                 Width = Width,
-                Text = server.GetHostString(),
+                Text = data.GetHostString(),
                 Alignment = Alignment.TopLeft,
                 Left = 4,
                 Top = lblDescription.Bottom,
@@ -112,7 +110,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             {
                 if (endPoint != null && args.Host.Equals(endPoint))
                 {
-                    pingTimer.Dispose();
+                    pingTimer?.Dispose();
 
                     lblStats.Text = args.Players + "/" + args.MaxPlayers;
                     lblDescription.Text = args.Description;
@@ -126,7 +124,6 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 }
             });
         }
-
         public override void DrawControl(Renderer renderer, Rectangle rect, GameTime gameTime)
         {
             //Don't draw anything

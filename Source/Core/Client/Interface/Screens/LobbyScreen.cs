@@ -42,6 +42,9 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
 
         }
+
+        protected internal override GameState State => GameState.Lobby;
+
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);
@@ -86,6 +89,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         public override void Remove()
         {
             Window.Remove(wndLobby);
+            wndLobby.Dispose();
             Window.Remove(imgBackground);
         }
     }

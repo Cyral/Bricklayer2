@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.Components;
 using Bricklayer.Core.Server.Data;
-using Pyratron.Bricklayer.Auth.Components;
 using Pyratron.Frameworks.Commands.Parser;
 using System.IO;
 
@@ -42,11 +41,6 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public NetworkComponent Net { get; set; }
 
-        // Temporary List of rooms. This will not be here later
-        public List<LobbySaveData> Rooms { get; set; }
-
-        public byte[] Banner { get; set; }
-
         /// <summary>
         /// List of users online the server.
         /// </summary>
@@ -61,14 +55,6 @@ namespace Bricklayer.Core.Server
             Logger.Server = this;
             Events = new EventManager();
             Users = new List<User>();
-
-            // Temporary code. This will not be here later
-            Rooms = new List<LobbySaveData>();
-            Rooms.Add(new LobbySaveData("DogeBall", 0, "A game of dodge ball, but the ball being a doge head. Wow!", 6,
-                23, 4));
-            Rooms.Add(new LobbySaveData("Terrain", 1,
-                "Beatiful terrain environment builds for your eyes to look at! Enjoy :)", 3, 20, 5));
-            Rooms.Add(new LobbySaveData("pls r8 5", 2, "pls r8 5. thats al i evr wanted in life.", 0, 7, 1));
 
             //Setup server
             Console.BackgroundColor = ConsoleColor.Black;

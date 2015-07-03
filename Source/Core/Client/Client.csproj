@@ -67,6 +67,7 @@
     <Compile Include="Interface\Screens\Screen.cs" />
     <Compile Include="Interface\Screens\LoginScreen.cs" />
     <Compile Include="Interface\Screens\ScreenManager.cs" />
+    <Compile Include="Interface\Screens\ServerScreen.cs" />
     <Compile Include="Interface\Windows\AddServerDialog.cs" />
     <Compile Include="Interface\Windows\CreateWorldDialog.cs" />
     <Compile Include="Interface\Windows\LobbyWindow.cs" />
@@ -96,6 +97,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net" />
     <Reference Include="System.Security" />
     <Reference Include="System.Xml" />
   </ItemGroup>

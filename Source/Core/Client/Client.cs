@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System;
 using Bricklayer.Client.Interface;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -132,9 +133,25 @@ namespace Bricklayer.Core.Client
             TextureLoader = new TextureLoader(Graphics.GraphicsDevice);
             Content.LoadTextures(this);
 
-            Graphics.PreferredBackBufferWidth = IO.Config.Client.Resolution.X;
-            Graphics.PreferredBackBufferHeight = IO.Config.Client.Resolution.Y;
-            Graphics.ApplyChanges();
+            if (IO.Config.Client.Resolution.X == 0 && IO.Config.Client.Resolution.Y == 0)
+            {
+                Graphics.PreferredBackBufferWidth = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width * .8);
+                Graphics.PreferredBackBufferHeight = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * .8);
+                Graphics.ApplyChanges();
+                base.Window.Position =
+                    new Point(
+                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width - Graphics.PreferredBackBufferWidth) /
+                        2,
+                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - Graphics.PreferredBackBufferHeight) /
+                        2);
+            }
+            else
+            {
+                Graphics.PreferredBackBufferWidth = IO.Config.Client.Resolution.X;
+                Graphics.PreferredBackBufferHeight = IO.Config.Client.Resolution.Y;
+                Graphics.ApplyChanges();
+
+            }
 
             //Initialize MonoForce after loading skins.
             UIManager.Initialize();

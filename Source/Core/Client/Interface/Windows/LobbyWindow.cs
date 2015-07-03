@@ -32,15 +32,15 @@ namespace Bricklayer.Core.Client.Interface.Windows
             TopPanel.Visible = false;
             Movable = false;
             Resizable = false;
-            Width = 700;
-            Height = 500;
+            Width = (int)(Manager.ScreenWidth * .9);
+            Height = (int)(Manager.ScreenHeight * .9);
             Shadow = true;
             Center();
 
             //Group panels
             var grpLobby = new GroupPanel(Manager)
             {
-                Width = ClientWidth / 2,
+                Width = (int)(ClientWidth * .6),
                 Height = ClientHeight - BottomPanel.Height + 2,
                 Text = "Rooms"
             };
@@ -49,8 +49,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             grpServer = new GroupPanel(Manager)
             {
-                Left = (ClientWidth / 2) - 1,
-                Width = (ClientWidth / 2) + 1,
+                Left = (int)((ClientWidth * .6) - 1),
+                Width = (int)((ClientWidth * .4) + 1),
                 Height = ClientHeight - BottomPanel.Height + 2,
                 Text = "Server"
             };
@@ -58,7 +58,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Add(grpServer);
 
             //Top controls
-            txtSearch = new TextBox(Manager) {Left = 8, Top = 8, Width = (ClientWidth / 4) - 16};
+            txtSearch = new TextBox(Manager) {Left = 8, Top = 8, Width = (int)(((ClientWidth * .6) / 2) - 16)};
             txtSearch.Init();
             txtSearch.Text = searchStr;
             txtSearch.TextChanged += delegate { RefreshRooms(); };
@@ -75,7 +75,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             grpLobby.Add(txtSearch);
 
-            cmbSort = new ComboBox(Manager) {Left = txtSearch.Right + 8, Top = 8, Width = (ClientWidth / 4) - 16 - 20};
+            cmbSort = new ComboBox(Manager) {Left = txtSearch.Right + 8, Top = 8, Width = (int)(((ClientWidth * .6) / 2) - 16 - 20)};
             cmbSort.Init();
             cmbSort.Items.AddRange(sortFilters);
             cmbSort.ItemIndex = 0;
@@ -95,6 +95,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnReload.ToolTip.Text = "Refresh";
             btnReload.Click += delegate
             {
+                btnReload.Enabled = false;
                 screen.Client.Network.Send(new RequestMessage(MessageTypes.Init));
             };
             grpLobby.Add(btnReload);
@@ -169,19 +170,25 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnDisconnect.Click += delegate
             {
                 screen.Client.Network.NetClient.Disconnect("Left Lobby");
-                screen.Client.State = GameState.Lobby;
                 MainWindow.ScreenManager.SwitchScreen(new LoginScreen());
             };
             BottomPanel.Add(btnDisconnect);
 
-            screen.Client.Events.Network.Game.Init.AddHandler(args =>
-            {
-                screen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
-                    args.Message.Intro, args.Message.Online, args.Message.Rooms));
-                LoadRooms();
-            });
+            screen.Client.Events.Network.Game.Init.AddHandler(OnInit);
 
             LoadRooms();
+        }
+
+        private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
+        {
+            lobbyScreen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
+               args.Message.Intro, args.Message.Online, args.Message.Rooms));
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            lobbyScreen.Client.Events.Network.Game.Init.RemoveHandler(OnInit);
+            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -249,7 +256,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lstRooms.Items.Clear();
             if (screen != null)
                 foreach (var s in screen.Rooms)
-                    lstRooms.Items.Add(new LobbyDataControl(screen, Manager, s));
+                    lstRooms.Items.Add(new LobbyDataControl(screen, Manager, s, lstRooms));
             FilterRooms();
         }
 
