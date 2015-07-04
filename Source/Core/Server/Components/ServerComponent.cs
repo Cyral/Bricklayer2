@@ -21,7 +21,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// The server object controlling this component.
         /// </summary>
-        protected Server Server { get; set; }
+        protected Server Server { get; }
 
         internal ServerComponent(Server server)
         {

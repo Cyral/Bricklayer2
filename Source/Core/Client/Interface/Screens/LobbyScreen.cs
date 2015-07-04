@@ -63,8 +63,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
             wndLobby.Init();
             Window.Add(wndLobby);
             wndLobby.Show();
-
-            Client.Network.Send(new RequestMessage(MessageTypes.Banner));
         }
 
         public override void Remove()

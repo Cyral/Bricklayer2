@@ -43,6 +43,9 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public string ServerDirectory { get; private set; }
 
+        /// <summary>
+        /// Byte array of the image data for the lobby banner.
+        /// </summary>
         internal byte[] Banner { get; private set; }
 
         protected override LogType LogType => LogType.IO;
@@ -131,32 +134,43 @@ namespace Bricklayer.Core.Server.Components
 
             //Load configuration.
             await LoadConfig();
+            LoadBanner();
 
             await base.Init();
         }
 
-
-        internal async void LoadBanner()
+        /// <summary>
+        /// Loads the banner JPEG or PNG.
+        /// </summary>
+        private void LoadBanner()
         {
-            if (File.Exists(ServerDirectory + "\\banner.png"))
-            {
-                var img = Image.FromFile(ServerDirectory + "\\banner.png");
+            var path = string.Empty;
 
-                if (img.Height <= Constants.MaxBannerHeight && img.Width <= Constants.MaxBannerWidth)
+            //Scan for possible names
+            var formats = new[] {"jpg", "jpeg", "png"};
+            foreach (var formatPath in formats.Select(format => Path.Combine(ServerDirectory, "banner." + format)).Where(File.Exists))
+            {
+                path = formatPath;
+                break;
+            }
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                var img = Image.FromFile(path);
+
+                if (img.Height <= Constants.MaxBannerHeight && img.Width <= Globals.Values.MaxBannerWidth)
                 {
-                    var info = new FileInfo(ServerDirectory + "\\banner.png");
-                    Banner = new byte[info.Length];
-                    using (FileStream fs = info.OpenRead())
+                    using (var ms = new MemoryStream())
                     {
-                        fs.Read(Banner, 0, Banner.Length);
+                        img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                        Banner = ms.ToArray();
                     }
                 }
                 else
                 {
-                    Logger.WriteLine("Banner size exceeds the size limit of " + Constants.MaxBannerWidth + "x" +
+                    Logger.WriteLine(LogType.Error, "Banner size exceeds the size limit of " + Globals.Values.MaxBannerWidth + "x" +
                                      Constants.MaxBannerHeight);
                 }
-
             }
         }
 

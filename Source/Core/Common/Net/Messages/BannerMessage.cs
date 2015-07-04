@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bricklayer.Core.Server.Data;
-using Lidgren.Network;
+﻿using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Sends lobby banner to client
+    /// Sends lobby banner to client.
     /// Server => Client
     /// </summary>
     public class BannerMessage : IMessage
     {
-        public double MessageTime { get; set; }
         public byte[] Banner { get; set; }
+        public double MessageTime { get; set; }
 
         public BannerMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -29,7 +23,6 @@ namespace Bricklayer.Core.Common.Net.Messages
             Banner = banner;
         }
 
-
         #region IMessage Members
 
         public MessageContext Context { get; set; }
@@ -37,7 +30,7 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
-            int bannerLength = im.ReadInt32();
+            var bannerLength = im.ReadInt32();
             im.SkipPadBits();
             Banner = im.ReadBytes(bannerLength);
         }

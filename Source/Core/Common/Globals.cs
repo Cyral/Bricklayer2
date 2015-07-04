@@ -61,6 +61,16 @@ namespace Bricklayer.Core.Common
             /// The actual address is configurable through the JSON config, although the auth address will most likely never change.
             /// </summary>
             public static string DefaultAuthAddress { get; } = "auth.pyratron.com";
+
+            /// <summary>
+            /// Max width of the banner image.
+            /// </summary>
+            public static int MaxBannerWidth { get; } = 500;
+
+            /// <summary>
+            /// Max height of the banner image.
+            /// </summary>
+            public static int MaxBannerHeight { get; } = 120;
         }
     }
 }

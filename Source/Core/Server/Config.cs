@@ -110,7 +110,7 @@ namespace Bricklayer.Core.Server
                 Decription =
                     "A Bricklayer Server running on the default configuration.\nEdit this message in the config file.",
                 Intro =
-                    "Welcome to $Name!\nWe currently have $Online player(s) in $Rooms room(s).\n\nServer News:\n-\n-\n-\n\nServer Rules:\n-\n-\n-\n\n\n\n\n..."
+                    "[color:Gold]Welcome to our $Name![/color] [color:DodgerBlue]We currently have $Online player(s) in $Rooms room(s).[/color]\n\nExtended information about your server can go here!"
             };
         }
     }

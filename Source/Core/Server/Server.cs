@@ -95,9 +95,6 @@ namespace Bricklayer.Core.Server
 
             WriteHeader();
 
-            IO.LoadBanner();
-
-
             while (true) //Parse commands now that messaging has been handed off to another thread
             {
                 input = string.Empty;

@@ -1,15 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
+using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
+using EventArgs = MonoForce.Controls.EventArgs;
 
 namespace Bricklayer.Core.Client.Interface.Windows
 {
@@ -43,27 +46,27 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Center();
 
             //Group panels
-            var grpLobby = new GroupPanel(Manager)
-            {
-                Width = (int)(ClientWidth * .6),
-                Height = ClientHeight - BottomPanel.Height + 2,
-                Text = "Rooms"
-            };
-            grpLobby.Init();
-            Add(grpLobby);
-
             grpServer = new GroupPanel(Manager)
             {
-                Left = (int)((ClientWidth * .6) - 1),
-                Width = (int)((ClientWidth * .4) + 1),
+                Left = ClientWidth - Globals.Values.MaxBannerWidth - 1,
+                Width = Globals.Values.MaxBannerWidth,
                 Height = ClientHeight - BottomPanel.Height + 2,
                 Text = "Server"
             };
             grpServer.Init();
             Add(grpServer);
+           
+            var grpLobby = new GroupPanel(Manager)
+            {
+                Width = ClientWidth - grpServer.Width, //Fill remaining space
+                Height = ClientHeight - BottomPanel.Height + 2,
+                Text = "Levels"
+            };
+            grpLobby.Init();
+            Add(grpLobby);
 
             //Top controls
-            txtSearch = new TextBox(Manager) {Left = 8, Top = 8, Width = (int)(((ClientWidth * .6) / 2) - 16)};
+            txtSearch = new TextBox(Manager) {Left = 8, Top = 8, Width = (int)((grpLobby.Width / 2d) - 16)};
             txtSearch.Init();
             txtSearch.Text = searchStr;
             txtSearch.TextChanged += delegate { RefreshRooms(); };
@@ -80,7 +83,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             grpLobby.Add(txtSearch);
 
-            cmbSort = new ComboBox(Manager) {Left = txtSearch.Right + 8, Top = 8, Width = (int)(((ClientWidth * .6) / 2) - 16 - 20)};
+            cmbSort = new ComboBox(Manager) {Left = txtSearch.Right + 8, Top = 8, Width = (int)((grpLobby.Width / 2) - 16 - 20)};
             cmbSort.Init();
             cmbSort.Items.AddRange(sortFilters);
             cmbSort.ItemIndex = 0;
@@ -120,19 +123,19 @@ namespace Bricklayer.Core.Client.Interface.Windows
             screen.Client.Events.Network.Game.LobbyBannerRecieved.AddHandler(args =>
             {
                 bannerInfo = args.Banner;
+                //Convert byte array to stream to be read
                 var stream = new MemoryStream(bannerInfo);
-                Texture2D image = Texture2D.FromStream(screen.Client.GraphicsDevice, stream);
+                var image = Texture2D.FromStream(screen.Client.GraphicsDevice, stream);
 
-                if (image.Height <= Constants.MaxBannerHeight && image.Width <= Constants.MaxBannerWidth)
+                if (image.Height <= Globals.Values.MaxBannerHeight && image.Width <= Globals.Values.MaxBannerWidth)
                 {
                     imgBanner = new ImageBox(Manager)
                     {
                         Image = image,
-
                     };
-                    imgBanner.SetPosition((grpServer.Width / 2) - (imgBanner.Image.Width / 2), 10);
-                    imgBanner.SetSize(547, image.Height);
                     imgBanner.Init();
+                    imgBanner.SetPosition((grpServer.Width / 2) - (imgBanner.Image.Width / 2), 0);
+                    imgBanner.SetSize(image.Width, image.Height);
                     grpServer.Add(imgBanner);
 
                     lblName.Top = imgBanner.Bottom + 8;
