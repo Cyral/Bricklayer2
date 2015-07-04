@@ -22,7 +22,15 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public static string VersionString { get; } = AssemblyVersionName.GetVersion();
 
+        /// <summary>
+        /// Max Width of the banner image
+        /// </summary>
+        public static int MaxBannerWidth { get; } = 547;
 
+        /// <summary>
+        /// Max Height of the banner image
+        /// </summary>
+        public static int MaxBannerHeight { get; } = 120;
         /// <summary>
         /// Globably used strings.
         /// </summary>
