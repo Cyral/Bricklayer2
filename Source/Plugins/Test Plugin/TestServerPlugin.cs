@@ -13,14 +13,9 @@ namespace Bricklayer.Plugins.TestPlugin
     /// <summary>
     /// A test server plugin.
     /// </summary>
-    class TestPlugin : ServerPlugin
+    public class TestServerPlugin : ServerPlugin
     {
-        public override string Name { get; } = "Test Server Plugin";
-        public override string Description { get; } = "A plugin for testing!";
-        public override string Author { get; } = "Bricklayer Devs";
-        public override Version Version { get; } = new Version(0, 1, 0, 0);
-
-        public TestPlugin(Server host) : base(host)
+        public TestServerPlugin(Server host) : base(host)
         {
 
         }

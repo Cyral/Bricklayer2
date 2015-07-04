@@ -42,7 +42,7 @@ namespace Bricklayer.Core.Server.Components
             {
                 //TODO: Use AppDomains for security
                 //Load the assembly
-                var asm = Server.IO.LoadPlugin(AppDomain.CurrentDomain, file);
+                var asm = Server.IO.LoadPlugin(AppDomain.CurrentDomain, file.Path);
 
                 //Search for a type of 'ServerPlugin' to use
                 var types = asm.GetTypes();
@@ -62,11 +62,11 @@ namespace Bricklayer.Core.Server.Components
                     }
                     catch (Exception e)
                     {
-                        Logger.WriteLine(LogType.Error, $"Couldn't load assembly '{Path.GetFileName(file)}': {e.InnerException}");
+                        Logger.WriteLine(LogType.Error, $"Couldn't load assembly '{Path.GetFileName(file.Name)}': {e.InnerException}");
                     }
                 }
                 else
-                    Logger.WriteLine(LogType.Error, $"Assembly '{Path.GetFileName(file)}' is not a valid server plugin.");
+                    Logger.WriteLine(LogType.Error, $"Assembly '{Path.GetFileName(file.Name)}' is not a valid server plugin.");
             }
         }
 

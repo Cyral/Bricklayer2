@@ -51,12 +51,46 @@ namespace Bricklayer.Core.Server.Components
         }
 
         /// <summary>
-        /// Returns a list of paths to the plugins in the plugins directory.
+        /// Returns a list plugins from the plugin directory.
+        /// These plugins are not executable, and only provide data for the plugin loader.
         /// </summary>
-        public List<string> GetPlugins()
+        public IEnumerable<PluginData> GetPlugins()
         {
+            var plugins = new List<PluginData>();
+            //Unzip any plugin folders that are zipped (Possible if user didn't extract of left .zip inside)
+            var zipped = Directory.GetFiles(PluginsDirectory, "*.zip");
+            foreach (var file in zipped)
+            {
+                // ReSharper disable once AssignNullToNotNullAttribute
+                var dir = Path.Combine(PluginsDirectory, Path.GetFileNameWithoutExtension(file));
+                if (!Directory.Exists(dir))  //If an unzipped version doesn't exist, unzip this plugin
+                    System.IO.Compression.ZipFile.ExtractToDirectory(file, dir);
+                File.Delete(file);
+            }
+            
+            //Get all of the directories in the plugin folder
             var dirs = Directory.GetDirectories(PluginsDirectory);
-            return dirs.Select(dir => Path.Combine(dir, "plugin.dll")).Where(File.Exists).ToList();
+            foreach (var dir in dirs)
+            {
+                //Make sure there is a plugin metadata file in this folder
+                if (!File.Exists(Path.Combine(dir, "plugin.json")))
+                {
+                    Logger.WriteLine(LogType.Error, $"Plugin directory '{new DirectoryInfo(dir).Name}' does not contain a plugin.json");
+                    continue;
+                }
+                //Make sure there is a plugin in this folder
+                if (!File.Exists(Path.Combine(dir, "plugin.dll")))
+                    Logger.WriteLine(LogType.Error,
+                        $"Plugin directory '{new DirectoryInfo(dir).Name}' does not contain a plugin.dll");
+                else
+                {
+                    var metadata = File.ReadAllText(Path.Combine(dir, "plugin.json"));
+                    var data = JsonConvert.DeserializeObject<PluginData>(metadata, serializationSettings);
+                    data.Path = dir;
+                    plugins.Add(data);
+                }
+            }
+            return plugins;
         }
 
         public override async Task Init()
@@ -102,7 +136,7 @@ namespace Bricklayer.Core.Server.Components
         public Assembly LoadPlugin(AppDomain domain, string path)
         {
             //Load the raw bytes of the file, to prevent locking it while the server is running, then load that into the assembly
-            return domain.Load(File.ReadAllBytes(path));
+            return domain.Load(File.ReadAllBytes(Path.Combine(path, "plugin.dll")));
         }
 
         /// <summary>

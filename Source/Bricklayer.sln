@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{0C8DECA4-1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{4081D86C-BE24-4513-850A-B2BE0362D5CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test Plugin", "Plugins\Test Plugin\Test Plugin.csproj", "{B8DA750D-088F-481A-A7F0-5E4EE4CCDD58}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test Server Plugin", "Plugins\Test Plugin\Test Server Plugin.csproj", "{B8DA750D-088F-481A-A7F0-5E4EE4CCDD58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
