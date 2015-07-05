@@ -64,13 +64,6 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public IO IO { get; set; }
 
-
-        /// <summary>
-        /// Temporary variables for storing user
-        /// </summary>
-        public string user;
-        public int id;
-
         /// <summary>
         /// The current state of the game. (Login, server list, in game, etc.)
         /// </summary>
@@ -88,8 +81,8 @@ namespace Bricklayer.Core.Client
         public Client()
         {
             Events = new EventManager();
-            Graphics = new GraphicsDeviceManager(this) { SynchronizeWithVerticalRetrace = false };
-            IsFixedTimeStep = false;
+            Graphics = new GraphicsDeviceManager(this);
+            IsFixedTimeStep = true;
 
             //Create the manager for MonoForce UI
             UIManager = new Manager(this, "Bricklayer")

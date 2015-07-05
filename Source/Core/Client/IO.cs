@@ -137,7 +137,6 @@ namespace Bricklayer.Core.Client
             await
                 Task.Factory.StartNew(
                     () => Config = JsonConvert.DeserializeObject<Config>(json, serializationSettings));
-            Console.WriteLine("Client configuration loaded.");
         }
 
         /// <summary>

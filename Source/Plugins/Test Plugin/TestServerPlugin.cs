@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Bricklayer.Core.Server;
 using Pyratron.Frameworks.Commands.Parser;
 
@@ -17,15 +11,17 @@ namespace Bricklayer.Plugins.TestPlugin
     {
         public TestServerPlugin(Server host) : base(host)
         {
-
         }
 
         public override void Load()
         {
-            Server.Commands.AddCommand(Command.Create("Test", "test", "A test command!").SetAction(((arguments, o) =>
-            {
-                Console.WriteLine("Hello!");
-            })));
+            Server.Commands.AddCommand(
+                Command.Create("Test", "test", "A test command!")
+                    .SetAction(((arguments, o) => { Console.WriteLine("Hello!"); })));
+
+            /* Server.Events.Connection.Connection.AddHandler(
+                args => { Logger.WriteLine(LogType.Plugin, $"{args.Username} has joined!"); }); */
+
             Logger.WriteLine(LogType.Plugin, "Test Plugin Loaded!");
         }
 

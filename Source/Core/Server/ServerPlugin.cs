@@ -18,7 +18,7 @@ namespace Bricklayer.Core.Server
         public Server Server { get; set; }
 
         /// <summary>
-        /// Creates an instance of the plugin.
+        /// Creates an instance of the plugin with the specified server host.
         /// </summary>
         public ServerPlugin(Server host)
         {
