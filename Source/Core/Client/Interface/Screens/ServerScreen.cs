@@ -7,7 +7,6 @@ using System.Net.Mime;
 using System.Net.Sockets;
 using System.Text;
 using Bricklayer.Core.Client.Interface.Windows;
-using Bricklayer.Core.Server.Data;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens

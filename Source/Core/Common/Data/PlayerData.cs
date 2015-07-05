@@ -1,14 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Lidgren.Network;
 
-namespace Bricklayer.Core.Common
+namespace Bricklayer.Core.Common.Data
 {
     /// <summary>
-    /// Represents a user connected to the server or client
+    /// Player information not associated with a map or game.
     /// </summary>
-    public class User : UserData
+    public class PlayerData
     {
+        public PlayerData(string name, short id, bool isGuest)
+        {
+            Username = name;
+        }
+
         /// <summary>
         /// Indicates if the user is not signed in.
         /// </summary>
@@ -20,16 +28,8 @@ namespace Bricklayer.Core.Common
         public short ID { get; private set; }
 
         /// <summary>
-        /// The user's underlying network connection.
+        /// The name of the player.
         /// </summary>
-        public NetConnection Connection { get; private set; }
-
-        public User(string username, NetConnection connection, short id)
-        {
-            Username = username;
-            Connection = connection;
-            ID = id;
-            UUID = string.Empty;
-        }
+        public string Username { get; set; }
     }
 }

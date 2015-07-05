@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Server.Components;
 using Pyratron.Frameworks.Commands.Parser;
 
@@ -48,7 +49,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// List of users online the server.
         /// </summary>
-        public List<User> Users;
+        public List<Player> Players;
 
         private string clear, input;
         private bool showHeader;
@@ -58,7 +59,7 @@ namespace Bricklayer.Core.Server
         {
             Logger.Server = this;
             Events = new EventManager();
-            Users = new List<User>();
+            Players = new List<Player>();
 
             //Setup server
             Console.BackgroundColor = ConsoleColor.Black;
@@ -247,10 +248,10 @@ namespace Bricklayer.Core.Server
         /// </summary>
         /// <param name="remoteUniqueIdentifier">The RUI to find</param>
         /// <param name="ignoreError">If a Sender is not found, should an error be thrown?</param>
-        public User UserFromRUI(long remoteUniqueIdentifier, bool ignoreError = false)
+        public Player PlayerFromRUI(long remoteUniqueIdentifier, bool ignoreError = false)
         {
-            User found = null;
-            foreach (var user in Users)
+            Player found = null;
+            foreach (var user in Players)
             {
                 if (user.Connection.RemoteUniqueIdentifier == remoteUniqueIdentifier)
                     found = user;
@@ -264,12 +265,12 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Finds an empty slot to use as a user's ID
         /// </summary>
-        public short FindAvailableUserID()
+        public short FindAvailablePlayerID()
         {
             for (var i = 1; i < IO.Config.Server.MaxPlayers; i++)
-                if (Users.All(x => x.ID != i))
+                if (Players.All(x => x.ID != i))
                     return (short)i;
-            Logger.WriteLine(LogType.Error, "Could not find empty user ID! (Max Users: {0})",
+            Logger.WriteLine(LogType.Error, "Could not find empty user ID! (Max Players: {0})",
                 IO.Config.Server.MaxPlayers);
             return 0;
         }

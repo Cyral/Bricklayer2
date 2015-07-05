@@ -5,7 +5,14 @@
     /// </summary>
     public enum MessageContext
     {
+        /// <summary>
+        /// The message is being encoded or decoded on the client side.
+        /// </summary>
         Client,
+
+        /// <summary>
+        /// The message is being encoded or decoded on the server side.
+        /// </summary>
         Server
     }
 }

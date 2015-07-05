@@ -5,7 +5,6 @@ using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net.Messages;
-using Bricklayer.Core.Server.Data;
 
 namespace Bricklayer.Core.Client
 {
@@ -252,7 +251,7 @@ namespace Bricklayer.Core.Client
                 public Event<ConnectEventArgs> Connect { get; } = new Event<ConnectEventArgs>();
 
                 /// <summary>
-                /// When an init message is recieved, containing list of rooms and server info. (On connect and when reload button is pressed)
+                /// When an init message is recieved, containing list of levels and server info. (On connect and when reload button is pressed)
                 /// </summary>
                 public Event<InitEventArgs> Init { get; } = new Event<InitEventArgs>();
 

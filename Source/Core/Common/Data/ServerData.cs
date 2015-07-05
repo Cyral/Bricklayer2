@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bricklayer.Core.Common;
-
-namespace Bricklayer.Core.Server.Data
+﻿namespace Bricklayer.Core.Common.Data
 {
     /// <summary>
     /// Server data such as name and host. To be used for saving/loading servers from a config file.
     /// </summary>
-    public class ServerSaveData
+    public class ServerData
     {
         /// <summary>
         /// The name of the server.
@@ -27,7 +20,7 @@ namespace Bricklayer.Core.Server.Data
         /// </summary>
         public int Port { get; private set; }
 
-        public ServerSaveData(string name, string host, int port)
+        public ServerData(string name, string host, int port)
         {
             Name = name;
             Host = host;

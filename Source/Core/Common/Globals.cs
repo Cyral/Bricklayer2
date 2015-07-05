@@ -11,7 +11,7 @@ namespace Bricklayer.Core.Common
     internal static class Globals
     {
         /// <summary>
-        /// Globally used regular expressions used for verifying names of entities, rooms, etc.
+        /// Globally used regular expressions used for verifying names of entities, levels, etc.
         /// </summary>
         public class Regexes
         {

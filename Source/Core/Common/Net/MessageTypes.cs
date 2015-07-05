@@ -5,6 +5,7 @@
     /// </summary>
     public enum MessageTypes : byte
     {
+        //Ordering matters, don't change the order of these!
         AuthLogin,
         AuthInit,
         FailedLogin,
@@ -14,7 +15,7 @@
         ValidSession,
         Init,
         ServerInfo,
-        CreateRoom,
+        CreateLevel,
         Request,
         Banner
     }

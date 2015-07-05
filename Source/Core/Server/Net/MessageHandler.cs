@@ -83,7 +83,7 @@ namespace Bricklayer.Core.Server.Net
                             //NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with Disconnect()
                             case NetIncomingMessageType.StatusChanged:
                             {
-                                //When a Users connection is finalized
+                                //When a Players connection is finalized
                                 if (inc.SenderConnection != null &&
                                     inc.SenderConnection.Status == NetConnectionStatus.Connected)
                                 {
@@ -185,7 +185,7 @@ namespace Bricklayer.Core.Server.Net
             //The type of message being recieved
             var type = (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
             //The user who sent the message
-            var sender = Server.UserFromRUI(inc.SenderConnection.RemoteUniqueIdentifier);
+            var sender = Server.PlayerFromRUI(inc.SenderConnection.RemoteUniqueIdentifier);
             if (sender != null)
             {
                 switch (type)

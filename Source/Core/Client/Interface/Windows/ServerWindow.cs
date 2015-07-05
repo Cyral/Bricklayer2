@@ -5,7 +5,7 @@ using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
-using Bricklayer.Core.Server.Data;
+using Bricklayer.Core.Common.Data;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
@@ -21,7 +21,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly Button btnRefresh;
         private readonly Button btnRemove;
         private readonly ControlList<ServerDataControl> lstServers; //The listbox of server control items
-        private List<ServerSaveData> servers; //The list of loaded servers
+        private List<ServerData> servers; //The list of loaded servers
         private readonly ServerScreen screen;
 
         public ServerWindow(Manager manager, ServerScreen screen) : base(manager)
@@ -143,7 +143,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
         {
             screen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
-                args.Message.Intro, args.Message.Online, args.Message.Rooms));
+                args.Message.Intro, args.Message.Online, args.Message.Levels));
         }
 
         private void OnDisconnect(EventManager.NetEvents.GameServerEvents.DisconnectEventArgs args)
@@ -163,14 +163,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
             base.Dispose(disposing);
         }
 
-        public void AddServer(ServerSaveData server)
+        public void AddServer(ServerData server)
         {
             servers.Add(server);
             screen.Client.IO.WriteServers(servers);
             RefreshServerList();
         }
 
-        public void EditServer(int index, ServerSaveData server)
+        public void EditServer(int index, ServerData server)
         {
             servers[index] = server;
             screen.Client.IO.WriteServers(servers);

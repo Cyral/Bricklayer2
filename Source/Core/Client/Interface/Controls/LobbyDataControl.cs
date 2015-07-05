@@ -1,22 +1,22 @@
 ﻿using Bricklayer.Core.Client.Interface.Screens;
-using Bricklayer.Core.Server.Data;
+using Bricklayer.Core.Common.Data;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Controls
 {
     /// <summary>
-    /// A control for displaying a room's name, rating, online, etc, in the lobby.
+    /// A control for displaying a level's name, rating, online, etc, in the lobby.
     /// </summary>
     public sealed class LobbyDataControl : Control
     {
-        public readonly LobbySaveData Data;
+        public readonly LevelData Data;
         private readonly StatusBar gradient;
         private readonly ImageBox[] imgRating = new ImageBox[5];
         private readonly Label lblName, lblDescription, lblStats;
         private readonly LobbyScreen screen;
 
-        public LobbyDataControl(LobbyScreen screen, Manager manager, LobbySaveData data, Control parent)
+        public LobbyDataControl(LobbyScreen screen, Manager manager, LevelData data, Control parent)
             : base(manager)
         {
             //Setup

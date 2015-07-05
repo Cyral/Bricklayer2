@@ -7,7 +7,7 @@ using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
-    public class CreateRoomMessage : IMessage
+    public class CreateLevelMessage : IMessage
     {
         public const int MaxNameLength = 24, MaxDescriptionLength = 80, MaxDescriptionLines = 2;
 
@@ -19,15 +19,15 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public MessageTypes MessageType
         {
-            get { return MessageTypes.CreateRoom; }
+            get { return MessageTypes.CreateLevel; }
         }
 
-        public CreateRoomMessage(NetIncomingMessage im)
+        public CreateLevelMessage(NetIncomingMessage im)
         {
             this.Decode(im);
         }
 
-        public CreateRoomMessage(string name, string description)
+        public CreateLevelMessage(string name, string description)
         {
             this.Name = name;
             this.Description = description;

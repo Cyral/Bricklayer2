@@ -12,7 +12,7 @@ using MonoForce.Controls;
 namespace Bricklayer.Core.Client.Interface.Windows
 {
     /// <summary>
-    /// Dialog for creating rooms in the lobby list
+    /// Dialog for creating levels in the lobby list
     /// </summary>
     public class CreateWorldDialog : Dialog
     {
@@ -20,12 +20,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private Button createBtn;
         private TextBox txtName, txtDescription;
         private Label lblName, lblDescription;
-        private LobbyWindow roomList;
+        private LobbyWindow levelList;
 
         public CreateWorldDialog(Manager manager, LobbyWindow parent)
             : base(manager)
         {
-            roomList = parent;
+            levelList = parent;
             //Setup the window
             Text = "Create World";
             TopPanel.Visible = false;
@@ -43,8 +43,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             txtName.Init();
             txtName.TextChanged += delegate (object o, MonoForce.Controls.EventArgs e)
             {
-                if (txtName.Text.Length > CreateRoomMessage.MaxNameLength)
-                    txtName.Text = txtName.Text.Truncate(CreateRoomMessage.MaxNameLength);
+                if (txtName.Text.Length > CreateLevelMessage.MaxNameLength)
+                    txtName.Text = txtName.Text.Truncate(CreateLevelMessage.MaxNameLength);
                 e.Handled = false; // Makes sure aspects like text selection rendering gets covered by NeoForce
             };
             Add(txtName);
@@ -58,10 +58,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
             txtDescription.TextChanged += delegate (object o, MonoForce.Controls.EventArgs e)
             {
                 //Filter the text by checking for length and lines
-                if (txtDescription.Text.Length > CreateRoomMessage.MaxDescriptionLength)
-                    txtDescription.Text = txtDescription.Text.Truncate(CreateRoomMessage.MaxDescriptionLength);
+                if (txtDescription.Text.Length > CreateLevelMessage.MaxDescriptionLength)
+                    txtDescription.Text = txtDescription.Text.Truncate(CreateLevelMessage.MaxDescriptionLength);
                 int newLines = txtDescription.Text.Count(c => c == '\n');
-                if (newLines >= CreateRoomMessage.MaxDescriptionLines)
+                if (newLines >= CreateLevelMessage.MaxDescriptionLines)
                 {
                     txtDescription.Text = txtDescription.Text.Substring(0, txtDescription.Text.Length - 1);
                     txtDescription.CursorPosition = 0;
@@ -81,9 +81,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// </summary>
         void CreateBtn_Click(object sender, MonoForce.Controls.EventArgs e)
         {
-            //                Game.NetManager.SendMessage(new Bricklayer.Client.Networking.Messages.JoinRoomMessage(worldName));
+            //                Game.NetManager.SendMessage(new Bricklayer.Client.Networking.Messages.JoinLevelMessage(worldName));
             //MainWindow.ScreenManager.SwitchScreen(new Screen(new Action((new Action(() => {
-            //    roomList.lobbyScreen.Client.Network.Send(new CreateRoomMessage(txtName.Text, txtDescription.Text));
+            //    levelList.lobbyScreen.Client.Network.Send(new CreateLevelMessage(txtName.Text, txtDescription.Text));
             //})))));
             Close();
         }

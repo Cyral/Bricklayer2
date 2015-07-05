@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
-using Bricklayer.Core.Server.Data;
+using Bricklayer.Core.Common.Data;
 using Newtonsoft.Json;
 
 namespace Bricklayer.Core.Client.Components
@@ -84,28 +84,28 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Reads a list of servers from the json server config file
         /// </summary>
-        public List<ServerSaveData> ReadServers()
+        public List<ServerData> ReadServers()
         {
             var fileName = serverFile;
             if (!File.Exists(fileName))
             {
                 //If server config does not exist, create it and write the default server to it
-                WriteServers(new List<ServerSaveData> {CreateDefaultServer()});
+                WriteServers(new List<ServerData> {CreateDefaultServer()});
             }
             var json = File.ReadAllText(fileName);
             if (string.IsNullOrWhiteSpace(json))
             {
-                WriteServers(new List<ServerSaveData> {CreateDefaultServer()});
+                WriteServers(new List<ServerData> {CreateDefaultServer()});
                 json = File.ReadAllText(fileName);
             }
-            var servers = JsonConvert.DeserializeObject<List<ServerSaveData>>(json);
+            var servers = JsonConvert.DeserializeObject<List<ServerData>>(json);
             return servers;
         }
 
         /// <summary>
         /// Save servers into a configurable json file
         /// </summary>
-        public void WriteServers(List<ServerSaveData> servers)
+        public void WriteServers(List<ServerData> servers)
         {
             var fileName = serverFile;
             if (!File.Exists(fileName))
@@ -204,9 +204,9 @@ namespace Bricklayer.Core.Client.Components
             }
         }
 
-        private static ServerSaveData CreateDefaultServer()
+        private static ServerData CreateDefaultServer()
         {
-            return new ServerSaveData("Local Server", "127.0.0.1", Globals.Values.DefaultServerPort);
+            return new ServerData("Local Server", "127.0.0.1", Globals.Values.DefaultServerPort);
         }
     }
 }
