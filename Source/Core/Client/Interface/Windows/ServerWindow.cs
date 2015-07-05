@@ -48,6 +48,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lstServers.Init();
             Add(lstServers);
             RefreshServerList();
+            lstServers.DoubleClick += delegate (object o, EventArgs e)
+            {
+                ServerDataControl sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
+                MouseEventArgs mouse = (MouseEventArgs)e;
+                if (sdc.CheckPositionMouse(mouse.Position - lstServers.AbsoluteRect.Location))
+                    screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
+            };
 
             //Add controls to the bottom panel. (Add server, edit server, etc.)
 
