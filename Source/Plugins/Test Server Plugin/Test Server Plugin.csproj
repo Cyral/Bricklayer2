@@ -7,7 +7,7 @@
     <ProjectGuid>{B8DA750D-088F-481A-A7F0-5E4EE4CCDD58}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bricklayer.Plugins.TestPlugin</RootNamespace>
+    <RootNamespace>Bricklayer.Plugins.TestServerPlugin</RootNamespace>
     <AssemblyName>plugin</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

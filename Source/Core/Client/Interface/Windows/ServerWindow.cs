@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Bricklayer.Client.Interface;
+using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
@@ -93,7 +94,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                         {
                             servers.RemoveAt(lstServers.ItemIndex);
                             lstServers.Items.RemoveAt(lstServers.ItemIndex);
-                            IO.WriteServers(servers); //Write the new server list to disk.
+                            screen.Client.IO.WriteServers(servers); //Write the new server list to disk.
                         }
                     };
                     Manager.Add(confirm);
@@ -165,14 +166,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
         public void AddServer(ServerSaveData server)
         {
             servers.Add(server);
-            IO.WriteServers(servers);
+            screen.Client.IO.WriteServers(servers);
             RefreshServerList();
         }
 
         public void EditServer(int index, ServerSaveData server)
         {
             servers[index] = server;
-            IO.WriteServers(servers);
+            screen.Client.IO.WriteServers(servers);
             RefreshServerList();
         }
 
@@ -180,7 +181,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         {
             lstServers.Items.Clear();
             //Read the servers from config
-            servers = IO.ReadServers();
+            servers = screen.Client.IO.ReadServers();
             //Populate the list 
             foreach (var server in servers)
             {

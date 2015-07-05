@@ -1,26 +1,21 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using System.Runtime.Remoting;
 using System.Threading.Tasks;
+using Bricklayer.Core.Client.Net;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Lidgren.Network;
-using Bricklayer.Core.Common.Net;
 
-namespace Bricklayer.Core.Client.Net.Messages.GameServer
+namespace Bricklayer.Core.Client.Components
 {
-    internal class NetworkManager
+    /// <summary>
+    /// Manages network functions related to the server.
+    /// </summary>
+    internal class NetworkManager : ClientComponent
     {
-        /// <summary>
-        /// The underlying Lidgren NetClient.
-        /// </summary>
-        public NetClient NetClient { get; private set; }
-
-        /// <summary>
-        /// The message handler to handle incoming messages.
-        /// </summary>
-        public MessageHandler Handler { get; private set; }
+        //Message delivery method
+        private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
 
         /// <summary>
         /// Configuration options for Lidgren messages.
@@ -28,41 +23,36 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         public NetPeerConfiguration Config { get; private set; }
 
         /// <summary>
+        /// The message handler to handle incoming messages.
+        /// </summary>
+        public MessageHandler Handler { get; private set; }
+
+        /// <summary>
+        /// The underlying Lidgren NetClient.
+        /// </summary>
+        public NetClient NetClient { get; private set; }
+
+        /// <summary>
         /// Contains the 2 keys used for authentication
         /// </summary>
         public Token TokenKeys { get; private set; }
-
-        internal Client Client { get; }
-
-
-        /// <summary>
-        /// Temporaryly store these while in the server joining process
-        /// </summary>
-        internal string Host;
-        internal int Port;
 
         /// <summary>
         /// The IP of the auth server.
         /// </summary>
         internal IPEndPoint AuthEndpoint { get; private set; }
 
-        public NetworkManager(Client client)
-        {
-            Client = client;
-        }
-
+        private string host;
         private bool isDisposed;
-
-        private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;//Message delivery method
-
-
+        private int port;
 
         /// <summary>
         /// Initialization logic on app startup
         /// </summary>
-        public void Init()
+        public override async Task Init()
         {
-            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Client.IO.Config.Client.AuthServerAddress), Client.IO.Config.Client.AuthServerPort); //Find the address of the auth server
+            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Client.IO.Config.Client.AuthServerAddress),
+                Client.IO.Config.Client.AuthServerPort); //Find the address of the auth server
             TokenKeys = new Token();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
@@ -100,13 +90,13 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                 if (args.Verified)
                 {
                     Debug.WriteLine("Session verification Successful");
-                    await Join(Host, Port, TokenKeys.Username, TokenKeys.UUID, TokenKeys.PublicKey); // Start connection process with game server once it gets session verification from the auth server
+                    await Join(host, port, TokenKeys.Username, TokenKeys.UUID, TokenKeys.PublicKey);
+                    // Start connection process with game server once it gets session verification from the auth server
                 }
                 else
                     Debug.WriteLine("Session verification failed");
             });
-
-
+            await base.Init();
         }
 
         /// <summary>
@@ -114,7 +104,8 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// </summary>
         public void ConnectToAuth(string username, string password)
         {
-            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort, new AuthLoginMessage(Constants.Version, username, password));
+            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort,
+                new AuthLoginMessage(Constants.Version, username, password));
         }
 
         /// <summary>
@@ -124,9 +115,11 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
         /// <param name="port"></param>
         public void SendSessionRequest(string host, int port)
         {
-            Host = host;
-            Port = port;
-            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort, new SessionMessage(TokenKeys.Username, TokenKeys.UUID, TokenKeys.PrivateKey, NetUtility.Resolve(host), port));
+            this.host = host;
+            this.port = port;
+            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort,
+                new SessionMessage(TokenKeys.Username, TokenKeys.UUID, TokenKeys.PrivateKey, NetUtility.Resolve(host),
+                    port));
         }
 
         /// <summary>
@@ -276,6 +269,10 @@ namespace Bricklayer.Core.Client.Net.Messages.GameServer
                     Disconnect();
                 isDisposed = true;
             }
+        }
+
+        public NetworkManager(Client client) : base(client)
+        {
         }
     }
 }

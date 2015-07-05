@@ -225,6 +225,7 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public void WriteText(string text, ConsoleColor color)
         {
+            Console.SetCursorPosition(0, Console.CursorTop);
             Console.ForegroundColor = ConsoleColor.Gray;
             var time = Logger.GetTimestamp();
             Console.Write(time);

@@ -2,7 +2,7 @@
 using Bricklayer.Core.Server;
 using Pyratron.Frameworks.Commands.Parser;
 
-namespace Bricklayer.Plugins.TestPlugin
+namespace Bricklayer.Plugins.TestServerPlugin
 {
     /// <summary>
     /// A test server plugin.

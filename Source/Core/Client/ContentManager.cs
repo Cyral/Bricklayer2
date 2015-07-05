@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Bricklayer.Core.Client.Components;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Bricklayer.Core.Client
@@ -39,7 +40,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         internal void LoadTextures(Client client)
         {
-            var directory = Path.Combine(IO.Directories["Content"], "Textures");
+            var directory = Path.Combine(client.IO.Directories["Content"], "Textures");
             var files = DirSearch(directory, ".png");
 
             //For each file name, load it from disk.

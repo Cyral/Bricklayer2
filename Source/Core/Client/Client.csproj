@@ -54,6 +54,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ClientPlugin.cs" />
+    <Compile Include="Components\ClientComponent.cs" />
+    <Compile Include="Components\PluginComponent.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ContentManager.cs" />
@@ -76,9 +79,9 @@
     <Compile Include="Interface\Windows\LobbyWindow.cs" />
     <Compile Include="Interface\Windows\LoginWindow.cs" />
     <Compile Include="Interface\Windows\ServerWindow.cs" />
-    <Compile Include="IO.cs" />
+    <Compile Include="Components\IOComponent.cs" />
     <Compile Include="Net\MessageHandler.cs" />
-    <Compile Include="Net\NetworkManager.cs" />
+    <Compile Include="Components\NetworkComponent.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextureLoader.cs" />
@@ -112,7 +115,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Bricklayer.Core.Server.Components
 {
     /// <summary>
-    /// Represents a static component required for the server.
+    /// Represents a component required for the server.
     /// </summary>
     public abstract class ServerComponent
     {
