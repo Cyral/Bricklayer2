@@ -50,9 +50,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
             RefreshServerList();
             lstServers.DoubleClick += delegate (object o, EventArgs e)
             {
-                ServerDataControl sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
-                MouseEventArgs mouse = (MouseEventArgs)e;
-                if (sdc.CheckPositionMouse(mouse.Position - lstServers.AbsoluteRect.Location))
+                var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
+                //Make sure the user clicks the item and not the empty space in the list
+                if (sdc.CheckPositionMouse(((MouseEventArgs)e).Position - lstServers.AbsoluteRect.Location))
                     screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
             };
 
@@ -121,6 +121,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnJoin.Right = btnAdd.Left - 8;
             btnJoin.Click += delegate
             {
+                btnJoin.Enabled = false;
+                btnJoin.Text = "Connecting...";
                 screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
             };
             BottomPanel.Add(btnJoin);
@@ -145,6 +147,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         private void OnDisconnect(EventManager.NetEvents.GameServerEvents.DisconnectEventArgs args)
         {
+            btnJoin.Enabled = true;
+            btnJoin.Text = "Connect";
             var msgBox = new MessageBox(Manager, MessageBoxType.Warning, args.Reason, "Error Connecting to Server");
             msgBox.Init();
             screen.ScreenManager.Manager.Add(msgBox);
@@ -187,20 +191,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
             }
             if (lstServers.Items.Count > 0)
                 lstServers.ItemIndex = 0;
-        }
-
-        internal void Disconnected(string message, string title)
-        {
-            //Enable join button and display error message if couldn't connect to server
-            if (!btnJoin.Enabled)
-            {
-                btnJoin.Enabled = true;
-                btnJoin.Text = "Connect";
-                var error = new MessageBox(Manager, MessageBoxType.Error, message, title);
-                error.Init();
-                Manager.Add(error);
-                error.Show();
-            }
         }
     }
 }
