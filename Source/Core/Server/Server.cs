@@ -10,6 +10,7 @@ using Pyratron.Frameworks.Commands.Parser;
 using System.IO;
 using System.Net.Mime;
 using System.Drawing;
+using System.Globalization;
 
 namespace Bricklayer.Core.Server
 {
@@ -71,7 +72,7 @@ namespace Bricklayer.Core.Server
             clear = new string(' ', Console.WindowWidth);
             var stopwatch = Stopwatch.StartNew();
             Logger.WriteLine($"{Constants.Strings.ServerTitle}");
-            Logger.WriteLine($"Server is starting now, on {DateTime.Now.ToString("U")}");
+            Logger.WriteLine($"Server is starting now, on {DateTime.Now.ToString("U", new CultureInfo("en-US"))}");
 
             //Initialize Properties
             Commands = CommandParser.CreateNew().UsePrefix(string.Empty).OnError(OnParseError);
