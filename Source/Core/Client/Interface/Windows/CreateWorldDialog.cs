@@ -41,11 +41,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             txtName = new TextBox(manager) { Left = 8, Top = lblName.Bottom + 4, Width = this.ClientWidth - 16 };
             txtName.Init();
-            txtName.TextChanged += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
+            txtName.TextChanged += delegate (object o, MonoForce.Controls.EventArgs e)
             {
                 if (txtName.Text.Length > CreateRoomMessage.MaxNameLength)
                     txtName.Text = txtName.Text.Truncate(CreateRoomMessage.MaxNameLength);
-            });
+                e.Handled = false; // Makes sure aspects like text selection rendering gets covered by NeoForce
+            };
             Add(txtName);
 
             lblDescription = new Label(manager) { Left = 8, Top = txtName.Bottom + 4, Text = "Description:", Width = this.ClientWidth - 16 };
@@ -54,7 +55,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             txtDescription = new TextBox(manager) { Left = 8, Top = lblDescription.Bottom + 4, Width = this.ClientWidth - 16, Height = 34, Mode = TextBoxMode.Multiline, ScrollBars = ScrollBars.None };
             txtDescription.Init();
-            txtDescription.TextChanged += new MonoForce.Controls.EventHandler(delegate (object o, MonoForce.Controls.EventArgs e)
+            txtDescription.TextChanged += delegate (object o, MonoForce.Controls.EventArgs e)
             {
                 //Filter the text by checking for length and lines
                 if (txtDescription.Text.Length > CreateRoomMessage.MaxDescriptionLength)
@@ -65,7 +66,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
                     txtDescription.Text = txtDescription.Text.Substring(0, txtDescription.Text.Length - 1);
                     txtDescription.CursorPosition = 0;
                 }
-            });
+                e.Handled = false; // Makes sure aspects like text selection rendering gets covered by NeoForce
+            };
             Add(txtDescription);
 
             createBtn = new Button(manager) { Top = 8, Text = "Create" };
