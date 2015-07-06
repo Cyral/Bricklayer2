@@ -135,6 +135,15 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
+                public class ModEventArgs : EventArgs
+                {
+                    public ModMessage Message { get; private set; }
+
+                    public ModEventArgs(ModMessage message)
+                    {
+                        Message = message;
+                    }
+                }
                 #endregion
 
                 //Events represent a collection of event handlers.
@@ -159,6 +168,11 @@ namespace Bricklayer.Core.Client
                 /// </summary>
                 public Event<VerifiedEventArgs> Verified { get; } =
                     new Event<VerifiedEventArgs>();
+
+                /// <summary>
+                /// When client recieves mod info from the Auth server
+                /// </summary>
+                public Event<ModEventArgs> Mod { get; } = new Event<ModEventArgs>();
 
 
                 #endregion

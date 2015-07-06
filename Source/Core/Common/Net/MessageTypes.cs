@@ -16,6 +16,7 @@
         ServerInfo,
         CreateRoom,
         Request,
-        Banner
+        Banner,
+        Mod
     }
 }

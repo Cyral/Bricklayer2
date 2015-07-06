@@ -93,6 +93,13 @@ namespace Bricklayer.Core.Client.Net
                             new EventManager.NetEvents.AuthServerEvents.VerifiedEventArgs(msg.Verified));
                         break;
                     }
+                    case MessageTypes.Mod:
+                    {
+                        var msg = new ModMessage(im, MessageContext.Client);
+                        networkManager.Client.Events.Network.Auth.Mod.Invoke(
+                            new EventManager.NetEvents.AuthServerEvents.ModEventArgs(msg));
+                        break;
+                    }
                 }
             }
             else //Message not from auth server, instead from a game server

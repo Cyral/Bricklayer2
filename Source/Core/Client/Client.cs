@@ -2,6 +2,7 @@
 using System.Net;
 using System;
 using Bricklayer.Client.Interface;
+using Bricklayer.Core.Client.Interface.Windows;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
@@ -66,12 +67,6 @@ namespace Bricklayer.Core.Client
 
 
         /// <summary>
-        /// Temporary variables for storing user
-        /// </summary>
-        public string user;
-        public int id;
-
-        /// <summary>
         /// The current state of the game. (Login, server list, in game, etc.)
         /// </summary>
         public GameState State
@@ -98,6 +93,15 @@ namespace Bricklayer.Core.Client
                 LogUnhandledExceptions = false,
                 ShowSoftwareCursor = true
             };
+
+            Events.Network.Auth.Mod.AddHandler(args =>
+            {
+                //Create the main window for all content to be added to.
+                var modWindow = new ModInstallWindow(UIManager, args.Message.ModName, args.Message.Id, args.Message.FileName, false);
+                modWindow.Init();
+                Window.Add(modWindow);
+                modWindow.Show();
+            });
         }
 
         /// <summary>
@@ -163,6 +167,8 @@ namespace Bricklayer.Core.Client
             Window.Init();
             UIManager.Add(Window);
             Window.SendToBack();
+
+
         }
 
         /// <summary>
