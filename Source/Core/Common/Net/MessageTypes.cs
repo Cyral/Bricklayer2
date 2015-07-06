@@ -18,6 +18,6 @@
         CreateLevel,
         Request,
         Banner,
-        Mod
+        PluginDownload
     }
 }

@@ -8,24 +8,27 @@ using Lidgren.Network;
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Sends mod info to client
+    /// Sends plugin info to client
     /// Auth Server => Client
+    /// Int: ID
+    /// String: Mod Name
+    /// String: File Name
     /// </summary>
-    public class ModMessage : IMessage
+    public class PluginDownloadMessage : IMessage
     {
-        public string Id { get; set; }
+        public int ID { get; set; }
         public string ModName { get; set; }
         public string FileName { get; set; }
 
-        public ModMessage(NetIncomingMessage im, MessageContext context)
+        public PluginDownloadMessage(NetIncomingMessage im, MessageContext context)
         {
             Context = context;
             Decode(im);
         }
 
-        public ModMessage(string id, string modName, string fileName)
+        public PluginDownloadMessage(int id, string modName, string fileName)
         {
-            Id = id;
+            ID = id;
             ModName = modName;
             FileName = fileName;
         }
@@ -33,18 +36,18 @@ namespace Bricklayer.Core.Common.Net.Messages
         #region IMessage Members
 
         public MessageContext Context { get; set; }
-        public MessageTypes MessageType => MessageTypes.Mod;
+        public MessageTypes MessageType => MessageTypes.PluginDownload;
 
         public void Decode(NetIncomingMessage im)
         {
-            Id = im.ReadString();
+            ID = im.ReadInt32();
             ModName = im.ReadString();
             FileName = im.ReadString();
         }
 
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write(Id);
+            om.Write(ID);
             om.Write(ModName);
             om.Write(FileName);
         }

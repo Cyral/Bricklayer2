@@ -136,9 +136,9 @@ namespace Bricklayer.Core.Client
 
                 public class ModEventArgs : EventArgs
                 {
-                    public ModMessage Message { get; private set; }
+                    public PluginDownloadMessage Message { get; private set; }
 
-                    public ModEventArgs(ModMessage message)
+                    public ModEventArgs(PluginDownloadMessage message)
                     {
                         Message = message;
                     }
@@ -169,9 +169,9 @@ namespace Bricklayer.Core.Client
                     new Event<VerifiedEventArgs>();
 
                 /// <summary>
-                /// When client recieves mod info from the Auth server
+                /// When the auth server tells the client to download a mod. (From the install button on the website)
                 /// </summary>
-                public Event<ModEventArgs> Mod { get; } = new Event<ModEventArgs>();
+                public Event<ModEventArgs> PluginDownload { get; } = new Event<ModEventArgs>();
 
 
                 #endregion

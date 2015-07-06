@@ -32,25 +32,40 @@ namespace Bricklayer.Core.Server.Components
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
             LoadPlugins();
+
             await base.Init();
         }
 
-        private void LoadPlugins()
+        /// <summary>
+        /// Loads all plugins that are not already loaded.
+        /// </summary>
+        internal void LoadPlugins()
         {
             //Get a list of all the .dlls in the directory
-            var files = IOHelper.GetPlugins(Server.IO.PluginsDirectory, Server.IO.SerializationSettings);
-            foreach (var file in files)
+            IEnumerable<PluginData> files = null;
+            try
             {
-                //TODO: Use AppDomains for security
-                //Load the assembly
-                try
+                files = IOHelper.GetPlugins(Server.IO.PluginsDirectory, Server.IO.SerializationSettings);
+            }
+            catch (Exception e)
+            {
+                Logger.WriteLine(LogType.Error, e.Message);
+            }
+            if (files != null)
+            {
+                foreach (var file in files.Where(file => !plugins.Contains(file)))
                 {
-                    var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
-                    RegisterPlugin(IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, file));
-                }
-                catch (Exception e)
-                {
-                    Logger.WriteLine(LogType.Error, e.Message);
+                    //TODO: Use AppDomains for security
+                    //Load the assembly
+                    try
+                    {
+                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                        RegisterPlugin(IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, file));
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.WriteLine(LogType.Error, e.Message);
+                    }
                 }
             }
         }

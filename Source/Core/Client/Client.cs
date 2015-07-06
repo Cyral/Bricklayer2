@@ -92,15 +92,6 @@ namespace Bricklayer.Core.Client
                 LogUnhandledExceptions = false,
                 ShowSoftwareCursor = true
             };
-
-            Events.Network.Auth.Mod.AddHandler(args =>
-            {
-                //Create the main window for all content to be added to.
-                var modWindow = new ModInstallWindow(UI, Window, args.Message.ModName, args.Message.Id, args.Message.FileName, false);
-                modWindow.Init();
-                Window.Add(modWindow);
-                modWindow.Show();
-            });
         }
 
         /// <summary>

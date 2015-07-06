@@ -5,7 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Common;
+using MonoForce.Controls;
+using Console = System.Console;
 
 namespace Bricklayer.Core.Client.Components
 {
@@ -30,26 +33,54 @@ namespace Bricklayer.Core.Client.Components
         {
             if (!Client.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
+
             LoadPlugins();
+
+            Client.Events.Network.Auth.PluginDownload.AddHandler(args =>
+            {
+                if (!PluginDownloadWindow.IsDownloading(args.Message.ID))
+                {
+                    var pluginWindow = new PluginDownloadWindow(Client.UI, Client.Window, args.Message.ModName, args.Message.ID,
+                        args.Message.FileName, false);
+                    pluginWindow.Init();
+                    Client.Window.Add(pluginWindow);
+                    pluginWindow.Show();
+                }
+            });
+
             await base.Init();
         }
 
-        private void LoadPlugins()
+        /// <summary>
+        /// Loads all plugins that are not already loaded.
+        /// </summary>
+        internal void LoadPlugins()
         {
             //Get a list of all the .dlls in the directory
-            var files = IOHelper.GetPlugins(Client.IO.Directories["Plugins"], Client.IO.SerializationSettings);
-            foreach (var file in files)
+            IEnumerable<PluginData> files = null;
+            try
             {
-                //TODO: Use AppDomains for security
-                //Load the assembly
-                try
+                files = IOHelper.GetPlugins(Client.IO.Directories["Plugins"], Client.IO.SerializationSettings);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            if (files != null)
+            {
+                foreach (var file in files.Where(file => !plugins.Contains(file)))
                 {
-                    var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
-                    RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
+                    //TODO: Use AppDomains for security
+                    //Load the assembly
+                    try
+                    {
+                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                        RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 }
             }
         }

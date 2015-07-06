@@ -69,7 +69,7 @@
     <Compile Include="Event.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Globals.cs" />
-    <Compile Include="Net\Messages\ModMessage.cs" />
+    <Compile Include="Net\Messages\PluginDownloadMessage.cs" />
     <Compile Include="IOHelper.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="JsonContractResolver.cs" />

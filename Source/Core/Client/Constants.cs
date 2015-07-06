@@ -46,6 +46,11 @@ namespace Bricklayer.Core.Client
             /// URL to create a Pyratron account.
             /// </summary>
             internal static string CreateAccountURL { get; } = "https://www.pyratron.com/component/users/?view=registration&variant=Bricklayer";
+
+            /// <summary>
+            /// URL to where plugin downloads come from. Revision/attachment ID must be appended.
+            /// </summary>
+            internal static string DownloadPluginURL { get; } = "https://community.pyratron.com/app.php/db/download/";
         }
     }
 }

@@ -28,6 +28,21 @@ namespace Bricklayer.Core.Common
         }
     }
 
+    public static class HashExtensions
+    {
+        public const int Start = 17;
+
+        /// <summary>
+        /// Creates a hash between this object and other object.
+        /// </summary>
+        public static int Hash<T>(this int hash, T obj)
+        {
+            var c = EqualityComparer<T>.Default;
+            var h = c.Equals(obj, default(T)) ? 0 : obj.GetHashCode();
+            return unchecked((hash * 31) + h);
+        }
+    }
+
     public static class IOExtensions
     {
         /// <summary>

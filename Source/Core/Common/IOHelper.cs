@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -29,9 +30,15 @@ namespace Bricklayer.Core.Common
             {
                 try
                 {
-                    return (T)Activator.CreateInstance(mainType,
+                    var instance =  (T)Activator.CreateInstance(mainType,
                         BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.Instance, null,
                         new[] {arguments}, CultureInfo.CurrentCulture);
+                    instance.Path = plugin.Path;
+                    instance.Author = plugin.Author;
+                    instance.Description = plugin.Description;
+                    instance.Name = plugin.Name;
+                    instance.Version = plugin.Version;
+                    return instance;
                 }
                 catch (Exception e)
                 {

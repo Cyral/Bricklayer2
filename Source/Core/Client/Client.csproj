@@ -78,7 +78,7 @@
     <Compile Include="Interface\Windows\CreateWorldDialog.cs" />
     <Compile Include="Interface\Windows\LobbyWindow.cs" />
     <Compile Include="Interface\Windows\LoginWindow.cs" />
-    <Compile Include="Interface\Windows\ModInstallWindow.cs" />
+    <Compile Include="Interface\Windows\PluginDownloadWindow.cs" />
     <Compile Include="Interface\Windows\ServerWindow.cs" />
     <Compile Include="Components\IOComponent.cs" />
     <Compile Include="Net\MessageHandler.cs" />

@@ -93,10 +93,10 @@ namespace Bricklayer.Core.Client.Net
                             new EventManager.NetEvents.AuthServerEvents.VerifiedEventArgs(msg.Verified));
                         break;
                     }
-                    case MessageTypes.Mod:
+                    case MessageTypes.PluginDownload:
                     {
-                        var msg = new ModMessage(im, MessageContext.Client);
-                        networkManager.Client.Events.Network.Auth.Mod.Invoke(
+                        var msg = new PluginDownloadMessage(im, MessageContext.Client);
+                        networkManager.Client.Events.Network.Auth.PluginDownload.Invoke(
                             new EventManager.NetEvents.AuthServerEvents.ModEventArgs(msg));
                         break;
                     }

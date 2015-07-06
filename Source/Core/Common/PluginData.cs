@@ -40,5 +40,16 @@ namespace Bricklayer.Core.Common
         /// </summary>
         [JsonIgnore]
         public string Path { get; internal set; }
+
+        public override bool Equals(object obj)
+        {
+            var item = obj as PluginData;
+            return item?.GetHashCode() == GetHashCode();
+        }
+
+        public override int GetHashCode()
+        {
+            return HashExtensions.Start.Hash(Path).Hash(Version);
+        }
     }
 }
