@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.SQLite;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -43,25 +41,24 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public string ServerDirectory { get; private set; }
 
+        protected override LogType LogType => LogType.IO;
+
+        /// <summary>
+        /// Byte array of the image data for the lobby banner.
+        /// </summary>
         internal byte[] Banner { get; private set; }
 
-        protected override LogType LogType => LogType.IO;
+        /// <summary>
+        /// Settings for the JSON.NET serializer
+        /// </summary>
+        internal JsonSerializerSettings SerializationSettings { get; private set; }
+
         private DateTime lastLog;
         private StreamWriter logWriter;
         private StringBuilder sb;
-        private JsonSerializerSettings serializationSettings;
 
         public IOComponent(Server server) : base(server)
         {
-        }
-
-        /// <summary>
-        /// Returns a list of paths to the plugins in the plugins directory.
-        /// </summary>
-        public List<string> GetPlugins()
-        {
-            var dirs = Directory.GetDirectories(PluginsDirectory);
-            return dirs.Select(dir => Path.Combine(dir, "plugin.dll")).Where(File.Exists).ToList();
         }
 
         public override async Task Init()
@@ -84,7 +81,7 @@ namespace Bricklayer.Core.Server.Components
             sb = new StringBuilder();
 
             //Set up JSON.net settings.
-            serializationSettings = new JsonSerializerSettings
+            SerializationSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
                 ContractResolver = new JsonContractResolver()
@@ -97,42 +94,9 @@ namespace Bricklayer.Core.Server.Components
 
             //Load configuration.
             await LoadConfig();
+            LoadBanner();
 
             await base.Init();
-        }
-
-
-        internal async void LoadBanner()
-        {
-            if (File.Exists(ServerDirectory + "\\banner.png"))
-            {
-                var img = Image.FromFile(ServerDirectory + "\\banner.png");
-
-                if (img.Height <= Constants.MaxBannerHeight && img.Width <= Constants.MaxBannerWidth)
-                {
-                    var info = new FileInfo(ServerDirectory + "\\banner.png");
-                    Banner = new byte[info.Length];
-                    using (FileStream fs = info.OpenRead())
-                    {
-                        fs.Read(Banner, 0, Banner.Length);
-                    }
-                }
-                else
-                {
-                    Logger.WriteLine("Banner size exceeds the size limit of " + Constants.MaxBannerWidth + "x" +
-                                     Constants.MaxBannerHeight);
-                }
-
-            }
-        }
-
-        /// <summary>
-        /// Loads a plugin from the specified path.
-        /// </summary>
-        public Assembly LoadPlugin(AppDomain domain, string path)
-        {
-            //Load the raw bytes of the file, to prevent locking it while the server is running, then load that into the assembly
-            return domain.Load(File.ReadAllBytes(path));
         }
 
         /// <summary>
@@ -164,7 +128,7 @@ namespace Bricklayer.Core.Server.Components
 
                 await
                     Task.Factory.StartNew(
-                        delegate { Config = JsonConvert.DeserializeObject<Config>(json, serializationSettings); });
+                        delegate { Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings); });
 
 
                 Log("Configuration loaded. Port: {0}", Config.Server.Port.ToString());
@@ -264,13 +228,51 @@ namespace Bricklayer.Core.Server.Components
                         var str = File.Create(ConfigFile);
                         str.Close();
                     }
-                    var json = JsonConvert.SerializeObject(settings, serializationSettings);
+                    var json = JsonConvert.SerializeObject(settings, SerializationSettings);
                     File.WriteAllText(ConfigFile, json);
                 });
             }
             catch (Exception ex)
             {
                 Logger.WriteLine(LogType.Error, "IOComponent.SaveConfig - {0}", ex.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Loads the banner JPEG or PNG.
+        /// </summary>
+        private void LoadBanner()
+        {
+            var path = string.Empty;
+
+            //Scan for possible names
+            var formats = new[] {"jpg", "jpeg", "png"};
+            foreach (
+                var formatPath in
+                    formats.Select(format => Path.Combine(ServerDirectory, "banner." + format)).Where(File.Exists))
+            {
+                path = formatPath;
+                break;
+            }
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                var img = Image.FromFile(path);
+
+                if (img.Height <= Constants.MaxBannerHeight && img.Width <= Globals.Values.MaxBannerWidth)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        img.Save(ms, ImageFormat.Png);
+                        Banner = ms.ToArray();
+                    }
+                }
+                else
+                {
+                    Logger.WriteLine(LogType.Error,
+                        "Banner size exceeds the size limit of " + Globals.Values.MaxBannerWidth + "x" +
+                        Constants.MaxBannerHeight);
+                }
             }
         }
     }

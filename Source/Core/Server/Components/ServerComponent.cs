@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Bricklayer.Core.Server.Components
 {
     /// <summary>
-    /// Represents a static component required for the server.
+    /// Represents a component required for the server.
     /// </summary>
     public abstract class ServerComponent
     {
@@ -21,7 +21,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// The server object controlling this component.
         /// </summary>
-        protected Server Server { get; set; }
+        protected Server Server { get; }
 
         internal ServerComponent(Server server)
         {

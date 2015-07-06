@@ -7,29 +7,28 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 
-namespace Bricklayer.Core.Server.Components
+namespace Bricklayer.Core.Client.Components
 {
     /// <summary>
     /// Handles plugin management.
     /// </summary>
-    public class PluginComponent : ServerComponent
+    public class PluginComponent : ClientComponent
     {
         /// <summary>
         /// The number of plugins currently loaded.
         /// </summary>
         public int PluginCount => plugins.Count;
 
-        protected override LogType LogType => LogType.Plugin;
-        private readonly List<ServerPlugin> plugins;
+        private readonly List<ClientPlugin> plugins;
 
-        public PluginComponent(Server server) : base(server)
+        public PluginComponent(Client client) : base(client)
         {
-            plugins = new List<ServerPlugin>();
+            plugins = new List<ClientPlugin>();
         }
 
         public override async Task Init()
         {
-            if (!Server.IO.Initialized)
+            if (!Client.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
             LoadPlugins();
             await base.Init();
@@ -38,7 +37,7 @@ namespace Bricklayer.Core.Server.Components
         private void LoadPlugins()
         {
             //Get a list of all the .dlls in the directory
-            var files = IOHelper.GetPlugins(Server.IO.PluginsDirectory, Server.IO.SerializationSettings);
+            var files = IOHelper.GetPlugins(Client.IO.Directories["Plugins"], Client.IO.SerializationSettings);
             foreach (var file in files)
             {
                 //TODO: Use AppDomains for security
@@ -46,16 +45,16 @@ namespace Bricklayer.Core.Server.Components
                 try
                 {
                     var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
-                    RegisterPlugin(IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, file));
+                    RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
                 }
                 catch (Exception e)
                 {
-                    Logger.WriteLine(LogType.Error, e.Message);
+                    Console.WriteLine(e.Message);
                 }
             }
         }
 
-        private void RegisterPlugin(ServerPlugin plugin)
+        private void RegisterPlugin(ClientPlugin plugin)
         {
             plugins.Add(plugin);
             plugin.Load();

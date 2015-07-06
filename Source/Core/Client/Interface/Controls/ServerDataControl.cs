@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Bricklayer.Core.Client.Interface.Screens;
+using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Net.Messages;
-using Bricklayer.Core.Server.Data;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
@@ -20,13 +20,13 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private readonly Color offlineColor = Color.Red, onlineColor = new Color(0, 205, 5);
         private readonly ServerScreen screen;
         private readonly Manager manager;
-        private readonly ServerSaveData data;
+        private readonly ServerData data;
         private IPEndPoint endPoint;
         private readonly ImageBox imgStatus;
         private Timer pingTimer;
         private bool resolvedHost;
 
-        public ServerDataControl(ServerScreen screen, Manager manager, ServerSaveData server, Control parent) : base(manager)
+        public ServerDataControl(ServerScreen screen, Manager manager, ServerData server, Control parent) : base(manager)
         {
             this.screen = screen;
             this.manager = manager;

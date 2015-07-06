@@ -212,13 +212,7 @@ namespace Bricklayer.Core.Server
             Console.Write(info);
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write(text);
-
-            var extra = sb.Clear().Append(time).Append(info).Append(text).ToString().Length;
-            if (Console.WindowWidth - extra - 1 > 0)
-            {
-                Console.CursorLeft = extra;
-                Console.WriteLine(new string(' ', Math.Max(1, Console.WindowWidth - extra - 1)));
-            }
+            Console.WriteLine();
 
             Logger.Server.WriteHeader();
             Logger.Server.WriteCommandCursor();
@@ -231,6 +225,7 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public void WriteText(string text, ConsoleColor color)
         {
+            Console.SetCursorPosition(0, Console.CursorTop);
             Console.ForegroundColor = ConsoleColor.Gray;
             var time = Logger.GetTimestamp();
             Console.Write(time);
@@ -240,10 +235,7 @@ namespace Bricklayer.Core.Server
             Console.ForegroundColor = color;
             Console.Write(text);
             Console.ForegroundColor = ConsoleColor.White;
-
-            var extra = sb.Clear().Append(time).Append(info).Append(text).ToString().Length;
-            Console.CursorLeft = extra;
-            Console.WriteLine(new string(' ', Math.Max(1, Console.WindowWidth - extra - 1)));
+            Console.WriteLine();
 
             Logger.Server.WriteHeader();
             Logger.Server.WriteCommandCursor();

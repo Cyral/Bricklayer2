@@ -11,7 +11,7 @@ namespace Bricklayer.Core.Common
     internal static class Globals
     {
         /// <summary>
-        /// Globally used regular expressions used for verifying names of entities, rooms, etc.
+        /// Globally used regular expressions used for verifying names of entities, levels, etc.
         /// </summary>
         public class Regexes
         {
@@ -61,6 +61,16 @@ namespace Bricklayer.Core.Common
             /// The actual address is configurable through the JSON config, although the auth address will most likely never change.
             /// </summary>
             public static string DefaultAuthAddress { get; } = "auth.pyratron.com";
+
+            /// <summary>
+            /// Max width of the banner image.
+            /// </summary>
+            public static int MaxBannerWidth { get; } = 500;
+
+            /// <summary>
+            /// Max height of the banner image.
+            /// </summary>
+            public static int MaxBannerHeight { get; } = 120;
         }
     }
 }

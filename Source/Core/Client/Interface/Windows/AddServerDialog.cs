@@ -1,6 +1,6 @@
 ﻿using System;
 using Bricklayer.Core.Common;
-using Bricklayer.Core.Server.Data;
+using Bricklayer.Core.Common.Data;
 using MonoForce.Controls;
 using EventArgs = MonoForce.Controls.EventArgs;
 
@@ -94,9 +94,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
             if (string.IsNullOrEmpty(txtName.Text) || string.IsNullOrEmpty(txtHost.Text))
                 return;
             if (edit)
-                wndServer.EditServer(index, new ServerSaveData(txtName.Text, host, port));
+                wndServer.EditServer(index, new ServerData(txtName.Text, host, port));
             else
-                wndServer.AddServer(new ServerSaveData(txtName.Text, host, port));
+                wndServer.AddServer(new ServerData(txtName.Text, host, port));
             Close();
         }
 

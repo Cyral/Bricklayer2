@@ -1,20 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 namespace Bricklayer.Core.Common.Entity
 {
     /// <summary>
-    /// Represents the current state of an entity (Its position, velocity, etc)
+    /// Represents a physical state of an entity.
     /// </summary>
     public class EntityState
     {
-        public Vector2 Position { get; set; }
-        public Vector2 Velocity { get; set; }
-        public Vector2 Movement { get; set; }
+        /// <summary>
+        /// The bounds of the entity in this state.
+        /// </summary>
         public Rectangle Bounds { get; set; }
+
+        /// <summary>
+        /// The input data for this state.
+        /// </summary>
+        public Vector2 Movement { get; set; }
+
+        /// <summary>
+        /// The position of this state.
+        /// </summary>
+        public Vector2 Position { get; set; }
+
+        /// <summary>
+        /// The velocity (speed/direction) of this state.
+        /// </summary>
+        public Vector2 Velocity { get; set; }
     }
 }

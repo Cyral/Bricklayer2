@@ -7,7 +7,7 @@
     <ProjectGuid>{B8DA750D-088F-481A-A7F0-5E4EE4CCDD58}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bricklayer.Plugins.TestPlugin</RootNamespace>
+    <RootNamespace>Bricklayer.Plugins.TestServerPlugin</RootNamespace>
     <AssemblyName>plugin</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -57,7 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestPlugin.cs" />
+    <Compile Include="TestServerPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -70,9 +70,15 @@
       <Name>Server</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="plugin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)Core\Server\bin\$(ConfigurationName)\plugins\Test Plugin\plugin.dll"</PostBuildEvent>
+    <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "$(SolutionDir)Core\Server\bin\$(ConfigurationName)\plugins\$(ProjectName)\plugin.dll"
+echo F|xcopy /y "$(TargetDir)plugin.json" "$(SolutionDir)Core\Server\bin\$(ConfigurationName)\plugins\$(ProjectName)\plugin.json"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

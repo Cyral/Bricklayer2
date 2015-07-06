@@ -1,0 +1,11 @@
+﻿{
+  "Name": "Test Client Plugin",
+  "Description": "An Example Client Plugin",
+  "Author": "Bricklayer Devs",
+  "Version": {
+    "Major": 0,
+    "Minor": 1,
+    "Build": 0,
+    "Revision": 0
+  }
+}

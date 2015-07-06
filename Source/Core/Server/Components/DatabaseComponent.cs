@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using Bricklayer.Core.Server.Data;
+using Bricklayer.Core.Common.Data;
 
 namespace Bricklayer.Core.Server.Components
 {
@@ -17,8 +17,8 @@ namespace Bricklayer.Core.Server.Components
         private readonly string
             setupQuery =
                 "CREATE TABLE IF NOT EXISTS `Levels` (`GUID` GUID,`Name` TEXT,`Description` TEXT,`Plays` INTEGER,PRIMARY KEY(GUID));",
-            getRoomsQuery = "SELECT `guid`, `name`, `description`, `plays` FROM `Levels`",
-            createRoomQuery =
+            getLevelsQuery = "SELECT `guid`, `name`, `description`, `plays` FROM `Levels`",
+            createLevelQuery =
                 "INSERT INTO `Levels`(`GUID`,`Name`,`Description`, `Plays`) VALUES (@guid, @name, @desc, 0);";
 
         private string connectionString;
@@ -45,20 +45,20 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Finds all briefings favorited by the specified user
         /// </summary>
-        public async Task<List<LobbySaveData>> GetAllRooms()
+        public async Task<List<LevelData>> GetAllLevels()
         {
-            var briefings = new List<LobbySaveData>();
+            var briefings = new List<LevelData>();
             var command = providerFactory.CreateCommand();
             if (command != null)
             {
-                command.CommandText = getRoomsQuery;
+                command.CommandText = getLevelsQuery;
                 //Query the database and add all resulting briefings to the briefing list
                 await PerformQuery(connectionString, command, reader =>
                 {
                     while (reader.Read())
                     {
                         // Create and add each briefing to a list
-                        var briefing = new LobbySaveData(reader.GetString(1), 0, reader.GetString(2), 10,
+                        var briefing = new LevelData(reader.GetString(1), Guid.NewGuid().ToString(), reader.GetString(2), 10,
                             reader.GetInt32(3), 3.5d);
                         briefings.Add(briefing);
                     }
@@ -91,28 +91,28 @@ namespace Bricklayer.Core.Server.Components
                 await PerformOperation(connectionString, initialCommand);
             }
 
-            //Create temporary rooms for testing
-            var rooms = new List<LobbySaveData>
+            //Create temporary levels for testing
+            var levels = new List<LevelData>
             {
-                new LobbySaveData("DogeBall", 0, "A game of dodge ball, but the ball being a doge head. Wow!", 6,
+                new LevelData("DogeBall", Guid.NewGuid().ToString(), "A game of dodge ball, but the ball being a doge head. Wow!", 6,
                     23, 4),
-                new LobbySaveData("Terrain", 1,
+                new LevelData("Terrain", Guid.NewGuid().ToString(),
                     "Beatiful terrain environment builds for your eyes to look at! Enjoy :)", 3, 20, 5),
-                new LobbySaveData("pls r8 5", 2, "pls r8 5. thats al i evr wanted in life.", 0, 7, 1)
+                new LevelData("pls r8 5", Guid.NewGuid().ToString(), "pls r8 5. thats al i evr wanted in life.", 0, 7, 1)
             };
 
-            foreach (var room in rooms)
-              CreateRoom(room);
+            foreach (var level in levels)
+              CreateLevel(level);
 
-            base.Init();
+            await base.Init();
         }
 
-        internal async void CreateRoom(LobbySaveData data)
+        internal async void CreateLevel(LevelData data)
         {
             var command = providerFactory.CreateCommand();
             if (command != null)
             {
-                command.CommandText = createRoomQuery;
+                command.CommandText = createLevelQuery;
                 AddParamaters(command, new Dictionary<string, string>
                 {
                     {"guid", Guid.NewGuid().ToString()},

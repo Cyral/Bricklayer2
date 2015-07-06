@@ -5,8 +5,8 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// <summary>
     /// Sends the initialization response to the client after logging in.
     /// Auth Server => Client
-    /// String: User's username (In case of incorrect case, or automatically assigned guest username)
-    /// String: User's UUID
+    /// String: Player's username (In case of incorrect case, or automatically assigned guest username)
+    /// String: Player's UUID
     /// String: Public Key
     /// String: Private Key
     /// </summary>

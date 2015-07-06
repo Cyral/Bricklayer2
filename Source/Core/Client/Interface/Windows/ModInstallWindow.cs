@@ -6,8 +6,9 @@ using System.Net;
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
+using Bricklayer.Client.Interface;
+using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Common;
-using Bricklayer.Core.Server.Data;
 using MonoForce.Controls;
 using EventArgs = System.EventArgs;
 
@@ -20,7 +21,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly Label lblName;
         private readonly Label lblPercent;
 
-        public ModInstallWindow(Manager manager, string modName, string id, string fileName, bool updating)
+        public ModInstallWindow(Manager manager, MainWindow window, string modName, string id, string fileName, bool updating)
             : base(manager)
         {
 
@@ -54,7 +55,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             var client = new WebClient();
             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadProgress);
             client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadComplete);
-            client.DownloadFileAsync(new Uri("https://community.pyratron.com/app.php/db/download/" + id), IO.MainDirectory + "\\Plugins\\" + fileName);
+            client.DownloadFileAsync(new Uri("https://community.pyratron.com/app.php/db/download/" + id), window.Client.IO.MainDirectory + "\\Plugins\\" + fileName);
         }
 
         void DownloadProgress(object sender, DownloadProgressChangedEventArgs e)

@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Bricklayer.Client.Interface;
+using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
-using Bricklayer.Core.Server.Data;
+using Bricklayer.Core.Common.Data;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
@@ -20,7 +21,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly Button btnRefresh;
         private readonly Button btnRemove;
         private readonly ControlList<ServerDataControl> lstServers; //The listbox of server control items
-        private List<ServerSaveData> servers; //The list of loaded servers
+        private List<ServerData> servers; //The list of loaded servers
         private readonly ServerScreen screen;
 
         public ServerWindow(Manager manager, ServerScreen screen) : base(manager)
@@ -48,6 +49,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lstServers.Init();
             Add(lstServers);
             RefreshServerList();
+            lstServers.DoubleClick += delegate (object o, EventArgs e)
+            {
+                var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
+                //Make sure the user clicks the item and not the empty space in the list
+                if (sdc.CheckPositionMouse(((MouseEventArgs)e).Position - lstServers.AbsoluteRect.Location))
+                    screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
+            };
 
             //Add controls to the bottom panel. (Add server, edit server, etc.)
 
@@ -86,7 +94,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                         {
                             servers.RemoveAt(lstServers.ItemIndex);
                             lstServers.Items.RemoveAt(lstServers.ItemIndex);
-                            IO.WriteServers(servers); //Write the new server list to disk.
+                            screen.Client.IO.WriteServers(servers); //Write the new server list to disk.
                         }
                     };
                     Manager.Add(confirm);
@@ -114,6 +122,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnJoin.Right = btnAdd.Left - 8;
             btnJoin.Click += delegate
             {
+                btnJoin.Enabled = false;
+                btnJoin.Text = "Connecting...";
                 screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
             };
             BottomPanel.Add(btnJoin);
@@ -133,11 +143,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
         {
             screen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
-                args.Message.Intro, args.Message.Online, args.Message.Rooms));
+                args.Message.Intro, args.Message.Online, args.Message.Levels));
         }
 
         private void OnDisconnect(EventManager.NetEvents.GameServerEvents.DisconnectEventArgs args)
         {
+            btnJoin.Enabled = true;
+            btnJoin.Text = "Connect";
             var msgBox = new MessageBox(Manager, MessageBoxType.Warning, args.Reason, "Error Connecting to Server");
             msgBox.Init();
             screen.ScreenManager.Manager.Add(msgBox);
@@ -151,17 +163,17 @@ namespace Bricklayer.Core.Client.Interface.Windows
             base.Dispose(disposing);
         }
 
-        public void AddServer(ServerSaveData server)
+        public void AddServer(ServerData server)
         {
             servers.Add(server);
-            IO.WriteServers(servers);
+            screen.Client.IO.WriteServers(servers);
             RefreshServerList();
         }
 
-        public void EditServer(int index, ServerSaveData server)
+        public void EditServer(int index, ServerData server)
         {
             servers[index] = server;
-            IO.WriteServers(servers);
+            screen.Client.IO.WriteServers(servers);
             RefreshServerList();
         }
 
@@ -169,7 +181,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         {
             lstServers.Items.Clear();
             //Read the servers from config
-            servers = IO.ReadServers();
+            servers = screen.Client.IO.ReadServers();
             //Populate the list 
             foreach (var server in servers)
             {
@@ -180,20 +192,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
             }
             if (lstServers.Items.Count > 0)
                 lstServers.ItemIndex = 0;
-        }
-
-        internal void Disconnected(string message, string title)
-        {
-            //Enable join button and display error message if couldn't connect to server
-            if (!btnJoin.Enabled)
-            {
-                btnJoin.Enabled = true;
-                btnJoin.Text = "Connect";
-                var error = new MessageBox(Manager, MessageBoxType.Error, message, title);
-                error.Init();
-                Manager.Add(error);
-                error.Show();
-            }
         }
     }
 }

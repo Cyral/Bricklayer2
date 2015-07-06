@@ -107,6 +107,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lnkForgot.Top = btnLoginAccount.Bottom + 8;
             lnkForgot.Text = "Forgot Password?";
             lnkForgot.URL = Constants.Strings.ForgotPasswordURL;
+            lnkForgot.ToolTip = new ToolTip(Manager) { Text = "A new browser window will be opened." };
             BottomPanel.Add(lnkForgot);
 
             lnkCreateAccount = new LinkLabel(Manager);
@@ -115,7 +116,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lnkCreateAccount.Alignment = Alignment.MiddleCenter;
             lnkCreateAccount.Left = btnLoginGuest.Left;
             lnkCreateAccount.Top = lnkForgot.Top;
-            lnkCreateAccount.Text = "Create an account.";
+            lnkCreateAccount.Text = "Create an account";
             lnkCreateAccount.URL = Constants.Strings.CreateAccountURL;
             BottomPanel.Add(lnkCreateAccount);
 

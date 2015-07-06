@@ -13,7 +13,7 @@ namespace Bricklayer.Core.Client
     /// </summary>
     internal static class Extensions
     {
-        private static Random random;
+        private static readonly Random random;
 
         static Extensions()
         {

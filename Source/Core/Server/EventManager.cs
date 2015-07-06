@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net;
 using Lidgren.Network;
 
@@ -112,9 +113,9 @@ namespace Bricklayer.Core.Server
                 /// <summary>
                 /// The user who requested the message.
                 /// </summary>
-                public User Sender { get; set; }
+                public Player Sender { get; set; }
 
-                public RequestMessageEventArgs(MessageTypes type, User sender)
+                public RequestMessageEventArgs(MessageTypes type, Player sender)
                 {
                     Type = type;
                     Sender = sender;

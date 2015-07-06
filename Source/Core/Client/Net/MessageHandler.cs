@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
-using Bricklayer.Core.Client.Net.Messages.GameServer;
+using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;

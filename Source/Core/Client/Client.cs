@@ -1,15 +1,9 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System;
-using Bricklayer.Client.Interface;
+﻿using Bricklayer.Client.Interface;
+using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Windows;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
-using Bricklayer.Core.Client.Net.Messages.GameServer;
-using Bricklayer.Core.Common;
-using Bricklayer.Core.Common.Net.Messages;
-using Microsoft.Xna.Framework.Input;
 
 namespace Bricklayer.Core.Client
 {
@@ -19,41 +13,16 @@ namespace Bricklayer.Core.Client
     public class Client : Game
     {
         /// <summary>
-        /// The game's graphics manager.
-        /// </summary>
-        public GraphicsDeviceManager Graphics { get; private set; }
-
-        /// <summary>
-        /// The game's sprite batch for drawing content.
-        /// </summary>
-        public SpriteBatch SpriteBatch { get; private set; }
-
-        /// <summary>
-        /// The main window, which is the root of all UI controls.
-        /// </summary>
-        public MainWindow Window { get; private set; }
-
-        /// <summary>
-        /// The MonoForce UI manager.
-        /// </summary>
-        public Manager UIManager { get; private set; }
-
-        /// <summary>
-        /// Texture loader for loading texture assets.
-        /// </summary>
-        internal TextureLoader TextureLoader { get; private set; }
-
-        /// <summary>
         /// Manages and handles all game assets and content.
         /// </summary>
         public new ContentManager Content { get; private set; }
 
-        public EventManager Events { get; private set; }
+        public EventManager Events { get; }
 
         /// <summary>
-        /// Handles receiving and sending of game server network messages
+        /// The game's graphics manager.
         /// </summary>
-        internal NetworkManager Network { get; private set; }
+        public GraphicsDeviceManager Graphics { get; }
 
         /// <summary>
         /// Manages and handles game input from the mouse and keyboard.
@@ -63,8 +32,17 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// Manages and handles file operations.
         /// </summary>
-        public IO IO { get; set; }
+        public IOComponent IO { get; set; }
 
+        /// <summary>
+        /// The PluginComponent for loading and managing plugins.
+        /// </summary>
+        public PluginComponent Plugins { get; set; }
+
+        /// <summary>
+        /// The game's sprite batch for drawing content.
+        /// </summary>
+        public SpriteBatch SpriteBatch { get; private set; }
 
         /// <summary>
         /// The current state of the game. (Login, server list, in game, etc.)
@@ -75,19 +53,40 @@ namespace Bricklayer.Core.Client
             set
             {
                 Events.Game.StateChanged.Invoke(new EventManager.GameEvents.GameStateEventArgs(State, value));
-                state = value; 
+                state = value;
             }
         }
+
+        /// <summary>
+        /// The MonoForce UI manager.
+        /// </summary>
+        public Manager UI { get; }
+
+        /// <summary>
+        /// The main window, which is the root of all UI controls.
+        /// </summary>
+        public new MainWindow Window { get; private set; }
+
+        /// <summary>
+        /// Handles receiving and sending of game server network messages
+        /// </summary>
+        internal NetworkManager Network { get; private set; }
+
+        /// <summary>
+        /// Texture loader for loading texture assets.
+        /// </summary>
+        internal TextureLoader TextureLoader { get; private set; }
+
         private GameState state;
 
-        public Client()
+        internal Client()
         {
             Events = new EventManager();
-            Graphics = new GraphicsDeviceManager(this) { SynchronizeWithVerticalRetrace = false };
-            IsFixedTimeStep = false;
+            Graphics = new GraphicsDeviceManager(this);
+            IsFixedTimeStep = true;
 
             //Create the manager for MonoForce UI
-            UIManager = new Manager(this, "Bricklayer")
+            UI = new Manager(this, "Bricklayer")
             {
                 AutoCreateRenderTarget = true,
                 LogUnhandledExceptions = false,
@@ -97,11 +96,26 @@ namespace Bricklayer.Core.Client
             Events.Network.Auth.Mod.AddHandler(args =>
             {
                 //Create the main window for all content to be added to.
-                var modWindow = new ModInstallWindow(UIManager, args.Message.ModName, args.Message.Id, args.Message.FileName, false);
+                var modWindow = new ModInstallWindow(UI, Window, args.Message.ModName, args.Message.Id, args.Message.FileName, false);
                 modWindow.Init();
                 Window.Add(modWindow);
                 modWindow.Show();
             });
+        }
+
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
+        protected override void Draw(GameTime gameTime)
+        {
+            UI.BeginDraw(gameTime);
+            GraphicsDevice.Clear(Color.Black);
+
+            // TODO: Add your drawing code here
+
+            UI.EndDraw();
+            base.Draw(gameTime);
         }
 
         /// <summary>
@@ -113,25 +127,25 @@ namespace Bricklayer.Core.Client
         protected override void Initialize()
         {
             base.Initialize();
-           
+
             Input = new InputHandler();
         }
-
 
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
-        protected async override void LoadContent()
+        protected override async void LoadContent()
         {
             base.LoadContent();
 
-            IO = new IO();
-            await IO.LoadConfig();
-            IO.CheckFiles();
-
+            IO = new IOComponent(this);
+            Plugins = new PluginComponent(this);
             Network = new NetworkManager(this);
-            Network.Init();
+
+            await IO.Init();
+            await IO.LoadConfig();
+            await Network.Init();
 
             Content = new ContentManager();
             TextureLoader = new TextureLoader(Graphics.GraphicsDevice);
@@ -139,8 +153,9 @@ namespace Bricklayer.Core.Client
 
             if (IO.Config.Client.Resolution.X == 0 && IO.Config.Client.Resolution.Y == 0)
             {
-                Graphics.PreferredBackBufferWidth = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width * .8);
-                Graphics.PreferredBackBufferHeight = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * .8);
+                Graphics.PreferredBackBufferWidth = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width * .9);
+                Graphics.PreferredBackBufferHeight =
+                    (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * .8);
                 Graphics.ApplyChanges();
                 base.Window.Position =
                     new Point(
@@ -154,21 +169,21 @@ namespace Bricklayer.Core.Client
                 Graphics.PreferredBackBufferWidth = IO.Config.Client.Resolution.X;
                 Graphics.PreferredBackBufferHeight = IO.Config.Client.Resolution.Y;
                 Graphics.ApplyChanges();
-
             }
 
             //Initialize MonoForce after loading skins.
-            UIManager.Initialize();
-            SpriteBatch = UIManager.Renderer.SpriteBatch; //Set the spritebatch to the Neoforce managed one
+            UI.Initialize();
+            SpriteBatch = UI.Renderer.SpriteBatch; //Set the spritebatch to the Neoforce managed one
 
 
             //Create the main window for all content to be added to.
-            Window = new MainWindow(UIManager, this);
+            Window = new MainWindow(UI, this);
             Window.Init();
-            UIManager.Add(Window);
+            UI.Add(Window);
             Window.SendToBack();
 
-
+            //Unlike the server, the clientside plugins must be loaded last.
+            await Plugins.Init();
         }
 
         /// <summary>
@@ -186,25 +201,9 @@ namespace Bricklayer.Core.Client
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
         protected override void Update(GameTime gameTime)
         {
-            UIManager.Update(gameTime);
+            UI.Update(gameTime);
             Input.Update();
             base.Update(gameTime);
-
-        }
-
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
-        protected override void Draw(GameTime gameTime)
-        {
-            UIManager.BeginDraw(gameTime);
-            GraphicsDevice.Clear(Color.Black);
-
-            // TODO: Add your drawing code here
-
-            UIManager.EndDraw();
-            base.Draw(gameTime);
         }
     }
 }

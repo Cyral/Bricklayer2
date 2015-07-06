@@ -208,7 +208,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public int GetDigitPressed()
         {
-            int key = -1;
+            var key = -1;
 
             if (IsKeyPressed(Keys.D1)) key = 0;
             else if (IsKeyPressed(Keys.D2)) key = 1;

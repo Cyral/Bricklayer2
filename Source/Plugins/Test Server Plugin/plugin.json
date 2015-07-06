@@ -1,0 +1,11 @@
+﻿{
+  "Name": "Test Server Plugin",
+  "Description": "An Example Server Plugin",
+  "Author": "Bricklayer Devs",
+  "Version": {
+    "Major": 0,
+    "Minor": 1,
+    "Build": 0,
+    "Revision": 0
+  }
+}

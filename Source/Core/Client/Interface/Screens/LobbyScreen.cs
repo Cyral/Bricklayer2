@@ -7,11 +7,11 @@ using System.Net.Mime;
 using System.Net.Sockets;
 using System.Text;
 using Bricklayer.Core.Client.Interface.Windows;
-using Bricklayer.Core.Server.Data;
 using MonoForce.Controls;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.IO;
+using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 
@@ -28,15 +28,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
         public string Intro { get; }
         public int Online { get; }
 
-        public List<LobbySaveData> Rooms { get; private set; }
+        public List<LevelData> Levels { get; private set; }
 
-        public LobbyScreen(string description, string name, string intro, int online, List<LobbySaveData> rooms)
+        public LobbyScreen(string description, string name, string intro, int online, List<LevelData> levels)
         {
             Description = description;
             Name = name;
             Intro = intro;
             Online = online;
-            Rooms = rooms;
+            Levels = levels;
 
 
         }
@@ -63,8 +63,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
             wndLobby.Init();
             Window.Add(wndLobby);
             wndLobby.Show();
-
-            Client.Network.Send(new RequestMessage(MessageTypes.Banner));
         }
 
         public override void Remove()
