@@ -36,7 +36,7 @@ namespace Bricklayer.Core.Client.Components
 
             LoadPlugins();
 
-            Client.Events.Network.Auth.PluginDownload.AddHandler(args =>
+            Client.Events.Network.Auth.PluginDownloadRequested.AddHandler(args =>
             {
                 if (!PluginDownloadWindow.IsDownloading(args.Message.ID))
                 {

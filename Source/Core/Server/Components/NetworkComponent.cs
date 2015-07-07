@@ -68,7 +68,7 @@ namespace Bricklayer.Core.Server.Components
         public NetworkComponent(Server server) : base(server)
         {
 
-            Server.Events.Connection.PreLogin.AddHandler(args =>
+            Server.Events.Network.UserLoginRequested.AddHandler(args =>
             {
                 Logger.WriteLine(LogType.Net,
                 args.Username + " requesting to join. Verifying public key with auth server.");
@@ -79,18 +79,23 @@ namespace Bricklayer.Core.Server.Components
                 NetServer.SendUnconnectedMessage(message, AuthEndpoint);
             });
 
-            Server.Events.Connection.Valid.AddHandler(async args =>
+            Server.Events.Network.SessionValidated.AddHandler(async args =>
             {
-                pendingSessions[args.UUID].Approve(EncodeMessage(
-                    new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
-                    Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels())));
-                Server.Players.Add(new Player(pendingSessions[args.UUID], null, new Vector2(0, 0), args.Username, Server.FindAvailablePlayerID(), false));
-                pendingSessions.Remove(args.UUID);
-                Logger.WriteLine(LogType.Net,
-                    $"Session valid for '{args.Username}'. (Allowed)");
+                if (args.Valid)
+                {
+                    pendingSessions[args.UUID].Approve(EncodeMessage(
+                        new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
+                            Server.IO.Config.Server.Intro, NetServer.ConnectionsCount,
+                            await Server.Database.GetAllLevels())));
+                    Server.Players.Add(new Player(pendingSessions[args.UUID], null, new Vector2(0, 0), args.Username,
+                        Server.FindAvailablePlayerID(), false));
+                    pendingSessions.Remove(args.UUID);
+                    Logger.WriteLine(LogType.Net,
+                        $"Session valid for '{args.Username}'. (Allowed)");
+                }
             }, EventPriority.Final);
 
-            Server.Events.Connection.RequestMessage.AddHandler(async args =>
+            Server.Events.Network.MessageRequested.AddHandler(async args =>
             {
                 //When the client request an init message (refreshing the lobby)
                 if (args.Type == MessageTypes.Init)
@@ -105,15 +110,18 @@ namespace Bricklayer.Core.Server.Components
                 }
             });
 
-            Server.Events.Connection.Invalid.AddHandler(args =>
+            Server.Events.Network.SessionValidated.AddHandler(args =>
             {
-                pendingSessions[args.UUID].Deny("Invalid or expired session.");
-                pendingSessions.Remove(args.UUID);
-                Logger.WriteLine(LogType.Net,
-                    $"Session invalid for '{args.Username}'. (Denied)");
+                if (!args.Valid)
+                {
+                    pendingSessions[args.UUID].Deny("Invalid or expired session.");
+                    pendingSessions.Remove(args.UUID);
+                    Logger.WriteLine(LogType.Net,
+                        $"Session invalid for '{args.Username}'. (Denied)");
+                }
             });
 
-            Server.Events.Connection.RequestInfo.AddHandler(args =>
+            Server.Events.Network.InfoRequested.AddHandler(args =>
             {
                 SendUnconnected(args.Host, new ServerInfoMessage(Server.IO.Config.Server.Decription, Server.Net.NetServer.ConnectionsCount, Server.IO.Config.Server.MaxPlayers));
             });

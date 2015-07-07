@@ -17,19 +17,19 @@ namespace Bricklayer.Core.Server
     public class EventManager
     {
         /// <summary>
-        /// Events related to player connections
+        /// Events related to player connections and networking.
         /// </summary>
-        public ConnectionEvents Connection { get; }
+        public NetEvents Network { get; }
 
         /// <summary>
         /// Events related to the main game client.
         /// </summary>
-        public sealed class ConnectionEvents
+        public sealed class NetEvents
         {
 
             //Arguments define what values are passed to the event handler(s).
             #region Arguments
-            public class PreLoginEventArgs : EventArgs
+            public class PreLoginEventArgs : BricklayerEventArgs
             {
                 public string Username { get; private set; }
                 public string UUID { get; private set; }
@@ -45,7 +45,7 @@ namespace Bricklayer.Core.Server
                 }
             }
 
-            public class ConnectionEventArgs : EventArgs
+            public class ConnectionEventArgs : BricklayerEventArgs
             {
                 public string Username { get; private set; }
 
@@ -55,7 +55,7 @@ namespace Bricklayer.Core.Server
                 }
             }
 
-            public class DisconnectionEventArgs : EventArgs
+            public class DisconnectionEventArgs : BricklayerEventArgs
             {
                 public string Username { get; private set; }
                 public string Reason { get; private set; }
@@ -68,32 +68,21 @@ namespace Bricklayer.Core.Server
             }
 
 
-            public class ValidSessionEventArgs : EventArgs
+            public class SessionEventArgs : BricklayerEventArgs
             {
                 public string Username { get; private set; }
                 public string UUID { get; private set; }
+                public bool Valid { get; set; }
 
-                public ValidSessionEventArgs(string username, string uuid)
+                public SessionEventArgs(string username, string uuid, bool valid)
                 {
                     Username = username;
                     UUID = uuid;
+                    Valid = valid;
                 }
             }
 
-            public class InvalidSessionEventArgs : EventArgs
-            {
-                public string Username { get; private set; }
-                public string UUID { get; private set; }
-
-                public InvalidSessionEventArgs(string username, string uuid)
-                {
-                    Username = username;
-                    UUID = uuid;
-                }
-            }
-
-
-            public class RequestInfoEventArgs : EventArgs
+            public class RequestInfoEventArgs : BricklayerEventArgs
             {
                 public IPEndPoint Host { get; private set; }
 
@@ -103,7 +92,7 @@ namespace Bricklayer.Core.Server
                 }
             }
 
-            public class RequestMessageEventArgs : EventArgs
+            public class RequestMessageEventArgs : BricklayerEventArgs
             {
                 /// <summary>
                 /// The type of message requested.
@@ -131,43 +120,38 @@ namespace Bricklayer.Core.Server
             /// <summary>
             /// When a player requests to join with a public key.
             /// </summary>
-            public Event<PreLoginEventArgs> PreLogin { get; } = new Event<PreLoginEventArgs>();
+            public Event<PreLoginEventArgs> UserLoginRequested { get; } = new Event<PreLoginEventArgs>();
 
             /// <summary>
             /// When a player fully connects.
             /// </summary>
-            public Event<ConnectionEventArgs> Connection { get; } = new Event<ConnectionEventArgs>();
+            public Event<ConnectionEventArgs> UserConnected { get; } = new Event<ConnectionEventArgs>();
 
             /// <summary>
             /// When a player disconnects.
             /// </summary>
-            public Event<DisconnectionEventArgs> Disconnection { get; } = new Event<DisconnectionEventArgs>();
+            public Event<DisconnectionEventArgs> UserDisconnected { get; } = new Event<DisconnectionEventArgs>();
 
             /// <summary>
-            /// When Auth server sends back validation of user session.
+            /// When Auth server sends back a response on whether the user's session is valid or not. (See the Valid argument)
             /// </summary>
-            public Event<ValidSessionEventArgs> Valid { get; } = new Event<ValidSessionEventArgs>();
-
-            /// <summary>
-            /// When Auth server sends back invalidation of user session.
-            /// </summary>
-            public Event<InvalidSessionEventArgs> Invalid { get; } = new Event<InvalidSessionEventArgs>();
+            public Event<SessionEventArgs> SessionValidated { get; } = new Event<SessionEventArgs>();
 
             /// <summary>
             /// When client pings the server for information for the serverlist.
             /// </summary>
-            public Event<RequestInfoEventArgs> RequestInfo { get; } = new Event<RequestInfoEventArgs>();
+            public Event<RequestInfoEventArgs> InfoRequested { get; } = new Event<RequestInfoEventArgs>();
 
             /// <summary>
             /// When the client request the server sends a specific message back.
             /// </summary>
-            public Event<RequestMessageEventArgs> RequestMessage { get; } = new Event<RequestMessageEventArgs>(); 
+            public Event<RequestMessageEventArgs> MessageRequested { get; } = new Event<RequestMessageEventArgs>(); 
             #endregion
         }
 
         internal EventManager()
         {
-            Connection = new ConnectionEvents();
+            Network = new NetEvents();
         }
     }
 }

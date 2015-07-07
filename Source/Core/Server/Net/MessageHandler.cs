@@ -64,8 +64,8 @@ namespace Bricklayer.Core.Server.Net
                                     {
                                         var msg = new PublicKeyMessage(inc, MessageContext.Client);
 
-                                        Server.Events.Connection.PreLogin.Invoke(
-                                          new EventManager.ConnectionEvents.PreLoginEventArgs(msg.Username, msg.UUID, msg.PublicKey, inc.SenderConnection));
+                                        Server.Events.Network.UserLoginRequested.Invoke(
+                                          new EventManager.NetEvents.PreLoginEventArgs(msg.Username, msg.UUID, msg.PublicKey, inc.SenderConnection));
 
                                         break;
                                     }
@@ -87,8 +87,8 @@ namespace Bricklayer.Core.Server.Net
                                 if (inc.SenderConnection != null &&
                                     inc.SenderConnection.Status == NetConnectionStatus.Connected)
                                 {
-                                    Server.Events.Connection.Connection.Invoke(
-                                        new EventManager.ConnectionEvents.ConnectionEventArgs("user here"));
+                                    Server.Events.Network.UserConnected.Invoke(
+                                        new EventManager.NetEvents.ConnectionEventArgs("user here"));
 
                                     break;
                                 }
@@ -97,8 +97,8 @@ namespace Bricklayer.Core.Server.Net
                                     (inc.SenderConnection.Status == NetConnectionStatus.Disconnected ||
                                      inc.SenderConnection.Status == NetConnectionStatus.Disconnecting))
                                 {
-                                    Server.Events.Connection.Disconnection.Invoke(
-                                        new EventManager.ConnectionEvents.DisconnectionEventArgs("user here",
+                                    Server.Events.Network.UserDisconnected.Invoke(
+                                        new EventManager.NetEvents.DisconnectionEventArgs("user here",
                                             inc.ReadString()));
                                 }
                                 break;
@@ -117,18 +117,9 @@ namespace Bricklayer.Core.Server.Net
                                         case MessageTypes.ValidSession:
                                         {
                                             var msg = new ValidSessionMessage(inc, MessageContext.Server);
-                                            if (msg.Valid)
-                                            {
-                                                Server.Events.Connection.Valid.Invoke(
-                                                    new EventManager.ConnectionEvents.ValidSessionEventArgs(
-                                                        msg.Username, msg.UUID));
-                                            }
-                                            else
-                                            {
-                                                Server.Events.Connection.Invalid.Invoke(
-                                                    new EventManager.ConnectionEvents.InvalidSessionEventArgs(
-                                                        msg.Username, msg.UUID));
-                                            }
+                                                Server.Events.Network.SessionValidated.Invoke(
+                                                    new EventManager.NetEvents.SessionEventArgs(
+                                                        msg.Username, msg.UUID, msg.Valid));
 
                                             break;
                                         }
@@ -143,8 +134,8 @@ namespace Bricklayer.Core.Server.Net
                                         {
                                             // ReSharper disable once UnusedVariable
                                             var msg = new ServerInfoMessage(inc, MessageContext.Server);
-                                            Server.Events.Connection.RequestInfo.Invoke(
-                                                new EventManager.ConnectionEvents.RequestInfoEventArgs(
+                                            Server.Events.Network.InfoRequested.Invoke(
+                                                new EventManager.NetEvents.RequestInfoEventArgs(
                                                     inc.SenderEndPoint));
                                             break;
                                         }
@@ -194,7 +185,7 @@ namespace Bricklayer.Core.Server.Net
                     case MessageTypes.Request:
                     {
                         var msg = new RequestMessage(inc, MessageContext.Server);
-                        Server.Events.Connection.RequestMessage.Invoke(new EventManager.ConnectionEvents.RequestMessageEventArgs(msg.Type, sender));
+                        Server.Events.Network.MessageRequested.Invoke(new EventManager.NetEvents.RequestMessageEventArgs(msg.Type, sender));
                         break;
                     }
                 }

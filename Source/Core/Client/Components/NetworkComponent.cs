@@ -76,7 +76,7 @@ namespace Bricklayer.Core.Client.Components
             // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
             //Listen for init response from auth server containing token keys
-            Client.Events.Network.Auth.Init.AddHandler(args =>
+            Client.Events.Network.Auth.InitReceived.AddHandler(args =>
             {
                 TokenKeys.Username = args.Username;
                 TokenKeys.UUID = args.UUID;

@@ -119,7 +119,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             grpLobby.Add(lstLevels);
 
             // When client gets banner data from server
-            screen.Client.Events.Network.Game.LobbyBannerRecieved.AddHandler(args =>
+            screen.Client.Events.Network.Game.LobbyBannerReceived.AddHandler(args =>
             {
                 bannerInfo = args.Banner;
                 //Convert byte array to stream to be read
@@ -206,7 +206,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             BottomPanel.Add(btnDisconnect);
 
-            screen.Client.Events.Network.Game.Init.AddHandler(OnInit);
+            screen.Client.Events.Network.Game.InitReceived.AddHandler(OnInit);
 
             LoadLevels();
 
@@ -221,7 +221,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         protected override void Dispose(bool disposing)
         {
-            lobbyScreen.Client.Events.Network.Game.Init.RemoveHandler(OnInit);
+            lobbyScreen.Client.Events.Network.Game.InitReceived.RemoveHandler(OnInit);
             base.Dispose(disposing);
         }
 
