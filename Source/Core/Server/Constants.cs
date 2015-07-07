@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Properties;
 
 namespace Bricklayer.Core.Server
@@ -18,18 +14,35 @@ namespace Bricklayer.Core.Server
     /// </remarks>
     internal static class Constants
     {
-        public static readonly Version Version = Assembly.GetEntryAssembly().GetName().Version;
-        public static readonly string VersionString = AssemblyVersionName.GetVersion();
+        /// <summary>
+        /// The current version of the server.
+        /// </summary>
+        public static Version Version { get; } = Assembly.GetEntryAssembly().GetName().Version;
+
+        /// <summary>
+        /// The version of the server in readable format. (Example: v0.2.0.0b)
+        /// </summary>
+        public static string VersionString { get; } = AssemblyVersionName.GetVersion();
+
+        /// <summary>
+        /// Max Width of the banner image
+        /// </summary>
+        public static int MaxBannerWidth { get; } = 547;
+
+        /// <summary>
+        /// Max Height of the banner image
+        /// </summary>
+        public static int MaxBannerHeight { get; } = 120;
 
         /// <summary>
         /// Globably used strings.
         /// </summary>
-        public class Strings
+        public static class Strings
         {
             /// <summary>
             /// The title of the server console.
             /// </summary>
-            public static string ServerTitle { get; } = $"Bricklayer {VersionString}";
+            public static string ServerTitle { get; } = $"Bricklayer Server {VersionString}";
         }
     }
 }

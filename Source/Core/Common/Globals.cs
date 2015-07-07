@@ -11,7 +11,7 @@ namespace Bricklayer.Core.Common
     internal static class Globals
     {
         /// <summary>
-        /// Globally used regular expressions used for verifying names of entities, rooms, etc.
+        /// Globally used regular expressions used for verifying names of entities, levels, etc.
         /// </summary>
         public class Regexes
         {
@@ -25,13 +25,52 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// Globably used strings.
         /// </summary>
-        public class Strings
+        public static class Strings
         {
             /// <summary>
             /// The app identification ID used for the Lidgren networking library.
             /// The client and server must have matching IDs in order to connect.
             /// </summary>
             public static string NetworkID { get; } = "Bricklayer01";
+
+            /// <summary>
+            /// App identification for Auth server
+            /// </summary>
+            public static string AuthNetworkID { get; } = "BricklayerAuth";
+        }
+
+        /// <summary>
+        /// Globally used values.
+        /// </summary>
+        public static class Values
+        {
+            /// <summary>
+            /// The default port for servers to run on.
+            /// The actual port is configurable through the JSON config.
+            /// </summary>
+            public static int DefaultServerPort { get; } = 52300;
+
+            /// <summary>
+            /// The default port for to send crededentials for authentication to.
+            /// The actual port is configurable through the JSON config, although the auth port will most likely never change.
+            /// </summary>
+            public static int DefaultAuthPort { get; } = 52400;
+
+            /// <summary>
+            /// The default address to send crededentials for authentication to.
+            /// The actual address is configurable through the JSON config, although the auth address will most likely never change.
+            /// </summary>
+            public static string DefaultAuthAddress { get; } = "auth.pyratron.com";
+
+            /// <summary>
+            /// Max width of the banner image.
+            /// </summary>
+            public static int MaxBannerWidth { get; } = 500;
+
+            /// <summary>
+            /// Max height of the banner image.
+            /// </summary>
+            public static int MaxBannerHeight { get; } = 120;
         }
     }
 }
