@@ -45,6 +45,8 @@ namespace Bricklayer.Core.Client.Components
                     pluginWindow.Init();
                     Client.Window.Add(pluginWindow);
                     pluginWindow.Show();
+
+                    Client.Network.PingAuthMessage("GotPlugin");
                 }
             });
 

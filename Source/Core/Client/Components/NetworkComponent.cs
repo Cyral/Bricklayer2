@@ -198,6 +198,15 @@ namespace Bricklayer.Core.Client.Components
         }
 
         /// <summary>
+        /// Send Ping message to Auth server
+        /// </summary>
+        /// <param name="message"></param>
+        public void PingAuthMessage(string message)
+        {
+            SendUnconnected(AuthEndpoint, new PingAuthMessage(message));
+        }
+
+        /// <summary>
         /// Disconnects from the server.
         /// </summary>
         /// <param name="reason">Reason to tell the server for disconnecting.</param>

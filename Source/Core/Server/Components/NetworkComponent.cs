@@ -323,6 +323,7 @@ namespace Bricklayer.Core.Server.Components
             return message;
         }
 
+
         /// <summary>
         /// Shuts down the server and disconnects clients
         /// </summary>

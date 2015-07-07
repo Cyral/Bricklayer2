@@ -69,6 +69,7 @@
     <Compile Include="Event.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Globals.cs" />
+    <Compile Include="Net\Messages\PingAuthMessage.cs" />
     <Compile Include="Net\Messages\PluginDownloadMessage.cs" />
     <Compile Include="IOHelper.cs" />
     <Compile Include="Plugin.cs" />

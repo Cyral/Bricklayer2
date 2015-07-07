@@ -18,6 +18,7 @@
         CreateLevel,
         Request,
         Banner,
-        PluginDownload
+        PluginDownload,
+        PingAuth
     }
 }
