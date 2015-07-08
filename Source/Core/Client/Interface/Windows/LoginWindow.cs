@@ -179,10 +179,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         private void LoginAccountClick(object sender, EventArgs eventArgs)
         {
-            // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
-            screen.Client.Network.ConnectToAuth(txtUsername.Text, txtPassword.Text);
-            btnLoginAccount.Enabled = btnLoginGuest.Enabled = false;
-            btnLoginAccount.Text = "Signing In...";
+            //Simple validation
+            if (!string.IsNullOrEmpty(txtUsername.Text) && !string.IsNullOrEmpty(txtPassword.Text) && txtUsername.Text.Length < 100 && txtPassword.Text.Length < 100)
+            {
+                // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
+                screen.Client.Network.ConnectToAuth(txtUsername.Text, txtPassword.Text);
+                btnLoginAccount.Enabled = btnLoginGuest.Enabled = false;
+                btnLoginAccount.Text = "Signing In...";
+            }
         }
     }
 }
