@@ -14,7 +14,7 @@ namespace Bricklayer.Core.Common
     public class BricklayerEventArgs : EventArgs
     {
         /// <summary>
-        /// True if the event has been cancelled and should not continue to execute.
+        /// True if the event has been cancelled and should not continue to execute any fu
         /// </summary>
         /// <remarks>
         /// Plugins can ignore this property by setting ignoreCancel to true when registering an event.
@@ -24,6 +24,14 @@ namespace Bricklayer.Core.Common
         public BricklayerEventArgs()
         {
             Cancelled = false;
+        }
+
+        /// <summary>
+        /// Cancel the event from progressing any further.
+        /// </summary>
+        public void Cancel()
+        {
+            Cancelled = true;
         }
     }
 

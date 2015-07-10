@@ -55,6 +55,9 @@ namespace Bricklayer.Core.Server
             {
                 public class CreateLevelEventArgs : BricklayerEventArgs
                 {
+                    /// <summary>
+                    /// The level that was created.
+                    /// </summary>
                     public Level Level { get; internal set; }
 
                     public CreateLevelEventArgs(Level level)
@@ -88,14 +91,21 @@ namespace Bricklayer.Core.Server
 
             #region Arguments
 
-            public class PreLoginEventArgs : BricklayerEventArgs
+            public class LoginRequestEventArgs : BricklayerEventArgs
             {
+                /// <summary>
+                /// The connection that sent the login request.
+                /// </summary>
                 public NetConnection Connection { get; private set; }
+
+                /// <summary>
+                /// The public key to be verified.
+                /// </summary>
                 public string PublicKey { get; private set; }
                 public string Username { get; private set; }
                 public Guid UUID { get; private set; }
 
-                public PreLoginEventArgs(string username, string uuid, string publicKey, NetConnection connection)
+                public LoginRequestEventArgs(string username, string uuid, string publicKey, NetConnection connection)
                 {
                     Username = username;
                     UUID = Guid.Parse(uuid);
@@ -106,22 +116,32 @@ namespace Bricklayer.Core.Server
 
             public class ConnectionEventArgs : BricklayerEventArgs
             {
-                public string Username { get; private set; }
+                /// <summary>
+                /// The player who has connected.
+                /// </summary>
+                public Player Player { get; private set; }
 
-                public ConnectionEventArgs(string username)
+                public ConnectionEventArgs(Player player)
                 {
-                    Username = username;
+                    Player = player;
                 }
             }
 
             public class DisconnectionEventArgs : BricklayerEventArgs
             {
+                /// <summary>
+                /// The reason for this user disconnecting.
+                /// </summary>
                 public string Reason { get; private set; }
-                public string Username { get; private set; }
 
-                public DisconnectionEventArgs(string username, string reason)
+                /// <summary>
+                /// The player who was disconnected.
+                /// </summary>
+                public Player Player { get; private set; }
+
+                public DisconnectionEventArgs(Player player, string reason)
                 {
-                    Username = username;
+                    Player = player;
                     Reason = reason;
                 }
             }
@@ -131,6 +151,10 @@ namespace Bricklayer.Core.Server
             {
                 public string Username { get; private set; }
                 public Guid UUID { get; private set; }
+
+                /// <summary>
+                /// Indicates if the session sent is valid or not.
+                /// </summary>
                 public bool Valid { get; private set; }
 
                 public SessionEventArgs(string username, string uuid, bool valid)
@@ -143,6 +167,9 @@ namespace Bricklayer.Core.Server
 
             public class RequestInfoEventArgs : BricklayerEventArgs
             {
+                /// <summary>
+                /// The endpoint that requested the server information.
+                /// </summary>
                 public IPEndPoint Host { get; private set; }
 
                 public RequestInfoEventArgs(IPEndPoint host)
@@ -174,9 +201,11 @@ namespace Bricklayer.Core.Server
             {
                 public string Description { get; private set; }
                 public string Name { get; private set; }
+                public Player Sender { get; private set; }
 
-                public CreateLevelEventArgs(string name, string description)
+                public CreateLevelEventArgs(Player sender, string name, string description)
                 {
+                    Sender = sender;
                     Name = name;
                     Description = description;
                 }
@@ -192,10 +221,10 @@ namespace Bricklayer.Core.Server
             /// <summary>
             /// When a player requests to join with a public key.
             /// </summary>
-            public Event<PreLoginEventArgs> UserLoginRequested { get; } = new Event<PreLoginEventArgs>();
+            public Event<LoginRequestEventArgs> UserLoginRequested { get; } = new Event<LoginRequestEventArgs>();
 
             /// <summary>
-            /// When a player fully connects.
+            /// When a player fully connects. (After verifying their session is valid)
             /// </summary>
             public Event<ConnectionEventArgs> UserConnected { get; } = new Event<ConnectionEventArgs>();
 

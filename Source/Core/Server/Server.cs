@@ -273,7 +273,7 @@ namespace Bricklayer.Core.Server
         /// Finds a Sender from a remote unique identifier
         /// </summary>
         /// <param name="remoteUniqueIdentifier">The RUI to find</param>
-        /// <param name="ignoreError">If a Sender is not found, should an error be thrown?</param>
+        /// <param name="ignoreError">If true and the sender is not found, null will be returned instead of throwing an error.</param>
         public Player PlayerFromRUI(long remoteUniqueIdentifier, bool ignoreError = false)
         {
             Player found = null;

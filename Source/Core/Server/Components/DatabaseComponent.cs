@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Data;
 
 namespace Bricklayer.Core.Server.Components
@@ -110,24 +111,23 @@ namespace Bricklayer.Core.Server.Components
                 await PerformOperation(connectionString, initialCommand);
             }
 
-            //When a (new) user connects, add them to the database
-            Server.Events.Network.SessionValidated.AddHandler(async args =>
+            //When a (new) user connects, add them to the database.
+            Server.Events.Network.UserConnected.AddHandler(async args =>
             {
-                if (args.Valid)
+                var insertCommand = providerFactory.CreateCommand();
+                if (insertCommand != null)
                 {
-                    var insertCommand = providerFactory.CreateCommand();
-                    if (insertCommand != null)
-                    {
-                        insertCommand.CommandText =
-                            "INSERT OR IGNORE INTO Players (Username, GUID) VALUES (@username, @uuid);";
-                        AddParamaters(insertCommand,
-                            new Dictionary<string, string> {{"username", args.Username}, {"uuid", args.UUID.ToString("N") }
-                });
-                        await PerformOperation(connectionString, insertCommand);
-                    }
+                    insertCommand.CommandText =
+                        "INSERT OR IGNORE INTO Players (Username, GUID) VALUES (@username, @uuid);";
+                    AddParamaters(insertCommand,
+                        new Dictionary<string, string>
+                        {
+                            {"username", args.Player.Username},
+                            {"uuid", args.Player.UUID.ToString("N")}
+                        });
+                    await PerformOperation(connectionString, insertCommand);
                 }
-            });
-
+            },EventPriority.InternalFinal);
 
             await base.Init();
         }

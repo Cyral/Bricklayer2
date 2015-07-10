@@ -32,10 +32,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
             //Events
 
             //Listen for valid response from auth server
-            screen.Client.Events.Network.Auth.InitReceived.AddHandler(OnInit, EventPriority.Initial);
+            screen.Client.Events.Network.Auth.InitReceived.AddHandler(OnInit);
 
             //Listen for failed login response from auth server
-            screen.Client.Events.Network.Auth.FailedLogin.AddHandler(OnFailedLogin, EventPriority.Initial);
+            screen.Client.Events.Network.Auth.FailedLogin.AddHandler(OnFailedLogin);
 
             //Setup the window
             CaptionVisible = false;
