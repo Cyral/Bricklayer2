@@ -206,7 +206,7 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// This priority level is only accessible to the core game, and is called before <c>Initial</c>.
         /// </summary>
-        internal static readonly EventPriority InternalFinal = 0;
+        internal static readonly EventPriority InternalFinal = 100;
 
         private EventPriority(int priority)
         {
