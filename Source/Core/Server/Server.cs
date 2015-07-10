@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.World;
 using Bricklayer.Core.Server.Components;
@@ -39,14 +36,14 @@ namespace Bricklayer.Core.Server
         public IOComponent IO { get; set; }
 
         /// <summary>
+        /// List of levels currently open.
+        /// </summary>
+        public List<Level> Levels { get; private set; }
+
+        /// <summary>
         /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
         public NetworkComponent Net { get; set; }
-
-        /// <summary>
-        /// The PluginComponent for loading and managing plugins.
-        /// </summary>
-        public PluginComponent Plugins { get; set; }
 
         /// <summary>
         /// List of users online the server.
@@ -54,9 +51,9 @@ namespace Bricklayer.Core.Server
         public List<Player> Players { get; private set; }
 
         /// <summary>
-        /// List of levels currently open.
+        /// The PluginComponent for loading and managing plugins.
         /// </summary>
-        public List<Level> Levels { get; private set; }
+        public PluginComponent Plugins { get; set; }
 
         private string clear, input;
         private bool showHeader;
@@ -67,6 +64,7 @@ namespace Bricklayer.Core.Server
             Logger.Server = this;
             Events = new EventManager();
             Players = new List<Player>();
+            Levels = new List<Level>();
 
             //Setup server
             Console.BackgroundColor = ConsoleColor.Black;
@@ -153,7 +151,7 @@ namespace Bricklayer.Core.Server
             Levels.Add(level);
 
             return level;
-        } 
+        }
 
         #region Console Stuff
 
@@ -230,32 +228,25 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public void WriteHeader()
         {
-            try
-            {
-                if (!showHeader)
-                    return;
-                if (clear.Length != Console.WindowWidth)
-                    clear = new string(' ', Console.WindowWidth);
-                var left = Console.CursorLeft;
-                var top = Console.CursorTop;
-                Console.SetCursorPosition(Math.Max(0, Console.WindowLeft), Math.Max(0, Console.WindowTop));
-                Console.Write(clear);
-                Console.SetCursorPosition(Math.Max(0, Console.WindowLeft), Math.Max(0, Console.WindowTop));
+            if (!showHeader)
+                return;
+            if (clear.Length != Console.WindowWidth)
+                clear = new string(' ', Console.WindowWidth);
+            var left = Console.CursorLeft;
+            var top = Console.CursorTop;
+            Console.SetCursorPosition(Math.Max(0, Console.WindowLeft), Math.Max(0, Console.WindowTop));
+            Console.Write(clear);
+            Console.SetCursorPosition(Math.Max(0, Console.WindowLeft), Math.Max(0, Console.WindowTop));
 
-                Console.BackgroundColor = ConsoleColor.Green;
-                Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = ConsoleColor.Black;
 
-                WriteStats();
+            WriteStats();
 
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
 
-                Console.SetCursorPosition(Math.Max(0, left), Math.Max(0, top));
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                //Nothin, caused by window resize
-            }
+            Console.SetCursorPosition(Math.Max(0, left), Math.Max(0, top));
         }
 
         /// <summary>

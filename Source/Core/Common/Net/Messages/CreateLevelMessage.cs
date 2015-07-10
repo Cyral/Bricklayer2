@@ -14,8 +14,9 @@ namespace Bricklayer.Core.Common.Net.Messages
         public string Description { get; set; }
         public string Name { get; set; }
 
-        public CreateLevelMessage(NetIncomingMessage im)
+        public CreateLevelMessage(NetIncomingMessage im, MessageContext context)
         {
+            Context = context;
             Decode(im);
         }
 

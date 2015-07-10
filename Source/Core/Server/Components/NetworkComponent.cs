@@ -182,7 +182,7 @@ namespace Bricklayer.Core.Server.Components
                 Environment.Exit(0);
             }
 
-            base.Init();
+            await base.Init();
         }
 
         /// <summary>

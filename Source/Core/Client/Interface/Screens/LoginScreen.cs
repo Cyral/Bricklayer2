@@ -12,7 +12,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
         private Label lblVersion;
         private LoginWindow wndLogin;
-        private ServerWindow wndServer;
 
         protected internal override GameState State => GameState.Login;
 
@@ -102,9 +101,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Remove(imgGithub);
             Window.Remove(lblVersion);
             Window.Remove(wndLogin);
-            Window.Remove(wndServer);
             wndLogin?.Dispose();
-            wndServer?.Dispose();
         }
     }
 }

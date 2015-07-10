@@ -24,7 +24,7 @@ namespace Bricklayer.Core.Server.Net
         /// <summary>
         /// The process network messages such as users joining, moving, etc
         /// </summary>
-        public async void ProcessNetworkMessages()
+        public void ProcessNetworkMessages()
         {
             while (NetManager.NetServer.Status == NetPeerStatus.Running)
             {
@@ -61,8 +61,8 @@ namespace Bricklayer.Core.Server.Net
                                 //Find message type
                                 switch (type)
                                 {
+                                    // The connection should come with a public key to verify the client's session
                                     case MessageTypes.PublicKey:
-                                        // The connection should come with a public key to verify the client's session
                                     {
                                         var msg = new PublicKeyMessage(inc, MessageContext.Client);
 
@@ -97,7 +97,8 @@ namespace Bricklayer.Core.Server.Net
                                 }
                                 //When a client disconnects
                                 else if (inc.SenderConnection != null &&
-                                    (inc.SenderConnection.Status == NetConnectionStatus.Disconnected || inc.SenderConnection.Status == NetConnectionStatus.Disconnecting))
+                                         (inc.SenderConnection.Status == NetConnectionStatus.Disconnected ||
+                                          inc.SenderConnection.Status == NetConnectionStatus.Disconnecting))
                                 {
                                     if (sender != null)
                                         Server.Events.Network.UserDisconnected.Invoke(
@@ -174,7 +175,7 @@ namespace Bricklayer.Core.Server.Net
         /// Handles all actions for recieving data messages (Such as movement, block placing, etc)
         /// </summary>
         /// <param name="inc">The incoming message</param>
-        private async void ProcessDataMessage(NetIncomingMessage inc)
+        private void ProcessDataMessage(NetIncomingMessage inc)
         {
             //The type of message being recieved
             var type = (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
@@ -190,6 +191,13 @@ namespace Bricklayer.Core.Server.Net
                         var msg = new RequestMessage(inc, MessageContext.Server);
                         Server.Events.Network.MessageRequested.Invoke(
                             new EventManager.NetEvents.RequestMessageEventArgs(msg.Type, sender));
+                        break;
+                    }
+                    case MessageTypes.CreateLevel:
+                    {
+                        var msg = new CreateLevelMessage(inc, MessageContext.Server);
+                        Server.Events.Network.CreateLevelMessageRecieved.Invoke(
+                            new EventManager.NetEvents.CreateLevelEventArgs(sender, msg.Name, msg.Description));
                         break;
                     }
                 }

@@ -13,11 +13,6 @@ namespace Bricklayer.Core.Common.World
     public class Level : LevelData
     {
         /// <summary>
-        /// The height, in blocks, of the map
-        /// </summary>
-        public virtual int Height { get; protected set; }
-
-        /// <summary>
         /// The number of players currently online this level.
         /// </summary>
         public override int Online => Players.Count;
@@ -44,11 +39,21 @@ namespace Bricklayer.Core.Common.World
         /// </summary>
         public virtual int Width { get; protected set; }
 
+        /// <summary>
+        /// The height, in blocks, of the map
+        /// </summary>
+        public virtual int Height { get; protected set; }
+
         protected Random random;
 
         public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating)
             : base(creator, name, uuid, description, 0, plays, rating)
         {
+            Players = new List<Player>();
+            Width = 1000;
+            Height = 500;
+            Tiles = new Tile[Width, Height,2];
+            Spawn = new Vector2(1,1);
             random = new Random();
         }
 

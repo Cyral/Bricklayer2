@@ -44,17 +44,22 @@ namespace Bricklayer.Core.Server.Components
             var command = providerFactory.CreateCommand();
             if (command != null)
             {
-                command.CommandText = "SELECT `guid`, `name`, `description`, `plays`, `creator` FROM `Levels`";
-                //Query the database and add all resulting briefings to the briefing list
-                await PerformQuery(connectionString, command, async reader =>
+                //Select the level data (name, description, plays, etc.), and find the name of the creator
+                command.CommandText =
+                    "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator";
+                //Query the database and add all resulting levels to the level list
+                await PerformQuery(connectionString, command, reader =>
                 {
-                    while (reader.Read())
+                    if (reader.HasRows)
                     {
-                        // Create and add each briefing to a list
-                        var briefing = new LevelData(await GetPlayerData(reader.GetGuid(4)), reader.GetString(1),
-                            Guid.Parse(reader.GetString(0)), reader.GetString(2), 0,
-                            reader.GetInt32(3), 3.5d);
-                        briefings.Add(briefing);
+                        while (reader.Read())
+                        {
+                            // Create and add each level data to the list
+                            var briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
+                                reader.GetGuid(0), reader.GetString(2), 0,
+                                reader.GetInt32(3), 3.5d);
+                            briefings.Add(briefing);
+                        }
                     }
                 });
             }
@@ -71,7 +76,7 @@ namespace Bricklayer.Core.Server.Components
             PlayerData player = null;
             if (command != null)
             {
-                command.CommandText = "SELECT `username` FROM `Players` WHERE `uuid` = @uuid LIMIT 1";
+                command.CommandText = "SELECT username FROM Players WHERE guid = @uuid";
                 AddParamaters(command, new Dictionary<string, string> {{"uuid", uuid.ToString("N")}});
                 await PerformQuery(connectionString, command, reader =>
                 {
@@ -106,8 +111,8 @@ namespace Bricklayer.Core.Server.Components
             if (initialCommand != null)
             {
                 initialCommand.CommandText =
-                    "CREATE TABLE IF NOT EXISTS Levels (`GUID` GUID PRIMARY KEY,`Name` TEXT,`Description` TEXT,`Plays` INTEGER, `Creator` GUID);" +
-                    "CREATE TABLE IF NOT EXISTS Players (`Username` Text UNIQUE,`GUID` GUID PRIMARY KEY)";
+                    "CREATE TABLE IF NOT EXISTS Levels (GUID GUID PRIMARY KEY,Name TEXT,Description TEXT,Plays INTEGER, Creator GUID);" +
+                    "CREATE TABLE IF NOT EXISTS Players (Username Text UNIQUE,GUID GUID PRIMARY KEY)";
                 await PerformOperation(connectionString, initialCommand);
             }
 
@@ -127,7 +132,7 @@ namespace Bricklayer.Core.Server.Components
                         });
                     await PerformOperation(connectionString, insertCommand);
                 }
-            },EventPriority.InternalFinal);
+            }, EventPriority.InternalFinal);
 
             await base.Init();
         }
@@ -138,10 +143,10 @@ namespace Bricklayer.Core.Server.Components
             if (command != null)
             {
                 command.CommandText =
-                    "INSERT INTO `Levels`(`GUID`,`Name`,`Description`, `Plays`, `Creator`) VALUES(@guid, @name, @desc, 0, @creator)";
+                    "INSERT INTO Levels (GUID,Name,Description, Plays, Creator) VALUES(@guid, @name, @desc, 0, @creator)";
                 AddParamaters(command, new Dictionary<string, string>
                 {
-                    {"guid", Guid.NewGuid().ToString()},
+                    {"guid", Guid.NewGuid().ToString("N")},
                     {"name", data.Name},
                     {"desc", data.Description},
                     {"creator", data.Creator.UUID.ToString("N")}
