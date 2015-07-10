@@ -10,7 +10,7 @@ namespace Bricklayer.Core.Common.World
     /// <summary>
     /// Represents a level/map, with an array of tiles and a list of players.
     /// </summary>
-    public abstract class Map : LevelData
+    public class Level : LevelData
     {
         /// <summary>
         /// The height, in blocks, of the map
@@ -46,8 +46,8 @@ namespace Bricklayer.Core.Common.World
 
         protected Random random;
 
-        public Map(string name, string uuid, string description, int players, int plays, double rating)
-            : base(name, uuid, description, players, plays, rating)
+        public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating)
+            : base(creator, name, uuid, description, 0, plays, rating)
         {
             random = new Random();
         }
@@ -66,17 +66,6 @@ namespace Bricklayer.Core.Common.World
         public bool InDrawBounds(int x, int y)
         {
             return !(y < 0 || y >= Height || x < 0 || x >= Width);
-        }
-
-        /// <summary>
-        /// Returns a player from an ID.
-        /// </summary>
-        public Player PlayerFromID(int id)
-        {
-            var player = Players.FirstOrDefault(x => x.ID == id);
-            if (player != null)
-                return player;
-            throw new KeyNotFoundException("Could not find player from ID: " + id);
         }
     }
 }

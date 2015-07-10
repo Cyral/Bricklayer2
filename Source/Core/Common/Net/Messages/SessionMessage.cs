@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
@@ -26,9 +27,9 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public SessionMessage(string username, string uuid, string privateKey, IPAddress address, int port)
+        public SessionMessage(string username, Guid uuid, string privateKey, IPAddress address, int port)
         {
-            UUID = uuid;
+            UUID = uuid.ToString("N");
             Username = username;
             PrivateKey = privateKey;
             Address = address;

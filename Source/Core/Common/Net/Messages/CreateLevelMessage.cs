@@ -1,46 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Lidgren.Network;
+﻿using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
+    /// <summary>
+    /// Sent to the server to create a new level.
+    /// Client => Server
+    /// String: Name
+    /// String: Description
+    /// </summary>
     public class CreateLevelMessage : IMessage
     {
         public const int MaxNameLength = 24, MaxDescriptionLength = 80, MaxDescriptionLines = 2;
-
-        public string Name { get; set; }
-
         public string Description { get; set; }
-
-        public MessageContext Context { get; set; }
-
-        public MessageTypes MessageType
-        {
-            get { return MessageTypes.CreateLevel; }
-        }
+        public string Name { get; set; }
 
         public CreateLevelMessage(NetIncomingMessage im)
         {
-            this.Decode(im);
+            Decode(im);
         }
 
         public CreateLevelMessage(string name, string description)
         {
-            this.Name = name;
-            this.Description = description;
+            Name = name;
+            Description = description;
         }
+
+        #region IMessage Members
+
+        public MessageContext Context { get; set; }
+        public MessageTypes MessageType => MessageTypes.CreateLevel;
+
         public void Decode(NetIncomingMessage im)
         {
-            this.Name = im.ReadString();
-            this.Description = im.ReadString();
+            Name = im.ReadString().Truncate(MaxNameLength);
+            Description = im.ReadString().Truncate(MaxDescriptionLength);
         }
+
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write(this.Name);
-            om.Write(this.Description);
+            om.Write(Name);
+            om.Write(Description);
         }
+
+        #endregion
     }
 }

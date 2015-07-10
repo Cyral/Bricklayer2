@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Bricklayer.Core.Client.Net;
@@ -125,12 +126,12 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Sends a message once connected to join a server officially.
         /// </summary>
-        public async Task Join(string host, int port, string username, string id, string publicKey)
+        public async Task Join(string host, int port, string username, Guid uuid, string publicKey)
         {
             await Task.Factory.StartNew(() =>
             {
                 NetClient.Connect(host, port,
-                    EncodeMessage(new PublicKeyMessage(username, id, publicKey)));
+                    EncodeMessage(new PublicKeyMessage(username, uuid, publicKey)));
             });
         }
 

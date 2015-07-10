@@ -60,7 +60,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Stored pending user sessions. (The users UUID and connection)
         /// </summary>
-        private readonly Dictionary<string, NetConnection> pendingSessions = new Dictionary<string, NetConnection>();
+        private readonly Dictionary<Guid, NetConnection> pendingSessions = new Dictionary<Guid, NetConnection>();
 
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered; //Message delivery method
         private bool isDisposed; //Is the instance disposed?
@@ -87,8 +87,7 @@ namespace Bricklayer.Core.Server.Components
                         new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
                             Server.IO.Config.Server.Intro, NetServer.ConnectionsCount,
                             await Server.Database.GetAllLevels())));
-                    Server.Players.Add(new Player(pendingSessions[args.UUID], null, new Vector2(0, 0), args.Username,
-                        Server.FindAvailablePlayerID(), false));
+                    Server.Players.Add(new Player(pendingSessions[args.UUID], null, new Vector2(0, 0), args.Username, args.UUID, false));
                     pendingSessions.Remove(args.UUID);
                     Logger.WriteLine(LogType.Net,
                         $"Session valid for '{args.Username}'. (Allowed)");

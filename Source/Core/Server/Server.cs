@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
+using Bricklayer.Core.Common.World;
 using Bricklayer.Core.Server.Components;
 using Pyratron.Frameworks.Commands.Parser;
 
@@ -49,7 +51,12 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// List of users online the server.
         /// </summary>
-        public List<Player> Players;
+        public List<Player> Players { get; private set; }
+
+        /// <summary>
+        /// List of levels currently open.
+        /// </summary>
+        public List<Level> Levels { get; private set; }
 
         private string clear, input;
         private bool showHeader;
@@ -128,6 +135,25 @@ namespace Bricklayer.Core.Server
             }
             // ReSharper disable once FunctionNeverReturns
         }
+
+        /// <summary>
+        /// Creates a level with the specified name and description, and the sender as the owner.
+        /// </summary>
+        /// <remarks>
+        /// It is up to the caller to send a message to the sender with the level data.
+        /// </remarks>
+        public async Task<Level> CreateLevel(Player sender, string name, string description)
+        {
+            var level = new Level(sender, name, Guid.NewGuid(), description, 0, 2.5);
+            level.Players.Add(sender);
+
+            //Add the level to the database
+            await Database.CreateLevel(level);
+
+            Levels.Add(level);
+
+            return level;
+        } 
 
         #region Console Stuff
 
@@ -259,20 +285,6 @@ namespace Bricklayer.Core.Server
             if (found != null) return found;
             if (ignoreError) return null;
             throw new KeyNotFoundException($"Could not find user from RemoteUniqueIdentifier: {remoteUniqueIdentifier}");
-        }
-
-
-        /// <summary>
-        /// Finds an empty slot to use as a user's ID
-        /// </summary>
-        public short FindAvailablePlayerID()
-        {
-            for (var i = 1; i < IO.Config.Server.MaxPlayers; i++)
-                if (Players.All(x => x.ID != i))
-                    return (short)i;
-            Logger.WriteLine(LogType.Error, "Could not find empty user ID! (Max Players: {0})",
-                IO.Config.Server.MaxPlayers);
-            return 0;
         }
 
         /// <summary>

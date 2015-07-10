@@ -40,10 +40,16 @@ namespace Bricklayer.Core.Common.Data
         /// </summary>
         public Guid UUID { get; protected set; }
 
-        public LevelData(string name, string uuid, string description, int players, int plays, double rating)
+        /// <summary>
+        /// The creator of this level
+        /// </summary>
+        public PlayerData Creator { get; protected set; }
+
+        public LevelData(PlayerData creator, string name, Guid uuid, string description, int players, int plays, double rating)
         {
+            Creator = creator;
             Name = name;
-            UUID = Guid.Parse(uuid);
+            UUID = uuid;
             Description = description;
             Online = players;
             Rating = rating;

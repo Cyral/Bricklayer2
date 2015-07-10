@@ -116,15 +116,6 @@ namespace Bricklayer.Core.Client
             }
         }
 
-        /// <summary>
-        /// Clamps a strings character count to a specified length.
-        /// </summary>
-        public static string Truncate(this string value, int maxLength)
-        {
-            if (string.IsNullOrEmpty(value)) return value;
-            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
-        }
-
         public static SecureString ToSecureString(this IEnumerable<char> input)
         {
             if (input == null)
