@@ -4,6 +4,7 @@ using Bricklayer.Core.Client.Interface.Windows;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
+using EventArgs = System.EventArgs;
 
 namespace Bricklayer.Core.Client
 {
@@ -195,6 +196,12 @@ namespace Bricklayer.Core.Client
             UI.Update(gameTime);
             Input.Update();
             base.Update(gameTime);
+        }
+
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            Network.Disconnect("Exited game.");
+            base.OnExiting(sender, args);
         }
     }
 }

@@ -18,7 +18,6 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public GameEvents Game { get; }
 
-
         /// <summary>
         /// Events related to network
         /// </summary>
@@ -82,7 +81,7 @@ namespace Bricklayer.Core.Client
             /// <summary>
             /// Events related to the authentication server and proccess.
             /// </summary>
-            internal AuthServerEvents Auth { get; }
+            public AuthServerEvents Auth { get; }
 
             /// <summary>
             /// Events related to networking from the game server.
@@ -93,14 +92,14 @@ namespace Bricklayer.Core.Client
             /// <summary>
             /// Events related to the authentication server and proccess.
             /// </summary>
-            internal sealed class AuthServerEvents
+            public sealed class AuthServerEvents
             {
                 //Arguments define what values are passed to the event handler(s).
                 #region Arguments
 
                 public class InitEventArgs : BricklayerEventArgs
                 {
-                    public string UUID { get; private set; }
+                    public Guid UUID { get; private set; }
                     public string Username { get; private set; }
                     internal string PrivateKey { get; private set; }
                     public string PublicKey { get; private set; }
@@ -108,7 +107,7 @@ namespace Bricklayer.Core.Client
                     public InitEventArgs(string username, string uuid, string privateKey, string publicKey)
                     {
                         Username = username;
-                        UUID = uuid;
+                        UUID = Guid.Parse(uuid);
                         PrivateKey = privateKey;
                         PublicKey = publicKey;
                     }

@@ -95,7 +95,7 @@
     <Compile Include="World\BlockCollision.cs" />
     <Compile Include="World\BlockType.cs" />
     <Compile Include="World\Layer.cs" />
-    <Compile Include="World\Map.cs" />
+    <Compile Include="World\Level.cs" />
     <Compile Include="World\Tile.cs" />
   </ItemGroup>
   <ItemGroup>

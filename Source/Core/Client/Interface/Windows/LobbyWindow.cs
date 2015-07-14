@@ -185,7 +185,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnCreate.Init();
             btnCreate.Click += delegate
             {
-                var window = new CreateWorldDialog(manager, this);
+                var window = new CreateLevelDialog(manager, screen);
                 window.Init();
                 Manager.Add(window);
                 window.Show();

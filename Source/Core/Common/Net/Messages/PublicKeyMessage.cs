@@ -27,9 +27,9 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public PublicKeyMessage(string username, string uuid, string publicKey)
+        public PublicKeyMessage(string username, Guid uuid, string publicKey)
         {
-            UUID = uuid;
+            UUID = uuid.ToString("N");
             Username = username;
             PublicKey = publicKey;
             MessageTime = NetTime.Now;

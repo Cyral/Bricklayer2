@@ -53,7 +53,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             int levelsLength = im.ReadByte();
             for (var i = 0; i < levelsLength; i++)
             {
-                Levels.Add(new LevelData(im.ReadString(), im.ReadString(), im.ReadString(), im.ReadByte(), im.ReadInt16(), im.ReadDouble()));
+                Levels.Add(new LevelData(new PlayerData(im.ReadString(), Guid.Parse(im.ReadString())), im.ReadString(), Guid.Parse(im.ReadString()), im.ReadString(), im.ReadByte(), im.ReadInt16(), im.ReadDouble()));
             }
         }
 
@@ -66,6 +66,8 @@ namespace Bricklayer.Core.Common.Net.Messages
             om.Write((byte)Levels.Count);
             foreach (var data in Levels)
             {
+                om.Write(data.Creator.Username);
+                om.Write(data.Creator.UUID.ToString());
                 om.Write(data.Name);
                 om.Write(data.UUID.ToString());
                 om.Write(data.Description);

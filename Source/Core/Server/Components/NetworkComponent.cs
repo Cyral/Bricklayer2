@@ -13,6 +13,7 @@ using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Net;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
+using static Bricklayer.Core.Server.EventManager;
 
 #endregion
 
@@ -27,15 +28,8 @@ namespace Bricklayer.Core.Server.Components
     /// </summary>
     public class NetworkComponent : ServerComponent
     {
-        /// <summary>
-        /// The underlying Lidgren server object
-        /// </summary>
-        public NetServer NetServer { get; set; }
-
-        /// <summary>
-        /// The message loop for handling messages
-        /// </summary>
-        public MessageHandler MsgHandler { get; set; }
+        private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
+            //Message delivery method
 
         /// <summary>
         /// The server configuration
@@ -43,14 +37,24 @@ namespace Bricklayer.Core.Server.Components
         public NetPeerConfiguration Config { get; set; }
 
         /// <summary>
-        /// Net LogType
-        /// </summary>
-        protected override LogType LogType => LogType.Net;
-
-        /// <summary>
         /// Indicates if the server has shut down, meaning there is no need to save maps.
         /// </summary>
         public bool IsShutdown { get; set; }
+
+        /// <summary>
+        /// The message loop for handling messages
+        /// </summary>
+        public MessageHandler MsgHandler { get; set; }
+
+        /// <summary>
+        /// The underlying Lidgren server object
+        /// </summary>
+        public NetServer NetServer { get; set; }
+
+        /// <summary>
+        /// Net LogType
+        /// </summary>
+        protected override LogType LogType => LogType.Net;
 
         /// <summary>
         /// The IP of the auth server.
@@ -58,20 +62,22 @@ namespace Bricklayer.Core.Server.Components
         internal IPEndPoint AuthEndpoint { get; private set; }
 
         /// <summary>
-        /// Stored pending user sessions. (The users UUID and connection)
+        /// Stored pending user sessions. (The user's UUID and connection)
+        /// These will be validated once the auth server responds.
         /// </summary>
-        private readonly Dictionary<string, NetConnection> pendingSessions = new Dictionary<string, NetConnection>();
+        private readonly Dictionary<Guid, NetConnection> pendingSessions = new Dictionary<Guid, NetConnection>();
 
-        private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered; //Message delivery method
         private bool isDisposed; //Is the instance disposed?
 
         public NetworkComponent(Server server) : base(server)
         {
-
+            //When a user requests to join, verify their account is valid with the auth server.
             Server.Events.Network.UserLoginRequested.AddHandler(args =>
             {
                 Logger.WriteLine(LogType.Net,
-                args.Username + " requesting to join. Verifying public key with auth server.");
+                    args.Username + " requesting to join. Verifying public key with auth server.");
+                if (pendingSessions.ContainsKey(args.UUID))
+                    pendingSessions.Remove(args.UUID);
                 pendingSessions.Add(args.UUID, args.Connection);
                 var message = EncodeMessage(new PublicKeyMessage(args.Username, args.UUID, args.PublicKey));
 
@@ -79,21 +85,33 @@ namespace Bricklayer.Core.Server.Components
                 NetServer.SendUnconnectedMessage(message, AuthEndpoint);
             });
 
+            //If the response from the auth server is valid, approve their connection request and finalize the connection process.
             Server.Events.Network.SessionValidated.AddHandler(async args =>
             {
+                if (!pendingSessions.ContainsKey(args.UUID))
+                {
+                    Logger.WriteLine(LogType.Error, $"Pending session for UUID \"{args.UUID}\" not found.");
+                    return;
+                }
                 if (args.Valid)
                 {
+                    Server.Players.Add(new Player(pendingSessions[args.UUID], null, new Vector2(0, 0), args.Username,
+                        args.UUID, false));
                     pendingSessions[args.UUID].Approve(EncodeMessage(
                         new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
                             Server.IO.Config.Server.Intro, NetServer.ConnectionsCount,
                             await Server.Database.GetAllLevels())));
-                    Server.Players.Add(new Player(pendingSessions[args.UUID], null, new Vector2(0, 0), args.Username,
-                        Server.FindAvailablePlayerID(), false));
-                    pendingSessions.Remove(args.UUID);
                     Logger.WriteLine(LogType.Net,
                         $"Session valid for '{args.Username}'. (Allowed)");
                 }
-            }, EventPriority.Final);
+                else
+                {
+                    pendingSessions[args.UUID].Deny("Invalid or expired session.");
+                    Logger.WriteLine(LogType.Net,
+                        $"Session invalid for '{args.Username}'. (Denied)");
+                }
+                pendingSessions.Remove(args.UUID);
+            }, EventPriority.InternalFinal);
 
             Server.Events.Network.MessageRequested.AddHandler(async args =>
             {
@@ -101,30 +119,46 @@ namespace Bricklayer.Core.Server.Components
                 if (args.Type == MessageTypes.Init)
                 {
                     Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
-                        Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels()), args.Sender);
+                        Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels()),
+                        args.Sender);
                 }
                 else if (args.Type == MessageTypes.Banner)
                 {
-                    if(Server.IO.Banner != null)
+                    if (Server.IO.Banner != null)
                         Send(new BannerMessage(Server.IO.Banner), args.Sender);
                 }
             });
 
-            Server.Events.Network.SessionValidated.AddHandler(args =>
-            {
-                if (!args.Valid)
+            //When a client loads their server list and requests server informatin, such as description, players online, etc.
+            Server.Events.Network.InfoRequested.AddHandler(
+                args =>
                 {
-                    pendingSessions[args.UUID].Deny("Invalid or expired session.");
-                    pendingSessions.Remove(args.UUID);
-                    Logger.WriteLine(LogType.Net,
-                        $"Session invalid for '{args.Username}'. (Denied)");
-                }
-            });
+                    SendUnconnected(args.Host,
+                        new ServerInfoMessage(Server.IO.Config.Server.Decription, Server.Net.NetServer.ConnectionsCount,
+                            Server.IO.Config.Server.MaxPlayers));
+                });
 
-            Server.Events.Network.InfoRequested.AddHandler(args =>
+            Server.Events.Network.CreateLevelMessageRecieved.AddHandler(
+                async args =>
+                {
+                    //Create the new level
+                    var level = await Server.CreateLevel(args.Sender, args.Name, args.Description);
+                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" created by {level.Creator.Username}");
+                    //Fire another event with the newly created level, so that plugins can access it.
+                    //(As the current event is only from the network message)
+                    Server.Events.Game.Levels.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
+
+                }, EventPriority.InternalFinal); //Must be the last event called as it fires another event
+
+            Server.Events.Network.UserConnected.AddHandler(args =>
             {
-                SendUnconnected(args.Host, new ServerInfoMessage(Server.IO.Config.Server.Decription, Server.Net.NetServer.ConnectionsCount, Server.IO.Config.Server.MaxPlayers));
-            });
+                Logger.WriteLine(LogType.Normal, ConsoleColor.Green, $"Player \"{args.Player.Username}\" has connected.");
+            }, EventPriority.InternalFinal);
+
+            Server.Events.Network.UserDisconnected.AddHandler(args =>
+            {
+                Logger.WriteLine(LogType.Normal, ConsoleColor.Red, $"Player \"{args.Player.Username}\" has disconnected.");
+            }, EventPriority.InternalFinal);
         }
 
         public override async Task Init()
@@ -133,10 +167,13 @@ namespace Bricklayer.Core.Server.Components
                 throw new InvalidOperationException("The IO component must be initialized first.");
 
             //Find the address of the auth server
-            await Task.Factory.StartNew(() =>
-            {
-                AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress), Server.IO.Config.Server.AuthServerPort);
-            });
+            await
+                Task.Factory.StartNew(
+                    () =>
+                    {
+                        AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Server.IO.Config.Server.AuthServerAddress),
+                            Server.IO.Config.Server.AuthServerPort);
+                    });
 
             var result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
             if (!result)
@@ -145,7 +182,7 @@ namespace Bricklayer.Core.Server.Components
                 Environment.Exit(0);
             }
 
-            base.Init();
+            await base.Init();
         }
 
         /// <summary>
@@ -159,7 +196,7 @@ namespace Bricklayer.Core.Server.Components
             Config = new NetPeerConfiguration(Globals.Strings.NetworkID)
             {
                 Port = port,
-                MaximumConnections = maxconnections,
+                MaximumConnections = maxconnections
             };
 
             // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
@@ -177,7 +214,7 @@ namespace Bricklayer.Core.Server.Components
             {
                 NetServer.Start();
             }
-            // ReSharper disable once RedundantCatchClause
+                // ReSharper disable once RedundantCatchClause
             catch (SocketException ex)
             {
                 Logger.WriteLine(LogType.Error, ex.Message);
@@ -185,7 +222,8 @@ namespace Bricklayer.Core.Server.Components
                     $"SERVER EXIT: The server has exited because of an error on {DateTime.Now.ToString("U")}");
                 return false;
             }
-            Log("Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(), Config.MaximumConnections.ToString());
+            Log("Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(),
+                Config.MaximumConnections.ToString());
 
             //Start message handler
             MsgHandler = new MessageHandler(Server);
@@ -254,59 +292,16 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
         /// <param name="user">Sender NOT to send to</param>
-        //public void BroadcastExcept(IMessage gameMessage, Player user)
-        //{
-        //    var con =
-        //        NetServer.Connections.FirstOrDefault(
-        //            x => x.RemoteUniqueIdentifier == user.Connection.RemoteUniqueIdentifier &&
-        //                 Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true).Level != null &&
-        //                 Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true).Level.ID ==
-        //                 user.Level.ID);
-        //    if (con != null)
-        //        BroadcastExcept(gameMessage, con);
-        //}
-
         /// <summary>
         /// Broadcasts a message to all clients in a level, EXCEPT for the one specified
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
         /// <param name="recipient">Client NOT to send to</param>
-        //public void BroadcastExcept(IMessage gameMessage, NetConnection recipient)
-        //{
-        //    var message = EncodeMessage(gameMessage);
-        //
-        //    //Search for recipients
-        //    var recipients = NetServer.Connections.Where(
-        //        x => x.RemoteUniqueIdentifier != recipient.RemoteUniqueIdentifier &&
-        //             Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true) != null &&
-        //             Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true).Level != null &&
-        //             Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true).Level.ID ==
-        //             Server.PlayerFromRUI(recipient.RemoteUniqueIdentifier).Level.ID)
-        //        .ToList();
-        //
-        //    if (recipients.Count > 0) //Send to recipients found
-        //        NetServer.SendMessage(message, recipients, deliveryMethod, 0);
-        //}
-
         /// <summary>
         /// Broadcasts a message to all Players in a level
         /// </summary>
         /// <param name="Level">Level/Level to send to</param>
         /// <param name="gameMessage">IMessage to send</param>
-        //public void Broadcast(Level Level, IMessage gameMessage)
-        //{
-        //    var message = EncodeMessage(gameMessage);
-        //
-        //    //Search for recipients
-        //    var recipients = NetServer.Connections.Where(
-        //        x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true) != null &&
-        //             Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true).Level == Level)
-        //        .ToList();
-        //
-        //    if (recipients.Count > 0) //Send to recipients found
-        //        NetServer.SendMessage(message, recipients, deliveryMethod, 0);
-        //}
-
         /// <summary>
         /// Sends a message to all Players connected to the server
         /// </summary>
