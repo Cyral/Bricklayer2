@@ -32,7 +32,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             //Events
 
             //Listen for valid response from auth server
-            screen.Client.Events.Network.Auth.Init.AddHandler(OnInit, EventPriority.Initial);
+            screen.Client.Events.Network.Auth.InitReceived.AddHandler(OnInit, EventPriority.Initial);
 
             //Listen for failed login response from auth server
             screen.Client.Events.Network.Auth.FailedLogin.AddHandler(OnFailedLogin, EventPriority.Initial);
@@ -162,7 +162,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         protected override void Dispose(bool disposing)
         {
-            screen.Client.Events.Network.Auth.Init.RemoveHandler(OnInit);
+            screen.Client.Events.Network.Auth.InitReceived.RemoveHandler(OnInit);
             screen.Client.Events.Network.Auth.FailedLogin.RemoveHandler(OnFailedLogin);
             base.Dispose(disposing);
         }

@@ -32,7 +32,7 @@ namespace Bricklayer.Core.Client
             //Arguments define what values are passed to the event handler(s).
             #region Arguments
 
-            public class GameStateEventArgs : EventArgs
+            public class GameStateEventArgs : BricklayerEventArgs
             {
                 public GameState NewState { get; private set; }
                 public GameState OldState { get; private set; }
@@ -44,7 +44,7 @@ namespace Bricklayer.Core.Client
                 }
             }
 
-            public class GameScreenEventArgs : EventArgs
+            public class GameScreenEventArgs : BricklayerEventArgs
             {
                 public Screen NewScreen { get; private set; }
                 public Screen OldScreen { get; private set; }
@@ -98,7 +98,7 @@ namespace Bricklayer.Core.Client
                 //Arguments define what values are passed to the event handler(s).
                 #region Arguments
 
-                public class InitEventArgs : EventArgs
+                public class InitEventArgs : BricklayerEventArgs
                 {
                     public string UUID { get; private set; }
                     public string Username { get; private set; }
@@ -114,7 +114,7 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class FailedLoginEventArgs : EventArgs
+                public class FailedLoginEventArgs : BricklayerEventArgs
                 {
                     public string ErrorMessage { get; private set; }
 
@@ -124,7 +124,7 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class VerifiedEventArgs : EventArgs
+                public class VerifiedEventArgs : BricklayerEventArgs
                 {
                     public bool Verified { get; private set; }
 
@@ -134,11 +134,11 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class ModEventArgs : EventArgs
+                public class PluginDownloadEventArgs : BricklayerEventArgs
                 {
                     public PluginDownloadMessage Message { get; private set; }
 
-                    public ModEventArgs(PluginDownloadMessage message)
+                    public PluginDownloadEventArgs(PluginDownloadMessage message)
                     {
                         Message = message;
                     }
@@ -151,13 +151,13 @@ namespace Bricklayer.Core.Client
                 #region Events
 
                 /// <summary>
-                /// When client recieves Init message from Auth server
+                /// When client recieves Init message from Auth server, containing the user's name, UUID, and session key-pair.
                 /// </summary>
-                public Event<InitEventArgs> Init { get; } =
+                public Event<InitEventArgs> InitReceived { get; } =
                     new Event<InitEventArgs>();
 
                 /// <summary>
-                /// When client recieves a FailedLogin message from the Auth server
+                /// When client recieves a FailedLogin message from the Auth server, meaning invalid credentials.
                 /// </summary>
                 public Event<FailedLoginEventArgs> FailedLogin { get; } =
                     new Event<FailedLoginEventArgs>();
@@ -171,7 +171,7 @@ namespace Bricklayer.Core.Client
                 /// <summary>
                 /// When the auth server tells the client to download a mod. (From the install button on the website)
                 /// </summary>
-                public Event<ModEventArgs> PluginDownload { get; } = new Event<ModEventArgs>();
+                public Event<PluginDownloadEventArgs> PluginDownloadRequested { get; } = new Event<PluginDownloadEventArgs>();
 
 
                 #endregion
@@ -186,7 +186,7 @@ namespace Bricklayer.Core.Client
 
                 #region Arguments
 
-                public class DisconnectEventArgs : EventArgs
+                public class DisconnectEventArgs : BricklayerEventArgs
                 {
                     public string Reason { get; private set; }
 
@@ -196,13 +196,13 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class ConnectEventArgs : EventArgs
+                public class ConnectEventArgs : BricklayerEventArgs
                 {
                 }
 
-                public class InitEventArgs : EventArgs
+                public class InitEventArgs : BricklayerEventArgs
                 {
-                    public InitMessage Message;
+                    public InitMessage Message { get; private set; }
 
                     public InitEventArgs(InitMessage message)
                     {
@@ -210,7 +210,7 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class BannerEventArgs : EventArgs
+                public class BannerEventArgs : BricklayerEventArgs
                 {
                     public byte[] Banner { get; private set; }
 
@@ -220,7 +220,7 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class ServerInfoEventArgs : EventArgs
+                public class ServerInfoEventArgs : BricklayerEventArgs
                 {
                     public string Description { get; private set; }
                     public int Players { get; private set; }
@@ -237,7 +237,7 @@ namespace Bricklayer.Core.Client
                 }
 
 
-                public class LatencyUpdatedEventArgs : EventArgs
+                public class LatencyUpdatedEventArgs : BricklayerEventArgs
                 {
                     public float Ping { get; private set; }
 
@@ -257,17 +257,17 @@ namespace Bricklayer.Core.Client
                 /// <summary>
                 /// When the client is disconnected from the game server.
                 /// </summary>
-                public Event<DisconnectEventArgs> Disconnect { get; } = new Event<DisconnectEventArgs>();
+                public Event<DisconnectEventArgs> Disconnected { get; } = new Event<DisconnectEventArgs>();
 
                 /// <summary>
                 /// When the client is fully connected to a game server.
                 /// </summary>
-                public Event<ConnectEventArgs> Connect { get; } = new Event<ConnectEventArgs>();
+                public Event<ConnectEventArgs> Connected { get; } = new Event<ConnectEventArgs>();
 
                 /// <summary>
                 /// When an init message is recieved, containing list of levels and server info. (On connect and when reload button is pressed)
                 /// </summary>
-                public Event<InitEventArgs> Init { get; } = new Event<InitEventArgs>();
+                public Event<InitEventArgs> InitReceived { get; } = new Event<InitEventArgs>();
 
                 /// <summary>
                 /// When the connection latency (ping) is updated after a successful ping/pong message.
@@ -275,14 +275,14 @@ namespace Bricklayer.Core.Client
                 public Event<LatencyUpdatedEventArgs> LatencyUpdated { get; } = new Event<LatencyUpdatedEventArgs>();
 
                 /// <summary>
-                /// When server sends player info to display on serverlist
+                /// When server sends player info to display on serverlist.
                 /// </summary>
-                public Event<ServerInfoEventArgs> ServerInfo { get; } = new Event<ServerInfoEventArgs>();
+                public Event<ServerInfoEventArgs> ServerInfoReceived { get; } = new Event<ServerInfoEventArgs>();
 
                 /// <summary>
-                /// When server sends player lobby banner
+                /// When server sends player lobby banner.
                 /// </summary>
-                public Event<BannerEventArgs> LobbyBannerRecieved { get; } = new Event<BannerEventArgs>();
+                public Event<BannerEventArgs> LobbyBannerReceived { get; } = new Event<BannerEventArgs>();
 
                 #endregion
             }

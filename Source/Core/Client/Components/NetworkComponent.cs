@@ -51,8 +51,8 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         public override async Task Init()
         {
-            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Client.IO.Config.Client.AuthServerAddress),
-                Client.IO.Config.Client.AuthServerPort); //Find the address of the auth server
+            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress),
+                Globals.Values.DefaultAuthPort); //Find the address of the auth server
             TokenKeys = new Token();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
@@ -76,7 +76,7 @@ namespace Bricklayer.Core.Client.Components
             // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
             //Listen for init response from auth server containing token keys
-            Client.Events.Network.Auth.Init.AddHandler(args =>
+            Client.Events.Network.Auth.InitReceived.AddHandler(args =>
             {
                 TokenKeys.Username = args.Username;
                 TokenKeys.UUID = args.UUID;
@@ -201,9 +201,9 @@ namespace Bricklayer.Core.Client.Components
         /// Send Ping message to Auth server
         /// </summary>
         /// <param name="message"></param>
-        public void PingAuthMessage(string message)
+        public void PingAuthMessage(Response response, string info)
         {
-            SendUnconnected(AuthEndpoint, new PingAuthMessage(message));
+            SendUnconnected(AuthEndpoint, new PingAuthMessage(response, info));
         }
 
         /// <summary>

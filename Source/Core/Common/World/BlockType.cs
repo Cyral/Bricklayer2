@@ -66,7 +66,15 @@ namespace Bricklayer.Core.Common.World
         /// </summary>
         public static BlockType FromID(short ID)
         {
-            return Blocks.FirstOrDefault(x => x.ID == ID);
+            // ReSharper disable once ForCanBeConvertedToForeach
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            // For loop for optimization as this is called for every tile access
+            for (var i = 0; i < Blocks.Count; i++)
+            {
+                var x = Blocks[i];
+                if (x.ID == ID) return x;
+            }
+            return null;
         }
     }
 }

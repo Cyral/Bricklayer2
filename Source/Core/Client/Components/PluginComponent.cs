@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Net.Messages;
 using MonoForce.Controls;
 using Console = System.Console;
 
@@ -36,7 +37,7 @@ namespace Bricklayer.Core.Client.Components
 
             LoadPlugins();
 
-            Client.Events.Network.Auth.PluginDownload.AddHandler(args =>
+            Client.Events.Network.Auth.PluginDownloadRequested.AddHandler(args =>
             {
                 if (!PluginDownloadWindow.IsDownloading(args.Message.ID))
                 {
@@ -46,7 +47,7 @@ namespace Bricklayer.Core.Client.Components
                     Client.Window.Add(pluginWindow);
                     pluginWindow.Show();
 
-                    Client.Network.PingAuthMessage("GotPlugin");
+                    Client.Network.PingAuthMessage(Response.GotPlugin, args.Message.ID.ToString());
                 }
             });
 

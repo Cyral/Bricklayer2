@@ -49,13 +49,5 @@ namespace Bricklayer.Core.Common.Data
             Rating = rating;
             Plays = plays;
         }
-
-        /// <summary>
-        /// Creates a LobbySaveData instance from a Map
-        /// </summary>
-        //public static LobbySaveData FromMap(World.Map map)
-        //{
-        //    return new LobbySaveData(map.Name, map.ID, map.Description, map.Online, map.Plays, map.Rating);
-        //}
     }
 }

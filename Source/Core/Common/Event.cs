@@ -1,18 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 
 namespace Bricklayer.Core.Common
 {
-    public delegate void EventHandler<in TArgsType>(TArgsType args) where TArgsType : EventArgs;
+    public delegate void EventHandler<in TArgsType>(TArgsType args) where TArgsType : BricklayerEventArgs;
+
+    /// <summary>
+    /// Event arguments for Bricklayer events.
+    /// </summary>
+    public class BricklayerEventArgs : EventArgs
+    {
+        /// <summary>
+        /// True if the event has been cancelled and should not continue to execute.
+        /// </summary>
+        /// <remarks>
+        /// Plugins can ignore this property by setting ignoreCancel to true when registering an event.
+        /// </remarks>
+        public bool Cancelled { get; set; }
+
+        public BricklayerEventArgs()
+        {
+            Cancelled = false;
+        }
+    }
 
     /// <summary>
     /// Represents a collection of event handlers for a certain game event.
     /// </summary>
     /// <typeparam name="THandler">The type of delegate each handler must be.</typeparam>
     /// <typeparam name="TArgs">The type of arguments for the handler.</typeparam>
-    public class Event<TArgs> where TArgs : EventArgs
+    public class Event<TArgs> where TArgs : BricklayerEventArgs
     {
         private readonly List<PrioritizedEventHandler<TArgs>> handlers;
 
@@ -32,12 +52,13 @@ namespace Bricklayer.Core.Common
         /// The priority order of this handler. LOWER priorities are called FIRST, and higher priorities are
         /// called last.
         /// </param>
+        /// <param name="ignoreCancel">If true, the handler will be executed even if a previous handler cancelled the event.</param>
         /// <remarks>
         /// For information on the priority ordering system, see <c>Priority</c>.
         /// </remarks>
-        public void AddHandler(EventHandler<TArgs> handler, EventPriority priority = EventPriority.Normal)
+        public void AddHandler(EventHandler<TArgs> handler, EventPriority priority = EventPriority.Normal, bool ignoreCancel = false)
         {
-            handlers.Add(new PrioritizedEventHandler<TArgs>(handler, priority));
+            handlers.Add(new PrioritizedEventHandler<TArgs>(handler, priority, ignoreCancel));
             handlers.Sort((a, b) => ((int)a.Priority).CompareTo((int)b.Priority)); //Sort by priority
         }
 
@@ -52,7 +73,8 @@ namespace Bricklayer.Core.Common
                 if (i < handlers.Count - 1)
                     Debug.Assert(handlers[i].Priority <= handlers[i + 1].Priority);
 
-                handlers[i].Event(args);
+                if (!args.Cancelled || handlers[i].IgnoreCancel)
+                    handlers[i].Event(args);
             }
         }
 
@@ -79,7 +101,7 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// Represents an event handler and priority.
         /// </summary>
-        private class PrioritizedEventHandler<TArgsType> where TArgsType : EventArgs
+        private class PrioritizedEventHandler<TArgsType> where TArgsType : BricklayerEventArgs
         {
             /// <summary>
             /// The delegate/action associated with this event handler.
@@ -91,10 +113,16 @@ namespace Bricklayer.Core.Common
             /// </summary>
             public EventPriority Priority { get; }
 
-            public PrioritizedEventHandler(EventHandler<TArgsType> handler, EventPriority priority)
+            /// <summary>
+            /// If true, the handler will be executed even if a previous handler cancelled the event.
+            /// </summary>
+            public bool IgnoreCancel { get; }
+
+            public PrioritizedEventHandler(EventHandler<TArgsType> handler, EventPriority priority, bool ignoreCancel = false)
             {
                 Event = handler;
                 Priority = priority;
+                IgnoreCancel = ignoreCancel;
             }
         }
 

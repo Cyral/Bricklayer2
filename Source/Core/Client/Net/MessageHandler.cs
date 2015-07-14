@@ -44,13 +44,13 @@ namespace Bricklayer.Core.Client.Net
                 case MessageTypes.Init:
                 {
                     var msg = new InitMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.Init.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
+                    networkManager.Client.Events.Network.Game.InitReceived.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
                     break;
                 }
                 case MessageTypes.Banner:
                 {
                     var msg = new BannerMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.LobbyBannerRecieved.Invoke(new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
+                    networkManager.Client.Events.Network.Game.LobbyBannerReceived.Invoke(new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
                     break;
                 }
             }
@@ -65,7 +65,7 @@ namespace Bricklayer.Core.Client.Net
 
             //Make sure the unconnected message is coming from the real auth server.
             if (Equals(im.SenderEndPoint, networkManager.AuthEndpoint) &&
-                im.SenderEndPoint.Port == networkManager.Client.IO.Config.Client.AuthServerPort)
+                im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
             {
                 var messageType = (MessageTypes) im.ReadByte(); //Find the type of data message sent
                 switch (messageType)
@@ -73,7 +73,7 @@ namespace Bricklayer.Core.Client.Net
                     case MessageTypes.AuthInit:
                     {
                         var msg = new AuthInitMessage(im, MessageContext.Client);
-                        networkManager.Client.Events.Network.Auth.Init.Invoke(
+                        networkManager.Client.Events.Network.Auth.InitReceived.Invoke(
                             new EventManager.NetEvents.AuthServerEvents.InitEventArgs(msg.Username, msg.UUID,
                                 msg.PrivateKey,
                                 msg.PublicKey));
@@ -96,8 +96,8 @@ namespace Bricklayer.Core.Client.Net
                     case MessageTypes.PluginDownload:
                     {
                         var msg = new PluginDownloadMessage(im, MessageContext.Client);
-                        networkManager.Client.Events.Network.Auth.PluginDownload.Invoke(
-                            new EventManager.NetEvents.AuthServerEvents.ModEventArgs(msg));
+                        networkManager.Client.Events.Network.Auth.PluginDownloadRequested.Invoke(
+                            new EventManager.NetEvents.AuthServerEvents.PluginDownloadEventArgs(msg));
                         break;
                     }
                 }
@@ -111,7 +111,7 @@ namespace Bricklayer.Core.Client.Net
                     {
                         var msg = new ServerInfoMessage(im, MessageContext.Client);
 
-                        networkManager.Client.Events.Network.Game.ServerInfo.Invoke(
+                        networkManager.Client.Events.Network.Game.ServerInfoReceived.Invoke(
                             new EventManager.NetEvents.GameServerEvents.ServerInfoEventArgs(msg.Description, msg.Players,
                                 msg.MaxPlayers, im.SenderEndPoint));
                         break;
@@ -155,7 +155,7 @@ namespace Bricklayer.Core.Client.Net
                                 {
                                     case NetConnectionStatus.None:
                                     {
-                                        networkManager.Client.Events.Network.Game.Disconnect.Invoke(
+                                        networkManager.Client.Events.Network.Game.Disconnected.Invoke(
                                             new EventManager.NetEvents.GameServerEvents.DisconnectEventArgs(
                                                 "Error connecting to the server."));
                                         break;
@@ -168,17 +168,17 @@ namespace Bricklayer.Core.Client.Net
                                         var msg = new InitMessage(im.SenderConnection.RemoteHailMessage,
                                             MessageContext.Client);
                                         //Fire connect event
-                                        networkManager.Client.Events.Network.Game.Connect.Invoke(
+                                        networkManager.Client.Events.Network.Game.Connected.Invoke(
                                             new EventManager.NetEvents.GameServerEvents.ConnectEventArgs());
                                         //And init message with actual data
-                                        networkManager.Client.Events.Network.Game.Init.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
+                                        networkManager.Client.Events.Network.Game.InitReceived.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
                                         break;
                                     }
                                     //When disconnected from the server
                                     case NetConnectionStatus.Disconnected:
                                     {
                                         var reason = im.ReadString();
-                                        networkManager.Client.Events.Network.Game.Disconnect.Invoke(
+                                        networkManager.Client.Events.Network.Game.Disconnected.Invoke(
                                             new EventManager.NetEvents.GameServerEvents.DisconnectEventArgs(reason));
                                         break;
                                     }

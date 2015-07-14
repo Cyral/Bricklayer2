@@ -52,7 +52,7 @@ namespace Bricklayer.Client.Interface
             ScreenManager = new ScreenManager(this);
             ScreenManager.SwitchScreen(new LoginScreen());
 
-            Client.Events.Network.Auth.Init.AddHandler(args =>
+            Client.Events.Network.Auth.InitReceived.AddHandler(args =>
             {
                 ScreenManager.SwitchScreen(new ServerScreen());
             });

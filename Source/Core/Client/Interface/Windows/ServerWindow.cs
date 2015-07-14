@@ -134,10 +134,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(btnRefresh);
 
             // Listen for when init message is recieved
-            screen.Client.Events.Network.Game.Init.AddHandler(OnInit);
+            screen.Client.Events.Network.Game.InitReceived.AddHandler(OnInit);
 
             // If user was disconnected from the server
-            screen.Client.Events.Network.Game.Disconnect.AddHandler(OnDisconnect);
+            screen.Client.Events.Network.Game.Disconnected.AddHandler(OnDisconnect);
         }
 
         private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
@@ -158,8 +158,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         protected override void Dispose(bool disposing)
         {
-            screen.Client.Events.Network.Game.Init.RemoveHandler(OnInit);
-            screen.Client.Events.Network.Game.Disconnect.RemoveHandler(OnDisconnect);
+            screen.Client.Events.Network.Game.InitReceived.RemoveHandler(OnInit);
+            screen.Client.Events.Network.Game.Disconnected.RemoveHandler(OnDisconnect);
             base.Dispose(disposing);
         }
 
