@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
@@ -24,6 +25,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private ImageBox BodyImg, SmileyImg;
         private ColorPicker bodyClr;
         private LoginScreen screen;
+        private readonly ControlList<ChatDataControl> lstServers;
 
         public LoginWindow(Manager manager, LoginScreen screen) : base(manager)
         {

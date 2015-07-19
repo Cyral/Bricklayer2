@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
@@ -88,6 +89,9 @@ namespace Bricklayer.Core.Client.Interface.Screens
             if (wndLogin.Top < imgLogo.Top + imgLogo.Height + 8)
                 wndLogin.Top = imgLogo.Top + imgLogo.Height + 24;
             Window.Add(wndLogin);
+
+            var control = new ChatDataControl("Test Chat", screenManager.Manager);
+            Window.Add(control);
         }
 
         /// <summary>
