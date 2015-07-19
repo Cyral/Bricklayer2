@@ -1,4 +1,5 @@
 ﻿using System;
+using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Data
 {
@@ -10,6 +11,8 @@ namespace Bricklayer.Core.Common.Data
     /// </remarks>
     public class LevelData
     {
+        private NetIncomingMessage im;
+
         /// <summary>
         /// The name of this level.
         /// </summary>
@@ -54,6 +57,33 @@ namespace Bricklayer.Core.Common.Data
             Online = players;
             Rating = rating;
             Plays = plays;
+        }
+
+        internal LevelData(NetIncomingMessage im)
+        {
+            Creator = new PlayerData(im.ReadString(), Guid.Parse(im.ReadString()));
+            Name = im.ReadString();
+            UUID = Guid.Parse(im.ReadString());
+            Description = im.ReadString();
+            Online = im.ReadByte();
+            Plays = im.ReadInt16();
+            Rating = im.ReadDouble();
+        }
+
+
+        /// <summary>
+        /// Writes the relevant level data to a messgae.
+        /// </summary>
+        internal virtual void Encode(NetOutgoingMessage om)
+        {
+            om.Write(Creator.Username);
+            om.Write(Creator.UUID.ToString());
+            om.Write(Name);
+            om.Write(UUID.ToString());
+            om.Write(Description);
+            om.Write((byte)Online);
+            om.Write((short)Plays);
+            om.Write(Rating);
         }
     }
 }

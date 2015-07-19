@@ -10,11 +10,12 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// <summary>
     /// Send response to Auth server
     /// Client => Auth Server
-    /// String: Response
+    /// Byte: Response Type
+    /// String: Data
     /// </summary>
     public class PingAuthMessage : IMessage
     {
-        public Response Response { get; set; }
+        public PingResponse Response { get; set; }
         public string Info { get; set; }
 
         public PingAuthMessage(NetIncomingMessage im, MessageContext context)
@@ -23,7 +24,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public PingAuthMessage(Response response, string info)
+        public PingAuthMessage(PingResponse response, string info)
         {
             Response = response;
             Info = info;
@@ -36,7 +37,7 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
-            Response = (Response)im.ReadByte();
+            Response = (PingResponse)im.ReadByte();
             Info = im.ReadString();
         }
 
@@ -46,11 +47,11 @@ namespace Bricklayer.Core.Common.Net.Messages
             om.Write(Info);
         }
 
-        #endregion
-    }
+        public enum PingResponse : byte
+        {
+            GotPlugin
+        }
 
-    public enum Response : byte
-    {
-        GotPlugin
+        #endregion
     }
 }

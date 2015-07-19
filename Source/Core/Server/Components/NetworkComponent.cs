@@ -129,7 +129,7 @@ namespace Bricklayer.Core.Server.Components
                 }
             });
 
-            //When a client loads their server list and requests server informatin, such as description, players online, etc.
+            //When a client loads their server list and requests server information, such as description, players online, etc.
             Server.Events.Network.InfoRequested.AddHandler(
                 args =>
                 {
@@ -144,11 +144,21 @@ namespace Bricklayer.Core.Server.Components
                     //Create the new level
                     var level = await Server.CreateLevel(args.Sender, args.Name, args.Description);
                     Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" created by {level.Creator.Username}");
+                    Send(new LevelDataMessage(level), args.Sender);
                     //Fire another event with the newly created level, so that plugins can access it.
                     //(As the current event is only from the network message)
                     Server.Events.Game.Levels.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
 
                 }, EventPriority.InternalFinal); //Must be the last event called as it fires another event
+
+            Server.Events.Network.JoinLevelMessageRecieved.AddHandler(
+                async args =>
+                {
+                    //Create the new level
+                    var level = await Server.JoinLevel(args.Sender, args.UUID);
+                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {level.Creator.Username}");
+                    Send(new LevelDataMessage(level), args.Sender);
+                }, EventPriority.InternalFinal); 
 
             Server.Events.Network.UserConnected.AddHandler(args =>
             {

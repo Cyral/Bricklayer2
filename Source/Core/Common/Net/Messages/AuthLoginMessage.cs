@@ -13,7 +13,6 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class AuthLoginMessage : IMessage
     {
-        public double MessageTime { get; set; }
         public string Password { get; set; }
         public string Username { get; set; }
         public Version Version { get; set; }
@@ -29,7 +28,6 @@ namespace Bricklayer.Core.Common.Net.Messages
             Version = version;
             Username = username;
             Password = password;
-            MessageTime = NetTime.Now;
         }
 
         #region IMessage Members

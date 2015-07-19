@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using Bricklayer.Core.Client.Components;
+using Bricklayer.Core.Client.World;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
@@ -51,6 +52,12 @@ namespace Bricklayer.Core.Client.Net
                 {
                     var msg = new BannerMessage(im, MessageContext.Client);
                     networkManager.Client.Events.Network.Game.LobbyBannerReceived.Invoke(new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
+                    break;
+                }
+                case MessageTypes.LevelData:
+                {
+                    var msg = new LevelDataMessage(im, MessageContext.Client);
+                    networkManager.Client.Events.Network.Game.LevelDataReceived.Invoke(new EventManager.NetEvents.GameServerEvents.LevelDataEventArgs(new Level(msg.Level)));
                     break;
                 }
             }

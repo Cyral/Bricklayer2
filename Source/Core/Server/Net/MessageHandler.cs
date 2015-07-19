@@ -200,6 +200,13 @@ namespace Bricklayer.Core.Server.Net
                             new EventManager.NetEvents.CreateLevelEventArgs(sender, msg.Name, msg.Description));
                         break;
                     }
+                    case MessageTypes.JoinLevel:
+                    {
+                        var msg = new JoinLevelMessage(inc, MessageContext.Server);
+                        Server.Events.Network.JoinLevelMessageRecieved.Invoke(
+                            new EventManager.NetEvents.JoinLevelEventArgs(sender, msg.UUID));
+                        break;
+                    }
                 }
             }
         }

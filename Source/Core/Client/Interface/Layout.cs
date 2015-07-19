@@ -34,7 +34,6 @@ namespace Bricklayer.Client.Interface
         {
             DefaultSpriteFont = Manager.Skin.Fonts["Default8"].Resource;
             Client = client;
-            ElapsedTime = TimeSpan.Zero;
 
             //Make the window full size, without any border, disallow resize and move, etc., to use the entire screen size.
             ClearBackground = true;

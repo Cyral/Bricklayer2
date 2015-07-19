@@ -1,6 +1,8 @@
-﻿using Bricklayer.Client.Interface;
+﻿using System;
+using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Windows;
+using Bricklayer.Core.Client.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
@@ -64,6 +66,11 @@ namespace Bricklayer.Core.Client
         public Manager UI { get; }
 
         /// <summary>
+        /// The current level.
+        /// </summary>
+        public Level Level { get; internal set; }
+
+        /// <summary>
         /// The main window, which is the root of all UI controls.
         /// </summary>
         public new MainWindow Window { get; private set; }
@@ -84,15 +91,24 @@ namespace Bricklayer.Core.Client
         {
             Events = new EventManager();
             Graphics = new GraphicsDeviceManager(this);
-            IsFixedTimeStep = true;
+            IsFixedTimeStep = false;
+            Graphics.SynchronizeWithVerticalRetrace = false;
+
+            AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
 
             //Create the manager for MonoForce UI
             UI = new Manager(this, "Bricklayer")
             {
+                TargetFrames = 100,
                 AutoCreateRenderTarget = true,
                 LogUnhandledExceptions = false,
                 ShowSoftwareCursor = true
             };
+        }
+
+        private void LogUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            //TODO: Save to a file (not important until later)
         }
 
         /// <summary>
@@ -103,8 +119,6 @@ namespace Bricklayer.Core.Client
         {
             UI.BeginDraw(gameTime);
             GraphicsDevice.Clear(Color.Black);
-
-            // TODO: Add your drawing code here
 
             UI.EndDraw();
             base.Draw(gameTime);

@@ -26,13 +26,6 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public PluginDownloadMessage(int id, string modName, string fileName)
-        {
-            ID = id;
-            ModName = modName;
-            FileName = fileName;
-        }
-
         #region IMessage Members
 
         public MessageContext Context { get; set; }

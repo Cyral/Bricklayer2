@@ -5,8 +5,10 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.World;
+using Bricklayer.Core.Server.World;
 using Bricklayer.Core.Server.Components;
 using Pyratron.Frameworks.Commands.Parser;
+using Level = Bricklayer.Core.Server.World.Level;
 
 namespace Bricklayer.Core.Server
 {
@@ -134,11 +136,29 @@ namespace Bricklayer.Core.Server
             // ReSharper disable once FunctionNeverReturns
         }
 
+
+        /// <summary>
+        /// Makes a player join the level with the specified UUID. If the level is not open, it will be loaded.
+        /// </summary>
+        /// <remarks>
+        /// It is up to the method caller to send a message to the sender with the level data.
+        /// </remarks>
+        public async Task<Level> JoinLevel(Player sender, Guid uuid)
+        {
+            //TODO: Implement level loading/saving from disk
+            var level = new Level(sender, "Test", Guid.NewGuid(), "Test", 0, 2.5);
+            level.Players.Add(sender);
+
+            Levels.Add(level);
+
+            return level;
+        }
+
         /// <summary>
         /// Creates a level with the specified name and description, and the sender as the owner.
         /// </summary>
         /// <remarks>
-        /// It is up to the caller to send a message to the sender with the level data.
+        /// It is up to the method caller to send a message to the sender with the level data.
         /// </remarks>
         public async Task<Level> CreateLevel(Player sender, string name, string description)
         {

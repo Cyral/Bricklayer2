@@ -197,12 +197,11 @@ namespace Bricklayer.Core.Client.Components
             gameMessage.Encode(message);
             return message;
         }
-
+        
         /// <summary>
-        /// Send Ping message to Auth server
+        /// Send ping message to auth server. (Usually used for letting it know it recieved a message)
         /// </summary>
-        /// <param name="message"></param>
-        public void PingAuthMessage(Response response, string info)
+        public void PingAuthMessage(PingAuthMessage.PingResponse response, string info)
         {
             SendUnconnected(AuthEndpoint, new PingAuthMessage(response, info));
         }

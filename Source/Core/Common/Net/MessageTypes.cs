@@ -19,6 +19,8 @@
         Request,
         Banner,
         PluginDownload,
-        PingAuth
+        PingAuth,
+        LevelData,
+        JoinLevel,
     }
 }
