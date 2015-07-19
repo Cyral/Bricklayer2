@@ -15,17 +15,10 @@ namespace Bricklayer.Core.Common.Net.Messages
     public class SessionMessage : IMessage
     {
         public IPAddress Address { get; set; }
-        public double MessageTime { get; set; }
         public int Port { get; set; }
         public string PrivateKey { get; set; }
         public string Username { get; set; }
         public string UUID { get; set; }
-
-        public SessionMessage(NetIncomingMessage im, MessageContext context)
-        {
-            Context = context;
-            Decode(im);
-        }
 
         public SessionMessage(string username, Guid uuid, string privateKey, IPAddress address, int port)
         {
@@ -34,7 +27,6 @@ namespace Bricklayer.Core.Common.Net.Messages
             PrivateKey = privateKey;
             Address = address;
             Port = port;
-            MessageTime = NetTime.Now;
         }
 
         #region IMessage Members

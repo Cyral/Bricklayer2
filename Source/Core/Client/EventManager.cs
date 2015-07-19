@@ -5,6 +5,7 @@ using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net.Messages;
+using Bricklayer.Core.Common.World;
 
 namespace Bricklayer.Core.Client
 {
@@ -199,6 +200,16 @@ namespace Bricklayer.Core.Client
                 {
                 }
 
+                public class LevelDataEventArgs : BricklayerEventArgs
+                {
+                    public World.Level Level { get; private set; }
+
+                    public LevelDataEventArgs(World.Level level)
+                    {
+                        Level = level;
+                    }
+                }
+
                 public class InitEventArgs : BricklayerEventArgs
                 {
                     public InitMessage Message { get; private set; }
@@ -282,6 +293,11 @@ namespace Bricklayer.Core.Client
                 /// When server sends player lobby banner.
                 /// </summary>
                 public Event<BannerEventArgs> LobbyBannerReceived { get; } = new Event<BannerEventArgs>();
+
+                /// <summary>
+                /// When level is received from the server. (Tile data, name, description, etc.)
+                /// </summary>
+                public Event<LevelDataEventArgs> LevelDataReceived { get; } = new Event<LevelDataEventArgs>(); 
 
                 #endregion
             }

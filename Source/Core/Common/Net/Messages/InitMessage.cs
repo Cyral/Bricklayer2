@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common.Data;
+using Bricklayer.Core.Common.World;
 using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
@@ -14,12 +15,11 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class InitMessage : IMessage
     {
-        public double MessageTime { get; set; }
         public string ServerName { get; set; }
         public string Description { get; set; }
         public string Intro { get; set; }
-        public int Online { get; set; }
-        public List<LevelData> Levels { get; set; }
+        public int Online { get; private set; }
+        public List<LevelData> Levels { get; }
 
         public InitMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -35,7 +35,6 @@ namespace Bricklayer.Core.Common.Net.Messages
             Intro = intro;
             Levels = levels;
             Online = (byte)online;
-            MessageTime = NetTime.Now;
         }
 
 
@@ -53,7 +52,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             int levelsLength = im.ReadByte();
             for (var i = 0; i < levelsLength; i++)
             {
-                Levels.Add(new LevelData(new PlayerData(im.ReadString(), Guid.Parse(im.ReadString())), im.ReadString(), Guid.Parse(im.ReadString()), im.ReadString(), im.ReadByte(), im.ReadInt16(), im.ReadDouble()));
+                Levels.Add(new LevelData(im)); //The level class will handle decoding the message
             }
         }
 
@@ -64,16 +63,10 @@ namespace Bricklayer.Core.Common.Net.Messages
             om.Write(Intro);
             om.Write(Online);
             om.Write((byte)Levels.Count);
+
             foreach (var data in Levels)
             {
-                om.Write(data.Creator.Username);
-                om.Write(data.Creator.UUID.ToString());
-                om.Write(data.Name);
-                om.Write(data.UUID.ToString());
-                om.Write(data.Description);
-                om.Write((byte)data.Online);
-                om.Write((short)data.Plays);
-                om.Write(data.Rating);
+                data.Encode(om);
             }
         }
 

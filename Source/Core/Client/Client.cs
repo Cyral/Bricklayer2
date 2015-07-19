@@ -1,6 +1,7 @@
 ﻿using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Windows;
+using Bricklayer.Core.Client.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
@@ -62,6 +63,11 @@ namespace Bricklayer.Core.Client
         /// The MonoForce UI manager.
         /// </summary>
         public Manager UI { get; }
+
+        /// <summary>
+        /// The current level.
+        /// </summary>
+        public Level Level { get; internal set; }
 
         /// <summary>
         /// The main window, which is the root of all UI controls.

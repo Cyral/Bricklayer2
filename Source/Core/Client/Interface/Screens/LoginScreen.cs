@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Bricklayer.Core.Client.Interface.Windows;
-using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
@@ -8,12 +7,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
 {
     internal class LoginScreen : Screen
     {
+        protected internal override GameState State => GameState.Login;
         //Controls
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
         private Label lblVersion;
         private LoginWindow wndLogin;
-
-        protected internal override GameState State => GameState.Login;
 
         /// <summary>
         /// Setup the login and serverlist screen content and controls.
@@ -62,10 +60,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
             {
                 Image = Client.Content["gui.icons.pyratron"],
                 SizeMode = SizeMode.Auto,
-                ToolTip = { Text = "Visit Pyratron Studios." }
+                ToolTip = {Text = "Visit Pyratron Studios."}
             };
             imgPyratron.SetSize(imgPyratron.Width, imgPyratron.Height);
-            imgPyratron.SetPosition(Window.Width - imgGithub.Width - 16 - imgPyratron.Width, Window.Height - imgPyratron.Height - 8);
+            imgPyratron.SetPosition(Window.Width - imgGithub.Width - 16 - imgPyratron.Width,
+                Window.Height - imgPyratron.Height - 8);
             imgPyratron.Init();
             imgPyratron.Color = Color.White * .9f;
             imgPyratron.MouseOut += (sender, args) => imgPyratron.Color = Color.White * .9f;

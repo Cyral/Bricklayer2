@@ -11,6 +11,7 @@ using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
+using Console = System.Console;
 using EventArgs = MonoForce.Controls.EventArgs;
 
 namespace Bricklayer.Core.Client.Interface.Windows
@@ -141,6 +142,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
                     lblDescription.Top = 8 + lblName.Bottom;
                     lblInfo.Top = 8 + lblDescription.Bottom;
                 }
+            });
+
+            // When client receives level data after joining/creating a level
+            screen.Client.Events.Network.Game.LevelDataReceived.AddHandler(args =>
+            {
+                screen.Client.Level = args.Level;
             });
 
             //Server info labels
