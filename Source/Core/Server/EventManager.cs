@@ -197,6 +197,21 @@ namespace Bricklayer.Core.Server
                 }
             }
 
+            public class JoinLevelEventArgs : BricklayerEventArgs
+            {
+                public Player Sender { get; private set; }
+
+                /// <summary>
+                /// The UUID of the level requested to join.
+                /// </summary>
+                public Guid UUID { get; private set; }
+
+                public JoinLevelEventArgs(Player sender, Guid uuid)
+                {
+                    UUID = uuid;
+                }
+            }
+
             public class CreateLevelEventArgs : BricklayerEventArgs
             {
                 public string Description { get; private set; }
@@ -249,7 +264,12 @@ namespace Bricklayer.Core.Server
             public Event<RequestMessageEventArgs> MessageRequested { get; } = new Event<RequestMessageEventArgs>();
 
             /// <summary>
-            /// When the server receives a request to create a new level.
+            /// When the server receives a request from a player to join a level.
+            /// </summary>
+            public Event<JoinLevelEventArgs> JoinLevelMessageRecieved { get; } = new Event<JoinLevelEventArgs>();
+
+            /// <summary>
+            /// When the server receives a request from a player to create a new level.
             /// </summary>
             public Event<CreateLevelEventArgs> CreateLevelMessageRecieved { get; } = new Event<CreateLevelEventArgs>();
 

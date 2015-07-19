@@ -119,37 +119,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lstLevels.Init();
             grpLobby.Add(lstLevels);
 
-            // When client gets banner data from server
-            screen.Client.Events.Network.Game.LobbyBannerReceived.AddHandler(args =>
-            {
-                bannerInfo = args.Banner;
-                //Convert byte array to stream to be read
-                var stream = new MemoryStream(bannerInfo);
-                var image = Texture2D.FromStream(screen.Client.GraphicsDevice, stream);
-
-                if (image.Height <= Globals.Values.MaxBannerHeight && image.Width <= Globals.Values.MaxBannerWidth)
-                {
-                    imgBanner = new ImageBox(Manager)
-                    {
-                        Image = image,
-                    };
-                    imgBanner.Init();
-                    imgBanner.SetPosition((grpServer.Width / 2) - (imgBanner.Image.Width / 2), 0);
-                    imgBanner.SetSize(image.Width, image.Height);
-                    grpServer.Add(imgBanner);
-
-                    lblName.Top = imgBanner.Bottom + 8;
-                    lblDescription.Top = 8 + lblName.Bottom;
-                    lblInfo.Top = 8 + lblDescription.Bottom;
-                }
-            });
-
-            // When client receives level data after joining/creating a level
-            screen.Client.Events.Network.Game.LevelDataReceived.AddHandler(args =>
-            {
-                screen.Client.Level = args.Level;
-            });
-
             //Server info labels
             lblName = new Label(Manager)
             {
@@ -213,22 +182,51 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             BottomPanel.Add(btnDisconnect);
 
-            screen.Client.Events.Network.Game.InitReceived.AddHandler(OnInit);
+            // When client gets banner data from server
+            screen.Client.Events.Network.Game.LobbyBannerReceived.AddHandler(LobbyBannerReceived);
+
+            // When client receives level data after joining/creating a level
+            screen.Client.Events.Network.Game.LevelDataReceived.AddHandler(LevelDataReceived);
 
             LoadLevels();
 
             screen.Client.Network.Send(new RequestMessage(MessageTypes.Banner));
         }
 
-        private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
+        private void LevelDataReceived(EventManager.NetEvents.GameServerEvents.LevelDataEventArgs args)
         {
-            lobbyScreen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
-               args.Message.Intro, args.Message.Online, args.Message.Levels));
+            lobbyScreen.Client.Level = args.Level;
+            lobbyScreen.ScreenManager.SwitchScreen(new GameScreen());
+        }
+
+        private void LobbyBannerReceived(EventManager.NetEvents.GameServerEvents.BannerEventArgs args)
+        {
+            bannerInfo = args.Banner;
+            //Convert byte array to stream to be read
+            var stream = new MemoryStream(bannerInfo);
+            var image = Texture2D.FromStream(lobbyScreen.Client.GraphicsDevice, stream);
+
+            if (image.Height <= Globals.Values.MaxBannerHeight && image.Width <= Globals.Values.MaxBannerWidth)
+            {
+                imgBanner = new ImageBox(Manager)
+                {
+                    Image = image,
+                };
+                imgBanner.Init();
+                imgBanner.SetPosition((grpServer.Width / 2) - (imgBanner.Image.Width / 2), 0);
+                imgBanner.SetSize(image.Width, image.Height);
+                grpServer.Add(imgBanner);
+
+                lblName.Top = imgBanner.Bottom + 8;
+                lblDescription.Top = 8 + lblName.Bottom;
+                lblInfo.Top = 8 + lblDescription.Bottom;
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
-            lobbyScreen.Client.Events.Network.Game.InitReceived.RemoveHandler(OnInit);
+            lobbyScreen.Client.Events.Network.Game.LobbyBannerReceived.RemoveHandler(LobbyBannerReceived);
+            lobbyScreen.Client.Events.Network.Game.LevelDataReceived.RemoveHandler(LevelDataReceived);
             base.Dispose(disposing);
         }
 
@@ -239,11 +237,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         {
             if (index >= 0)
             {
-                //MainWindow.ScreenManager.SwitchScreen(new Screen(new Action((new Action(() =>
-                //{
-                // screen.Client.Network.Send(new Bricklayer.Common.Networking.Messages.JoinLevelMessage(
-                //     (LevelListCtrl.Items[index] as LobbyDataControl).Data.ID));
-                // })))));
+                lobbyScreen.Client.Network.Send(new Bricklayer.Core.Common.Net.Messages.JoinLevelMessage(((LobbyDataControl)lstLevels.Items[index]).Data.UUID));
             }
         }
 

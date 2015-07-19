@@ -151,6 +151,15 @@ namespace Bricklayer.Core.Server.Components
 
                 }, EventPriority.InternalFinal); //Must be the last event called as it fires another event
 
+            Server.Events.Network.JoinLevelMessageRecieved.AddHandler(
+                async args =>
+                {
+                    //Create the new level
+                    var level = await Server.JoinLevel(args.Sender, args.UUID);
+                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {level.Creator.Username}");
+                    Send(new LevelDataMessage(level), args.Sender);
+                }, EventPriority.InternalFinal); 
+
             Server.Events.Network.UserConnected.AddHandler(args =>
             {
                 Logger.WriteLine(LogType.Normal, ConsoleColor.Green, $"Player \"{args.Player.Username}\" has connected.");

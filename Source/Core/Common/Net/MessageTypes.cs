@@ -21,5 +21,6 @@
         PluginDownload,
         PingAuth,
         LevelData,
+        JoinLevel,
     }
 }

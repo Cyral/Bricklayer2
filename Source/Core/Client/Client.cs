@@ -1,4 +1,5 @@
-﻿using Bricklayer.Client.Interface;
+﻿using System;
+using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Client.World;
@@ -90,15 +91,24 @@ namespace Bricklayer.Core.Client
         {
             Events = new EventManager();
             Graphics = new GraphicsDeviceManager(this);
-            IsFixedTimeStep = true;
+            IsFixedTimeStep = false;
+            Graphics.SynchronizeWithVerticalRetrace = false;
+
+            AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
 
             //Create the manager for MonoForce UI
             UI = new Manager(this, "Bricklayer")
             {
+                TargetFrames = 100,
                 AutoCreateRenderTarget = true,
                 LogUnhandledExceptions = false,
                 ShowSoftwareCursor = true
             };
+        }
+
+        private void LogUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            //TODO: Save to a file (not important until later)
         }
 
         /// <summary>
@@ -109,8 +119,6 @@ namespace Bricklayer.Core.Client
         {
             UI.BeginDraw(gameTime);
             GraphicsDevice.Clear(Color.Black);
-
-            // TODO: Add your drawing code here
 
             UI.EndDraw();
             base.Draw(gameTime);
