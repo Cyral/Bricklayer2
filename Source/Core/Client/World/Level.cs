@@ -6,6 +6,14 @@ namespace Bricklayer.Core.Client.World
 {
     public class Level : Common.World.Level
     {
+        /// <summary>
+        /// The main camera to follow the player
+        /// </summary>
+        public Camera Camera { get; set; }
+
+        private static readonly float cameraSpeed = .18f;
+        private static readonly float cameraParallax = .9f;
+
         public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating) : base(creator, name, uuid, description, plays, rating)
         {
 

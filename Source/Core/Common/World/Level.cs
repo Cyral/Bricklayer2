@@ -60,14 +60,14 @@ namespace Bricklayer.Core.Common.World
             Width = 1000;
             Height = 500;
             Tiles = new Tile[Width, Height, 2];
-            Spawn = new Vector2(1, 1);
+            Spawn = new Vector2(Tile.Width, Tile.Height);
             random = new Random();
         }
 
         internal Level(NetIncomingMessage im) : base(im)
         {
             Players = new List<Player>();
-            Spawn = new Vector2(1, 1);
+            Spawn = new Vector2(Tile.Width, Tile.Height);
             random = new Random();
 
             //Read the tile data
