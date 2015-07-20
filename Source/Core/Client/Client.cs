@@ -208,7 +208,6 @@ namespace Bricklayer.Core.Client
         protected override void Update(GameTime gameTime)
         {
             UI.Update(gameTime);
-            Input.Update();
             base.Update(gameTime);
         }
 

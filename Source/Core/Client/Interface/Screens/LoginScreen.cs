@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Windows;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
@@ -13,6 +15,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
         private Label lblVersion;
         private LoginWindow wndLogin;
+
+
 
         /// <summary>
         /// Setup the login and serverlist screen content and controls.
@@ -89,8 +93,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 wndLogin.Top = imgLogo.Top + imgLogo.Height + 24;
             Window.Add(wndLogin);
 
-            var control = new ChatDataControl("Test Chat", screenManager.Manager);
-            Window.Add(control);
+           
+
         }
 
         /// <summary>

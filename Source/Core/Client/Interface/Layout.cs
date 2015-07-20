@@ -23,16 +23,12 @@ namespace Bricklayer.Client.Interface
         /// <summary>
         /// The main <c>ScreenManager</c> that handles control adding/removing.
         /// </summary>
-        public static ScreenManager ScreenManager { get; set; }
+        public static ScreenManager ScreenManager { get; private set; }
 
-        public static Color DefaultTextColor = new Color(32, 32, 32);
-
-        public static SpriteFont DefaultSpriteFont;
 
         public MainWindow(Manager manager, Core.Client.Client client)
             : base(manager)
         {
-            DefaultSpriteFont = Manager.Skin.Fonts["Default8"].Resource;
             Client = client;
 
             //Make the window full size, without any border, disallow resize and move, etc., to use the entire screen size.
