@@ -59,6 +59,16 @@ namespace Bricklayer.Core.Server.Components
                     //Load the assembly
                     try
                     {
+                        //Make sure dependencies are met.
+                        if (file.Dependencies.Count > 0)
+                        {
+                            // ReSharper disable once PossibleMultipleEnumeration
+                            foreach (
+                                var dep in
+                                    file.Dependencies.Where(dep => !files.Any(plugin => plugin.Identifier == dep)))
+                                throw new FileNotFoundException($"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
+                        }
+                        //Load plugin
                         var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
                         RegisterPlugin(IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, file));
                     }
