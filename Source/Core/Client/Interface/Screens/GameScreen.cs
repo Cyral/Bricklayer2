@@ -1,5 +1,7 @@
-﻿using Bricklayer.Core.Client.World;
+﻿using Bricklayer.Core.Client.Interface.Controls;
+using Bricklayer.Core.Client.World;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
@@ -10,6 +12,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
         internal Level Level => Client.Level;
         private StatusBar sbStats;
         private Label lblStats;
+        private ControlList<ChatDataControl> lstChats;
+        private TextBox txtChat;
 
         /// <summary>
         /// Setup the game UI.
@@ -29,11 +33,76 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             sbStats.Add(lblStats);
             Window.Add(sbStats);
+
+            //Chat input box
+            txtChat = new TextBox(Manager);
+            txtChat.Init();
+            txtChat.Left = 30;
+            txtChat.Top = sbStats.Top - 50;
+            txtChat.Width = (int)(Manager.TargetWidth * 0.4f);
+            txtChat.Visible = false;
+            txtChat.Passive = true;
+            Window.Add(txtChat);
+
+            lstChats = new ControlList<ChatDataControl>(Manager)
+            {
+                Left = txtChat.Left,
+                Width = txtChat.Width,
+                Height = (int)(Manager.TargetHeight * 0.25f),
+            };
+            lstChats.Init();
+            lstChats.Color = Color.Transparent;
+            lstChats.HideSelection = true;
+            lstChats.Passive = true;
+            lstChats.Top = txtChat.Top - lstChats.Height;
+            Window.Add(lstChats);
+            // Hackish way to get chats to start at the bottom
+            for (var i = 0; i < (Manager.TargetHeight * 0.25f) / 18; i++)
+            {
+                lstChats.Items.Add(new ChatDataControl("", Manager, lstChats));
+            }
         }
 
         public override void Update(GameTime gameTime)
         {
             lblStats.Text = "FPS: " + Window.FPS;
+
+            if (Client.Input.WasKeyPressed(Keys.T) && !txtChat.Visible) // Open chat
+            {
+                txtChat.Visible = true;
+                txtChat.Passive = false;
+                txtChat.Focused = true;
+
+                lstChats.Items.ForEach(x => ((ChatDataControl)x).Show());
+            }
+            else if (Client.Input.WasKeyPressed(Keys.Enter) && txtChat.Visible)
+            {
+                if (!string.IsNullOrWhiteSpace(txtChat.Text)) // If there's characters in chatbox, send chat
+                {
+                    lstChats.Items.Add(new ChatDataControl(txtChat.Text, Manager, lstChats));
+                    lstChats.ScrollTo(lstChats.Items.Count);
+                    txtChat.Text = "";
+                    txtChat.Visible = false;
+                    txtChat.Passive = true;
+                    txtChat.Focused = false;
+                    lstChats.Items.ForEach(x => ((ChatDataControl)x).UnShow());
+                }
+                else // If nothing is typed and player clicked enter, close out of chat
+                {
+                    txtChat.Visible = false;
+                    txtChat.Passive = true;
+                    txtChat.Focused = false;
+                    lstChats.Items.ForEach(x => ((ChatDataControl)x).UnShow());
+                }
+            }
+            // Cancel out of chat if player clicks escape
+            else if (Client.Input.WasKeyPressed(Keys.Escape) && txtChat.Visible)
+            {
+                txtChat.Visible = false;
+                txtChat.Passive = true;
+                txtChat.Focused = false;
+                lstChats.Items.ForEach(x => ((ChatDataControl)x).UnShow());
+            }
             base.Update(gameTime);
         }
 

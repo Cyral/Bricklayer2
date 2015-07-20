@@ -276,11 +276,11 @@ namespace Bricklayer.Core.Client.Interface.Windows
             grpServer.Text = "Server [" + lobbyScreen.Client.Network.NetClient.ServerConnection.RemoteEndPoint + "]";
             lblName.Text = lobbyScreen.Name;
             lblDescription.Text = lobbyScreen.Description;
-            lblDescription.Height = (int)MainWindow.DefaultSpriteFont.MeasureRichString(lblDescription.Text, Manager).Y;
+            lblDescription.Height = (int)Manager.Skin.Fonts[lblDescription.Font.ToString()].Resource.MeasureRichString(lblDescription.Text, Manager).Y;
 
             lblInfo.Top = 16 + lblDescription.Bottom;
             lblInfo.Text = ReplaceVariables(lobbyScreen.Intro);
-            lblInfo.Height = (int)MainWindow.DefaultSpriteFont.MeasureRichString(lblInfo.Text, Manager).Y;
+            lblInfo.Height = (int)Manager.Skin.Fonts[lblInfo.Font.ToString()].Resource.MeasureRichString(lblInfo.Text, Manager).Y;
 
             RefreshLevels();
         }

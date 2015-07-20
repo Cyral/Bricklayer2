@@ -65,6 +65,7 @@
     <Compile Include="Client.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="InputHandler.cs" />
+    <Compile Include="Interface\Controls\ChatDataControl.cs" />
     <Compile Include="Interface\Controls\LobbyDataControl.cs" />
     <Compile Include="Interface\Controls\ServerDataControl.cs" />
     <Compile Include="Interface\Layout.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Interface\Windows\CreateLevelDialog.cs" />
     <Compile Include="Interface\Windows\LobbyWindow.cs" />
     <Compile Include="Interface\Windows\LoginWindow.cs" />
+    <Compile Include="Interface\Windows\ModManagerWindow.cs" />
     <Compile Include="Interface\Windows\PluginDownloadWindow.cs" />
     <Compile Include="Interface\Windows\ServerWindow.cs" />
     <Compile Include="Components\IOComponent.cs" />

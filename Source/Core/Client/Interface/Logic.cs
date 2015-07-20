@@ -21,6 +21,8 @@ namespace Bricklayer.Client.Interface
 
         protected override void Update(GameTime gameTime)
         {
+            Client.Input.Update();
+
             //Update current screen
             ScreenManager.Update(gameTime);
 

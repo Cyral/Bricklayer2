@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
+using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
@@ -143,6 +145,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             BottomPanel.Height = lnkForgot.Bottom + 28;
             BottomPanel.Top = Height - BottomPanel.Height;
+
         }
 
         private void OnFailedLogin(EventManager.NetEvents.AuthServerEvents.FailedLoginEventArgs args)
