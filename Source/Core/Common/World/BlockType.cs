@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// List of all block types.
         /// </summary>
-        public static List<BlockType> Blocks;
+        public static List<BlockType> Blocks { get; }
 
         /// <summary>
         /// How players should collide with this tile. (Only used for foregrounds).
