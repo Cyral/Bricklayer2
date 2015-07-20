@@ -92,6 +92,7 @@ namespace Bricklayer.Core.Client.Components
         {
             plugins.Add(plugin);
             plugin.Load();
+            Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
         }
     }
 }

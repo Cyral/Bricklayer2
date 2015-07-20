@@ -13,9 +13,22 @@ namespace Bricklayer.Core.Common
     public class PluginData
     {
         /// <summary>
-        /// The (preferably short) name of the plugin.
+        /// The (preferably short) display name of the plugin.
         /// </summary>
         public string Name { get; internal set; }
+
+        /// <summary>
+        /// The unique identification name of this plugin.
+        /// This name must not be used by any other plugin.
+        /// </summary>
+        /// <example>
+        /// Examples:
+        /// com.pyratron.plugins.testplugin
+        /// myplugin-123
+        /// MyName.MyPlugin
+        /// The plugin identifier will be validated when uploading to the official database.
+        /// </example>
+        public string Identifier { get; internal set; }
 
         /// <summary>
         /// The description of the plugin.
@@ -23,9 +36,14 @@ namespace Bricklayer.Core.Common
         public string Description { get; internal set; }
 
         /// <summary>
-        /// The name of the author of this plugin.
+        /// The name(s) of the author(s) of the plugin.
         /// </summary>
-        public string Author { get; internal set; }
+        public List<string> Authors { get; internal set; }
+
+        /// <summary>
+        /// The plugin identifiers that this plugin requires to be installed to run.
+        /// </summary>
+        public List<string> Dependencies { get; internal set; }
 
         /// <summary>
         /// The version of this plugin.
@@ -49,7 +67,15 @@ namespace Bricklayer.Core.Common
 
         public override int GetHashCode()
         {
-            return HashExtensions.Start.Hash(Path).Hash(Version);
+            return HashExtensions.Start.Hash(Identifier).Hash(Version);
+        }
+
+        /// <summary>
+        /// Returns a readable string containing the plugin's name, unique identifier, and version.
+        /// </summary>
+        public string GetInfoString()
+        {
+            return $"{Name} ({Identifier}) v{Version}";
         }
     }
 }

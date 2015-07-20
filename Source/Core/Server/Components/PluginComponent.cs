@@ -74,6 +74,7 @@ namespace Bricklayer.Core.Server.Components
         {
             plugins.Add(plugin);
             plugin.Load();
+            Log($"Loaded {plugin.GetInfoString()}");
         }
     }
 }

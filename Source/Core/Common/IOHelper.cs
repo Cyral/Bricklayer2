@@ -34,10 +34,12 @@ namespace Bricklayer.Core.Common
                         BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.Instance, null,
                         new[] {arguments}, CultureInfo.CurrentCulture);
                     instance.Path = plugin.Path;
-                    instance.Author = plugin.Author;
+                    instance.Identifier = plugin.Identifier;
+                    instance.Authors = plugin.Authors;
                     instance.Description = plugin.Description;
                     instance.Name = plugin.Name;
                     instance.Version = plugin.Version;
+                    instance.Dependencies = plugin.Dependencies;
                     return instance;
                 }
                 catch (Exception e)
