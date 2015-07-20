@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22823.1
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Core\Client\Client.csproj", "{9749B258-EFAC-4384-8677-D7B2A2217356}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test Server Plugin", "Plugins\Test Server Plugin\Test Server Plugin.csproj", "{B8DA750D-088F-481A-A7F0-5E4EE4CCDD58}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test Client Plugin", "Plugins\Test Client Plugin\Test Client Plugin.csproj", "{3E8BAA47-2616-4873-8735-4D192C725584}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blocks", "Plugins\Blocks\Blocks.csproj", "{A278E381-7012-43CF-8F2C-D3744AE9C09B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,6 +92,18 @@ Global
 		{3E8BAA47-2616-4873-8735-4D192C725584}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3E8BAA47-2616-4873-8735-4D192C725584}.Release|x86.ActiveCfg = Release|Any CPU
 		{3E8BAA47-2616-4873-8735-4D192C725584}.Release|x86.Build.0 = Release|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Debug|x86.Build.0 = Debug|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Mono|Any CPU.ActiveCfg = Release|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Mono|Any CPU.Build.0 = Release|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Mono|x86.ActiveCfg = Release|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Mono|x86.Build.0 = Release|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Release|x86.ActiveCfg = Release|Any CPU
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,5 +114,6 @@ Global
 		{67934705-6FC7-4B1B-BFF6-22D98BA135A7} = {0C8DECA4-1A15-4B40-ACDC-4161CE4B609F}
 		{B8DA750D-088F-481A-A7F0-5E4EE4CCDD58} = {4081D86C-BE24-4513-850A-B2BE0362D5CF}
 		{3E8BAA47-2616-4873-8735-4D192C725584} = {4081D86C-BE24-4513-850A-B2BE0362D5CF}
+		{A278E381-7012-43CF-8F2C-D3744AE9C09B} = {4081D86C-BE24-4513-850A-B2BE0362D5CF}
 	EndGlobalSection
 EndGlobal
