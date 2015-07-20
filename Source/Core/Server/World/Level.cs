@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.World;
 
@@ -14,6 +10,11 @@ namespace Bricklayer.Core.Server.World
             base(creator, name, uuid, description, plays, rating)
         {
             Generate();
+        }
+
+        public Level(LevelData level) : base(level)
+        {
+            
         }
 
         /// <summary>

@@ -18,9 +18,10 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// Creates an instance of a plugin from the specified assembly, if valid.
         /// </summary>
+        /// <param name="asm">The assembly to load.</param>
         public static T CreatePluginInstance<T>(Assembly asm, object arguments, PluginData plugin) where T : Plugin
         {
-            //Search for a type of 'ServerPlugin' to use
+            //Search for a type of 'T : Plugin' to use
             var types = asm.GetTypes();
             var pluginType = typeof (T);
             var mainType = types.FirstOrDefault(type => pluginType.IsAssignableFrom(type));
@@ -34,10 +35,12 @@ namespace Bricklayer.Core.Common
                         BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.Instance, null,
                         new[] {arguments}, CultureInfo.CurrentCulture);
                     instance.Path = plugin.Path;
-                    instance.Author = plugin.Author;
+                    instance.Identifier = plugin.Identifier;
+                    instance.Authors = plugin.Authors;
                     instance.Description = plugin.Description;
                     instance.Name = plugin.Name;
                     instance.Version = plugin.Version;
+                    instance.Dependencies = plugin.Dependencies;
                     return instance;
                 }
                 catch (Exception e)
@@ -47,7 +50,7 @@ namespace Bricklayer.Core.Common
                 }
             }
             throw new InvalidOperationException(
-                $"Assembly '{Path.GetFileName(plugin.Name)}' is not a valid server plugin.");
+                $"Assembly '{Path.GetFileName(plugin.Name)}' is not a valid plugin.");
         }
 
         /// <summary>

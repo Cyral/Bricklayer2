@@ -40,7 +40,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public async Task<List<LevelData>> GetAllLevels()
         {
-            var briefings = new List<LevelData>();
+            var levels = new List<LevelData>();
             var command = providerFactory.CreateCommand();
             if (command != null)
             {
@@ -58,13 +58,43 @@ namespace Bricklayer.Core.Server.Components
                             var briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
                                 reader.GetGuid(0), reader.GetString(2), 0,
                                 reader.GetInt32(3), 3.5d);
-                            briefings.Add(briefing);
+                            levels.Add(briefing);
                         }
                     }
                 });
             }
 
-            return briefings;
+            return levels;
+        }
+
+        /// <summary>
+        /// Gets level data for the specified level.
+        /// </summary>
+        public async Task<LevelData> GetLevelData(Guid uuid)
+        {
+            LevelData data = null;
+            var command = providerFactory.CreateCommand();
+            if (command != null)
+            {
+                //Select the level data (name, description, plays, etc.), and find the name of the creator
+                command.CommandText =
+                    "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator WHERE Level.Guid = @uuid";
+                AddParamaters(command, new Dictionary<string, string>
+                {
+                    {"uuid", uuid.ToString("N")}
+                });
+                await PerformQuery(connectionString, command, reader =>
+                {
+                    if (reader.Read())
+                    {
+                        data = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
+                            reader.GetGuid(0), reader.GetString(2), 0,
+                            reader.GetInt32(3), 3.5d);
+                    }
+                });
+            }
+
+            return data;
         }
 
         /// <summary>
@@ -146,7 +176,7 @@ namespace Bricklayer.Core.Server.Components
                     "INSERT INTO Levels (GUID,Name,Description, Plays, Creator) VALUES(@guid, @name, @desc, 0, @creator)";
                 AddParamaters(command, new Dictionary<string, string>
                 {
-                    {"guid", Guid.NewGuid().ToString("N")},
+                    {"guid", data.UUID.ToString("N")},
                     {"name", data.Name},
                     {"desc", data.Description},
                     {"creator", data.Creator.UUID.ToString("N")}

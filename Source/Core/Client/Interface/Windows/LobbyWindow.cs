@@ -237,7 +237,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         {
             if (index >= 0)
             {
-                lobbyScreen.Client.Network.Send(new Bricklayer.Core.Common.Net.Messages.JoinLevelMessage(((LobbyDataControl)lstLevels.Items[index]).Data.UUID));
+                lobbyScreen.Client.Network.Send(new JoinLevelMessage(((LobbyDataControl)lstLevels.Items[index]).Data.UUID));
             }
         }
 

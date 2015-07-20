@@ -77,6 +77,17 @@ namespace Bricklayer.Core.Client.Components
                     //Load the assembly
                     try
                     {
+                        //Make sure dependencies are met.
+                        if (file.Dependencies.Count > 0)
+                        {
+                            // ReSharper disable once PossibleMultipleEnumeration
+                            foreach (
+                                var dep in
+                                    file.Dependencies.Where(dep => !files.Any(plugin => plugin.Identifier == dep)))
+                            {
+                                throw new FileNotFoundException($"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
+                            }
+                        }
                         var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
                         RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
                     }
@@ -92,6 +103,7 @@ namespace Bricklayer.Core.Client.Components
         {
             plugins.Add(plugin);
             plugin.Load();
+            Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
         }
     }
 }

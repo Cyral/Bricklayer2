@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.World;
@@ -145,11 +146,15 @@ namespace Bricklayer.Core.Server
         /// </remarks>
         public async Task<Level> JoinLevel(Player sender, Guid uuid)
         {
-            //TODO: Implement level loading/saving from disk
-            var level = new Level(sender, "Test", Guid.NewGuid(), "Test", 0, 2.5);
-            level.Players.Add(sender);
+            Level level = Levels.FirstOrDefault(x => x.UUID == uuid);
+            if (level == null)
+            {
+                level = await IO.LoadLevel(uuid);
+                Levels.Add(level);
+            }
 
-            Levels.Add(level);
+            await RemovePlayerFromLevels(sender);
+            level.Players.Add(sender);
 
             return level;
         }
@@ -163,6 +168,7 @@ namespace Bricklayer.Core.Server
         public async Task<Level> CreateLevel(Player sender, string name, string description)
         {
             var level = new Level(sender, name, Guid.NewGuid(), description, 0, 2.5);
+            await RemovePlayerFromLevels(sender);
             level.Players.Add(sender);
 
             //Add the level to the database
@@ -171,6 +177,32 @@ namespace Bricklayer.Core.Server
             Levels.Add(level);
 
             return level;
+        }
+
+        /// <summary>
+        /// Removes a player from any level they are currently in. (Does not send network message.)
+        /// </summary>
+        private async Task RemovePlayerFromLevels(Player sender)
+        {
+            if (sender.Level != null)
+            {
+                sender.Level.Players.Remove(sender);
+                if (sender.Level.Players.Count == 0)
+                {
+                    await CloseLevel(sender.Level.UUID); //Close level is nobody is in it
+                }
+            }
+        }
+
+        private async Task CloseLevel(Guid uuid)
+        {
+            var level = Levels.FirstOrDefault(r => r.UUID == uuid);
+            if (level != null && level.Online == 0)
+            {
+                await IO.SaveLevel(level);
+                Logger.WriteLine(LogType.Normal, $"{level.Name} closed.");
+                Levels.Remove(level);
+            }
         }
 
         #region Console Stuff
@@ -205,6 +237,16 @@ namespace Bricklayer.Core.Server
                 .AddAlias("stats", "data")
                 .SetDescription("Shows statistics")
                 .SetAction(delegate { WriteStats(); }));
+
+            Commands.AddCommand(Command
+                .Create("Save All")
+                .AddAlias("save", "saveall")
+                .SetDescription("Saves all levels.")
+                .SetAction(async delegate
+                {
+                    foreach (var level in Levels)
+                        await IO.SaveLevel(level);
+                }));
 
             Commands.AddCommand(Command
                 .Create("Exit")

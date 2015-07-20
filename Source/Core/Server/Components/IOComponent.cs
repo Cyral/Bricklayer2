@@ -2,11 +2,13 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Server.World;
 using Newtonsoft.Json;
 
 namespace Bricklayer.Core.Server.Components
@@ -35,6 +37,11 @@ namespace Bricklayer.Core.Server.Components
         /// The path to the plugins directory, which contains the plugin .dlls
         /// </summary>
         public string PluginsDirectory { get; private set; }
+
+        /// <summary>
+        /// The path to the directory containing level saves.
+        /// </summary>
+        public string LevelsDirectory { get; private set; }
 
         /// <summary>
         /// The path to the server root directory.
@@ -68,6 +75,7 @@ namespace Bricklayer.Core.Server.Components
             if (ServerDirectory != null)
             {
                 LogDirectory = Path.Combine(ServerDirectory, "logs");
+                LevelsDirectory = Path.Combine(ServerDirectory, "levels");
                 PluginsDirectory = Path.Combine(ServerDirectory, "plugins");
                 ConfigFile = Path.Combine(ServerDirectory, "config.json");
             }
@@ -75,6 +83,8 @@ namespace Bricklayer.Core.Server.Components
             //Create directories that don't exist.
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
+            if (!Directory.Exists(LevelsDirectory))
+                Directory.CreateDirectory(LevelsDirectory);
             if (!Directory.Exists(PluginsDirectory))
                 Directory.CreateDirectory(PluginsDirectory);
 
@@ -145,7 +155,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         internal async void LogMessage(string message)
         {
-#if !MONO
+            #if !MONO
             try
             {
                 message = message.Replace("\n", Environment.NewLine);
@@ -177,9 +187,9 @@ namespace Bricklayer.Core.Server.Components
             {
                 logWriter?.Close();
             }
-#endif
+            #endif
             //Logging errors occur on MONO, this fixes it (Although the performance increase on the Windows version (less file opening) is not present)
-#if MONO
+            #if MONO
             try
             {
                 message = message.Replace("\n", Environment.NewLine);
@@ -274,6 +284,54 @@ namespace Bricklayer.Core.Server.Components
                         Constants.MaxBannerHeight);
                 }
             }
+        }
+
+        internal async Task SaveLevel(Level level)
+        {
+            await Task.Run(() =>
+            {
+                using (var filestream = new BufferedStream(
+                    File.Open(Path.Combine(LevelsDirectory, level.UUID.ToString("N") + ".level"), FileMode.Create)))
+                {
+                    using (var gzip = new GZipStream(filestream, CompressionMode.Compress, true))
+                    {
+                        using (var writer = new BinaryWriter(gzip))
+                        {
+                            //Version used for save format migrations
+                            writer.Write(Constants.Version.Major);
+                            writer.Write(Constants.Version.Minor);
+                            writer.Write(Constants.Version.Build);
+                            writer.Write(Constants.Version.Revision);
+
+                            //Read tiles
+                            level.EncodeTiles(writer);
+                        }
+                    }
+                }
+            });
+        }
+
+        internal async Task<Level> LoadLevel(Guid uuid)
+        {
+            var level = new Level(await Server.Database.GetLevelData(uuid));
+            await Task.Run(() =>
+            {
+                using (var filestream = new BufferedStream(File.Open(Path.Combine(LevelsDirectory, uuid.ToString("N") + ".level"), FileMode.Open)))
+                {
+                    using (var gzip = new GZipStream(filestream, CompressionMode.Decompress, true))
+                    {
+                        using (var reader = new BinaryReader(gzip))
+                        {
+                            //Version used for save format migrations
+                            var version = new Version(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+
+                            //Read tiles
+                            level.DecodeTiles(reader);
+                        }
+                    }
+                }
+            });
+            return level;
         }
     }
 }
