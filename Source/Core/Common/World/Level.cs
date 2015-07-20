@@ -78,20 +78,28 @@ namespace Bricklayer.Core.Common.World
                 {
                     using (var reader = new BinaryReader(gzip))
                     { 
-                        Width = reader.ReadInt32();
-                        Height = reader.ReadInt32();
-                        Tiles = new Tile[Width, Height, 2];
-                        //Write the background layer, then foreground layer, so values that are the same are written next to each other
-                        for (var layer = 0; layer < 2; layer++)
-                        {
-                            for (var y = 0; y < Height; y++)
-                            {
-                                for (var x = 0; x < Width; x++)
-                                {
-                                    Tiles[x, y, layer] = new Tile(BlockType.FromID(reader.ReadInt16()));
-                                }
-                            }
-                        }
+                        DecodeTiles(reader);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reads tile data from a binary stream.
+        /// </summary>
+        internal void DecodeTiles(BinaryReader reader)
+        {
+            Width = reader.ReadInt32();
+            Height = reader.ReadInt32();
+            Tiles = new Tile[Width, Height, 2];
+            //Read the background layer, then foreground layer.
+            for (var layer = 0; layer < 2; layer++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    for (var x = 0; x < Width; x++)
+                    {
+                        Tiles[x, y, layer] = new Tile(BlockType.FromID(reader.ReadInt16()));
                     }
                 }
             }
@@ -110,23 +118,28 @@ namespace Bricklayer.Core.Common.World
                 {
                     using (var writer = new BinaryWriter(gzip))
                     {
-                        writer.Write(Width);
-                        writer.Write(Height);
-                        //Write the background layer, then foreground layer, so values that are the same are written next to each other
-                        for (var layer = 0; layer < 2; layer++)
-                        {
-                            for (var y = 0; y < Height; y++)
-                            {
-                                for (var x = 0; x < Width; x++)
-                                {
-                                    Tiles[x, y, layer].Write(writer);
-                                }
-                            }
-                        }
+                        EncodeTiles(writer);
                     }
                     var memArr = memory.ToArray();
                     om.Write(memArr.Length);
                     om.Write(memArr);
+                }
+            }
+        }
+
+        internal void EncodeTiles(BinaryWriter writer)
+        {
+            writer.Write(Width);
+            writer.Write(Height);
+            //Write the background layer, then foreground layer, so values that are the same are written next to each other
+            for (var layer = 0; layer < 2; layer++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    for (var x = 0; x < Width; x++)
+                    {
+                        Tiles[x, y, layer].Write(writer);
+                    }
                 }
             }
         }

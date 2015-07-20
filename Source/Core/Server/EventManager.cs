@@ -208,6 +208,7 @@ namespace Bricklayer.Core.Server
 
                 public JoinLevelEventArgs(Player sender, Guid uuid)
                 {
+                    Sender = sender;
                     UUID = uuid;
                 }
             }
