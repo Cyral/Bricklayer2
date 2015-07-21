@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.World;
 using Bricklayer.Core.Server.World;
@@ -156,6 +157,8 @@ namespace Bricklayer.Core.Server
             await RemovePlayerFromLevels(sender);
             level.Players.Add(sender);
 
+            sender.Level = level;
+
             return level;
         }
 
@@ -175,6 +178,7 @@ namespace Bricklayer.Core.Server
             await Database.CreateLevel(level);
 
             Levels.Add(level);
+            sender.Level = level;
 
             return level;
         }

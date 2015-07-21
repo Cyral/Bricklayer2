@@ -22,5 +22,6 @@
         PingAuth,
         LevelData,
         JoinLevel,
+        Chat,
     }
 }

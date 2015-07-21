@@ -207,6 +207,12 @@ namespace Bricklayer.Core.Server.Net
                             new EventManager.NetEvents.JoinLevelEventArgs(sender, msg.UUID));
                         break;
                     }
+                    case MessageTypes.Chat:
+                    {
+                        var msg = new ChatMessage(inc, MessageContext.Server);
+                        Server.Events.Network.ChatMessageReceived.Invoke(new EventManager.NetEvents.ChatEventArgs(sender, msg.Message));
+                        break;
+                    }
                 }
             }
         }

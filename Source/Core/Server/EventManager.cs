@@ -227,6 +227,18 @@ namespace Bricklayer.Core.Server
                 }
             }
 
+            public class ChatEventArgs : BricklayerEventArgs
+            {
+                public string Message { get; private set; }
+                public Player Sender { get; private set; }
+
+                public ChatEventArgs(Player sender, string message)
+                {
+                    Sender = sender;
+                    Message = message;
+                }
+            }
+
             #endregion
 
             //Events represent a collection of event handlers.
@@ -273,6 +285,11 @@ namespace Bricklayer.Core.Server
             /// When the server receives a request from a player to create a new level.
             /// </summary>
             public Event<CreateLevelEventArgs> CreateLevelMessageRecieved { get; } = new Event<CreateLevelEventArgs>();
+
+            /// <summary>
+            /// When the server receives a chat message
+            /// </summary>
+            public Event<ChatEventArgs> ChatMessageReceived { get; } = new Event<ChatEventArgs>();
 
             #endregion
         }

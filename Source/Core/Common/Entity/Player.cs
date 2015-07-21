@@ -51,7 +51,7 @@ namespace Bricklayer.Core.Common.Entity
         /// <summary>
         /// The currently occupied map the player is in
         /// </summary>
-        public virtual Level Level { get; protected set; }
+        public virtual Level Level { get; internal set; }
 
         /// <summary>
         /// The color the body should be tinted.

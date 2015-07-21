@@ -1,5 +1,6 @@
 ﻿using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.World;
+using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
@@ -61,6 +62,12 @@ namespace Bricklayer.Core.Client.Interface.Screens
             {
                 lstChats.Items.Add(new ChatDataControl("", Manager, lstChats));
             }
+
+            Client.Events.Network.Game.ChatReceived.AddHandler(args =>
+            {
+                lstChats.Items.Add(new ChatDataControl(args.Message, Manager, lstChats));
+                lstChats.ScrollTo(lstChats.Items.Count);
+            });
         }
 
         public override void Update(GameTime gameTime)
@@ -79,8 +86,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
             {
                 if (!string.IsNullOrWhiteSpace(txtChat.Text)) // If there's characters in chatbox, send chat
                 {
-                    lstChats.Items.Add(new ChatDataControl(txtChat.Text, Manager, lstChats));
-                    lstChats.ScrollTo(lstChats.Items.Count);
+                    Client.Network.Send(new ChatMessage(txtChat.Text));
+                    //lstChats.Items.Add(new ChatDataControl(txtChat.Text, Manager, lstChats));
                     txtChat.Text = "";
                     txtChat.Visible = false;
                     txtChat.Passive = true;

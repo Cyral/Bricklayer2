@@ -257,6 +257,16 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
+
+                public class ChatEventArgs : BricklayerEventArgs
+                {
+                    public string Message { get; private set; }
+
+                    public ChatEventArgs(string message)
+                    {
+                        Message = message;
+                    }
+                }
                 #endregion
 
                 //Events represent a collection of event handlers.
@@ -297,7 +307,12 @@ namespace Bricklayer.Core.Client
                 /// <summary>
                 /// When level is received from the server. (Tile data, name, description, etc.)
                 /// </summary>
-                public Event<LevelDataEventArgs> LevelDataReceived { get; } = new Event<LevelDataEventArgs>(); 
+                public Event<LevelDataEventArgs> LevelDataReceived { get; } = new Event<LevelDataEventArgs>();
+
+                /// <summary>
+                /// When a chat messaged is recieved (Chat message)
+                /// </summary>
+                public Event<ChatEventArgs> ChatReceived { get; } = new Event<ChatEventArgs>();
 
                 #endregion
             }

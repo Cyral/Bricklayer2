@@ -10,6 +10,7 @@ using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
+using Bricklayer.Core.Common.World;
 using Bricklayer.Core.Server.Net;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
@@ -149,6 +150,7 @@ namespace Bricklayer.Core.Server.Components
                     //(As the current event is only from the network message)
                     Server.Events.Game.Levels.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
 
+
                 }, EventPriority.InternalFinal); //Must be the last event called as it fires another event
 
             Server.Events.Network.JoinLevelMessageRecieved.AddHandler(
@@ -158,7 +160,20 @@ namespace Bricklayer.Core.Server.Components
                     var level = await Server.JoinLevel(args.Sender, args.UUID);
                     Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {level.Creator.Username}");
                     Send(new LevelDataMessage(level), args.Sender);
-                }, EventPriority.InternalFinal); 
+
+
+                }, EventPriority.InternalFinal);
+
+            Server.Events.Network.ChatMessageReceived.AddHandler(
+                args =>
+                {
+                    if (args.Sender.Level != null)
+                    {
+                        Logger.WriteLine(LogType.Normal,
+                            $"Level \"{args.Sender.Level.Name}\" - (Chat) \"{args.Sender.Username}\": \"{args.Message}\"");
+                        SendInLevel(args.Sender.Level, new ChatMessage(args.Sender.Username + ": " + args.Message));
+                    }
+                }, EventPriority.InternalFinal);
 
             Server.Events.Network.UserConnected.AddHandler(args =>
             {
@@ -312,6 +327,19 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="Level">Level/Level to send to</param>
         /// <param name="gameMessage">IMessage to send</param>
+        public void SendInLevel(Level level, IMessage message)
+        {
+
+
+            //Search for recipients
+            var recipients = NetServer.Connections.Where(
+                x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true) != null &&
+                     Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true).Level == level)
+                .ToList();
+
+            if (recipients.Count > 0) //Send to recipients found
+                NetServer.SendMessage(EncodeMessage(message), recipients, deliveryMethod, 0);
+        }
         /// <summary>
         /// Sends a message to all Players connected to the server
         /// </summary>
