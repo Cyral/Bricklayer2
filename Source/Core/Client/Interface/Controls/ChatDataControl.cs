@@ -17,11 +17,11 @@ namespace Bricklayer.Core.Client.Interface.Controls
 {
     public sealed class ChatDataControl : Control
     {
-        private Label lblMsg;
-        private double timePassed = 0;
-        private bool startTrans = false;
+        private readonly Label lblMsg;
+        private double timePassed;
+        private bool startTrans;
         private bool allowTrans = true;
-        private bool done = false;
+        private bool done;
 
         public ChatDataControl(string text, Manager manager, Control parent)
             : base(manager)
@@ -31,43 +31,12 @@ namespace Bricklayer.Core.Client.Interface.Controls
             this.parent = parent;
             lblMsg = new Label(Manager)
             {
-                Width = parent.Width,
+                Width = parent.Width -8,
             };
             lblMsg.Init();
             lblMsg.Ellipsis = false;
-            lblMsg.Text = WrapText(text, lblMsg.Width);
+            lblMsg.Text = text;
             Add(lblMsg);
-        }
-
-        /// <summary>hj
-        /// Wraps a string around the width of an area (Ex: The chat box)
-        /// </summary>
-        public string WrapText(string text, float maxLineWidth)
-        {
-            SpriteFont spriteFont = Manager.Skin.Fonts[lblMsg.Font.ToString()].Resource;
-            string[] words = text.Split(' ');
-            StringBuilder sb = new StringBuilder();
-            float lineWidth = 0f;
-            float spaceWidth = spriteFont.MeasureString(" ").X;
-            int lines = 1;
-            foreach (string word in words)
-            {
-                Vector2 size = spriteFont.MeasureRichString(word, Manager);
-
-                if (lineWidth + size.X < maxLineWidth)
-                {
-                    sb.Append(word + " ");
-                    lineWidth += size.X + spaceWidth;
-                }
-                else
-                {
-                    sb.Append("\n" + word + " ");
-                    lines++;
-                    lineWidth = size.X + spaceWidth;
-                }
-            }
-            lblMsg.Height = Height = lines*spriteFont.LineSpacing;
-            return sb.ToString();
         }
 
         protected override void Update(GameTime gameTime)
@@ -78,8 +47,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
             {
                 timePassed += gameTime.ElapsedGameTime.TotalSeconds;
 
-                // If (somewhat) 5 seconds have passed, start fade transition
-                if (timePassed > 3 && !startTrans)
+                // If time has passed, start fading out
+                if (timePassed > 8 && !startTrans)
                 {
                     timePassed = 0;
                     startTrans = true;
@@ -87,38 +56,27 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 else if (startTrans) // If transition is started
                 {
                     if (lblMsg.Alpha > 0) // If not already faded away
-                    {
-                        lblMsg.Alpha -= (float) timePassed*255f;
-                    }
+                        lblMsg.Alpha -= (float)timePassed * 255f;
                     else
-                    {
                         done = true;
-                    }
                 }
-                parent.Invalidate();
-                lblMsg.Invalidate();
             }
-
         }
 
-        public void Show()
+        public override void Show()
         {
             lblMsg.Alpha = 255;
             allowTrans = false;
         }
 
-        public void UnShow()
+        public override void Hide()
         {
             if (!done)
             {
                 allowTrans = true;
-                startTrans = false;
-                timePassed = 0;
             }
             else
-            {
                 lblMsg.Alpha = 0;
-            }
         }
 
 
@@ -127,6 +85,5 @@ namespace Bricklayer.Core.Client.Interface.Controls
             //Don't draw anything
             //base.DrawControl(renderer,rect,gameTime);
         }
-
     }
 }

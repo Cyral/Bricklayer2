@@ -51,10 +51,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
             RefreshServerList();
             lstServers.DoubleClick += delegate (object o, EventArgs e)
             {
-                var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
-                //Make sure the user clicks the item and not the empty space in the list
-                if (sdc.CheckPositionMouse(((MouseEventArgs)e).Position - lstServers.AbsoluteRect.Location))
-                    screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
+                if (lstServers.ItemIndex >= 0)
+                {
+                    var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
+                    //Make sure the user clicks the item and not the empty space in the list
+                    if (sdc.CheckPositionMouse(((MouseEventArgs)e).Position - lstServers.AbsoluteRect.Location))
+                        screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
+                            servers[lstServers.ItemIndex].Port);
+                }
             };
 
             //Add controls to the bottom panel. (Add server, edit server, etc.)
@@ -122,9 +126,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnJoin.Right = btnAdd.Left - 8;
             btnJoin.Click += delegate
             {
-                btnJoin.Enabled = false;
-                btnJoin.Text = "Connecting...";
-                screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
+                if (lstServers.ItemIndex >= 0)
+                {
+                    btnJoin.Enabled = false;
+                    btnJoin.Text = "Connecting...";
+                    screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
+                        servers[lstServers.ItemIndex].Port);
+                }
             };
             BottomPanel.Add(btnJoin);
 
