@@ -15,6 +15,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         private StatusBar sbStats;
         private Label lblStats;
         private ControlList<ChatDataControl> lstChats;
+        private ControlList<PlayerListDataControl> lstPlayers;
         private TextBox txtChat;
 
         /// <summary>
@@ -60,6 +61,25 @@ namespace Bricklayer.Core.Client.Interface.Screens
             lstChats.HideScrollbars = true;
             lstChats.Top = txtChat.Top - lstChats.Height;
             Window.Add(lstChats);
+
+            lstPlayers = new ControlList<PlayerListDataControl>(Manager)
+            {
+                Width = (int)(Manager.TargetWidth * .4f) - 16,
+                Height = (int)(Manager.TargetHeight * .25f),
+            };
+            lstPlayers.Init();
+            lstPlayers.HideSelection = true;
+            lstPlayers.Left = Manager.TargetWidth/2 - (lstPlayers.Width / 2);
+            lstPlayers.Passive = true;
+            lstPlayers.HideScrollbars = true;
+            lstPlayers.Visible = false;
+            lstPlayers.BackColor = Color.TransparentBlack;
+            Window.Add(lstPlayers);
+
+            lstPlayers.Items.Add(new PlayerListDataControl("Pugmatt", Manager, lstPlayers));
+            lstPlayers.Items.Add(new PlayerListDataControl("Test", Manager, lstPlayers));
+
+
             // Hackish way to get chats to start at the bottom
             for (var i = 0; i < (Manager.TargetHeight * 0.25f) / 18; i++)
             {
@@ -105,6 +125,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 txtChat.Passive = true;
                 txtChat.Focused = false;
                 lstChats.Items.ForEach(x => ((ChatDataControl)x).Hide());
+            }
+            else if (Client.Input.IsKeyDown(Keys.Tab) && !lstPlayers.Visible)
+            {
+                lstPlayers.Visible = true;
+            }
+            else if (Client.Input.IsKeyUp(Keys.Tab) && lstPlayers.Visible)
+            {
+                lstPlayers.Visible = false;
             }
         }
 

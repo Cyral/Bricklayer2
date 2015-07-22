@@ -72,9 +72,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         public override void Hide()
         {
             if (!done)
-            {
                 allowTrans = true;
-            }
             else
                 lblMsg.Alpha = 0;
         }
