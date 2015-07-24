@@ -117,6 +117,17 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 Height = grpLobby.Height - 16 - txtSearch.Bottom - 24
             };
             lstLevels.Init();
+            lstLevels.DoubleClick += (obj, args) =>
+            {
+                if (lstLevels.ItemIndex < 0)
+                    return;
+
+                var ldc = (LobbyDataControl)lstLevels.Items[lstLevels.ItemIndex];
+                // Make sure the user clicks the item and not the empty space in the list
+                if (ldc.CheckPositionMouse(((MouseEventArgs)args).Position - lstLevels.AbsoluteRect.Location))
+                    JoinLevel(lstLevels.ItemIndex);
+            };
+
             grpLobby.Add(lstLevels);
 
             //Server info labels
