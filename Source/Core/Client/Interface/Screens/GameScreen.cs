@@ -1,6 +1,9 @@
-﻿using System.Text;
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Text;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.World;
+using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -73,22 +76,28 @@ namespace Bricklayer.Core.Client.Interface.Screens
             lstPlayers.Passive = true;
             lstPlayers.HideScrollbars = true;
             lstPlayers.Visible = false;
-            lstPlayers.BackColor = Color.TransparentBlack;
             Window.Add(lstPlayers);
 
-            lstPlayers.Items.Add(new PlayerListDataControl("Pugmatt", Manager, lstPlayers));
-            lstPlayers.Items.Add(new PlayerListDataControl("Test", Manager, lstPlayers));
+            foreach (var player in Level.Players)
+                lstPlayers.Items.Add(new PlayerListDataControl(player.Username, Manager, lstPlayers));
+
+
+            // Listen for later player joins
+            Client.Events.Network.Game.PlayerJoinReceived.AddHandler(args =>
+            {
+                lstPlayers.Items.Add(new PlayerListDataControl(args.Player.Username, Manager, lstPlayers));
+            });
 
 
             // Hackish way to get chats to start at the bottom
             for (var i = 0; i < (Manager.TargetHeight * 0.25f) / 18; i++)
             {
-                lstChats.Items.Add(new ChatDataControl("", Manager, lstChats));
+                lstChats.Items.Add(new ChatDataControl("", Manager, lstChats, this));
             }
 
             Client.Events.Network.Game.ChatReceived.AddHandler(args =>
             {
-                lstChats.Items.Add(new ChatDataControl(args.Message, Manager, lstChats));
+                lstChats.Items.Add(new ChatDataControl(args.Message, Manager, lstChats, this));
                 lstChats.ScrollTo(lstChats.Items.Count);
             });
         }
@@ -101,6 +110,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             base.Update(gameTime);
         }
+
 
         private void HandleInput()
         {
@@ -140,7 +150,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         {
             var lines = WrapText(text, lstChats.Width - 8, FontSize.Default9).Split('\n');
             foreach (var line in lines)
-                lstChats.Items.Add(new ChatDataControl(line, Manager, lstChats));
+                lstChats.Items.Add(new ChatDataControl(line, Manager, lstChats, this));
         }
 
         private string WrapText(string text, float maxLineWidth, FontSize fontsize)
@@ -166,6 +176,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 }
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// If chat is open
+        /// </summary>
+        /// <returns></returns>
+        public bool ChatOpen()
+        {
+            return txtChat.Visible;
         }
 
         /// <summary>

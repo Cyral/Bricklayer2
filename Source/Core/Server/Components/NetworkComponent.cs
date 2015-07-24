@@ -158,9 +158,10 @@ namespace Bricklayer.Core.Server.Components
                 {
                     //Create the new level
                     var level = await Server.JoinLevel(args.Sender, args.UUID);
-                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {level.Creator.Username}");
+                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {args.Sender.Username}");
                     Send(new LevelDataMessage(level), args.Sender);
-
+                    SendInLevel(level, new PlayerJoinMessage(args.Sender));
+                    SendInLevel(level, new ChatMessage("[color:Green]" + args.Sender.Username + " has joined.[/color]"));
 
                 }, EventPriority.InternalFinal);
 
