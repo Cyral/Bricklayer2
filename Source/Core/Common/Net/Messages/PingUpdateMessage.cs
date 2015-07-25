@@ -39,17 +39,14 @@ namespace Bricklayer.Core.Common.Net.Messages
         public void Decode(NetIncomingMessage im)
         {
             var count = im.ReadInt32();
-            Guid guid;
-            int ping;
 
             for (var i = 0; i < count; i++)
             {
-                guid = Guid.Parse(im.ReadString());
-                ping = im.ReadInt32();
+                var guid = Guid.Parse(im.ReadString());
+                var ping = im.ReadInt32();
 
                 Pings.Add(guid, ping);
             }
-
         }
 
         public void Encode(NetOutgoingMessage om)
@@ -57,7 +54,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             om.Write(Pings.Count);
             foreach (var i in Pings)
             {
-                om.Write(i.Key.ToString());
+                om.Write(i.Key.ToString("N"));
                 om.Write(i.Value);
             }
         }
