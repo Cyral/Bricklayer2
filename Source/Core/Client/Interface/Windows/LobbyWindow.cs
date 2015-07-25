@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
-using Console = System.Console;
-using EventArgs = MonoForce.Controls.EventArgs;
 
 namespace Bricklayer.Core.Client.Interface.Windows
 {
@@ -25,7 +22,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly LobbyScreen lobbyScreen;
         private readonly ControlList<LobbyDataControl> lstLevels;
         private readonly List<string> sortFilters = new List<string> {"Online", "Rating", "Plays", "Random", "Mine"};
-        //Controls
+        // Controls
         private readonly TextBox txtSearch;
 
         private ImageBox imgBanner;
@@ -35,7 +32,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             : base(manager)
         {
             lobbyScreen = screen;
-            //Setup the window
+            // Setup the window
             CaptionVisible = false;
             TopPanel.Visible = false;
             Movable = false;
@@ -58,36 +55,36 @@ namespace Bricklayer.Core.Client.Interface.Windows
            
             var grpLobby = new GroupPanel(Manager)
             {
-                Width = ClientWidth - grpServer.Width, //Fill remaining space
+                Width = ClientWidth - grpServer.Width, // Fill remaining space
                 Height = ClientHeight - BottomPanel.Height + 2,
                 Text = "Levels"
             };
             grpLobby.Init();
             Add(grpLobby);
 
-            //Top controls
+            // Top controls
             txtSearch = new TextBox(Manager) {Left = 8, Top = 8, Width = (int)((grpLobby.Width / 2d) - 16)};
             txtSearch.Init();
             txtSearch.Text = searchStr;
-            txtSearch.TextChanged += delegate { RefreshLevels(); };
-            //Show "Search..." text, but make it dissapear on focus
-            txtSearch.FocusGained += delegate
+            txtSearch.TextChanged += (sender, args) => { RefreshLevels(); };
+            // Show "Search..." text, but make it dissapear on focus
+            txtSearch.FocusGained += (sender, args) =>
             {
                 if (txtSearch.Text.Trim() == searchStr)
                     txtSearch.Text = string.Empty;
             };
-            txtSearch.FocusLost += delegate
+            txtSearch.FocusLost += (sender, args) =>
             {
                 if (txtSearch.Text.Trim() == string.Empty)
                     txtSearch.Text = searchStr;
             };
             grpLobby.Add(txtSearch);
 
-            cmbSort = new ComboBox(Manager) {Left = txtSearch.Right + 8, Top = 8, Width = (int)((grpLobby.Width / 2) - 16 - 20)};
+            cmbSort = new ComboBox(Manager) { Left = txtSearch.Right + 8, Top = 8, Width = (grpLobby.Width / 2) - 16 - 20 };
             cmbSort.Init();
             cmbSort.Items.AddRange(sortFilters);
             cmbSort.ItemIndex = 0;
-            cmbSort.ItemIndexChanged += delegate { RefreshLevels(); };
+            cmbSort.ItemIndexChanged += (sender, args) => { RefreshLevels(); };
             grpLobby.Add(cmbSort);
 
             var btnReload = new Button(Manager)
@@ -101,14 +98,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnReload.Init();
             btnReload.Glyph = new Glyph(screen.Client.Content["gui.icons.refresh"]);
             btnReload.ToolTip.Text = "Refresh";
-            btnReload.Click += delegate
-            {
+            btnReload.Click += (sender, args) => {
                 btnReload.Enabled = false;
                 screen.Client.Network.Send(new RequestMessage(MessageTypes.Init));
             };
             grpLobby.Add(btnReload);
 
-            //Main level list
+            // Main level list
             lstLevels = new ControlList<LobbyDataControl>(Manager)
             {
                 Left = 8,
@@ -117,7 +113,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 Height = grpLobby.Height - 16 - txtSearch.Bottom - 24
             };
             lstLevels.Init();
-            lstLevels.DoubleClick += (obj, args) =>
+            lstLevels.DoubleClick += (sender, args) =>
             {
                 if (lstLevels.ItemIndex < 0)
                     return;
@@ -130,7 +126,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             grpLobby.Add(lstLevels);
 
-            //Server info labels
+            // Server info labels
             lblName = new Label(Manager)
             {
                 Text = "Loading...",
@@ -166,11 +162,11 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             lblInfo.Init();
             grpServer.Add(lblInfo);
-            //Bottom buttons
+            // Bottom buttons
             var btnCreate = new Button(Manager) {Top = 8, Text = "Create"};
             btnCreate.Left = (ClientWidth / 2) - (btnCreate.Width / 2);
             btnCreate.Init();
-            btnCreate.Click += delegate
+            btnCreate.Click += (sender, args) =>
             {
                 var window = new CreateLevelDialog(manager, screen);
                 window.Init();
@@ -181,12 +177,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             var btnJoin = new Button(Manager) {Right = btnCreate.Left - 8, Top = 8, Text = "Join"};
             btnJoin.Init();
-            btnJoin.Click += delegate { JoinLevel(lstLevels.ItemIndex); };
+            btnJoin.Click += (sender, args) => { JoinLevel(lstLevels.ItemIndex); };
             BottomPanel.Add(btnJoin);
 
             var btnDisconnect = new Button(Manager) {Left = btnCreate.Right + 8, Top = 8, Text = "Quit"};
             btnDisconnect.Init();
-            btnDisconnect.Click += delegate
+            btnDisconnect.Click += (sender, args) =>
             {
                 screen.Client.Network.NetClient.Disconnect("Left Lobby");
                 MainWindow.ScreenManager.SwitchScreen(new LoginScreen());
@@ -213,25 +209,22 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private void LobbyBannerReceived(EventManager.NetEvents.GameServerEvents.BannerEventArgs args)
         {
             bannerInfo = args.Banner;
-            //Convert byte array to stream to be read
+            // Convert byte array to stream to be read
             var stream = new MemoryStream(bannerInfo);
             var image = Texture2D.FromStream(lobbyScreen.Client.GraphicsDevice, stream);
 
-            if (image.Height <= Globals.Values.MaxBannerHeight && image.Width <= Globals.Values.MaxBannerWidth)
-            {
-                imgBanner = new ImageBox(Manager)
-                {
-                    Image = image,
-                };
-                imgBanner.Init();
-                imgBanner.SetPosition((grpServer.Width / 2) - (imgBanner.Image.Width / 2), 0);
-                imgBanner.SetSize(image.Width, image.Height);
-                grpServer.Add(imgBanner);
+            if (image.Height > Globals.Values.MaxBannerHeight || image.Width > Globals.Values.MaxBannerWidth)
+                return;
 
-                lblName.Top = imgBanner.Bottom + 8;
-                lblDescription.Top = 8 + lblName.Bottom;
-                lblInfo.Top = 8 + lblDescription.Bottom;
-            }
+            imgBanner = new ImageBox(Manager) { Image = image };
+            imgBanner.Init();
+            imgBanner.SetPosition((grpServer.Width / 2) - (imgBanner.Image.Width / 2), 0);
+            imgBanner.SetSize(image.Width, image.Height);
+            grpServer.Add(imgBanner);
+
+            lblName.Top = imgBanner.Bottom + 8;
+            lblDescription.Top = 8 + lblName.Bottom;
+            lblInfo.Top = 8 + lblDescription.Bottom;
         }
 
         protected override void Dispose(bool disposing)
@@ -246,21 +239,20 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// </summary>
         public void JoinLevel(int index)
         {
-            if (index >= 0)
-            {
-                lobbyScreen.Client.Network.Send(new JoinLevelMessage(((LobbyDataControl)lstLevels.Items[index]).Data.UUID));
-            }
+            if (index < 0)
+                return;
+            lobbyScreen.Client.Network.Send(new JoinLevelMessage(((LobbyDataControl)lstLevels.Items[index]).Data.UUID));
         }
 
         private void FilterLevels()
         {
-            //Filter search results
+            // Filter search results
             if (txtSearch.Text != searchStr && !string.IsNullOrWhiteSpace(txtSearch.Text))
                 lstLevels.Items =
                     lstLevels.Items.Where(
                         x => ((LobbyDataControl)x).Data.Name.ToLower().Contains(txtSearch.Text.ToLower())).ToList();
 
-            //Filter by category
+            // Filter by category
             switch (cmbSort.ItemIndex)
             {
                 case 0:
@@ -283,7 +275,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// </summary>
         private void LoadLevels()
         {
-            //Set text with what has been recieved
+            // Set text with what has been recieved
             grpServer.Text = "Server [" + lobbyScreen.Client.Network.NetClient.ServerConnection.RemoteEndPoint + "]";
             lblName.Text = lobbyScreen.Name;
             lblDescription.Text = lobbyScreen.Description;
@@ -301,8 +293,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             var screen = MainWindow.ScreenManager.Current as LobbyScreen;
             lstLevels.Items.Clear();
             if (screen != null)
-                foreach (var s in screen.Levels)
-                    lstLevels.Items.Add(new LobbyDataControl(screen, Manager, s, lstLevels));
+                lstLevels.Items.AddRange(
+                    screen.Levels.Select(x => new LobbyDataControl(screen, Manager, x, lstLevels)));
             FilterLevels();
         }
 
@@ -311,11 +303,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// </summary>
         private string ReplaceVariables(string infoText)
         {
-            //Replace variables in the info text
-            infoText = infoText.Replace("$Online", lobbyScreen.Online.ToString());
-            infoText = infoText.Replace("$Name", lobbyScreen.Name);
-            infoText = infoText.Replace("$Levels", lobbyScreen.Levels.Count.ToString());
-            return infoText;
+            // Replace variables in the info text
+            return infoText.Replace("$Online", lobbyScreen.Online.ToString())
+                .Replace("$Name", lobbyScreen.Name)
+                .Replace("$Levels", lobbyScreen.Levels.Count.ToString());
         }
     }
 }
