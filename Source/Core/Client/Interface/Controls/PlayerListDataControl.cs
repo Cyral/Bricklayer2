@@ -37,6 +37,16 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Add(lblPing);
         }
 
+        public string GetUser()
+        {
+            return lblName.Text;
+        }
+
+        public void ChangePing(int ping)
+        {
+            lblPing.Text = ping + " ms";
+        }
+
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
