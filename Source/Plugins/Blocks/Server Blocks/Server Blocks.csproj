@@ -68,7 +68,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "$(SolutionDir)Core\Server\bin\$(ConfigurationName)\plugins\$(ProjectName)\plugin.dll"
-echo F|xcopy /y "$(TargetDir)plugin.json" "$(SolutionDir)Core\Server\bin\$(ConfigurationName)\plugins\$(ProjectName)\plugin.json"</PostBuildEvent>
+echo F|xcopy /y "$(TargetDir)plugin.json" "$(SolutionDir)Core\Server\bin\$(ConfigurationName)\plugins\$(ProjectName)\plugin.json"
+echo F|xcopy /y "$(TargetDir)Common Blocks.dll" "$(SolutionDir)Core\Server\bin\$(ConfigurationName)\plugins\$(ProjectName)\Common Blocks.dll"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

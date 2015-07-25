@@ -38,7 +38,7 @@ namespace Bricklayer.Core.Client
         public int Count => Textures.Count;
 
         /// <summary>
-        /// Load textures for a given pack
+        /// Load textures for a given path
         /// </summary>
         internal void LoadTextures(string path, Client client)
         {
@@ -56,10 +56,7 @@ namespace Bricklayer.Core.Client
                     var texture = client.TextureLoader.FromFile(file);
 
                     //Add it to the dictionary
-                    if (Textures.ContainsKey(name))
-                        Textures[name] = texture;
-                    else
-                        Textures.Add(name, texture);
+                    Textures[name] = texture;
                 }
             }
         }

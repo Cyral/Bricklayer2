@@ -74,6 +74,7 @@
   <PropertyGroup>
     <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.dll"
 echo F|xcopy /y "$(TargetDir)plugin.json" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.json"
+echo F|xcopy /y "$(TargetDir)Common Blocks.dll" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Common Blocks.dll"
 mkdir "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Content"
 xcopy /s /i /y "$(TargetDir)Content" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Content"</PostBuildEvent>
   </PropertyGroup>
