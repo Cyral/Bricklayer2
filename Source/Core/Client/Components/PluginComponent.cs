@@ -102,6 +102,7 @@ namespace Bricklayer.Core.Client.Components
         private void RegisterPlugin(ClientPlugin plugin)
         {
             plugins.Add(plugin);
+            plugin.LoadContent();
             plugin.Load();
             Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
         }

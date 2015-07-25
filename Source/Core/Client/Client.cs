@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Windows;
@@ -155,7 +156,7 @@ namespace Bricklayer.Core.Client
 
             Content = new ContentManager();
             TextureLoader = new TextureLoader(Graphics.GraphicsDevice);
-            Content.LoadTextures(this);
+            Content.LoadTextures(Path.Combine(IO.Directories["Content"], "Textures"), this);
 
             if (IO.Config.Client.Resolution.X == 0 && IO.Config.Client.Resolution.Y == 0)
             {
