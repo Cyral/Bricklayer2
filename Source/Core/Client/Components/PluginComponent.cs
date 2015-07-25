@@ -121,7 +121,9 @@ namespace Bricklayer.Core.Client.Components
         private void RegisterPlugin(ClientPlugin plugin)
         {
             plugins.Add(plugin);
-            plugin.LoadContent();
+            //Load plugin content
+            Client.Content.LoadTextures(Path.Combine(plugin.Path, Path.Combine("Content", "Textures")), Client);
+            //Load plugin
             plugin.Load();
             Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
         }

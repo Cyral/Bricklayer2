@@ -42,23 +42,29 @@ namespace Bricklayer.Core.Client
         /// </summary>
         internal void LoadTextures(string path, Client client)
         {
-            var files = DirSearch(path, ".png");
-
-            //For each file name, load it from disk.
-            foreach (var file in files)
+            if (Directory.Exists(path))
             {
-                //Remove the full path to return the name of the file
-                var directoryName = Path.GetDirectoryName(file);
-                if (directoryName != null)
+                var files = DirSearch(path, ".png", ".jpeg", ".jpg");
+
+                //For each file name, load it from disk.
+                foreach (var file in files)
                 {
-                    var name = Path.Combine(directoryName.Remove(0, path.Length + 1), Path.GetFileNameWithoutExtension(file));
+                    //Remove the full path to return the name of the file
+                    var directoryName = Path.GetDirectoryName(file);
+                    if (directoryName != null)
+                    {
+                        var name = Path.Combine(directoryName.Remove(0, path.Length + 1),
+                            Path.GetFileNameWithoutExtension(file));
 
-                    var texture = client.TextureLoader.FromFile(file);
+                        var texture = client.TextureLoader.FromFile(file);
 
-                    //Add it to the dictionary
-                    Textures[name] = texture;
+                        //Add it to the dictionary
+                        Textures[name] = texture;
+                    }
                 }
             }
+            else
+                Console.WriteLine($"Directory {path} does not exist.");
         }
 
         /// <summary>
