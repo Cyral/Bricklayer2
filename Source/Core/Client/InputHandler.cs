@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
@@ -208,20 +209,17 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public int GetDigitPressed()
         {
-            var key = -1;
+            var pressedDigitKeys = CurrentKeyboardState.GetPressedKeys()
+                // Select those that are within D0 and D9
+                .Where(x => x >= Keys.D0 && x <= Keys.D9)
+                // Select those that weren't pressed last time
+                .Where(x => !PreviousKeyboardState.GetPressedKeys().Contains(x)).ToArray();
 
-            if (IsKeyPressed(Keys.D1)) key = 0;
-            else if (IsKeyPressed(Keys.D2)) key = 1;
-            else if (IsKeyPressed(Keys.D3)) key = 2;
-            else if (IsKeyPressed(Keys.D4)) key = 3;
-            else if (IsKeyPressed(Keys.D5)) key = 4;
-            else if (IsKeyPressed(Keys.D6)) key = 5;
-            else if (IsKeyPressed(Keys.D7)) key = 6;
-            else if (IsKeyPressed(Keys.D8)) key = 7;
-            else if (IsKeyPressed(Keys.D9)) key = 8;
-            else if (IsKeyPressed(Keys.D0)) key = 9;
+            if (pressedDigitKeys.Length == 0)
+                return -1;
 
-            return key;
+            // D0 is 9, D1 is 0, D2 is 1, and so on...
+            return pressedDigitKeys[0] == Keys.D0 ? 9 : ((int)pressedDigitKeys[0]) - 49;
         }
     }
 }
