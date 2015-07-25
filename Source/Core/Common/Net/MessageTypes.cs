@@ -23,5 +23,6 @@
         LevelData,
         JoinLevel,
         Chat,
+        PlayerJoin
     }
 }

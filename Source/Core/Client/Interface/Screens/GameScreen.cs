@@ -1,6 +1,9 @@
-﻿using System.Text;
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Text;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.World;
+using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -15,6 +18,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         private StatusBar sbStats;
         private Label lblStats;
         private ControlList<ChatDataControl> lstChats;
+        private ControlList<PlayerListDataControl> lstPlayers;
         private TextBox txtChat;
 
         /// <summary>
@@ -60,15 +64,40 @@ namespace Bricklayer.Core.Client.Interface.Screens
             lstChats.HideScrollbars = true;
             lstChats.Top = txtChat.Top - lstChats.Height;
             Window.Add(lstChats);
+
+            lstPlayers = new ControlList<PlayerListDataControl>(Manager)
+            {
+                Width = (int)(Manager.TargetWidth * .4f) - 16,
+                Height = (int)(Manager.TargetHeight * .25f),
+            };
+            lstPlayers.Init();
+            lstPlayers.HideSelection = true;
+            lstPlayers.Left = Manager.TargetWidth/2 - (lstPlayers.Width / 2);
+            lstPlayers.Passive = true;
+            lstPlayers.HideScrollbars = true;
+            lstPlayers.Visible = false;
+            Window.Add(lstPlayers);
+
+            foreach (var player in Level.Players)
+                lstPlayers.Items.Add(new PlayerListDataControl(player.Username, Manager, lstPlayers));
+
+
+            // Listen for later player joins
+            Client.Events.Network.Game.PlayerJoinReceived.AddHandler(args =>
+            {
+                lstPlayers.Items.Add(new PlayerListDataControl(args.Player.Username, Manager, lstPlayers));
+            });
+
+
             // Hackish way to get chats to start at the bottom
             for (var i = 0; i < (Manager.TargetHeight * 0.25f) / 18; i++)
             {
-                lstChats.Items.Add(new ChatDataControl("", Manager, lstChats));
+                lstChats.Items.Add(new ChatDataControl("", Manager, lstChats, this));
             }
 
             Client.Events.Network.Game.ChatReceived.AddHandler(args =>
             {
-                lstChats.Items.Add(new ChatDataControl(args.Message, Manager, lstChats));
+                lstChats.Items.Add(new ChatDataControl(args.Message, Manager, lstChats, this));
                 lstChats.ScrollTo(lstChats.Items.Count);
             });
         }
@@ -81,6 +110,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             base.Update(gameTime);
         }
+
 
         private void HandleInput()
         {
@@ -106,13 +136,21 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 txtChat.Focused = false;
                 lstChats.Items.ForEach(x => ((ChatDataControl)x).Hide());
             }
+            else if (Client.Input.IsKeyDown(Keys.Tab) && !lstPlayers.Visible)
+            {
+                lstPlayers.Visible = true;
+            }
+            else if (Client.Input.IsKeyUp(Keys.Tab) && lstPlayers.Visible)
+            {
+                lstPlayers.Visible = false;
+            }
         }
 
         private void AddChat(string text, Manager manager, ControlList<ChatDataControl> controlList)
         {
             var lines = WrapText(text, lstChats.Width - 8, FontSize.Default9).Split('\n');
             foreach (var line in lines)
-                lstChats.Items.Add(new ChatDataControl(line, Manager, lstChats));
+                lstChats.Items.Add(new ChatDataControl(line, Manager, lstChats, this));
         }
 
         private string WrapText(string text, float maxLineWidth, FontSize fontsize)
@@ -138,6 +176,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 }
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// If chat is open
+        /// </summary>
+        /// <returns></returns>
+        public bool ChatOpen()
+        {
+            return txtChat.Visible;
         }
 
         /// <summary>

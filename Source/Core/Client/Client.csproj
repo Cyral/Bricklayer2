@@ -67,6 +67,7 @@
     <Compile Include="InputHandler.cs" />
     <Compile Include="Interface\Controls\ChatDataControl.cs" />
     <Compile Include="Interface\Controls\LobbyDataControl.cs" />
+    <Compile Include="Interface\Controls\PlayerListDataControl.cs" />
     <Compile Include="Interface\Controls\ServerDataControl.cs" />
     <Compile Include="Interface\Layout.cs" />
     <Compile Include="Interface\Logic.cs" />

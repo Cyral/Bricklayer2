@@ -23,7 +23,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private bool allowTrans = true;
         private bool done;
 
-        public ChatDataControl(string text, Manager manager, Control parent)
+        public ChatDataControl(string text, Manager manager, Control parent, Screen screen)
             : base(manager)
         {
             Width = parent.ClientWidth;
@@ -34,9 +34,15 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 Width = parent.Width -8,
             };
             lblMsg.Init();
+            lblMsg.DrawFormattedText = true;
             lblMsg.Ellipsis = false;
             lblMsg.Text = text;
             Add(lblMsg);
+            if (((GameScreen) screen).ChatOpen())
+            {
+                allowTrans = false;
+                done = true;
+            }
         }
 
         protected override void Update(GameTime gameTime)
@@ -72,9 +78,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         public override void Hide()
         {
             if (!done)
-            {
                 allowTrans = true;
-            }
             else
                 lblMsg.Alpha = 0;
         }

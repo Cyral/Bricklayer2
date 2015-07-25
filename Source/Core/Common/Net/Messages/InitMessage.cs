@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.World;
 using Lidgren.Network;
+using Bricklayer.Core.Common.Entity;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
