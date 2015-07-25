@@ -1,6 +1,4 @@
-﻿#region Usings
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -15,8 +13,7 @@ using Bricklayer.Core.Server.Net;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using static Bricklayer.Core.Server.EventManager;
-
-#endregion
+using Timer = System.Timers.Timer;
 
 namespace Bricklayer.Core.Server.Components
 {
@@ -72,6 +69,16 @@ namespace Bricklayer.Core.Server.Components
 
         public NetworkComponent(Server server) : base(server)
         {
+            var timer = new Timer(10000);
+            timer.Elapsed += delegate
+            {
+                foreach (var level in Server.Levels)
+                {
+                    Broadcast(level, new PingUpdateMessage(level));
+                }
+            };
+            timer.Start();
+
             //When a user requests to join, verify their account is valid with the auth server.
             Server.Events.Network.UserLoginRequested.AddHandler(args =>
             {
@@ -158,9 +165,10 @@ namespace Bricklayer.Core.Server.Components
                 {
                     //Create the new level
                     var level = await Server.JoinLevel(args.Sender, args.UUID);
-                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {level.Creator.Username}");
+                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {args.Sender.Username}");
                     Send(new LevelDataMessage(level), args.Sender);
-
+                    Broadcast(level, new PlayerJoinMessage(args.Sender));
+                    Broadcast(level, new ChatMessage("[color:Green]" + args.Sender.Username + " has joined.[/color]"));
 
                 }, EventPriority.InternalFinal);
 
@@ -171,7 +179,7 @@ namespace Bricklayer.Core.Server.Components
                     {
                         Logger.WriteLine(LogType.Normal,
                             $"Level \"{args.Sender.Level.Name}\" - (Chat) \"{args.Sender.Username}\": \"{args.Message}\"");
-                        SendInLevel(args.Sender.Level, new ChatMessage(args.Sender.Username + ": " + args.Message));
+                        Broadcast(args.Sender.Level, new ChatMessage(args.Sender.Username + ": " + args.Message));
                     }
                 }, EventPriority.InternalFinal);
 
@@ -279,21 +287,21 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Encodes and sends a message to a specified Sender
         /// </summary>
-        /// <param name="gameMessage">IMessage to send</param>
+        /// <param name="message">IMessage to send</param>
         /// <param name="user">Sender to send to</param>
-        public void Send(IMessage gameMessage, Player user)
+        public void Send(IMessage message, Player user)
         {
             var con =
                 NetServer.Connections.FirstOrDefault(
                     x => x.RemoteUniqueIdentifier == user.Connection.RemoteUniqueIdentifier);
             if (con != null)
-                Send(gameMessage, con);
+                Send(message, con);
         }
-
 
         /// <summary>
         /// Sends an unconnected message to the endpoint
         /// </summary>
+        /// <param name="receiver"></param>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
         {
@@ -304,44 +312,59 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Encodes and sends a message to a specified NetConnection recipient
         /// </summary>
-        /// <param name="gameMessage">IMessage to send</param>
+        /// <param name="message">IMessage to send</param>
         /// <param name="recipient">Client to send to</param>
-        public void Send(IMessage gameMessage, NetConnection recipient)
+        public void Send(IMessage message, NetConnection recipient)
         {
             if (recipient != null)
-                NetServer.SendMessage(EncodeMessage(gameMessage), recipient, deliveryMethod);
+                NetServer.SendMessage(EncodeMessage(message), recipient, deliveryMethod);
         }
 
         /// <summary>
-        /// Broadcasts a message to all Players in a level, EXCEPT for the one specified
+        /// Broadcasts a message to all Users in a room, EXCEPT for the one specified
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
-        /// <param name="user">Sender NOT to send to</param>
+        /// <param name="player">Sender NOT to send to</param>
+        public void BroadcastExcept(IMessage gameMessage, Player player)
+        {
+            BroadcastExcept(gameMessage, player.Connection);
+        }
+
         /// <summary>
-        /// Broadcasts a message to all clients in a level, EXCEPT for the one specified
+        /// Broadcasts a message to all clients in a room, EXCEPT to the recipient specified.
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
         /// <param name="recipient">Client NOT to send to</param>
-        /// <summary>
-        /// Broadcasts a message to all Players in a level
-        /// </summary>
-        /// <param name="Level">Level/Level to send to</param>
-        /// <param name="gameMessage">IMessage to send</param>
-        public void SendInLevel(Level level, IMessage message)
+        public void BroadcastExcept(IMessage gameMessage, NetConnection recipient)
         {
-
+            var message = EncodeMessage(gameMessage);
 
             //Search for recipients
-            var recipients = NetServer.Connections.Where(
-                x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true) != null &&
-                     Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true).Level == level)
-                .ToList();
+            var recipients = NetServer.Connections.Where(x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true)?.Connection.RemoteUniqueIdentifier != recipient.RemoteUniqueIdentifier).ToList();
 
             if (recipients.Count > 0) //Send to recipients found
-                NetServer.SendMessage(EncodeMessage(message), recipients, deliveryMethod, 0);
+                NetServer.SendMessage(message, recipients, deliveryMethod, 0);
         }
+
         /// <summary>
-        /// Sends a message to all Players connected to the server
+        /// Broadcasts a message to all players in a level.
+        /// </summary>
+        /// <param name="level">Level to send to</param>
+        /// <param name="gameMessage">IMessage to send</param>
+        public void Broadcast(Level level, IMessage gameMessage)
+        {
+            var message = EncodeMessage(gameMessage);
+
+            //Search for recipients
+            var recipients =
+                NetServer.Connections.Where(x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true)?.Level == level).ToList();
+
+            if (recipients.Count > 0) //Send to recipients found
+                NetServer.SendMessage(message, recipients, deliveryMethod, 0);
+        }
+
+        /// <summary>
+        /// Sends a message to all Users connected to the server
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
         public void Global(IMessage gameMessage)
@@ -363,7 +386,6 @@ namespace Bricklayer.Core.Server.Components
             gameMessage.Encode(message);
             return message;
         }
-
 
         /// <summary>
         /// Shuts down the server and disconnects clients

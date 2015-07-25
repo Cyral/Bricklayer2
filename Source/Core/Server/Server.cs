@@ -155,6 +155,7 @@ namespace Bricklayer.Core.Server
             }
 
             await RemovePlayerFromLevels(sender);
+            level.Players.Remove(sender);
             level.Players.Add(sender);
 
             sender.Level = level;

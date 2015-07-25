@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
+using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client
 {
@@ -267,6 +269,26 @@ namespace Bricklayer.Core.Client
                         Message = message;
                     }
                 }
+
+                public class PlayerJoinEventArgs : BricklayerEventArgs
+                {
+                    public Player Player { get; private set; }
+
+                    public PlayerJoinEventArgs(Player player)
+                    {
+                        Player = player;
+                    }
+                }
+
+                public class PingUpdateEventArgs : BricklayerEventArgs
+                {
+                    public Dictionary<Guid, int> Pings { get; private set; }
+
+                    public PingUpdateEventArgs(Dictionary<Guid, int> pings)
+                    {
+                        Pings = pings;
+                    }
+                }
                 #endregion
 
                 //Events represent a collection of event handlers.
@@ -313,6 +335,16 @@ namespace Bricklayer.Core.Client
                 /// When a chat messaged is recieved (Chat message)
                 /// </summary>
                 public Event<ChatEventArgs> ChatReceived { get; } = new Event<ChatEventArgs>();
+
+                /// <summary>
+                /// When a player joins the level client is currently in
+                /// </summary>
+                public Event<PlayerJoinEventArgs> PlayerJoinReceived { get; } = new Event<PlayerJoinEventArgs>();
+
+                /// <summary>
+                /// When pings for players in level are recieved
+                /// </summary>
+                public Event<PingUpdateEventArgs> PingUpdateReceived { get; } = new Event<PingUpdateEventArgs>();
 
                 #endregion
             }

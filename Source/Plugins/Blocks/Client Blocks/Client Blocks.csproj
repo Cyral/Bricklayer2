@@ -7,7 +7,7 @@
     <ProjectGuid>{A278E381-7012-43CF-8F2C-D3744AE9C09B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bricklayer.Plugins.Blocks</RootNamespace>
+    <RootNamespace>Bricklayer.Plugins.Blocks.Client</RootNamespace>
     <AssemblyName>plugin</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -42,8 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ServerBlocks.cs" />
-    <Compile Include="ClientBlocks.cs" />
+    <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -52,20 +51,33 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Client\Client.csproj">
+    <ProjectReference Include="..\..\..\Core\Client\Client.csproj">
       <Project>{9749b258-efac-4384-8677-d7b2a2217356}</Project>
       <Name>Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Core\Common\Common.csproj">
+    <ProjectReference Include="..\..\..\Core\Common\Common.csproj">
       <Project>{11549dce-3a75-4c4d-94e2-c5b2c6c5144c}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Core\Server\Server.csproj">
-      <Project>{67934705-6fc7-4b1b-bff6-22d98ba135a7}</Project>
-      <Name>Server</Name>
+    <ProjectReference Include="..\Common Blocks\Common Blocks.csproj">
+      <Project>{a0e7ab06-82f9-4548-835b-bfa5e7e0d615}</Project>
+      <Name>Common Blocks</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Content\Textures\blocks\default.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.dll"
+echo F|xcopy /y "$(TargetDir)plugin.json" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.json"
+echo F|xcopy /y "$(TargetDir)Common Blocks.dll" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Common Blocks.dll"
+mkdir "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Content"
+xcopy /s /i /y "$(TargetDir)Content" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Content"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

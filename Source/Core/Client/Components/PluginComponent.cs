@@ -30,10 +30,28 @@ namespace Bricklayer.Core.Client.Components
             plugins = new List<ClientPlugin>();
         }
 
+        private string loadingPlugin;
+
         public override async Task Init()
         {
             if (!Client.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
+            //Resolve assembly references for plugins.
+            AppDomain.CurrentDomain.AssemblyResolve += 
+                (sender, args) =>
+                {
+                    //If a plugin.dll is trying to load a referenced assembly
+                    if (args.RequestingAssembly.FullName.Split(',')[0] == "plugin")
+                    {
+                        var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
+                        if (File.Exists(path))
+                            return Assembly.LoadFile(path);
+                        path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe"); //Try to load a .exe if .dll doesn't exist
+                        if (File.Exists(path))
+                            return Assembly.LoadFile(path);
+                    }
+                    return null;
+                };
 
             LoadPlugins();
 
@@ -89,6 +107,7 @@ namespace Bricklayer.Core.Client.Components
                             }
                         }
                         var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                        loadingPlugin = file.Path;
                         RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
                     }
                     catch (Exception e)
@@ -102,6 +121,9 @@ namespace Bricklayer.Core.Client.Components
         private void RegisterPlugin(ClientPlugin plugin)
         {
             plugins.Add(plugin);
+            //Load plugin content
+            Client.Content.LoadTextures(Path.Combine(plugin.Path, Path.Combine("Content", "Textures")), Client);
+            //Load plugin
             plugin.Load();
             Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
         }

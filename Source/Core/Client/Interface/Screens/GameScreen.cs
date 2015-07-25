@@ -1,6 +1,10 @@
-﻿using System.Text;
+﻿using System;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.World;
+using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -8,7 +12,7 @@ using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
-    internal class GameScreen : Screen
+    public class GameScreen : Screen
     {
         protected internal override GameState State => GameState.Game;
         internal Level Level => Client.Level;
@@ -64,8 +68,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             lstPlayers = new ControlList<PlayerListDataControl>(Manager)
             {
-                Width = (int)(Manager.TargetWidth * .4f) - 16,
-                Height = (int)(Manager.TargetHeight * .25f),
+                Width = 256,
+                Top = 256,
             };
             lstPlayers.Init();
             lstPlayers.HideSelection = true;
@@ -73,23 +77,38 @@ namespace Bricklayer.Core.Client.Interface.Screens
             lstPlayers.Passive = true;
             lstPlayers.HideScrollbars = true;
             lstPlayers.Visible = false;
-            lstPlayers.BackColor = Color.TransparentBlack;
             Window.Add(lstPlayers);
 
-            lstPlayers.Items.Add(new PlayerListDataControl("Pugmatt", Manager, lstPlayers));
-            lstPlayers.Items.Add(new PlayerListDataControl("Test", Manager, lstPlayers));
+            foreach (var player in Level.Players)
+                lstPlayers.Items.Add(new PlayerListDataControl(player, Manager, lstPlayers));
+
+
+            // Listen for later player joins
+            Client.Events.Network.Game.PlayerJoinReceived.AddHandler(args =>
+            {
+                lstPlayers.Items.Add(new PlayerListDataControl(args.Player, Manager, lstPlayers));
+            });
+
+            // Listen for ping updates for players
+            Client.Events.Network.Game.PingUpdateReceived.AddHandler(args =>
+            {
+                foreach (var ping in args.Pings)
+                {
+                    var control = (PlayerListDataControl)lstPlayers.Items.FirstOrDefault(i => ((PlayerListDataControl)i).User.UUID == ping.Key);
+                    control?.ChangePing(ping.Value);
+                }
+            });
 
 
             // Hackish way to get chats to start at the bottom
             for (var i = 0; i < (Manager.TargetHeight * 0.25f) / 18; i++)
             {
-                lstChats.Items.Add(new ChatDataControl("", Manager, lstChats));
+                lstChats.Items.Add(new ChatDataControl("", Manager, lstChats, this));
             }
 
             Client.Events.Network.Game.ChatReceived.AddHandler(args =>
             {
-                lstChats.Items.Add(new ChatDataControl(args.Message, Manager, lstChats));
-                lstChats.ScrollTo(lstChats.Items.Count);
+                AddChat(args.Message, Manager, lstChats);
             });
         }
 
@@ -101,6 +120,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             base.Update(gameTime);
         }
+
 
         private void HandleInput()
         {
@@ -117,7 +137,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 // Cancel out of chat if player clicks escape
                 if (!string.IsNullOrWhiteSpace(txtChat.Text) && !Client.Input.IsKeyPressed(Keys.Escape))
                 {
-                     Client.Network.Send(new ChatMessage(txtChat.Text));
+                    Client.Network.Send(new ChatMessage(txtChat.Text));
                     txtChat.Text = string.Empty;
                 }
                 // If nothing is typed and player clicked enter, close out of chat
@@ -126,21 +146,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 txtChat.Focused = false;
                 lstChats.Items.ForEach(x => ((ChatDataControl)x).Hide());
             }
-            else if (Client.Input.IsKeyDown(Keys.Tab) && !lstPlayers.Visible)
-            {
-                lstPlayers.Visible = true;
-            }
-            else if (Client.Input.IsKeyUp(Keys.Tab) && lstPlayers.Visible)
-            {
-                lstPlayers.Visible = false;
-            }
+            lstPlayers.Visible = Client.Input.IsKeyDown(Keys.Tab);
         }
 
-        private void AddChat(string text, Manager manager, ControlList<ChatDataControl> controlList)
+        private void AddChat(string text, Manager manager, ControlList<ChatDataControl> chatlist)
         {
             var lines = WrapText(text, lstChats.Width - 8, FontSize.Default9).Split('\n');
             foreach (var line in lines)
-                lstChats.Items.Add(new ChatDataControl(line, Manager, lstChats));
+                chatlist.Items.Add(new ChatDataControl(line, manager, chatlist, this));
+            chatlist.ScrollTo(chatlist.Items.Count);
         }
 
         private string WrapText(string text, float maxLineWidth, FontSize fontsize)
@@ -166,6 +180,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 }
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// If chat is open
+        /// </summary>
+        /// <returns></returns>
+        public bool ChatOpen()
+        {
+            return txtChat.Visible;
         }
 
         /// <summary>

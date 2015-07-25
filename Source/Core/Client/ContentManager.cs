@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Bricklayer.Core.Client
 {
     /// <summary>
-    /// Handles loading and organizing of the game's texture files.
+    /// Handles loading and organizing of texture files.
     /// A dot (.) may be used instead of a slash for the file path.
     /// </summary>
     public class ContentManager
@@ -35,32 +35,36 @@ namespace Bricklayer.Core.Client
         /// </summary>
         private Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>();
 
+        public int Count => Textures.Count;
+
         /// <summary>
-        /// Load textures for a given pack
+        /// Load textures for a given path
         /// </summary>
-        internal void LoadTextures(Client client)
+        internal void LoadTextures(string path, Client client)
         {
-            var directory = Path.Combine(client.IO.Directories["Content"], "Textures");
-            var files = DirSearch(directory, ".png");
-
-            //For each file name, load it from disk.
-            foreach (var file in files)
+            if (Directory.Exists(path))
             {
-                //Remove the full path to return the name of the file
-                var directoryName = Path.GetDirectoryName(file);
-                if (directoryName != null)
+                var files = DirSearch(path, ".png", ".jpeg", ".jpg");
+
+                //For each file name, load it from disk.
+                foreach (var file in files)
                 {
-                    var name = Path.Combine(directoryName.Remove(0, directory.Length + 1), Path.GetFileNameWithoutExtension(file));
+                    //Remove the full path to return the name of the file
+                    var directoryName = Path.GetDirectoryName(file);
+                    if (directoryName != null)
+                    {
+                        var name = Path.Combine(directoryName.Remove(0, path.Length + 1),
+                            Path.GetFileNameWithoutExtension(file));
 
-                    var texture = client.TextureLoader.FromFile(file);
+                        var texture = client.TextureLoader.FromFile(file);
 
-                    //Add it to the dictionary
-                    if (Textures.ContainsKey(name))
+                        //Add it to the dictionary
                         Textures[name] = texture;
-                    else
-                        Textures.Add(name, texture);
+                    }
                 }
             }
+            else
+                Console.WriteLine($"Directory {path} does not exist.");
         }
 
         /// <summary>
@@ -71,11 +75,10 @@ namespace Bricklayer.Core.Client
         {
             var dir = new DirectoryInfo(directory);
 
-            var files = (from f in dir.GetFiles("*.*") where f.Extension.EqualsAny(extensions) select f.FullName).ToList();
-            foreach (var d in dir.GetDirectories("*.*"))
-                {
-                    files.AddRange(DirSearch(d.FullName, extensions));
-                }
+            var files =
+                dir.GetFiles().Where(f => f.Extension.EqualsAny(extensions)).Select(f => f.FullName).ToList();
+            foreach (var d in dir.GetDirectories())
+                files.AddRange(DirSearch(d.FullName, extensions));
 
             return files;
         }

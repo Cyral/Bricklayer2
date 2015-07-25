@@ -1,24 +1,24 @@
 ﻿using Bricklayer.Core.Client;
 
-namespace Bricklayer.Plugins.Blocks
+namespace Bricklayer.Plugins.Blocks.Client
 {
     /// <summary>
     /// Client part of the default blocks plugin.
     /// </summary>
-    public class ClientBlocks : ClientPlugin
+    public class Plugin : ClientPlugin
     {
-        public ClientBlocks(Core.Client.Client host) : base(host)
+        public Plugin(Core.Client.Client host) : base(host)
         {
         }
 
         public override void Load()
         {
-
+            Common.Blocks.AddBlocks();
         }
 
         protected override void Unload()
         {
-
+          
         }
     }
 }

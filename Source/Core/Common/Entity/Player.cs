@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -90,5 +91,16 @@ namespace Bricklayer.Core.Common.Entity
 
             SimulationState.Position = PreviousState.Position = DisplayState.Position = position;
         }
+
+        internal Player(NetIncomingMessage im) : base(im)
+        {
+            
+        }
+
+        internal override void Encode(NetOutgoingMessage om)
+        {
+            base.Encode(om);
+        }
+
     }
 }

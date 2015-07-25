@@ -70,6 +70,12 @@ namespace Bricklayer.Core.Common.World
             Spawn = new Vector2(Tile.Width, Tile.Height);
             random = new Random();
 
+            // Read player data
+            int playersLength = im.ReadInt32();
+
+            for (var i = 0; i < playersLength; i++)
+                Players.Add(new Player(im));
+
             //Read the tile data
             var memLength = im.ReadInt32();
             using (var memory = new MemoryStream(im.ReadBytes(memLength)))
@@ -109,6 +115,13 @@ namespace Bricklayer.Core.Common.World
         {
             //Write the data such as name, description, etc.
             base.Encode(om);
+
+
+            // Read player data
+            om.Write(Players.Count);
+            foreach (var player in Players)
+                player.Encode(om);
+
             //Write the tile data
             using (var memory = new MemoryStream())
             {
