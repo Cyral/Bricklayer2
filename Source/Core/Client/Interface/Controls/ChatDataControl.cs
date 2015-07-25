@@ -23,7 +23,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private bool allowTrans = true;
         private bool done;
 
-        public ChatDataControl(string text, Manager manager, Control parent, Screen screen)
+        public ChatDataControl(string text, Manager manager, Control parent, GameScreen screen)
             : base(manager)
         {
             Width = parent.ClientWidth;
@@ -38,7 +38,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             lblMsg.Ellipsis = false;
             lblMsg.Text = text;
             Add(lblMsg);
-            if (((GameScreen) screen).ChatOpen())
+            if (screen.ChatOpen())
             {
                 allowTrans = false;
                 done = true;

@@ -1,10 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Bricklayer.Core.Common.Entity;
+using Microsoft.Xna.Framework;
 using MonoForce.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bricklayer.Core.Client.Interface.Controls
 {
@@ -13,43 +9,50 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// </summary>
     public class PlayerListDataControl : Control
     {
-        private Label lblName;
-        private Label lblPing;
-         
-        public PlayerListDataControl(string user, Manager manager, Control parent) : base(manager)
+        public Player User { get; private set; }
+        private readonly Label lblName;
+        private readonly Label lblPing;
+
+        public PlayerListDataControl(Player user, Manager manager, Control parent) : base(manager)
         {
+            User = user;
             Height = 16;
-            
+            Width = parent.Width - 24; //-24 due to scrollbar, TODO: remove scrollbar completely
+
             lblName = new Label(manager)
             {
-                Text = user,
-                Left = 15
+                Text = user.Username,
+                Left = 2
             };
             lblName.Init();
             Add(lblName);
 
-            lblPing = new Label(manager)
-            {
-                Text = "0 ms",
-                Left = parent.Width - 50
-            };
+            lblPing = new Label(manager);
             lblPing.Init();
+            lblPing.Width = 100;
+            ChangePing(0);
             Add(lblPing);
-        }
-
-        public string GetUser()
-        {
-            return lblName.Text;
         }
 
         public void ChangePing(int ping)
         {
-            lblPing.Text = ping + " ms";
+            lblPing.TextColor = GetTextColor(ping);
+            lblPing.Text = $"{ping} ms";
+            lblPing.Left = Width - (int)Manager.Skin.Fonts[lblPing.Font.ToString()].Resource.MeasureString(lblPing.Text).X - 2;
         }
 
-        protected override void Update(GameTime gameTime)
+        private Color GetTextColor(int ping)
         {
-            base.Update(gameTime);
+            var color = Color.Lime;
+            if (ping > 500)
+                color = Color.Red;
+            else if (ping > 300)
+                color = Color.OrangeRed;
+            else if (ping > 140)
+                color = Color.Yellow;
+            else if (ping > 90)
+                color = Color.GreenYellow;
+            return color;
         }
     }
 }

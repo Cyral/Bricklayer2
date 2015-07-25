@@ -12,7 +12,7 @@ using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
-    internal class GameScreen : Screen
+    public class GameScreen : Screen
     {
         protected internal override GameState State => GameState.Game;
         internal Level Level => Client.Level;
@@ -68,8 +68,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             lstPlayers = new ControlList<PlayerListDataControl>(Manager)
             {
-                Width = (int)(Manager.TargetWidth * .4f) - 16,
-                Height = (int)(Manager.TargetHeight * .25f),
+                Width = 256,
+                Top = 256,
             };
             lstPlayers.Init();
             lstPlayers.HideSelection = true;
@@ -80,13 +80,13 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Add(lstPlayers);
 
             foreach (var player in Level.Players)
-                lstPlayers.Items.Add(new PlayerListDataControl(player.Username, Manager, lstPlayers));
+                lstPlayers.Items.Add(new PlayerListDataControl(player, Manager, lstPlayers));
 
 
             // Listen for later player joins
             Client.Events.Network.Game.PlayerJoinReceived.AddHandler(args =>
             {
-                lstPlayers.Items.Add(new PlayerListDataControl(args.Player.Username, Manager, lstPlayers));
+                lstPlayers.Items.Add(new PlayerListDataControl(args.Player, Manager, lstPlayers));
             });
 
             // Listen for ping updates for players
@@ -94,8 +94,9 @@ namespace Bricklayer.Core.Client.Interface.Screens
             {
                 foreach (var ping in args.Pings)
                 {
-                    ((PlayerListDataControl)lstPlayers.Items.FirstOrDefault(i => Level.Players.FirstOrDefault(x => x.UUID == ping.Key)?.Username == ((PlayerListDataControl)i).GetUser()))?.ChangePing(ping.Value);
-                };
+                    var control = (PlayerListDataControl)lstPlayers.Items.FirstOrDefault(i => ((PlayerListDataControl)i).User.UUID == ping.Key);
+                    control?.ChangePing(ping.Value);
+                }
             });
 
 
@@ -107,8 +108,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             Client.Events.Network.Game.ChatReceived.AddHandler(args =>
             {
-                lstChats.Items.Add(new ChatDataControl(args.Message, Manager, lstChats, this));
-                lstChats.ScrollTo(lstChats.Items.Count);
+                AddChat(args.Message, Manager, lstChats);
             });
         }
 
@@ -137,7 +137,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 // Cancel out of chat if player clicks escape
                 if (!string.IsNullOrWhiteSpace(txtChat.Text) && !Client.Input.IsKeyPressed(Keys.Escape))
                 {
-                     Client.Network.Send(new ChatMessage(txtChat.Text));
+                    Client.Network.Send(new ChatMessage(txtChat.Text));
                     txtChat.Text = string.Empty;
                 }
                 // If nothing is typed and player clicked enter, close out of chat
@@ -146,21 +146,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 txtChat.Focused = false;
                 lstChats.Items.ForEach(x => ((ChatDataControl)x).Hide());
             }
-            else if (Client.Input.IsKeyDown(Keys.Tab) && !lstPlayers.Visible)
-            {
-                lstPlayers.Visible = true;
-            }
-            else if (Client.Input.IsKeyUp(Keys.Tab) && lstPlayers.Visible)
-            {
-                lstPlayers.Visible = false;
-            }
+            lstPlayers.Visible = Client.Input.IsKeyDown(Keys.Tab);
         }
 
-        private void AddChat(string text, Manager manager, ControlList<ChatDataControl> controlList)
+        private void AddChat(string text, Manager manager, ControlList<ChatDataControl> chatlist)
         {
             var lines = WrapText(text, lstChats.Width - 8, FontSize.Default9).Split('\n');
             foreach (var line in lines)
-                lstChats.Items.Add(new ChatDataControl(line, Manager, lstChats, this));
+                chatlist.Items.Add(new ChatDataControl(line, manager, chatlist, this));
+            chatlist.ScrollTo(chatlist.Items.Count);
         }
 
         private string WrapText(string text, float maxLineWidth, FontSize fontsize)

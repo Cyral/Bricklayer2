@@ -1,13 +1,15 @@
 ﻿using System;
 using Bricklayer.Core.Common.Data;
 using Lidgren.Network;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Bricklayer.Core.Client.World
 {
     public class Level : Common.World.Level
     {
         /// <summary>
-        /// The main camera to follow the player
+        /// The main camera to follow the player.
         /// </summary>
         public Camera Camera { get; set; }
 
@@ -34,6 +36,16 @@ namespace Bricklayer.Core.Client.World
             Height = level.Width;
             Players = level.Players;
             Spawn = level.Spawn;
+        }
+
+        public void Update(GameTime delta)
+        {
+            
+        }
+
+        public void Draw(SpriteBatch batch, GameTime delta)
+        {
+            
         }
     }
 }
