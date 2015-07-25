@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Bricklayer.Core.Client.Interface.Controls;
@@ -86,6 +87,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Client.Events.Network.Game.PlayerJoinReceived.AddHandler(args =>
             {
                 lstPlayers.Items.Add(new PlayerListDataControl(args.Player.Username, Manager, lstPlayers));
+            });
+
+            // Listen for ping updates for players
+            Client.Events.Network.Game.PingUpdateReceived.AddHandler(args =>
+            {
+                foreach (var ping in args.Pings)
+                {
+                    ((PlayerListDataControl)lstPlayers.Items.FirstOrDefault(i => Level.Players.FirstOrDefault(x => x.UUID == ping.Key)?.Username == ((PlayerListDataControl)i).GetUser()))?.ChangePing(ping.Value);
+                };
             });
 
 

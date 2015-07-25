@@ -73,6 +73,12 @@ namespace Bricklayer.Core.Client.Net
                     networkManager.Client.Events.Network.Game.PlayerJoinReceived.Invoke(new EventManager.NetEvents.GameServerEvents.PlayerJoinEventArgs(msg.Player));
                     break;
                 }
+                case MessageTypes.PingUpdate:
+                {
+                    var msg = new PingUpdateMessage(im, MessageContext.Client);
+                    networkManager.Client.Events.Network.Game.PingUpdateReceived.Invoke(new EventManager.NetEvents.GameServerEvents.PingUpdateEventArgs(msg.Pings));
+                    break;
+                }
             }
         }
 

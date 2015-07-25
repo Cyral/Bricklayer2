@@ -23,6 +23,7 @@
         LevelData,
         JoinLevel,
         Chat,
-        PlayerJoin
+        PlayerJoin,
+        PingUpdate
     }
 }

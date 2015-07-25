@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
@@ -15,6 +16,7 @@ using Bricklayer.Core.Server.Net;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using static Bricklayer.Core.Server.EventManager;
+using Timer = System.Timers.Timer;
 
 #endregion
 
@@ -72,6 +74,16 @@ namespace Bricklayer.Core.Server.Components
 
         public NetworkComponent(Server server) : base(server)
         {
+            var timer = new Timer(10000);
+            timer.Elapsed += delegate
+            {
+                foreach (var level in Server.Levels)
+                {
+                    SendInLevel(level, new PingUpdateMessage(level));
+                }
+            };
+            timer.Start();
+
             //When a user requests to join, verify their account is valid with the auth server.
             Server.Events.Network.UserLoginRequested.AddHandler(args =>
             {

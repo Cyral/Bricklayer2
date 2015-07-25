@@ -279,6 +279,16 @@ namespace Bricklayer.Core.Client
                         Player = player;
                     }
                 }
+
+                public class PingUpdateEventArgs : BricklayerEventArgs
+                {
+                    public Dictionary<Guid, int> Pings { get; private set; }
+
+                    public PingUpdateEventArgs(Dictionary<Guid, int> pings)
+                    {
+                        Pings = pings;
+                    }
+                }
                 #endregion
 
                 //Events represent a collection of event handlers.
@@ -330,6 +340,11 @@ namespace Bricklayer.Core.Client
                 /// When a player joins the level client is currently in
                 /// </summary>
                 public Event<PlayerJoinEventArgs> PlayerJoinReceived { get; } = new Event<PlayerJoinEventArgs>();
+
+                /// <summary>
+                /// When pings for players in level are recieved
+                /// </summary>
+                public Event<PingUpdateEventArgs> PingUpdateReceived { get; } = new Event<PingUpdateEventArgs>();
 
                 #endregion
             }
