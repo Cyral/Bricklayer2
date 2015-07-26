@@ -2,6 +2,7 @@
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net.Messages;
+using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
@@ -28,7 +29,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             TopPanel.Visible = false;
             Resizable = false;
             Width = 250;
-            Height = 190;
+            Height = 196;
             Center();
 
             //Add controls
@@ -40,9 +41,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
             txtName.Init();
             txtName.TextChanged += delegate(object o, EventArgs e)
             {
+                // If you're trying to fix this function, please check out line 77 first.
                 if (txtName.Text.Length > CreateLevelMessage.MaxNameLength)
                     txtName.Text = txtName.Text.Truncate(CreateLevelMessage.MaxNameLength);
-                e.Handled = false; // Makes sure aspects like text selection rendering gets covered by MonoForce
+
+                createBtn.Enabled = !string.IsNullOrWhiteSpace(txtName.Text);
+
+                // Makes sure aspects like text selection rendering gets covered by MonoForce
+                e.Handled = false;
             };
             Add(txtName);
 
@@ -61,27 +67,48 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 Left = 8,
                 Top = lblDescription.Bottom + 4,
                 Width = ClientWidth - 16,
-                Height = 34,
+                Height = 40,
                 Mode = TextBoxMode.Multiline,
                 ScrollBars = ScrollBars.None
             };
             txtDescription.Init();
-            txtDescription.TextChanged += delegate(object o, EventArgs e)
+            txtDescription.TextChanged += (sender, args) =>
             {
-                //Filter the text by checking for length and lines
+                // Dear maintainer:
+                //
+                // If you've come here to avoid the truncation and instead
+                // stop the player from typing those characters on the first place
+                // then you're reading the right comment, because I already tried it!
+                //
+                // Here is why it doesn't work:
+                // * NeoForce just straight ignore args.Handled on this function;
+                // * KeyDown works however if you hold down a key it just ignores your code;
+                // * KeyUp is useless, as is KeyPress;
+                //
+                // Once you are done trying to 'fix' this routine, and have realized
+                // what a terrible mistake that was, please increment the following
+                // counter as a warning to the next guy:
+                //
+                // total_hours_wasted_here = 4
+
                 if (txtDescription.Text.Length > CreateLevelMessage.MaxDescriptionLength)
                     txtDescription.Text = txtDescription.Text.Truncate(CreateLevelMessage.MaxDescriptionLength);
-                var newLines = txtDescription.Text.Count(c => c == '\n');
-                if (newLines >= CreateLevelMessage.MaxDescriptionLines)
+
+                var newLines = txtDescription.Text.Count(c => c == '\n') + 1; // There is always one line!
+                if (newLines > CreateLevelMessage.MaxDescriptionLines)
                 {
-                    txtDescription.Text = txtDescription.Text.Substring(0, txtDescription.Text.Length - 1);
-                    txtDescription.CursorPosition = 0;
+                    txtDescription.Text = string.Join("\n",
+                        txtDescription.Text.Split('\n'), 0, CreateLevelMessage.MaxDescriptionLines);
+                    txtDescription.CursorPosition = txtDescription.Text.Length - 1;
                 }
-                e.Handled = false; // Makes sure aspects like text selection rendering gets covered by MonoForce
+
+                // Makes sure aspects like text selection rendering gets covered by MonoForce
+                // Works everytime, 50% of the time.
+                args.Handled = false;
             };
             Add(txtDescription);
 
-            createBtn = new Button(manager) {Top = 8, Text = "Create"};
+            createBtn = new Button(manager) {Top = 8, Text = "Create", Enabled = false};
             createBtn.Init();
             createBtn.Left = (Width / 2) - (createBtn.Width / 2);
             createBtn.Click += CreateBtn_Click;
