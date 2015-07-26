@@ -2,7 +2,6 @@
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net.Messages;
-using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
@@ -12,7 +11,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
     /// </summary>
     public sealed class CreateLevelDialog : Dialog
     {
-        //Controls
+        // Controls
         private readonly Button createBtn;
         private readonly Label lblDescription;
         private readonly Label lblName;
@@ -20,11 +19,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly TextBox txtDescription;
         private readonly TextBox txtName;
 
-        public CreateLevelDialog(Manager manager, LobbyScreen screen)
-            : base(manager)
+        public CreateLevelDialog(Manager manager, LobbyScreen screen) : base(manager)
         {
             this.screen = screen;
-            //Setup the window
+            // Setup the window
             Text = "Create Level";
             TopPanel.Visible = false;
             Resizable = false;
@@ -32,14 +30,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Height = 196;
             Center();
 
-            //Add controls
-            lblName = new Label(manager) {Left = 8, Top = 8, Text = "Name:", Width = ClientWidth - 16};
+            // Add controls
+            lblName = new Label(manager) { Left = 8, Top = 8, Text = "Name:", Width = ClientWidth - 16 };
             lblName.Init();
             Add(lblName);
 
-            txtName = new TextBox(manager) {Left = 8, Top = lblName.Bottom + 4, Width = ClientWidth - 16};
+            txtName = new TextBox(manager) { Left = 8, Top = lblName.Bottom + 4, Width = ClientWidth - 16 };
             txtName.Init();
-            txtName.TextChanged += delegate(object o, EventArgs e)
+            txtName.TextChanged += (sender, args) =>
             {
                 // If you're trying to fix this function, please check out line 77 first.
                 if (txtName.Text.Length > CreateLevelMessage.MaxNameLength)
@@ -48,7 +46,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 createBtn.Enabled = !string.IsNullOrWhiteSpace(txtName.Text);
 
                 // Makes sure aspects like text selection rendering gets covered by MonoForce
-                e.Handled = false;
+                args.Handled = false;
             };
             Add(txtName);
 
@@ -108,7 +106,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             Add(txtDescription);
 
-            createBtn = new Button(manager) {Top = 8, Text = "Create", Enabled = false};
+            createBtn = new Button(manager) { Top = 8, Text = "Create", Enabled = false };
             createBtn.Init();
             createBtn.Left = (Width / 2) - (createBtn.Width / 2);
             createBtn.Click += CreateBtn_Click;
