@@ -39,7 +39,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window = window;
             Manager = window.Manager;
 
-            //Setup a solid black image to use for fading
+            // Setup a solid black image to use for fading
             fadeTexture = new Texture2D(Manager.GraphicsDevice, 1, 1);
             fadeTexture.SetData(new[] {Color.Black});
 
@@ -78,7 +78,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// </summary>
         public void SwitchScreen(Screen newScreen)
         {
-            //Set the new screen and start fading to it
+            // Set the new screen and start fading to it
             fadeTo = newScreen;
             state = FadeState.Out;
             fadeImage.BringToFront();
@@ -88,7 +88,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         {
             var elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            //Fade the screen in or out, and add/remove its controls accordingly.
+            // Fade the screen in or out, and add/remove its controls accordingly.
             if (state == FadeState.In)
             {
                 fadeAlpha = MathHelper.Clamp(fadeAlpha - (elapsed * FadeSpeed), 0, 1);
@@ -104,10 +104,10 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 fadeAlpha = MathHelper.Clamp(fadeAlpha + (elapsed * FadeSpeed), 0, 1);
                 fadeImage.Alpha = fadeAlpha;
                 fadeImage.Color = Color.White * fadeImage.Alpha;
-                if (fadeAlpha >= 1) //Done fading to black, now set new screen and fade into it
+                if (fadeAlpha >= 1) // Done fading to black, now set new screen and fade into it
                 {
                     Window.Client.Events.Game.ScreenChanged.Invoke(new EventManager.GameEvents.GameScreenEventArgs(fadeTo, Current));
-                    //Destory objects from the first screen
+                    // Destory objects from the first screen
                     if (Current != fadeTo)
                     {
                         Current?.Remove();

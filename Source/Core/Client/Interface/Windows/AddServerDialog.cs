@@ -36,12 +36,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
             int port)
             : base(manager)
         {
-            //Are we editing a server or adding one (They use same dialog)
+            // Are we editing a server or adding one (They use same dialog)
             this.edit = edit;
             this.index = index;
             wndServer = parent;
 
-            //Setup the window
+            // Setup the window
             Text = this.edit ? "Edit Server" : "Add Server";
             TopPanel.Visible = false;
             Resizable = false;
@@ -49,7 +49,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Height = 180;
             Center();
 
-            //Add controls
+            // Add controls
             lblName = new Label(manager) {Left = 8, Top = 8, Text = "Name:", Width = ClientWidth - 16};
             lblName.Init();
             Add(lblName);
@@ -83,7 +83,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(btnSave);
 
             if (this.edit)
-                Validate(); //Validate existing text
+                Validate(); // Validate existing text
         }
 
         /// <summary>

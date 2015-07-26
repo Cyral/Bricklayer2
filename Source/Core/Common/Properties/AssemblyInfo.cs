@@ -5,18 +5,18 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Bricklayer.Core.Common.Properties;
 
-//Assembly information
+// Assembly information
 [assembly: AssemblyTitle("Bricklayer")]
 [assembly: AssemblyProduct("Bricklayer")]
 [assembly: AssemblyDescription("Bricklayer Common")]
 [assembly: AssemblyCopyright("Copyright © 2015 Pyratron Studios")]
 [assembly: AssemblyCulture("")]
 
-//COM information (not needed)
+// COM information (not needed)
 [assembly: ComVisible(false)]
 [assembly: Guid("11549dce-3a75-4c4d-94e2-c5b2c6c5144c")]
 
-//Allow the Bricklayer client and server to use internal methods from the common project
+// Allow the Bricklayer client and server to use internal methods from the common project
 [assembly: InternalsVisibleTo("Bricklayer Client")]
 [assembly: InternalsVisibleTo("Bricklayer Server")]
 

@@ -89,11 +89,11 @@ namespace Bricklayer.Core.Client.Net
         {
             if (im == null) throw new ArgumentNullException(nameof(im));
 
-            //Make sure the unconnected message is coming from the real auth server.
+            // Make sure the unconnected message is coming from the real auth server.
             if (Equals(im.SenderEndPoint, networkManager.AuthEndpoint) &&
                 im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
             {
-                var messageType = (MessageTypes) im.ReadByte(); //Find the type of data message sent
+                var messageType = (MessageTypes) im.ReadByte(); // Find the type of data message sent
                 switch (messageType)
                 {
                     case MessageTypes.AuthInit:
@@ -128,9 +128,9 @@ namespace Bricklayer.Core.Client.Net
                     }
                 }
             }
-            else //Message not from auth server, instead from a game server
+            else // Message not from auth server, instead from a game server
             {
-                var messageType = (MessageTypes) im.ReadByte(); //Find the type of data message sent
+                var messageType = (MessageTypes) im.ReadByte(); // Find the type of data message sent
                 switch (messageType)
                 {
                     case MessageTypes.ServerInfo:
@@ -156,10 +156,10 @@ namespace Bricklayer.Core.Client.Net
             {
                 if (networkManager.NetClient != null)
                 {
-                    //Block thread until next message
+                    // Block thread until next message
                     networkManager.NetClient.MessageReceivedEvent.WaitOne();
 
-                    NetIncomingMessage im; //Holder for the incoming message
+                    NetIncomingMessage im; // Holder for the incoming message
                     while ((im = networkManager.ReadMessage()) != null)
                     {
                         switch (im.MessageType)
@@ -186,21 +186,21 @@ namespace Bricklayer.Core.Client.Net
                                                 "Error connecting to the server."));
                                         break;
                                     }
-                                    //When connected to the server
+                                    // When connected to the server
                                     case NetConnectionStatus.Connected:
                                     {
-                                        //Must read the first byte of the hail message, which should correspond to the byte of the Init type
-                                        im.SenderConnection.RemoteHailMessage.ReadByte(); //Throw it away
+                                        // Must read the first byte of the hail message, which should correspond to the byte of the Init type
+                                        im.SenderConnection.RemoteHailMessage.ReadByte(); // Throw it away
                                         var msg = new InitMessage(im.SenderConnection.RemoteHailMessage,
                                             MessageContext.Client);
-                                        //Fire connect event
+                                        // Fire connect event
                                         networkManager.Client.Events.Network.Game.Connected.Invoke(
                                             new EventManager.NetEvents.GameServerEvents.ConnectEventArgs());
-                                        //And init message with actual data
+                                        // And init message with actual data
                                         networkManager.Client.Events.Network.Game.InitReceived.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
                                         break;
                                     }
-                                    //When disconnected from the server
+                                    // When disconnected from the server
                                     case NetConnectionStatus.Disconnected:
                                     {
                                         var reason = im.ReadString();
@@ -216,13 +216,13 @@ namespace Bricklayer.Core.Client.Net
                                 }
                                 break;
                             }
-                            //Data messages are sent by a connected server. (Such as a game server)
+                            // Data messages are sent by a connected server. (Such as a game server)
                             case NetIncomingMessageType.Data:
                             {
                                 HandleDataMessage(im);
                                 break;
                             }
-                            //Unconnected messages are sent by a server, without creating a full connection. (Used for the auth server)
+                            // Unconnected messages are sent by a server, without creating a full connection. (Used for the auth server)
                             case NetIncomingMessageType.UnconnectedData:
                             {
                                 HandleUnconnectedMessage(im);

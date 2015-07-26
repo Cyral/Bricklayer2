@@ -23,10 +23,10 @@ namespace Bricklayer.Client.Interface
         {
             Client.Input.Update();
 
-            //Update current screen
+            // Update current screen
             ScreenManager.Update(gameTime);
 
-            //Calculate FPS
+            // Calculate FPS
             elapsedTime += gameTime.ElapsedGameTime;
             if (elapsedTime > second)
             {

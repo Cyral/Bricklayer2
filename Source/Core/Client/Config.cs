@@ -72,7 +72,7 @@ namespace Bricklayer.Core.Client
             {
                 RememberMe = true,
                 Password = string.Empty,
-                Resolution = new Point(0, 0), //Empty on default, which tells the client to go fullscreen (Windowed)
+                Resolution = new Point(0, 0), // Empty on default, which tells the client to go fullscreen (Windowed)
                 Username = "Guest",
                 Color = 40,
                 AuthServerAddress = Common.Globals.Values.DefaultAuthAddress,

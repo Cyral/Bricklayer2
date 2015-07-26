@@ -31,7 +31,7 @@ namespace Bricklayer.Client.Interface
         {
             Client = client;
 
-            //Make the window full size, without any border, disallow resize and move, etc., to use the entire screen size.
+            // Make the window full size, without any border, disallow resize and move, etc., to use the entire screen size.
             ClearBackground = true;
             Resizable = false;
             Movable = false;
@@ -43,7 +43,7 @@ namespace Bricklayer.Client.Interface
             Width = manager.Graphics.PreferredBackBufferWidth;
             Height = manager.Graphics.PreferredBackBufferHeight;
 
-            //Set up the ScreenManager which will handle all of the controls from here
+            // Set up the ScreenManager which will handle all of the controls from here
             ScreenManager = new ScreenManager(this);
             ScreenManager.SwitchScreen(new LoginScreen());
 

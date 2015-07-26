@@ -59,19 +59,19 @@ namespace Bricklayer.Core.Client.Components
 
         public override async Task Init()
         {
-            //Set up JSON.NET settings.
+            // Set up JSON.NET settings.
             SerializationSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
                 ContractResolver = new JsonContractResolver()
-                //Use a custom contract resolver that can read private and internal properties
+                // Use a custom contract resolver that can read private and internal properties
             };
 
             if (!Directory.Exists(MainDirectory))
                 Directory.CreateDirectory(MainDirectory);
             ConfigFile = Path.Combine(MainDirectory, "config.json");
 
-            //Add the sub-directories to the directory list
+            // Add the sub-directories to the directory list
             Directories.Add("Content", Path.Combine(ExecutableDirectory, "Content"));
             Directories.Add("Plugins", Path.Combine(MainDirectory, "Plugins"));
             Directories.Add("Maps", Path.Combine(MainDirectory, "Maps"));
@@ -89,7 +89,7 @@ namespace Bricklayer.Core.Client.Components
             var fileName = serverFile;
             if (!File.Exists(fileName))
             {
-                //If server config does not exist, create it and write the default server to it
+                // If server config does not exist, create it and write the default server to it
                 WriteServers(new List<ServerData> {CreateDefaultServer()});
             }
             var json = File.ReadAllText(fileName);
@@ -122,10 +122,10 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         internal void CheckFiles()
         {
-            //Check if the main directory exists. If its dosent, Create the main directory
+            // Check if the main directory exists. If its dosent, Create the main directory
             if (!Directory.Exists(MainDirectory))
                 Directory.CreateDirectory(MainDirectory);
-            //Now check for each sub-folder. If they dont exist, then add them
+            // Now check for each sub-folder. If they dont exist, then add them
             foreach (var kv in Directories.Where(kv => !Directory.Exists(kv.Value)))
                 Directory.CreateDirectory(kv.Value);
         }
@@ -137,7 +137,7 @@ namespace Bricklayer.Core.Client.Components
         {
             if (!string.IsNullOrWhiteSpace(Config.Client.Password))
             {
-                //Get password
+                // Get password
                 using (var secureString = Config.Client.Password.DecryptString())
                 {
                     return (secureString.ToInsecureString());
@@ -151,7 +151,7 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         internal async Task LoadConfig()
         {
-            //If server config does not exist, create it and write the default settings
+            // If server config does not exist, create it and write the default settings
             if (!File.Exists(ConfigFile))
             {
                 Config = Config.GenerateDefaultConfig();
@@ -162,7 +162,7 @@ namespace Bricklayer.Core.Client.Components
             var json = string.Empty;
             await Task.Factory.StartNew(() => json = File.ReadAllText(ConfigFile));
 
-            //If config is empty, regenerate and read again
+            // If config is empty, regenerate and read again
             if (string.IsNullOrWhiteSpace(json))
             {
                 var config = Config.GenerateDefaultConfig();
@@ -182,7 +182,7 @@ namespace Bricklayer.Core.Client.Components
         {
             await Task.Factory.StartNew(() =>
             {
-                //If server config does not exist, create it
+                // If server config does not exist, create it
                 if (!File.Exists(ConfigFile))
                 {
                     var str = File.Create(ConfigFile);

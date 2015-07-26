@@ -20,15 +20,15 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private readonly Button btnJoin;
         private readonly Button btnRefresh;
         private readonly Button btnRemove;
-        private readonly ControlList<ServerDataControl> lstServers; //The listbox of server control items
-        private List<ServerData> servers; //The list of loaded servers
+        private readonly ControlList<ServerDataControl> lstServers; // The listbox of server control items
+        private List<ServerData> servers; // The list of loaded servers
         private readonly ServerScreen screen;
 
         public ServerWindow(Manager manager, ServerScreen screen) : base(manager)
         {
 
             this.screen = screen;
-            //Setup the window
+            // Setup the window
             CaptionVisible = false;
             TopPanel.Visible = false;
             Movable = false;
@@ -38,7 +38,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Shadow = true;
             Center();
 
-            //Create main server list
+            // Create main server list
             lstServers = new ControlList<ServerDataControl>(manager)
             {
                 Left = 8,
@@ -54,14 +54,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 if (lstServers.ItemIndex >= 0)
                 {
                     var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
-                    //Make sure the user clicks the item and not the empty space in the list
+                    // Make sure the user clicks the item and not the empty space in the list
                     if (sdc.CheckPositionMouse(((MouseEventArgs)e).Position - lstServers.AbsoluteRect.Location))
                         screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
                             servers[lstServers.ItemIndex].Port);
                 }
             };
 
-            //Add controls to the bottom panel. (Add server, edit server, etc.)
+            // Add controls to the bottom panel. (Add server, edit server, etc.)
 
             btnEdit = new Button(manager) {Text = "Edit", Top = 8, Width = 64};
             btnEdit.Init();
@@ -83,22 +83,22 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnRemove.Init();
             btnRemove.Click += delegate
             {
-                //Show a messagebox that asks for confirmation to delete the selected server.
+                // Show a messagebox that asks for confirmation to delete the selected server.
                 if (lstServers.Items.Count > 0)
                 {
                     var confirm = new MessageBox(manager, MessageBoxType.YesNo,
                         "Are you sure you would like to remove\nthis server from your server list?",
                         "Confirm Removal");
                     confirm.Init();
-                    //When the message box is closed, check if the user clicked yes, if so, removed the server from the list.
+                    // When the message box is closed, check if the user clicked yes, if so, removed the server from the list.
                     confirm.Closed += delegate(object sender, WindowClosedEventArgs args)
                     {
                         var dialog = sender as Dialog;
-                        if (dialog != null && dialog.ModalResult == ModalResult.Yes) //If user clicked yes
+                        if (dialog != null && dialog.ModalResult == ModalResult.Yes) // If user clicked yes
                         {
                             servers.RemoveAt(lstServers.ItemIndex);
                             lstServers.Items.RemoveAt(lstServers.ItemIndex);
-                            screen.Client.IO.WriteServers(servers); //Write the new server list to disk.
+                            screen.Client.IO.WriteServers(servers); // Write the new server list to disk.
                         }
                     };
                     Manager.Add(confirm);
@@ -112,7 +112,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnAdd.Right = btnEdit.Left - 8;
             btnAdd.Click += delegate
             {
-                //Show add server dialog
+                // Show add server dialog
                 var window = new AddServerDialog(manager, this, lstServers.ItemIndex, false, string.Empty,
                     string.Empty, Globals.Values.DefaultServerPort);
                 window.Init();
@@ -188,9 +188,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private void RefreshServerList()
         {
             lstServers.Items.Clear();
-            //Read the servers from config
+            // Read the servers from config
             servers = screen.Client.IO.ReadServers();
-            //Populate the list 
+            // Populate the list 
             foreach (var server in servers)
             {
                 var control = new ServerDataControl(screen, Manager, server, lstServers);

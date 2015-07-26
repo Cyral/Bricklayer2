@@ -43,7 +43,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         internal InputHandler()
         {
-            //Initialize
+            // Initialize
         }
 
         /// <summary>

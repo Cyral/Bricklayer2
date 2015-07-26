@@ -45,7 +45,7 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
-            //Actual data is only sent from server to client
+            // Actual data is only sent from server to client
             if (Context == MessageContext.Client)
             {
                 Description = im.ReadString();

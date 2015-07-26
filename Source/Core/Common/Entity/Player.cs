@@ -16,10 +16,10 @@ namespace Bricklayer.Core.Common.Entity
     /// </summary>
     public class Player : PlayerData
     {
-        //Contants
+        // Contants
         public static readonly int Width = 16, Height = 16;
 
-        //Entity States
+        // Entity States
         /// <summary>
         /// The current internal state (What the game sees, without interpolation)
         /// </summary>
@@ -40,7 +40,7 @@ namespace Bricklayer.Core.Common.Entity
         /// </summary>
         public FacingDirection Direction { get; protected set; }
 
-        //Physic States
+        // Physic States
         public bool IsJumping { get; protected set; }
         public bool IsOnGround { get; protected set; }
         public bool WasJumping { get; protected set; }
@@ -81,8 +81,8 @@ namespace Bricklayer.Core.Common.Entity
         {
             Connection = connection;
             Level = level;
-            //Smiley = SmileyType.Default;
-            //Mode = PlayerMode.Normal;
+            // Smiley = SmileyType.Default;
+            // Mode = PlayerMode.Normal;
             Tint = Color.White;
 
             SimulationState = new EntityState();

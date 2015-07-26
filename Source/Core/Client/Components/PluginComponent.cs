@@ -34,17 +34,17 @@ namespace Bricklayer.Core.Client.Components
         {
             if (!Client.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
-            //Resolve assembly references for plugins.
+            // Resolve assembly references for plugins.
             AppDomain.CurrentDomain.AssemblyResolve += 
                 (sender, args) =>
                 {
-                    //If a plugin.dll is trying to load a referenced assembly
+                    // If a plugin.dll is trying to load a referenced assembly
                     if (args.RequestingAssembly.FullName.Split(',')[0] == "plugin")
                     {
                         var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
                         if (File.Exists(path))
                             return Assembly.LoadFile(path);
-                        path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe"); //Try to load a .exe if .dll doesn't exist
+                        path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe"); // Try to load a .exe if .dll doesn't exist
                         if (File.Exists(path))
                             return Assembly.LoadFile(path);
                     }
@@ -63,7 +63,7 @@ namespace Bricklayer.Core.Client.Components
                     Client.Window.Add(pluginWindow);
                     pluginWindow.Show();
                 }
-                //Tell the auth server it got the message
+                // Tell the auth server it got the message
                 Client.Network.PingAuthMessage(PingAuthMessage.PingResponse.GotPlugin, args.Message.ID.ToString());
             });
 
@@ -75,7 +75,7 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         internal void LoadPlugins()
         {
-            //Get a list of all the .dlls in the directory
+            // Get a list of all the .dlls in the directory
             IEnumerable<PluginData> files = null;
             try
             {
@@ -89,11 +89,11 @@ namespace Bricklayer.Core.Client.Components
             {
                 foreach (var file in files.Where(file => !plugins.Contains(file)))
                 {
-                    //TODO: Use AppDomains for security
-                    //Load the assembly
+                    // TODO: Use AppDomains for security
+                    // Load the assembly
                     try
                     {
-                        //Make sure dependencies are met.
+                        // Make sure dependencies are met.
                         if (file.Dependencies.Count > 0)
                         {
                             // ReSharper disable once PossibleMultipleEnumeration
@@ -119,9 +119,9 @@ namespace Bricklayer.Core.Client.Components
         private void RegisterPlugin(ClientPlugin plugin)
         {
             plugins.Add(plugin);
-            //Load plugin content
+            // Load plugin content
             Client.Content.LoadTextures(Path.Combine(plugin.Path, Path.Combine("Content", "Textures")), Client);
-            //Load plugin
+            // Load plugin
             plugin.Load();
             Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
         }

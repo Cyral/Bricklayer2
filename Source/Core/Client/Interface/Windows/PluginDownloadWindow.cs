@@ -34,7 +34,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// </summary>
         internal static bool IsDownloading(int id)
         {
-            return downloads.Contains(id); //Already downloading this plugin
+            return downloads.Contains(id); // Already downloading this plugin
         }
 
         public PluginDownloadWindow(Manager manager, MainWindow window, string modName, int id, string fileName,
@@ -55,7 +55,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Center();
             Top = 24;
 
-            //Add controls
+            // Add controls
             lblName = new Label(manager)
             {
                 Left = 8,
@@ -67,7 +67,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lblName.Alignment = Alignment.TopLeft;
             Add(lblName);
 
-            //Add controls
+            // Add controls
             lblPercent = new Label(manager) {Left = 8, Top = 8, Text = "0%", Width = ClientWidth - 16};
             lblPercent.Init();
             lblPercent.Alignment = Alignment.TopRight;
@@ -79,10 +79,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             Height = MinimumHeight = pbDownloaded.Bottom + 22;
 
-            //For multiple dialogs, stack them.
+            // For multiple dialogs, stack them.
             Top += (Height + 8) * downloads.Count;
 
-            //Download the file
+            // Download the file
             downloads.Add(id);
             try
             {
@@ -108,7 +108,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         private void DownloadComplete(object sender, AsyncCompletedEventArgs e)
         {
-            //Load new plugin (LoadPlugins will only load new plugins, not existing ones again)
+            // Load new plugin (LoadPlugins will only load new plugins, not existing ones again)
             window.Client.Plugins.LoadPlugins();
             downloads.Remove(id);
             Close();

@@ -15,7 +15,7 @@ namespace Bricklayer.Core.Client.Components
     /// </summary>
     internal class NetworkManager : ClientComponent
     {
-        //Message delivery method
+        // Message delivery method
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
 
         /// <summary>
@@ -53,13 +53,13 @@ namespace Bricklayer.Core.Client.Components
         public override async Task Init()
         {
             AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress),
-                Globals.Values.DefaultAuthPort); //Find the address of the auth server
+                Globals.Values.DefaultAuthPort); // Find the address of the auth server
             TokenKeys = new Token();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             Config = new NetPeerConfiguration(Globals.Strings.NetworkID);
 
-            //Create message handler (So events are initialized, but don't start it)
+            // Create message handler (So events are initialized, but don't start it)
             Handler = new MessageHandler(this);
 
             // Create new client, with previously created configs
@@ -76,7 +76,7 @@ namespace Bricklayer.Core.Client.Components
                                      | NetIncomingMessageType.UnconnectedData);
             // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
-            //Listen for init response from auth server containing token keys
+            // Listen for init response from auth server containing token keys
             Client.Events.Network.Auth.InitReceived.AddHandler(args =>
             {
                 TokenKeys.Username = args.Username;
@@ -160,8 +160,8 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void Send(IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            NetClient.SendMessage(message, deliveryMethod); //Send
+            var message = EncodeMessage(gameMessage); // Write packet ID and encode
+            NetClient.SendMessage(message, deliveryMethod); // Send
         }
 
         /// <summary>
@@ -170,9 +170,9 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void SendUnconnected(string ip, int port, IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage); //Write packet ID and encode
+            var message = EncodeMessage(gameMessage); // Write packet ID and encode
             var receiver = new IPEndPoint(NetUtility.Resolve(ip), port); // Auth Server info
-            NetClient.SendUnconnectedMessage(message, receiver); //Send
+            NetClient.SendUnconnectedMessage(message, receiver); // Send
         }
 
         /// <summary>
@@ -181,8 +181,8 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            NetClient.SendUnconnectedMessage(message, receiver); //Send
+            var message = EncodeMessage(gameMessage); // Write packet ID and encode
+            NetClient.SendUnconnectedMessage(message, receiver); // Send
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Bricklayer.Core.Client.Components
         {
             gameMessage.Context = MessageContext.Client;
             var message = NetClient.CreateMessage();
-            //Write packet type ID
+            // Write packet type ID
             message.Write((byte)gameMessage.MessageType);
             gameMessage.Encode(message);
             return message;

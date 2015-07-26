@@ -87,7 +87,7 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public sealed class NetEvents
         {
-            //Arguments define what values are passed to the event handler(s).
+            // Arguments define what values are passed to the event handler(s).
 
             #region Arguments
 
@@ -241,8 +241,8 @@ namespace Bricklayer.Core.Server
 
             #endregion
 
-            //Events represent a collection of event handlers.
-            //(Note: These are not standard .NET events, see the Event class)
+            // Events represent a collection of event handlers.
+            // (Note: These are not standard .NET events, see the Event class)
 
             #region Events
 

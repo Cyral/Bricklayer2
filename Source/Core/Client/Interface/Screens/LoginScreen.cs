@@ -11,7 +11,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
     internal class LoginScreen : Screen
     {
         protected internal override GameState State => GameState.Login;
-        //Controls
+        // Controls
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
         private Label lblVersion;
         private LoginWindow wndLogin;
@@ -36,14 +36,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
             imgBackground.Init();
             Window.Add(imgBackground);
 
-            //Add the logo image
+            // Add the logo image
             imgLogo = new ImageBox(Manager) {Image = Client.Content["gui.logosmall"], SizeMode = SizeMode.Normal};
             imgLogo.Init();
             imgLogo.SetSize(imgLogo.Image.Width, imgLogo.Image.Height);
             imgLogo.SetPosition((Window.Width / 2) - (imgLogo.Image.Width / 2), 0);
             Window.Add(imgLogo);
 
-            //Add github contribute link
+            // Add github contribute link
             imgGithub = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.icons.github"],
@@ -60,7 +60,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 (sender, args) => { if (Manager.Game.IsActive) Process.Start(Constants.Strings.GithubURL); };
             Window.Add(imgGithub);
 
-            //Add Pyratron link
+            // Add Pyratron link
             imgPyratron = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.icons.pyratron"],
@@ -78,7 +78,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 (sender, args) => { if (Manager.Game.IsActive) Process.Start(Constants.Strings.PyratronURL); };
             Window.Add(imgPyratron);
 
-            //Add version tag
+            // Add version tag
             lblVersion = new Label(Manager) {Font = FontSize.Default14};
             lblVersion.Init();
             lblVersion.SetSize(200, 20);
@@ -88,7 +88,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             wndLogin = new LoginWindow(Manager, this);
             wndLogin.Init();
-            //If the login window is overlapping the logo, push it down a bit. (For smaller screens)
+            // If the login window is overlapping the logo, push it down a bit. (For smaller screens)
             if (wndLogin.Top < imgLogo.Top + imgLogo.Height + 8)
                 wndLogin.Top = imgLogo.Top + imgLogo.Height + 24;
             Window.Add(wndLogin);

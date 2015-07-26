@@ -41,13 +41,13 @@ namespace Bricklayer.Core.Client.Interface.Screens
             sbStats.Add(lblStats);
             Window.Add(sbStats);
 
-            //Chat input box
+            // Chat input box
             txtChat = new TextBox(Manager);
             txtChat.Init();
             txtChat.Left = 8;
             txtChat.DrawFormattedText = false;
             txtChat.Bottom = sbStats.Top - 8;
-            txtChat.Width = (int)(Manager.TargetWidth * .4f) - 16; //Remove 16 to align due to invisible scrollbar
+            txtChat.Width = (int)(Manager.TargetWidth * .4f) - 16; // Remove 16 to align due to invisible scrollbar
             txtChat.Visible = false;
             txtChat.Passive = true;
             Window.Add(txtChat);

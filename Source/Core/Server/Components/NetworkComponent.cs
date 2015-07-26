@@ -27,7 +27,7 @@ namespace Bricklayer.Core.Server.Components
     public class NetworkComponent : ServerComponent
     {
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
-            //Message delivery method
+            // Message delivery method
 
         /// <summary>
         /// The server configuration
@@ -65,7 +65,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         private readonly Dictionary<Guid, NetConnection> pendingSessions = new Dictionary<Guid, NetConnection>();
 
-        private bool isDisposed; //Is the instance disposed?
+        private bool isDisposed; // Is the instance disposed?
 
         public NetworkComponent(Server server) : base(server)
         {
@@ -79,7 +79,7 @@ namespace Bricklayer.Core.Server.Components
             };
             timer.Start();
 
-            //When a user requests to join, verify their account is valid with the auth server.
+            // When a user requests to join, verify their account is valid with the auth server.
             Server.Events.Network.UserLoginRequested.AddHandler(args =>
             {
                 Logger.WriteLine(LogType.Net,
@@ -89,11 +89,11 @@ namespace Bricklayer.Core.Server.Components
                 pendingSessions.Add(args.UUID, args.Connection);
                 var message = EncodeMessage(new PublicKeyMessage(args.Username, args.UUID, args.PublicKey));
 
-                //Send public key to auth server to verify if session is valid
+                // Send public key to auth server to verify if session is valid
                 NetServer.SendUnconnectedMessage(message, AuthEndpoint);
             });
 
-            //If the response from the auth server is valid, approve their connection request and finalize the connection process.
+            // If the response from the auth server is valid, approve their connection request and finalize the connection process.
             Server.Events.Network.SessionValidated.AddHandler(async args =>
             {
                 if (!pendingSessions.ContainsKey(args.UUID))
@@ -123,7 +123,7 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Network.MessageRequested.AddHandler(async args =>
             {
-                //When the client request an init message (refreshing the lobby)
+                // When the client request an init message (refreshing the lobby)
                 if (args.Type == MessageTypes.Init)
                 {
                     Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
@@ -137,7 +137,7 @@ namespace Bricklayer.Core.Server.Components
                 }
             });
 
-            //When a client loads their server list and requests server information, such as description, players online, etc.
+            // When a client loads their server list and requests server information, such as description, players online, etc.
             Server.Events.Network.InfoRequested.AddHandler(
                 args =>
                 {
@@ -149,21 +149,21 @@ namespace Bricklayer.Core.Server.Components
             Server.Events.Network.CreateLevelMessageRecieved.AddHandler(
                 async args =>
                 {
-                    //Create the new level
+                    // Create the new level
                     var level = await Server.CreateLevel(args.Sender, args.Name, args.Description);
                     Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" created by {level.Creator.Username}");
 
-                    //Fire another event with the newly created level, so that plugins can access it.
-                    //(As the current event is only from the network message)
+                    // Fire another event with the newly created level, so that plugins can access it.
+                    // (As the current event is only from the network message)
                     Server.Events.Game.Levels.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
 
                     Send(new LevelDataMessage(level), args.Sender);
-                }, EventPriority.InternalFinal); //Must be the last event called as it fires another event
+                }, EventPriority.InternalFinal); // Must be the last event called as it fires another event
 
             Server.Events.Network.JoinLevelMessageRecieved.AddHandler(
                 async args =>
                 {
-                    //Create the new level
+                    // Create the new level
                     var level = await Server.JoinLevel(args.Sender, args.UUID);
                     Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {args.Sender.Username}");
                     Send(new LevelDataMessage(level), args.Sender);
@@ -199,7 +199,7 @@ namespace Bricklayer.Core.Server.Components
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
 
-            //Find the address of the auth server
+            // Find the address of the auth server
             await
                 Task.Factory.StartNew(
                     () =>
@@ -225,7 +225,7 @@ namespace Bricklayer.Core.Server.Components
         /// <param name="maxconnections">Maximum clients connectable</param>
         public bool Start(int port, int maxconnections)
         {
-            //Set up config
+            // Set up config
             Config = new NetPeerConfiguration(Globals.Strings.NetworkID)
             {
                 Port = port,
@@ -241,7 +241,7 @@ namespace Bricklayer.Core.Server.Components
                                      | NetIncomingMessageType.UnconnectedData);
             // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
-            //Start Lidgren server
+            // Start Lidgren server
             NetServer = new NetServer(Config);
             try
             {
@@ -258,12 +258,12 @@ namespace Bricklayer.Core.Server.Components
             Log("Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(),
                 Config.MaximumConnections.ToString());
 
-            //Start message handler
+            // Start message handler
             MsgHandler = new MessageHandler(Server);
             MsgHandler.Start();
             Log("Message handler started.");
 
-            return true; //No error
+            return true; // No error
         }
 
         /// <summary>
@@ -305,8 +305,8 @@ namespace Bricklayer.Core.Server.Components
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            NetServer.SendUnconnectedMessage(message, receiver); //Send
+            var message = EncodeMessage(gameMessage); // Write packet ID and encode
+            NetServer.SendUnconnectedMessage(message, receiver); // Send
         }
 
         /// <summary>
@@ -339,10 +339,10 @@ namespace Bricklayer.Core.Server.Components
         {
             var message = EncodeMessage(gameMessage);
 
-            //Search for recipients
+            // Search for recipients
             var recipients = NetServer.Connections.Where(x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true)?.Connection.RemoteUniqueIdentifier != recipient.RemoteUniqueIdentifier).ToList();
 
-            if (recipients.Count > 0) //Send to recipients found
+            if (recipients.Count > 0) // Send to recipients found
                 NetServer.SendMessage(message, recipients, deliveryMethod, 0);
         }
 
@@ -355,11 +355,11 @@ namespace Bricklayer.Core.Server.Components
         {
             var message = EncodeMessage(gameMessage);
 
-            //Search for recipients
+            // Search for recipients
             var recipients =
                 NetServer.Connections.Where(x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true)?.Level == level).ToList();
 
-            if (recipients.Count > 0) //Send to recipients found
+            if (recipients.Count > 0) // Send to recipients found
                 NetServer.SendMessage(message, recipients, deliveryMethod, 0);
         }
 
@@ -369,7 +369,7 @@ namespace Bricklayer.Core.Server.Components
         /// <param name="gameMessage">IMessage to send</param>
         public void Global(IMessage gameMessage)
         {
-            NetServer.SendToAll(EncodeMessage(gameMessage), deliveryMethod); //Send
+            NetServer.SendToAll(EncodeMessage(gameMessage), deliveryMethod); // Send
         }
 
         /// <summary>
@@ -381,7 +381,7 @@ namespace Bricklayer.Core.Server.Components
         {
             gameMessage.Context = MessageContext.Server;
             var message = NetServer.CreateMessage();
-            //Write packet type ID
+            // Write packet type ID
             message.Write((byte)gameMessage.MessageType);
             gameMessage.Encode(message);
             return message;

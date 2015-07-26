@@ -15,7 +15,7 @@ namespace Bricklayer.Plugins.TestClientPlugin
 
         public override void Load()
         {
-            //Demo window
+            // Demo window
             var window = new Window(Client.UI);
             window.Init();
             window.SetSize(300, 120);

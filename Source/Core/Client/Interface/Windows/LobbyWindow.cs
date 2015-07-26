@@ -42,7 +42,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Shadow = true;
             Center();
 
-            //Group panels
+            // Group panels
             grpServer = new GroupPanel(Manager)
             {
                 Left = ClientWidth - Globals.Values.MaxBannerWidth - 1,

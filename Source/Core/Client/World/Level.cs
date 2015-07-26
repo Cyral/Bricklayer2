@@ -66,7 +66,7 @@ namespace Bricklayer.Core.Client.World
         /// </summary>
         private void DrawTiles(SpriteBatch batch)
         {
-            //Draw Foreground Blocks
+            // Draw Foreground Blocks
             for (var x = (int)Camera.Left / Tile.Width; x <= (int)Camera.Right / Tile.Width; x++)
             {
                 for (var y = ((int)Camera.Bottom / Tile.Height); y >= (int)Camera.Top / Tile.Height; y--)

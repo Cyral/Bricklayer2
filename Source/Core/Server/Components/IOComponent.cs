@@ -71,7 +71,7 @@ namespace Bricklayer.Core.Server.Components
 
         public override async Task Init()
         {
-            //Paths.
+            // Paths.
             ServerDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (ServerDirectory != null)
             {
@@ -81,7 +81,7 @@ namespace Bricklayer.Core.Server.Components
                 ConfigFile = Path.Combine(ServerDirectory, "config.json");
             }
 
-            //Create directories that don't exist.
+            // Create directories that don't exist.
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
             if (!Directory.Exists(LevelsDirectory))
@@ -91,19 +91,19 @@ namespace Bricklayer.Core.Server.Components
 
             sb = new StringBuilder();
 
-            //Set up JSON.net settings.
+            // Set up JSON.net settings.
             SerializationSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
                 ContractResolver = new JsonContractResolver()
-                //Use a custom contract resolver that can read private and internal properties
+                // Use a custom contract resolver that can read private and internal properties
             };
 
-            //Log a message to the log file stating the startup time and version.
+            // Log a message to the log file stating the startup time and version.
             LogMessage(
                 $"SERVER STARTUP:\n{Constants.Strings.ServerTitle} {Constants.VersionString}\n\nServer is starting now, on {DateTime.Now.ToString("U")}\n\n");
 
-            //Load configuration.
+            // Load configuration.
             await LoadConfig();
             LoadBanner();
 
@@ -117,7 +117,7 @@ namespace Bricklayer.Core.Server.Components
         {
             try
             {
-                //If server config does not exist, create it and write the default settings
+                // If server config does not exist, create it and write the default settings
                 if (!File.Exists(ConfigFile))
                 {
                     Config = Config.GenerateDefaultConfig();
@@ -129,7 +129,7 @@ namespace Bricklayer.Core.Server.Components
                 var json = string.Empty;
                 await Task.Factory.StartNew(() => json = File.ReadAllText(ConfigFile));
 
-                //If config is empty, regenerate and read again
+                // If config is empty, regenerate and read again
                 if (string.IsNullOrWhiteSpace(json))
                 {
                     var config = Config.GenerateDefaultConfig();
@@ -164,7 +164,7 @@ namespace Bricklayer.Core.Server.Components
                 if (logWriter == null || date.Date != lastLog.Date)
                 {
                     var path = Path.Combine(LogDirectory, date.ToString("MM-dd-yyyy") + ".txt");
-                    if (logWriter != null) //On day change, make a new stream/file
+                    if (logWriter != null) // On day change, make a new stream/file
                     {
                         logWriter.Close();
                         logWriter.Dispose();
@@ -189,7 +189,7 @@ namespace Bricklayer.Core.Server.Components
                 logWriter?.Close();
             }
             #endif
-            //Logging errors occur on MONO, this fixes it (Although the performance increase on the Windows version (less file opening) is not present)
+            // Logging errors occur on MONO, this fixes it (Although the performance increase on the Windows version (less file opening) is not present)
             #if MONO
             try
             {
@@ -233,7 +233,7 @@ namespace Bricklayer.Core.Server.Components
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    //If server config does not exist, create it
+                    // If server config does not exist, create it
                     if (!File.Exists(ConfigFile))
                     {
                         var str = File.Create(ConfigFile);
@@ -256,7 +256,7 @@ namespace Bricklayer.Core.Server.Components
         {
             var path = string.Empty;
 
-            //Scan for possible names
+            // Scan for possible names
             var formats = new[] {"jpg", "jpeg", "png"};
             foreach (
                 var formatPath in
@@ -298,13 +298,13 @@ namespace Bricklayer.Core.Server.Components
                     {
                         using (var writer = new BinaryWriter(gzip))
                         {
-                            //Version used for save format migrations
+                            // Version used for save format migrations
                             writer.Write(Constants.Version.Major);
                             writer.Write(Constants.Version.Minor);
                             writer.Write(Constants.Version.Build);
                             writer.Write(Constants.Version.Revision);
 
-                            //Read tiles
+                            // Read tiles
                             level.EncodeTiles(writer);
                         }
                     }
@@ -326,12 +326,12 @@ namespace Bricklayer.Core.Server.Components
                         {
                             using (var reader = new BinaryReader(gzip))
                             {
-                                //Version used for save format migrations
+                                // Version used for save format migrations
                                 // ReSharper disable once UnusedVariable (This may be used in the future)
                                 var version = new Version(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(),
                                     reader.ReadInt32());
 
-                                //Read tiles
+                                // Read tiles
                                 level.DecodeTiles(reader);
                             }
                         }

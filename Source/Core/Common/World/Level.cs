@@ -76,7 +76,7 @@ namespace Bricklayer.Core.Common.World
             for (var i = 0; i < playersLength; i++)
                 Players.Add(new Player(im));
 
-            //Read the tile data
+            // Read the tile data
             var memLength = im.ReadInt32();
             using (var memory = new MemoryStream(im.ReadBytes(memLength)))
             {
@@ -98,7 +98,7 @@ namespace Bricklayer.Core.Common.World
             Width = reader.ReadInt32();
             Height = reader.ReadInt32();
             Tiles = new Tile[Width, Height, 2];
-            //Read the background layer, then foreground layer.
+            // Read the background layer, then foreground layer.
             for (var layer = 0; layer < 2; layer++)
             {
                 for (var y = 0; y < Height; y++)
@@ -113,7 +113,7 @@ namespace Bricklayer.Core.Common.World
 
         internal override void Encode(NetOutgoingMessage om)
         {
-            //Write the data such as name, description, etc.
+            // Write the data such as name, description, etc.
             base.Encode(om);
 
 
@@ -122,11 +122,11 @@ namespace Bricklayer.Core.Common.World
             foreach (var player in Players)
                 player.Encode(om);
 
-            //Write the tile data
+            // Write the tile data
             using (var memory = new MemoryStream())
             {
-                //Use Gzip to compress the data
-                //Note: In Bricklayer v1, RLE was used, Gzip is simpler to use and results in better compression hower.
+                // Use Gzip to compress the data
+                // Note: In Bricklayer v1, RLE was used, Gzip is simpler to use and results in better compression hower.
                 using (var gzip = new GZipStream(memory, CompressionMode.Compress, true))
                 {
                     using (var writer = new BinaryWriter(gzip))
@@ -144,7 +144,7 @@ namespace Bricklayer.Core.Common.World
         {
             writer.Write(Width);
             writer.Write(Height);
-            //Write the background layer, then foreground layer, so values that are the same are written next to each other
+            // Write the background layer, then foreground layer, so values that are the same are written next to each other
             for (var layer = 0; layer < 2; layer++)
             {
                 for (var y = 0; y < Height; y++)

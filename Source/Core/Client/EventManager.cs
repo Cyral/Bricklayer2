@@ -31,7 +31,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public sealed class GameEvents
         {
-            //Arguments define what values are passed to the event handler(s).
+            // Arguments define what values are passed to the event handler(s).
             #region Arguments
 
             public class GameStateEventArgs : BricklayerEventArgs
@@ -59,8 +59,8 @@ namespace Bricklayer.Core.Client
             }
             #endregion
 
-            //Events represent a collection of event handlers.
-            //(Note: These are not standard .NET events, see the Event class)
+            // Events represent a collection of event handlers.
+            // (Note: These are not standard .NET events, see the Event class)
 
             #region Events
 
@@ -97,7 +97,7 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public sealed class AuthServerEvents
             {
-                //Arguments define what values are passed to the event handler(s).
+                // Arguments define what values are passed to the event handler(s).
                 #region Arguments
 
                 public class InitEventArgs : BricklayerEventArgs
@@ -147,8 +147,8 @@ namespace Bricklayer.Core.Client
                 }
                 #endregion
 
-                //Events represent a collection of event handlers.
-                //(Note: These are not standard .NET events, see the Event class)
+                // Events represent a collection of event handlers.
+                // (Note: These are not standard .NET events, see the Event class)
 
                 #region Events
 
@@ -184,7 +184,7 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public sealed class GameServerEvents
             {
-                //Arguments define what values are passed to the event handler(s).
+                // Arguments define what values are passed to the event handler(s).
 
                 #region Arguments
 
@@ -291,8 +291,8 @@ namespace Bricklayer.Core.Client
                 }
                 #endregion
 
-                //Events represent a collection of event handlers.
-                //(Note: These are not standard .NET events, see the Event class)
+                // Events represent a collection of event handlers.
+                // (Note: These are not standard .NET events, see the Event class)
 
                 #region Events
 

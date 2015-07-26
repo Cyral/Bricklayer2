@@ -53,7 +53,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             int levelsLength = im.ReadByte();
             for (var i = 0; i < levelsLength; i++)
             {
-                Levels.Add(new LevelData(im)); //The level class will handle decoding the message
+                Levels.Add(new LevelData(im)); // The level class will handle decoding the message
             }
         }
 
