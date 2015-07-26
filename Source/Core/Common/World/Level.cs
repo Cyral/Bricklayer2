@@ -79,15 +79,9 @@ namespace Bricklayer.Core.Common.World
             // Read the tile data
             var memLength = im.ReadInt32();
             using (var memory = new MemoryStream(im.ReadBytes(memLength)))
-            {
-                using (var gzip = new GZipStream(memory, CompressionMode.Decompress, true))
-                {
-                    using (var reader = new BinaryReader(gzip))
-                    { 
-                        DecodeTiles(reader);
-                    }
-                }
-            }
+            using (var gzip = new GZipStream(memory, CompressionMode.Decompress, true))
+            using (var reader = new BinaryReader(gzip))
+                DecodeTiles(reader);
         }
 
         /// <summary>
@@ -124,21 +118,17 @@ namespace Bricklayer.Core.Common.World
 
             // Write the tile data
             using (var memory = new MemoryStream())
+            // Use Gzip to compress the data
+            // Note: In Bricklayer v1, RLE was used, Gzip is simpler to use and results in better compression hower.
+            using (var gzip = new GZipStream(memory, CompressionMode.Compress, true))
             {
-                // Use Gzip to compress the data
-                // Note: In Bricklayer v1, RLE was used, Gzip is simpler to use and results in better compression hower.
-                using (var gzip = new GZipStream(memory, CompressionMode.Compress, true))
-                {
-                    using (var writer = new BinaryWriter(gzip))
-                    {
-                        EncodeTiles(writer);
-                    }
-                    var memArr = memory.ToArray();
-                    om.Write(memArr.Length);
-                    om.Write(memArr);
-                }
+                using (var writer = new BinaryWriter(gzip))
+                    EncodeTiles(writer);
+                var memArr = memory.ToArray();
+                om.Write(memArr.Length);
+                om.Write(memArr);
             }
-        }
+    }
 
         internal void EncodeTiles(BinaryWriter writer)
         {

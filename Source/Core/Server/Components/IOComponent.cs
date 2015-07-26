@@ -293,21 +293,17 @@ namespace Bricklayer.Core.Server.Components
             {
                 using (var filestream = new BufferedStream(
                     File.Open(Path.Combine(LevelsDirectory, level.UUID.ToString("N") + ".level"), FileMode.Create)))
+                using (var gzip = new GZipStream(filestream, CompressionMode.Compress, true))
+                using (var writer = new BinaryWriter(gzip))
                 {
-                    using (var gzip = new GZipStream(filestream, CompressionMode.Compress, true))
-                    {
-                        using (var writer = new BinaryWriter(gzip))
-                        {
-                            // Version used for save format migrations
-                            writer.Write(Constants.Version.Major);
-                            writer.Write(Constants.Version.Minor);
-                            writer.Write(Constants.Version.Build);
-                            writer.Write(Constants.Version.Revision);
+                    // Version used for save format migrations
+                    writer.Write(Constants.Version.Major);
+                    writer.Write(Constants.Version.Minor);
+                    writer.Write(Constants.Version.Build);
+                    writer.Write(Constants.Version.Revision);
 
-                            // Read tiles
-                            level.EncodeTiles(writer);
-                        }
-                    }
+                    // Read tiles
+                    level.EncodeTiles(writer);
                 }
             });
         }
@@ -321,20 +317,16 @@ namespace Bricklayer.Core.Server.Components
                 await Task.Run(() =>
                 {
                     using (var filestream = new BufferedStream(File.Open(path, FileMode.Open)))
+                    using (var gzip = new GZipStream(filestream, CompressionMode.Decompress, true))
+                    using (var reader = new BinaryReader(gzip))
                     {
-                        using (var gzip = new GZipStream(filestream, CompressionMode.Decompress, true))
-                        {
-                            using (var reader = new BinaryReader(gzip))
-                            {
-                                // Version used for save format migrations
-                                // ReSharper disable once UnusedVariable (This may be used in the future)
-                                var version = new Version(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(),
-                                    reader.ReadInt32());
+                        // Version used for save format migrations
+                        // ReSharper disable once UnusedVariable (This may be used in the future)
+                        var version = new Version(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(),
+                            reader.ReadInt32());
 
-                                // Read tiles
-                                level.DecodeTiles(reader);
-                            }
-                        }
+                        // Read tiles
+                        level.DecodeTiles(reader);
                     }
                 });
             }

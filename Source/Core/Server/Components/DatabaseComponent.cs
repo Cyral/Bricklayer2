@@ -246,9 +246,7 @@ namespace Bricklayer.Core.Server.Components
 
                             // Perform command and handle the result
                             using (var reader = command.ExecuteReader())
-                            {
                                 action(reader); // Let caller handle logic
-                            }
                             con.Close();
                         }
                     }

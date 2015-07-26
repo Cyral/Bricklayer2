@@ -135,15 +135,11 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         internal string GetPassword()
         {
-            if (!string.IsNullOrWhiteSpace(Config.Client.Password))
-            {
-                // Get password
-                using (var secureString = Config.Client.Password.DecryptString())
-                {
-                    return (secureString.ToInsecureString());
-                }
-            }
-            return string.Empty;
+            if (string.IsNullOrWhiteSpace(Config.Client.Password))
+                return string.Empty;
+            // Get password
+            using (var secureString = Config.Client.Password.DecryptString())
+                return (secureString.ToInsecureString());
         }
 
         /// <summary>
@@ -199,9 +195,7 @@ namespace Bricklayer.Core.Client.Components
         internal void SetPassword(string password)
         {
             using (var secureString = password.ToSecureString())
-            {
                 Config.Client.Password = secureString.EncryptString();
-            }
         }
 
         private static ServerData CreateDefaultServer()
