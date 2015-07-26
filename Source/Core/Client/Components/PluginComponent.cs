@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net.Messages;
-using MonoForce.Controls;
-using Console = System.Console;
 
 namespace Bricklayer.Core.Client.Components
 {

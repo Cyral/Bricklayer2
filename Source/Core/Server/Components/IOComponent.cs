@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.World;
 using Newtonsoft.Json;
+using Level = Bricklayer.Core.Server.World.Level;
 
 namespace Bricklayer.Core.Server.Components
 {
@@ -314,23 +315,33 @@ namespace Bricklayer.Core.Server.Components
         internal async Task<Level> LoadLevel(Guid uuid)
         {
             var level = new Level(await Server.Database.GetLevelData(uuid));
-            await Task.Run(() =>
+            var path = Path.Combine(LevelsDirectory, uuid.ToString("N") + ".level");
+            if (File.Exists(path))
             {
-                using (var filestream = new BufferedStream(File.Open(Path.Combine(LevelsDirectory, uuid.ToString("N") + ".level"), FileMode.Open)))
+                await Task.Run(() =>
                 {
-                    using (var gzip = new GZipStream(filestream, CompressionMode.Decompress, true))
+                    using (var filestream = new BufferedStream(File.Open(path, FileMode.Open)))
                     {
-                        using (var reader = new BinaryReader(gzip))
+                        using (var gzip = new GZipStream(filestream, CompressionMode.Decompress, true))
                         {
-                            //Version used for save format migrations
-                            var version = new Version(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+                            using (var reader = new BinaryReader(gzip))
+                            {
+                                //Version used for save format migrations
+                                // ReSharper disable once UnusedVariable (This may be used in the future)
+                                var version = new Version(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(),
+                                    reader.ReadInt32());
 
-                            //Read tiles
-                            level.DecodeTiles(reader);
+                                //Read tiles
+                                level.DecodeTiles(reader);
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+            else
+            {
+                Logger.WriteLine(LogType.Error, $"Level file \"{uuid.ToString("N")}\" not found.");
+            }
             return level;
         }
     }

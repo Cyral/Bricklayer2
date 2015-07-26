@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace Bricklayer.Core.Common.World
 {
@@ -41,16 +43,28 @@ namespace Bricklayer.Core.Common.World
         /// </summary>
         public string Name { get; private set; }
 
+        /// <summary>
+        /// The texture of this block. (Null on serverside)
+        /// </summary>
+        public Texture2D Texture { get; set; }
+
+        /// <summary>
+        /// The function to draw this block.
+        /// </summary>
+        public Action<SpriteBatch, Tile, int, int> Draw { get; set; }
+
+        /// <summary>
+        /// Indicates whether or not this block has a texture and should be rendered.
+        /// </summary>
+        public bool IsRenderable { get; set; }
+
         static BlockType()
         {
             Blocks = new List<BlockType>();
-
-            Blocks.Add(new BlockType("Air", Layer.All));
-            Blocks.Add(new BlockType("Default", Layer.All, BlockCollision.Impassable));
         }
 
         /// <summary>
-        /// Creates a new instance a block type.
+        /// Creates a new instance a block type and adds it to the block list.
         /// </summary>
         /// <param name="name">Name of the block</param>
         /// <param name="layer">The layer(s) the tile can be placed on.</param>
@@ -63,6 +77,14 @@ namespace Bricklayer.Core.Common.World
             Layer = layer;
             Collision = collision;
             ID = (short)Blocks.Count();
+            IsRenderable = true;
+
+            Draw = (batch, tile, x, y) =>
+            {
+                batch.Draw(Texture, new Vector2(x * Tile.Width, y * Tile.Height));
+            };
+
+            Blocks.Add(this);
         }
 
         /// <summary>

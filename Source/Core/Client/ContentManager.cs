@@ -33,7 +33,7 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// List of all textures loaded into the game.
         /// </summary>
-        private Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>();
+        private Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>(StringComparer.OrdinalIgnoreCase);
 
         public int Count => Textures.Count;
 

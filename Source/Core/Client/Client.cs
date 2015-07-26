@@ -1,13 +1,15 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Windows;
-using Bricklayer.Core.Client.World;
+using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
 using EventArgs = System.EventArgs;
+using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client
 {
@@ -121,7 +123,16 @@ namespace Bricklayer.Core.Client
             UI.BeginDraw(gameTime);
             GraphicsDevice.Clear(Color.Black);
 
+            if (State == GameState.Game)
+            {
+                var sb = new SpriteBatch(GraphicsDevice);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                Level?.Draw(sb, gameTime);
+                sb.End();
+            }
+
             UI.EndDraw();
+
             base.Draw(gameTime);
         }
 
@@ -191,6 +202,13 @@ namespace Bricklayer.Core.Client
 
             //Unlike the server, the clientside plugins must be loaded last.
             await Plugins.Init();
+
+            //Now that all the textures have been loaded, set the block textures
+            foreach (var block in BlockType.Blocks.Where(x => x.IsRenderable))
+            {
+                var str = "blocks." + block.Name;
+                block.Texture = Content[str];
+            }
         }
 
         /// <summary>
@@ -209,6 +227,12 @@ namespace Bricklayer.Core.Client
         protected override void Update(GameTime gameTime)
         {
             UI.Update(gameTime);
+
+            if (State == GameState.Game)
+            {
+                Level?.Update(gameTime);
+            }
+
             base.Update(gameTime);
         }
 

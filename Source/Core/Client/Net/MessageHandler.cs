@@ -58,7 +58,7 @@ namespace Bricklayer.Core.Client.Net
                 {
                     var msg = new LevelDataMessage(im, MessageContext.Client);
                     networkManager.Client.Events.Network.Game.LevelDataReceived.Invoke(
-                        new EventManager.NetEvents.GameServerEvents.LevelDataEventArgs(new Level(msg.Level)));
+                        new EventManager.NetEvents.GameServerEvents.LevelDataEventArgs(new Level(msg.Level, networkManager.Client)));
                     break;
                 }
                 case MessageTypes.Chat:

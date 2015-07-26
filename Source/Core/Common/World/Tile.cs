@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Common.World
     public struct Tile
     {
         public const int BackgroundIndex = 0, ForegroundIndex = 1;
-        public const int Width = 16, Height = 16, DrawHeight = 20, DrawWidth = 20;
+        public const int Width = 16, Height = 16, FullHeight = 20, FullWidth = 20;
 
         /// <summary>
         /// The layer (foreground or background) the tile occupies.

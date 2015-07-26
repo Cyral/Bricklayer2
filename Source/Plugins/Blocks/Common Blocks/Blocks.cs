@@ -4,10 +4,12 @@ namespace Bricklayer.Plugins.Blocks.Common
 {
     public class Blocks
     {
+        public static BlockType Empty, Default;
+
         public static void AddBlocks()
         {
-             BlockType.Blocks.Add(new BlockType("Air", Layer.All));
-             BlockType.Blocks.Add(new BlockType("Default", Layer.All, BlockCollision.Impassable));
+             Empty = new BlockType("Empty", Layer.All) { IsRenderable = false };
+             Default = new BlockType("Default", Layer.All, BlockCollision.Impassable);
         }
     }
 }
