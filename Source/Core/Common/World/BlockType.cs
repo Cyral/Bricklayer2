@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// List of all block types.
         /// </summary>
-        public static List<BlockType> Blocks;
+        public static List<BlockType> Blocks { get; }
 
         /// <summary>
         /// How players should collide with this tile. (Only used for foregrounds).
@@ -34,7 +34,7 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// Defines if this block is a background or foreground.
         /// </summary>
-        public Layer Layer { get; set; }
+        public Layer Layer { get; private set; }
 
         /// <summary>
         /// Name of the block.
@@ -44,12 +44,17 @@ namespace Bricklayer.Core.Common.World
         static BlockType()
         {
             Blocks = new List<BlockType>();
+
+            Blocks.Add(new BlockType("Air", Layer.All));
+            Blocks.Add(new BlockType("Default", Layer.All, BlockCollision.Impassable));
         }
 
         /// <summary>
         /// Creates a new instance a block type.
         /// </summary>
         /// <param name="name">Name of the block</param>
+        /// <param name="layer">The layer(s) the tile can be placed on.</param>
+        /// <param name="collision">The physics that the tile will interact with entities with.</param>
         public BlockType(string name, Layer layer, BlockCollision collision = BlockCollision.Passable)
         {
             //TODO: ID will be calulcated by server, and the list will be rearranged after plugins are loaded
@@ -57,8 +62,7 @@ namespace Bricklayer.Core.Common.World
             Name = name;
             Layer = layer;
             Collision = collision;
-            ID = (byte)Blocks.Count();
-            Blocks.Add(this);
+            ID = (short)Blocks.Count();
         }
 
         /// <summary>
@@ -66,7 +70,15 @@ namespace Bricklayer.Core.Common.World
         /// </summary>
         public static BlockType FromID(short ID)
         {
-            return Blocks.FirstOrDefault(x => x.ID == ID);
+            // ReSharper disable once ForCanBeConvertedToForeach
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            // For loop for optimization as this is called for every tile access
+            for (var i = 0; i < Blocks.Count; i++)
+            {
+                var x = Blocks[i];
+                if (x.ID == ID) return x;
+            }
+            return null;
         }
     }
 }

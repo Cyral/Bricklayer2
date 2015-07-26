@@ -1,4 +1,5 @@
 ﻿using System;
+using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Data
 {
@@ -10,6 +11,8 @@ namespace Bricklayer.Core.Common.Data
     /// </remarks>
     public class LevelData
     {
+        private NetIncomingMessage im;
+
         /// <summary>
         /// The name of this level.
         /// </summary>
@@ -40,22 +43,47 @@ namespace Bricklayer.Core.Common.Data
         /// </summary>
         public Guid UUID { get; protected set; }
 
-        public LevelData(string name, string uuid, string description, int players, int plays, double rating)
+        /// <summary>
+        /// The creator of this level
+        /// </summary>
+        public PlayerData Creator { get; protected set; }
+
+        public LevelData(PlayerData creator, string name, Guid uuid, string description, int players, int plays, double rating)
         {
+            Creator = creator;
             Name = name;
-            UUID = Guid.Parse(uuid);
+            UUID = uuid;
             Description = description;
             Online = players;
             Rating = rating;
             Plays = plays;
         }
 
+        internal LevelData(NetIncomingMessage im)
+        {
+            Creator = new PlayerData(im.ReadString(), Guid.Parse(im.ReadString()));
+            Name = im.ReadString();
+            UUID = Guid.Parse(im.ReadString());
+            Description = im.ReadString();
+            Online = im.ReadByte();
+            Plays = im.ReadInt16();
+            Rating = im.ReadDouble();
+        }
+
+
         /// <summary>
-        /// Creates a LobbySaveData instance from a Map
+        /// Writes the relevant level data to a messgae.
         /// </summary>
-        //public static LobbySaveData FromMap(World.Map map)
-        //{
-        //    return new LobbySaveData(map.Name, map.ID, map.Description, map.Online, map.Plays, map.Rating);
-        //}
+        internal virtual void Encode(NetOutgoingMessage om)
+        {
+            om.Write(Creator.Username);
+            om.Write(Creator.UUID.ToString());
+            om.Write(Name);
+            om.Write(UUID.ToString());
+            om.Write(Description);
+            om.Write((byte)Online);
+            om.Write((short)Plays);
+            om.Write(Rating);
+        }
     }
 }

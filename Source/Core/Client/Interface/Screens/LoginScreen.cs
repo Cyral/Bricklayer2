@@ -1,20 +1,22 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Windows;
-using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
     internal class LoginScreen : Screen
     {
+        protected internal override GameState State => GameState.Login;
         //Controls
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
         private Label lblVersion;
         private LoginWindow wndLogin;
-        private ServerWindow wndServer;
 
-        protected internal override GameState State => GameState.Login;
+
 
         /// <summary>
         /// Setup the login and serverlist screen content and controls.
@@ -63,10 +65,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
             {
                 Image = Client.Content["gui.icons.pyratron"],
                 SizeMode = SizeMode.Auto,
-                ToolTip = { Text = "Visit Pyratron Studios." }
+                ToolTip = {Text = "Visit Pyratron Studios."}
             };
             imgPyratron.SetSize(imgPyratron.Width, imgPyratron.Height);
-            imgPyratron.SetPosition(Window.Width - imgGithub.Width - 16 - imgPyratron.Width, Window.Height - imgPyratron.Height - 8);
+            imgPyratron.SetPosition(Window.Width - imgGithub.Width - 16 - imgPyratron.Width,
+                Window.Height - imgPyratron.Height - 8);
             imgPyratron.Init();
             imgPyratron.Color = Color.White * .9f;
             imgPyratron.MouseOut += (sender, args) => imgPyratron.Color = Color.White * .9f;
@@ -89,6 +92,9 @@ namespace Bricklayer.Core.Client.Interface.Screens
             if (wndLogin.Top < imgLogo.Top + imgLogo.Height + 8)
                 wndLogin.Top = imgLogo.Top + imgLogo.Height + 24;
             Window.Add(wndLogin);
+
+           
+
         }
 
         /// <summary>
@@ -102,9 +108,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Remove(imgGithub);
             Window.Remove(lblVersion);
             Window.Remove(wndLogin);
-            Window.Remove(wndServer);
             wndLogin?.Dispose();
-            wndServer?.Dispose();
         }
     }
 }

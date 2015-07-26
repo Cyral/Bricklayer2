@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,9 +13,11 @@ namespace Bricklayer.Core.Common.Data
     /// </summary>
     public class PlayerData
     {
-        public PlayerData(string name, short id, bool isGuest)
+        public PlayerData(string name, Guid uuid, bool isGuest = false)
         {
             Username = name;
+            UUID = uuid;
+            IsGuest = isGuest;
         }
 
         /// <summary>
@@ -23,13 +26,37 @@ namespace Bricklayer.Core.Common.Data
         public bool IsGuest { get; private set; }
 
         /// <summary>
-        /// The numerical ID of the user, for keeping track of connections.
+        /// The user's unique identifier.
         /// </summary>
-        public short ID { get; private set; }
+        public Guid UUID { get; private set; }
 
         /// <summary>
         /// The name of the player.
         /// </summary>
         public string Username { get; set; }
+
+        internal PlayerData(NetIncomingMessage im)
+        {
+            IsGuest = im.ReadBoolean();
+            Guid uuid;
+            var s = im.ReadString();
+            if (Guid.TryParse(s, out uuid))
+            {
+                UUID = uuid;
+            }
+            else
+            {
+                Debug.WriteLine("UUID sent is in incorrect format: " + s);
+            }
+            Username = im.ReadString();
+        }
+
+        internal virtual void Encode(NetOutgoingMessage om)
+        {
+            om.Write(IsGuest);
+            om.Write(UUID.ToString());
+            om.Write(Username);
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,11 +40,6 @@ namespace Bricklayer.Core.Common.Entity
         /// </summary>
         public FacingDirection Direction { get; protected set; }
 
-        /// <summary>
-        /// The ID of this player in the world.
-        /// </summary>
-        public virtual short ID { get; protected set; }
-
         //Physic States
         public bool IsJumping { get; protected set; }
         public bool IsOnGround { get; protected set; }
@@ -56,7 +52,7 @@ namespace Bricklayer.Core.Common.Entity
         /// <summary>
         /// The currently occupied map the player is in
         /// </summary>
-        public virtual Map Map { get; protected set; }
+        public virtual Level Level { get; internal set; }
 
         /// <summary>
         /// The color the body should be tinted.
@@ -81,10 +77,10 @@ namespace Bricklayer.Core.Common.Entity
         /// <summary>
         /// Creates a new player.
         /// </summary>
-        public Player(NetConnection connection, Map map, Vector2 position, string name, short id, bool isGuest) : base(name, id, isGuest)
+        public Player(NetConnection connection, Level level, Vector2 position, string name, Guid uuid, bool isGuest) : base(name, uuid, isGuest)
         {
             Connection = connection;
-            Map = map;
+            Level = level;
             //Smiley = SmileyType.Default;
             //Mode = PlayerMode.Normal;
             Tint = Color.White;
@@ -94,8 +90,17 @@ namespace Bricklayer.Core.Common.Entity
             PreviousState = new EntityState();
 
             SimulationState.Position = PreviousState.Position = DisplayState.Position = position;
-
-            ID = id;
         }
+
+        internal Player(NetIncomingMessage im) : base(im)
+        {
+            
+        }
+
+        internal override void Encode(NetOutgoingMessage om)
+        {
+            base.Encode(om);
+        }
+
     }
 }

@@ -119,6 +119,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
                     fadeImage.BringToFront();
                 }
             }
+
+            Current.Update(gameTime);
         }
 
         #region Nested type: Enum

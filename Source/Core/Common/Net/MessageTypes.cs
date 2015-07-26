@@ -18,6 +18,12 @@
         CreateLevel,
         Request,
         Banner,
-        PluginDownload
+        PluginDownload,
+        PingAuth,
+        LevelData,
+        JoinLevel,
+        Chat,
+        PlayerJoin,
+        PingUpdate
     }
 }

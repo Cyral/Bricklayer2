@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Bricklayer.Core.Client.Net;
@@ -51,8 +52,8 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         public override async Task Init()
         {
-            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Client.IO.Config.Client.AuthServerAddress),
-                Client.IO.Config.Client.AuthServerPort); //Find the address of the auth server
+            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress),
+                Globals.Values.DefaultAuthPort); //Find the address of the auth server
             TokenKeys = new Token();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
@@ -76,7 +77,7 @@ namespace Bricklayer.Core.Client.Components
             // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
             //Listen for init response from auth server containing token keys
-            Client.Events.Network.Auth.Init.AddHandler(args =>
+            Client.Events.Network.Auth.InitReceived.AddHandler(args =>
             {
                 TokenKeys.Username = args.Username;
                 TokenKeys.UUID = args.UUID;
@@ -125,12 +126,12 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Sends a message once connected to join a server officially.
         /// </summary>
-        public async Task Join(string host, int port, string username, string id, string publicKey)
+        public async Task Join(string host, int port, string username, Guid uuid, string publicKey)
         {
             await Task.Factory.StartNew(() =>
             {
                 NetClient.Connect(host, port,
-                    EncodeMessage(new PublicKeyMessage(username, id, publicKey)));
+                    EncodeMessage(new PublicKeyMessage(username, uuid, publicKey)));
             });
         }
 
@@ -195,6 +196,14 @@ namespace Bricklayer.Core.Client.Components
             message.Write((byte)gameMessage.MessageType);
             gameMessage.Encode(message);
             return message;
+        }
+        
+        /// <summary>
+        /// Send ping message to auth server. (Usually used for letting it know it recieved a message)
+        /// </summary>
+        public void PingAuthMessage(PingAuthMessage.PingResponse response, string info)
+        {
+            SendUnconnected(AuthEndpoint, new PingAuthMessage(response, info));
         }
 
         /// <summary>

@@ -51,10 +51,14 @@ namespace Bricklayer.Core.Client.Interface.Windows
             RefreshServerList();
             lstServers.DoubleClick += delegate (object o, EventArgs e)
             {
-                var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
-                //Make sure the user clicks the item and not the empty space in the list
-                if (sdc.CheckPositionMouse(((MouseEventArgs)e).Position - lstServers.AbsoluteRect.Location))
-                    screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
+                if (lstServers.ItemIndex >= 0)
+                {
+                    var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
+                    //Make sure the user clicks the item and not the empty space in the list
+                    if (sdc.CheckPositionMouse(((MouseEventArgs)e).Position - lstServers.AbsoluteRect.Location))
+                        screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
+                            servers[lstServers.ItemIndex].Port);
+                }
             };
 
             //Add controls to the bottom panel. (Add server, edit server, etc.)
@@ -122,9 +126,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnJoin.Right = btnAdd.Left - 8;
             btnJoin.Click += delegate
             {
-                btnJoin.Enabled = false;
-                btnJoin.Text = "Connecting...";
-                screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
+                if (lstServers.ItemIndex >= 0)
+                {
+                    btnJoin.Enabled = false;
+                    btnJoin.Text = "Connecting...";
+                    screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
+                        servers[lstServers.ItemIndex].Port);
+                }
             };
             BottomPanel.Add(btnJoin);
 
@@ -134,10 +142,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(btnRefresh);
 
             // Listen for when init message is recieved
-            screen.Client.Events.Network.Game.Init.AddHandler(OnInit);
+            screen.Client.Events.Network.Game.InitReceived.AddHandler(OnInit);
 
             // If user was disconnected from the server
-            screen.Client.Events.Network.Game.Disconnect.AddHandler(OnDisconnect);
+            screen.Client.Events.Network.Game.Disconnected.AddHandler(OnDisconnect);
         }
 
         private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
@@ -158,8 +166,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         protected override void Dispose(bool disposing)
         {
-            screen.Client.Events.Network.Game.Init.RemoveHandler(OnInit);
-            screen.Client.Events.Network.Game.Disconnect.RemoveHandler(OnDisconnect);
+            screen.Client.Events.Network.Game.InitReceived.RemoveHandler(OnInit);
+            screen.Client.Events.Network.Game.Disconnected.RemoveHandler(OnDisconnect);
             base.Dispose(disposing);
         }
 

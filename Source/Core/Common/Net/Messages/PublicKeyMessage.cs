@@ -16,7 +16,6 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class PublicKeyMessage : IMessage
     {
-        public double MessageTime { get; set; }
         public string Username { get; set; }
         public string UUID { get; set; }
         public string PublicKey { get; set; }
@@ -27,12 +26,11 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public PublicKeyMessage(string username, string uuid, string publicKey)
+        public PublicKeyMessage(string username, Guid uuid, string publicKey)
         {
-            UUID = uuid;
+            UUID = uuid.ToString("N");
             Username = username;
             PublicKey = publicKey;
-            MessageTime = NetTime.Now;
         }
 
         #region IMessage Members

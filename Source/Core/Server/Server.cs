@@ -4,10 +4,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Entity;
+using Bricklayer.Core.Common.World;
+using Bricklayer.Core.Server.World;
 using Bricklayer.Core.Server.Components;
 using Pyratron.Frameworks.Commands.Parser;
+using Level = Bricklayer.Core.Server.World.Level;
 
 namespace Bricklayer.Core.Server
 {
@@ -37,19 +40,24 @@ namespace Bricklayer.Core.Server
         public IOComponent IO { get; set; }
 
         /// <summary>
+        /// List of levels currently open.
+        /// </summary>
+        public List<Level> Levels { get; private set; }
+
+        /// <summary>
         /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
         public NetworkComponent Net { get; set; }
 
         /// <summary>
+        /// List of users online the server.
+        /// </summary>
+        public List<Player> Players { get; private set; }
+
+        /// <summary>
         /// The PluginComponent for loading and managing plugins.
         /// </summary>
         public PluginComponent Plugins { get; set; }
-
-        /// <summary>
-        /// List of users online the server.
-        /// </summary>
-        public List<Player> Players;
 
         private string clear, input;
         private bool showHeader;
@@ -60,6 +68,7 @@ namespace Bricklayer.Core.Server
             Logger.Server = this;
             Events = new EventManager();
             Players = new List<Player>();
+            Levels = new List<Level>();
 
             //Setup server
             Console.BackgroundColor = ConsoleColor.Black;
@@ -129,6 +138,78 @@ namespace Bricklayer.Core.Server
             // ReSharper disable once FunctionNeverReturns
         }
 
+
+        /// <summary>
+        /// Makes a player join the level with the specified UUID. If the level is not open, it will be loaded.
+        /// </summary>
+        /// <remarks>
+        /// It is up to the method caller to send a message to the sender with the level data.
+        /// </remarks>
+        public async Task<Level> JoinLevel(Player sender, Guid uuid)
+        {
+            Level level = Levels.FirstOrDefault(x => x.UUID == uuid);
+            if (level == null)
+            {
+                level = await IO.LoadLevel(uuid);
+                Levels.Add(level);
+            }
+
+            await RemovePlayerFromLevels(sender);
+            level.Players.Remove(sender);
+            level.Players.Add(sender);
+
+            sender.Level = level;
+
+            return level;
+        }
+
+        /// <summary>
+        /// Creates a level with the specified name and description, and the sender as the owner.
+        /// </summary>
+        /// <remarks>
+        /// It is up to the method caller to send a message to the sender with the level data.
+        /// </remarks>
+        public async Task<Level> CreateLevel(Player sender, string name, string description)
+        {
+            var level = new Level(sender, name, Guid.NewGuid(), description, 0, 2.5);
+            await RemovePlayerFromLevels(sender);
+            level.Players.Add(sender);
+
+            //Add the level to the database
+            await Database.CreateLevel(level);
+
+            Levels.Add(level);
+            sender.Level = level;
+
+            return level;
+        }
+
+        /// <summary>
+        /// Removes a player from any level they are currently in. (Does not send network message.)
+        /// </summary>
+        private async Task RemovePlayerFromLevels(Player sender)
+        {
+            if (sender.Level != null)
+            {
+                sender.Level.Players.Remove(sender);
+                if (sender.Level.Players.Count == 0)
+                {
+                    await CloseLevel(sender.Level.UUID); //Close level is nobody is in it
+                }
+            }
+        }
+
+        private async Task CloseLevel(Guid uuid)
+        {
+            var level = Levels.FirstOrDefault(r => r.UUID == uuid);
+            if (level != null && level.Online == 0)
+            {
+                await IO.SaveLevel(level);
+                Logger.WriteLine(LogType.Normal, $"{level.Name} closed.");
+                Levels.Remove(level);
+            }
+        }
+
         #region Console Stuff
 
         /// <summary>
@@ -161,6 +242,16 @@ namespace Bricklayer.Core.Server
                 .AddAlias("stats", "data")
                 .SetDescription("Shows statistics")
                 .SetAction(delegate { WriteStats(); }));
+
+            Commands.AddCommand(Command
+                .Create("Save All")
+                .AddAlias("save", "saveall")
+                .SetDescription("Saves all levels.")
+                .SetAction(async delegate
+                {
+                    foreach (var level in Levels)
+                        await IO.SaveLevel(level);
+                }));
 
             Commands.AddCommand(Command
                 .Create("Exit")
@@ -204,32 +295,25 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public void WriteHeader()
         {
-            try
-            {
-                if (!showHeader)
-                    return;
-                if (clear.Length != Console.WindowWidth)
-                    clear = new string(' ', Console.WindowWidth);
-                var left = Console.CursorLeft;
-                var top = Console.CursorTop;
-                Console.SetCursorPosition(Math.Max(0, Console.WindowLeft), Math.Max(0, Console.WindowTop));
-                Console.Write(clear);
-                Console.SetCursorPosition(Math.Max(0, Console.WindowLeft), Math.Max(0, Console.WindowTop));
+            if (!showHeader)
+                return;
+            if (clear.Length != Console.WindowWidth)
+                clear = new string(' ', Console.WindowWidth);
+            var left = Console.CursorLeft;
+            var top = Console.CursorTop;
+            Console.SetCursorPosition(Math.Max(0, Console.WindowLeft), Math.Max(0, Console.WindowTop));
+            Console.Write(clear);
+            Console.SetCursorPosition(Math.Max(0, Console.WindowLeft), Math.Max(0, Console.WindowTop));
 
-                Console.BackgroundColor = ConsoleColor.Green;
-                Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = ConsoleColor.Black;
 
-                WriteStats();
+            WriteStats();
 
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
 
-                Console.SetCursorPosition(Math.Max(0, left), Math.Max(0, top));
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                //Nothin, caused by window resize
-            }
+            Console.SetCursorPosition(Math.Max(0, left), Math.Max(0, top));
         }
 
         /// <summary>
@@ -247,7 +331,7 @@ namespace Bricklayer.Core.Server
         /// Finds a Sender from a remote unique identifier
         /// </summary>
         /// <param name="remoteUniqueIdentifier">The RUI to find</param>
-        /// <param name="ignoreError">If a Sender is not found, should an error be thrown?</param>
+        /// <param name="ignoreError">If true and the sender is not found, null will be returned instead of throwing an error.</param>
         public Player PlayerFromRUI(long remoteUniqueIdentifier, bool ignoreError = false)
         {
             Player found = null;
@@ -259,20 +343,6 @@ namespace Bricklayer.Core.Server
             if (found != null) return found;
             if (ignoreError) return null;
             throw new KeyNotFoundException($"Could not find user from RemoteUniqueIdentifier: {remoteUniqueIdentifier}");
-        }
-
-
-        /// <summary>
-        /// Finds an empty slot to use as a user's ID
-        /// </summary>
-        public short FindAvailablePlayerID()
-        {
-            for (var i = 1; i < IO.Config.Server.MaxPlayers; i++)
-                if (Players.All(x => x.ID != i))
-                    return (short)i;
-            Logger.WriteLine(LogType.Error, "Could not find empty user ID! (Max Players: {0})",
-                IO.Config.Server.MaxPlayers);
-            return 0;
         }
 
         /// <summary>

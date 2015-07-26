@@ -69,6 +69,12 @@
     <Compile Include="Event.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Globals.cs" />
+    <Compile Include="Net\Messages\ChatMessage.cs" />
+    <Compile Include="Net\Messages\JoinLevelMessage.cs" />
+    <Compile Include="Net\Messages\LevelDataMessage.cs" />
+    <Compile Include="Net\Messages\PingAuthMessage.cs" />
+    <Compile Include="Net\Messages\PingUpdateMessage.cs" />
+    <Compile Include="Net\Messages\PlayerJoinMessage.cs" />
     <Compile Include="Net\Messages\PluginDownloadMessage.cs" />
     <Compile Include="IOHelper.cs" />
     <Compile Include="Plugin.cs" />
@@ -81,7 +87,6 @@
     <Compile Include="Net\Messages\FailedLoginMessage.cs" />
     <Compile Include="Net\Messages\AuthInitMessage.cs" />
     <Compile Include="Net\Messages\InitMessage.cs" />
-    <Compile Include="Net\Messages\LoginMessage.cs" />
     <Compile Include="Net\Messages\PublicKeyMessage.cs" />
     <Compile Include="Net\Messages\RequestMessage.cs" />
     <Compile Include="Net\Messages\ServerInfoMessage.cs" />
@@ -94,7 +99,7 @@
     <Compile Include="World\BlockCollision.cs" />
     <Compile Include="World\BlockType.cs" />
     <Compile Include="World\Layer.cs" />
-    <Compile Include="World\Map.cs" />
+    <Compile Include="World\Level.cs" />
     <Compile Include="World\Tile.cs" />
   </ItemGroup>
   <ItemGroup>

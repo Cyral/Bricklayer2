@@ -106,7 +106,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             lblHost.Init();
             Add(lblHost);
 
-            this.screen.Client.Events.Network.Game.ServerInfo.AddHandler(args =>
+            this.screen.Client.Events.Network.Game.ServerInfoReceived.AddHandler(args =>
             {
                 if (endPoint != null && args.Host.Equals(endPoint))
                 {

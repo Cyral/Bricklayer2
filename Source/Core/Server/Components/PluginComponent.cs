@@ -27,10 +27,29 @@ namespace Bricklayer.Core.Server.Components
             plugins = new List<ServerPlugin>();
         }
 
+        private string loadingPlugin;
+
         public override async Task Init()
         {
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
+            //Resolve assembly references for plugins. 
+            AppDomain.CurrentDomain.AssemblyResolve +=
+                (sender, args) =>
+                {
+                    //If a plugin.dll is trying to load a referenced assembly
+                    if (args.RequestingAssembly.FullName.Split(',')[0] == "plugin")
+                    {
+                        var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
+                        if (File.Exists(path))
+                            return Assembly.LoadFile(path);
+                        path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe"); //Try to load a .exe if .dll doesn't exist
+                        if (File.Exists(path))
+                            return Assembly.LoadFile(path);
+                    }
+                    return null;
+                };
+
             LoadPlugins();
 
             await base.Init();
@@ -59,6 +78,17 @@ namespace Bricklayer.Core.Server.Components
                     //Load the assembly
                     try
                     {
+                        //Make sure dependencies are met.
+                        if (file.Dependencies.Count > 0)
+                        {
+                            // ReSharper disable once PossibleMultipleEnumeration
+                            foreach (
+                                var dep in
+                                    file.Dependencies.Where(dep => !files.Any(plugin => plugin.Identifier == dep)))
+                                throw new FileNotFoundException($"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
+                        }
+                        //Load plugin
+                        loadingPlugin = file.Path;
                         var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
                         RegisterPlugin(IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, file));
                     }
@@ -74,6 +104,7 @@ namespace Bricklayer.Core.Server.Components
         {
             plugins.Add(plugin);
             plugin.Load();
+            Log($"Loaded {plugin.GetInfoString()}");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using static Bricklayer.Core.Common.World.BlockType;
+﻿using System.IO;
+using static Bricklayer.Core.Common.World.BlockType;
 
 namespace Bricklayer.Core.Common.World
 {
@@ -36,6 +37,15 @@ namespace Bricklayer.Core.Common.World
         public Tile(BlockType type)
         {
             this.type = type.ID;
+        }
+
+        /// <summary>
+        /// Writes the tile's data to a binary stream.
+        /// </summary>
+        /// <param name="writer"></param>
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(type);
         }
     }
 }

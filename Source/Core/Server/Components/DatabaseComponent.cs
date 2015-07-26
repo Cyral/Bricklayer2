@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Data;
 
 namespace Bricklayer.Core.Server.Components
@@ -13,14 +14,6 @@ namespace Bricklayer.Core.Server.Components
     public class DatabaseComponent : ServerComponent
     {
         protected override LogType LogType => LogType.Database;
-
-        private readonly string
-            setupQuery =
-                "CREATE TABLE IF NOT EXISTS `Levels` (`GUID` GUID,`Name` TEXT,`Description` TEXT,`Plays` INTEGER,PRIMARY KEY(GUID));",
-            getLevelsQuery = "SELECT `guid`, `name`, `description`, `plays` FROM `Levels`",
-            createLevelQuery =
-                "INSERT INTO `Levels`(`GUID`,`Name`,`Description`, `Plays`) VALUES (@guid, @name, @desc, 0);";
-
         private string connectionString;
         private DbProviderFactory providerFactory;
 
@@ -43,29 +36,89 @@ namespace Bricklayer.Core.Server.Components
         }
 
         /// <summary>
-        /// Finds all briefings favorited by the specified user
+        /// Gets a list of all levels in the database.
         /// </summary>
         public async Task<List<LevelData>> GetAllLevels()
         {
-            var briefings = new List<LevelData>();
+            var levels = new List<LevelData>();
             var command = providerFactory.CreateCommand();
             if (command != null)
             {
-                command.CommandText = getLevelsQuery;
-                //Query the database and add all resulting briefings to the briefing list
+                //Select the level data (name, description, plays, etc.), and find the name of the creator
+                command.CommandText =
+                    "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator";
+                //Query the database and add all resulting levels to the level list
                 await PerformQuery(connectionString, command, reader =>
                 {
-                    while (reader.Read())
+                    if (reader.HasRows)
                     {
-                        // Create and add each briefing to a list
-                        var briefing = new LevelData(reader.GetString(1), Guid.NewGuid().ToString(), reader.GetString(2), 10,
-                            reader.GetInt32(3), 3.5d);
-                        briefings.Add(briefing);
+                        while (reader.Read())
+                        {
+                            // Create and add each level data to the list
+                            var briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
+                                reader.GetGuid(0), reader.GetString(2), 0,
+                                reader.GetInt32(3), 3.5d);
+                            levels.Add(briefing);
+                        }
                     }
                 });
             }
 
-            return briefings;
+            return levels;
+        }
+
+        /// <summary>
+        /// Gets level data for the specified level.
+        /// </summary>
+        public async Task<LevelData> GetLevelData(Guid uuid)
+        {
+            LevelData data = null;
+            var command = providerFactory.CreateCommand();
+            if (command != null)
+            {
+                //Select the level data (name, description, plays, etc.), and find the name of the creator
+                command.CommandText =
+                    "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator WHERE Level.Guid = @uuid";
+                AddParamaters(command, new Dictionary<string, string>
+                {
+                    {"uuid", uuid.ToString("N")}
+                });
+                await PerformQuery(connectionString, command, reader =>
+                {
+                    if (reader.Read())
+                    {
+                        data = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
+                            reader.GetGuid(0), reader.GetString(2), 0,
+                            reader.GetInt32(3), 3.5d);
+                    }
+                });
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// Gets a player's username from their GUID and returns a PlayerData object.
+        /// </summary>
+        public async Task<PlayerData> GetPlayerData(Guid uuid)
+        {
+            var command = providerFactory.CreateCommand();
+            PlayerData player = null;
+            if (command != null)
+            {
+                command.CommandText = "SELECT username FROM Players WHERE guid = @uuid";
+                AddParamaters(command, new Dictionary<string, string> {{"uuid", uuid.ToString("N")}});
+                await PerformQuery(connectionString, command, reader =>
+                {
+                    if (reader.Read())
+                    {
+                        player = new PlayerData(reader.GetString(0), uuid);
+                    }
+                });
+            }
+            if (player != null)
+                return player;
+            throw new KeyNotFoundException($"Player with UUID of '{uuid}' was not found in the database.");
         }
 
         public override async Task Init()
@@ -83,41 +136,50 @@ namespace Bricklayer.Core.Server.Components
                 Log(
                     "Could not connect to database. Database services will be non functional.");
 
-            //Create initial tables
+            //Create initial tables if they don't exist
             var initialCommand = providerFactory.CreateCommand();
             if (initialCommand != null)
             {
-                initialCommand.CommandText = setupQuery;
+                initialCommand.CommandText =
+                    "CREATE TABLE IF NOT EXISTS Levels (GUID GUID PRIMARY KEY,Name TEXT,Description TEXT,Plays INTEGER, Creator GUID);" +
+                    "CREATE TABLE IF NOT EXISTS Players (Username Text UNIQUE,GUID GUID PRIMARY KEY)";
                 await PerformOperation(connectionString, initialCommand);
             }
 
-            //Create temporary levels for testing
-            var levels = new List<LevelData>
+            //When a (new) user connects, add them to the database.
+            Server.Events.Network.UserConnected.AddHandler(async args =>
             {
-                new LevelData("DogeBall", Guid.NewGuid().ToString(), "A game of dodge ball, but the ball being a doge head. Wow!", 6,
-                    23, 4),
-                new LevelData("Terrain", Guid.NewGuid().ToString(),
-                    "Beatiful terrain environment builds for your eyes to look at! Enjoy :)", 3, 20, 5),
-                new LevelData("pls r8 5", Guid.NewGuid().ToString(), "pls r8 5. thats al i evr wanted in life.", 0, 7, 1)
-            };
-
-            foreach (var level in levels)
-              CreateLevel(level);
+                var insertCommand = providerFactory.CreateCommand();
+                if (insertCommand != null)
+                {
+                    insertCommand.CommandText =
+                        "INSERT OR IGNORE INTO Players (Username, GUID) VALUES (@username, @uuid);";
+                    AddParamaters(insertCommand,
+                        new Dictionary<string, string>
+                        {
+                            {"username", args.Player.Username},
+                            {"uuid", args.Player.UUID.ToString("N")}
+                        });
+                    await PerformOperation(connectionString, insertCommand);
+                }
+            }, EventPriority.InternalFinal);
 
             await base.Init();
         }
 
-        internal async void CreateLevel(LevelData data)
+        internal async Task CreateLevel(LevelData data)
         {
             var command = providerFactory.CreateCommand();
             if (command != null)
             {
-                command.CommandText = createLevelQuery;
+                command.CommandText =
+                    "INSERT INTO Levels (GUID,Name,Description, Plays, Creator) VALUES(@guid, @name, @desc, 0, @creator)";
                 AddParamaters(command, new Dictionary<string, string>
                 {
-                    {"guid", Guid.NewGuid().ToString()},
+                    {"guid", data.UUID.ToString("N")},
                     {"name", data.Name},
-                    {"desc", data.Description}
+                    {"desc", data.Description},
+                    {"creator", data.Creator.UUID.ToString("N")}
                 });
                 await PerformOperation(connectionString, command);
             }

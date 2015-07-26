@@ -41,21 +41,15 @@ namespace Bricklayer.Core.Common.Net.Messages
         public void Decode(NetIncomingMessage im)
         {
             Valid = im.ReadBoolean();
-            if (Valid)
-            {
-                Username = im.ReadString();
-                UUID = im.ReadString();
-            }
+            Username = im.ReadString();
+            UUID = im.ReadString();
         }
 
         public void Encode(NetOutgoingMessage om)
         {
             om.Write(Valid);
-            if (Valid)
-            {
-                om.Write(Username);
-                om.Write(UUID);
-            }
+            om.Write(Username);
+            om.Write(UUID);
         }
 
         #endregion

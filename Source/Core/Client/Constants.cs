@@ -50,7 +50,7 @@ namespace Bricklayer.Core.Client
             /// <summary>
             /// URL to where plugin downloads come from. Revision/attachment ID must be appended.
             /// </summary>
-            internal static string DownloadPluginURL { get; } = "https://community.pyratron.com/app.php/db/download/";
+            internal static string DownloadPluginURL { get; } = "https://community.pyratron.com/db/download/";
         }
     }
 }
