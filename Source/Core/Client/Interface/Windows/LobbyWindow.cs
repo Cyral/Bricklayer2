@@ -100,7 +100,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnReload.ToolTip.Text = "Refresh";
             btnReload.Click += (sender, args) => {
                 btnReload.Enabled = false;
-                screen.Client.Network.Send(new RequestMessage(MessageTypes.Init));
+                lobbyScreen.Client.Network.Send(new RequestMessage(MessageTypes.Init));
             };
             grpLobby.Add(btnReload);
 
@@ -184,7 +184,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnDisconnect.Init();
             btnDisconnect.Click += (sender, args) =>
             {
-                screen.Client.Network.NetClient.Disconnect("Left Lobby");
+                lobbyScreen.Client.Network.NetClient.Disconnect("Left Lobby");
                 MainWindow.ScreenManager.SwitchScreen(new LoginScreen());
             };
             BottomPanel.Add(btnDisconnect);
