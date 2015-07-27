@@ -1,6 +1,5 @@
 ﻿using System;
 using Bricklayer.Core.Common.Data;
-using Bricklayer.Core.Common.World;
 
 namespace Bricklayer.Core.Server.World
 {

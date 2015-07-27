@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Mime;
-using System.Net.Sockets;
-using System.Text;
-using Bricklayer.Core.Client.Interface.Windows;
+﻿using Bricklayer.Core.Client.Interface.Windows;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens

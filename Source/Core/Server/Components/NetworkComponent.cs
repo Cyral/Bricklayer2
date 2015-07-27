@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using System.Timers;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net;
@@ -13,7 +14,6 @@ using Bricklayer.Core.Server.Net;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using static Bricklayer.Core.Server.EventManager;
-using Timer = System.Timers.Timer;
 
 namespace Bricklayer.Core.Server.Components
 {

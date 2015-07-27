@@ -11,7 +11,7 @@ namespace Bricklayer.Core.Client.Interface
         /// <summary>
         /// The game instance this window belongs to.
         /// </summary>
-        public Core.Client.Client Client { get; }
+        public Client Client { get; }
 
         /// <summary>
         /// The main <c>ScreenManager</c> that handles control adding/removing.
@@ -19,7 +19,7 @@ namespace Bricklayer.Core.Client.Interface
         public static ScreenManager ScreenManager { get; private set; }
 
 
-        public MainWindow(Manager manager, Core.Client.Client client) : base(manager)
+        public MainWindow(Manager manager, Client client) : base(manager)
         {
             Client = client;
 

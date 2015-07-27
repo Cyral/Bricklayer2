@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Mime;
-using System.Text;
-using System.Threading.Tasks;
-using Bricklayer.Core.Client.Interface.Controls;
-using Bricklayer.Core.Client.Interface.Screens;
-using Bricklayer.Core.Common;
+﻿using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
-using EventArgs = MonoForce.Controls.EventArgs;
 
 namespace Bricklayer.Core.Client.Interface.Windows
 {

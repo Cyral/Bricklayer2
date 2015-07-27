@@ -1,9 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using Bricklayer.Core.Client.Interface.Controls;
+﻿using System.Diagnostics;
 using Bricklayer.Core.Client.Interface.Windows;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens

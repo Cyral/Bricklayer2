@@ -9,7 +9,7 @@ namespace Bricklayer.Plugins.TestClientPlugin
     /// </summary>
     public class TestClientPlugin : ClientPlugin
     {
-        public TestClientPlugin(Core.Client.Client host) : base(host)
+        public TestClientPlugin(Client host) : base(host)
         {
         }
 

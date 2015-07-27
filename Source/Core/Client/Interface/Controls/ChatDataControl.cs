@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
-using Bricklayer.Core.Client.Interface.Screens;
-using Bricklayer.Core.Client.Interface.Windows;
-using Bricklayer.Core.Common.Data;
+﻿using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Controls

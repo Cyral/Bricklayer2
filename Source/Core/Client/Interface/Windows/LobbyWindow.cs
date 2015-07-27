@@ -4,7 +4,6 @@ using System.Linq;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
-using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework.Graphics;
