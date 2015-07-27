@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Components;
-using Bricklayer.Core.Client.Interface.Windows;
+using Bricklayer.Core.Client.Interface;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
