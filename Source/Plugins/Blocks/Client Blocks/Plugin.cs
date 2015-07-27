@@ -1,6 +1,7 @@
 ﻿using Bricklayer.Core.Client;
+using Bricklayer.Plugins.DefaultBlocks.Common;
 
-namespace Bricklayer.Plugins.Blocks.Client
+namespace Bricklayer.Plugins.DefaultBlocks.Client
 {
     /// <summary>
     /// Client part of the default blocks plugin.
@@ -13,7 +14,7 @@ namespace Bricklayer.Plugins.Blocks.Client
 
         public override void Load()
         {
-            Common.Blocks.AddBlocks();
+            Blocks.AddBlocks();
         }
 
         protected override void Unload()

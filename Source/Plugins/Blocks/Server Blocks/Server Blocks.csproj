@@ -7,7 +7,7 @@
     <ProjectGuid>{F1171DB8-B11A-441C-B325-D371AB902ECF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bricklayer.Plugins.Blocks.Server</RootNamespace>
+    <RootNamespace>Bricklayer.Plugins.DefaultBlocks.Server</RootNamespace>
     <AssemblyName>plugin</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

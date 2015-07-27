@@ -1,6 +1,6 @@
 ﻿using Bricklayer.Core.Common.World;
 
-namespace Bricklayer.Plugins.Blocks.Common
+namespace Bricklayer.Plugins.DefaultBlocks.Common
 {
     public class Blocks
     {

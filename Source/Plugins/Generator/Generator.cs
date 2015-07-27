@@ -1,6 +1,7 @@
 ﻿using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.World;
 using Bricklayer.Core.Server;
+using Bricklayer.Plugins.DefaultBlocks.Common;
 
 namespace Bricklayer.Plugins.Generator
 {
@@ -11,6 +12,7 @@ namespace Bricklayer.Plugins.Generator
     {
         public Plugin(Server host) : base(host)
         {
+
         }
 
         public override void Load()
@@ -23,10 +25,10 @@ namespace Bricklayer.Plugins.Generator
                     for (var y = 0; y < args.Level.Height; y++)
                     {
                         if (x == 0 || y == 0 || x == args.Level.Width - 1 || y == args.Level.Height - 1)
-                            args.Level.Tiles[x, y, 1] = new Tile(Blocks.Common.Blocks.Default);
+                            args.Level.Tiles[x, y, 1] = new Tile(Blocks.Default);
                         else
-                            args.Level.Tiles[x, y, 1] = new Tile(Blocks.Common.Blocks.Empty); 
-                        args.Level.Tiles[x, y, 0] = new Tile(Blocks.Common.Blocks.Empty);
+                            args.Level.Tiles[x, y, 1] = new Tile(Blocks.Empty); 
+                        args.Level.Tiles[x, y, 0] = new Tile(Blocks.Empty);
                     }
                 }
             }, EventPriority.Initial);

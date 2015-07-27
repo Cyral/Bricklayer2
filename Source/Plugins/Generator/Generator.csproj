@@ -59,7 +59,7 @@
       <Name>Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\Blocks\Common Blocks\Common Blocks.csproj">
-      <Project>{A0E7AB06-82F9-4548-835B-BFA5E7E0D615}</Project>
+      <Project>{a0e7ab06-82f9-4548-835b-bfa5e7e0d615}</Project>
       <Name>Common Blocks</Name>
     </ProjectReference>
   </ItemGroup>

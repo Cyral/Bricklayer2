@@ -3,7 +3,7 @@
   "Identifier": "Bricklayer.Plugins.Generator",
   "Description": "Generates a basic empty level",
   "Authors": [ "Cyral" ],
-  "Dependencies": [ "Bricklayer.Plugins.Blocks.Server" ],
+  "Dependencies": [ "Bricklayer.Plugins.DefaultBlocks.Server" ],
   "Version": {
       "Major": 0,
       "Minor": 1,

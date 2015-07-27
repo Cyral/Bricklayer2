@@ -7,7 +7,7 @@
     <ProjectGuid>{A278E381-7012-43CF-8F2C-D3744AE9C09B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bricklayer.Plugins.Blocks.Client</RootNamespace>
+    <RootNamespace>Bricklayer.Plugins.DefaultBlocks.Client</RootNamespace>
     <AssemblyName>plugin</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -1,6 +1,6 @@
 ﻿{
-  "Name": "Blocks",
-  "Identifier": "Bricklayer.Plugins.Blocks",
+  "Name": "Default Blocks",
+  "Identifier": "Bricklayer.Plugins.DefaultBlocks",
   "Description": "Provides the default blocks.",
   "Authors": [ "Cyral" ],
   "Dependencies": [],
