@@ -16,7 +16,7 @@ namespace Bricklayer.Core.Client.Components
     internal class NetworkManager : ClientComponent
     {
         // Message delivery method
-        private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
+        private const NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
 
         /// <summary>
         /// Configuration options for Lidgren messages.
@@ -211,7 +211,7 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="reason">Reason to tell the server for disconnecting.</param>
         public void Disconnect(string reason = "Disconnected.")
         {
-            if (NetClient != null) NetClient.Disconnect(reason);
+            NetClient?.Disconnect(reason);
         }
 
         /// <summary>
