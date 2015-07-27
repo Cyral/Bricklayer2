@@ -49,9 +49,7 @@ namespace Bricklayer.Core.Common.World
         protected Random random;
 
         public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating)
-            : this(new LevelData(creator, name, uuid, description, 0, plays, rating))
-        {
-        }
+            : this(new LevelData(creator, name, uuid, description, 0, plays, rating)) {}
 
         public Level(LevelData level)
             : base(level.Creator, level.Name, level.UUID, level.Description, 0, level.Plays, level.Rating)

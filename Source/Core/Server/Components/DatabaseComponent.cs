@@ -17,9 +17,7 @@ namespace Bricklayer.Core.Server.Components
         private string connectionString;
         private DbProviderFactory providerFactory;
 
-        public DatabaseComponent(Server server) : base(server)
-        {
-        }
+        public DatabaseComponent(Server server) : base(server) {}
 
         /// <summary>
         /// Adds the specified named parameters to the command.

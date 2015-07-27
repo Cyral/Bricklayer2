@@ -7,18 +7,13 @@ namespace Bricklayer.Plugins.Blocks.Server
     /// </summary>
     public class Plugin : ServerPlugin
     {
-        public Plugin(Core.Server.Server host) : base(host)
-        {
-        }
+        public Plugin(Core.Server.Server host) : base(host) {}
 
         public override void Load()
         {
             Common.Blocks.AddBlocks();
         }
 
-        protected override void Unload()
-        {
-
-        }
+        protected override void Unload() {}
     }
 }

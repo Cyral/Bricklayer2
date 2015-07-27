@@ -44,14 +44,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// Removes the controls for this screen from the window.
         /// </summary>
-        public virtual void Remove()
-        {
+        public virtual void Remove() {}
 
-        }
-
-        public virtual void Update(GameTime gameTime)
-        {
-            
-        }
+        public virtual void Update(GameTime gameTime) {}
     }
 }

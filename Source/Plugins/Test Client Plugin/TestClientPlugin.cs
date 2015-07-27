@@ -9,9 +9,7 @@ namespace Bricklayer.Plugins.TestClientPlugin
     /// </summary>
     public class TestClientPlugin : ClientPlugin
     {
-        public TestClientPlugin(Client host) : base(host)
-        {
-        }
+        public TestClientPlugin(Client host) : base(host) {}
 
         public override void Load()
         {

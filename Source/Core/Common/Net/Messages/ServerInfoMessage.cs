@@ -20,10 +20,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public ServerInfoMessage()
-        {
-            
-        }
+        public ServerInfoMessage() {}
 
         public ServerInfoMessage(string description, int players, int maxPlayers)
         {

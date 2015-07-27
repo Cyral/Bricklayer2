@@ -7,18 +7,13 @@ namespace Bricklayer.Plugins.Blocks.Client
     /// </summary>
     public class Plugin : ClientPlugin
     {
-        public Plugin(Core.Client.Client host) : base(host)
-        {
-        }
+        public Plugin(Core.Client.Client host) : base(host) {}
 
         public override void Load()
         {
             Common.Blocks.AddBlocks();
         }
 
-        protected override void Unload()
-        {
-          
-        }
+        protected override void Unload() {}
     }
 }

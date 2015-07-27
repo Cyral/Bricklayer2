@@ -87,10 +87,7 @@ namespace Bricklayer.Core.Common.Entity
             SimulationState.Position = PreviousState.Position = DisplayState.Position = position;
         }
 
-        internal Player(NetIncomingMessage im) : base(im)
-        {
-            
-        }
+        internal Player(NetIncomingMessage im) : base(im) {}
 
         internal override void Encode(NetOutgoingMessage om)
         {

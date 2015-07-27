@@ -196,9 +196,7 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class ConnectEventArgs : BricklayerEventArgs
-                {
-                }
+                public class ConnectEventArgs : BricklayerEventArgs {}
 
                 public class LevelDataEventArgs : BricklayerEventArgs
                 {

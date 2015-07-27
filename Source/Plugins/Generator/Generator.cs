@@ -9,9 +9,7 @@ namespace Bricklayer.Plugins.Generator
     /// </summary>
     public class Plugin : ServerPlugin
     {
-        public Plugin(Server host) : base(host)
-        {
-        }
+        public Plugin(Server host) : base(host) {}
 
         public override void Load()
         {
@@ -31,9 +29,6 @@ namespace Bricklayer.Plugins.Generator
             }, EventPriority.Initial);
         }
 
-        protected override void Unload()
-        {
-
-        }
+        protected override void Unload() {}
     }
 }
