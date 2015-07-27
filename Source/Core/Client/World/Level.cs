@@ -50,10 +50,7 @@ namespace Bricklayer.Core.Client.World
             };
         }
 
-        public void Update(GameTime delta)
-        {
-            
-        }
+        public void Update(GameTime delta) {}
 
         public void Draw(SpriteBatch batch, GameTime delta)
         {

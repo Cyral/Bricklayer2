@@ -64,9 +64,7 @@ namespace Bricklayer.Core.Server.Components
         private StreamWriter logWriter;
         private StringBuilder sb;
 
-        public IOComponent(Server server) : base(server)
-        {
-        }
+        public IOComponent(Server server) : base(server) {}
 
         public override async Task Init()
         {
@@ -94,8 +92,8 @@ namespace Bricklayer.Core.Server.Components
             SerializationSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
-                ContractResolver = new JsonContractResolver()
                 // Use a custom contract resolver that can read private and internal properties
+                ContractResolver = new JsonContractResolver()
             };
 
             // Log a message to the log file stating the startup time and version.
@@ -136,11 +134,9 @@ namespace Bricklayer.Core.Server.Components
                     await SaveConfig(config);
                 }
 
-                await
-                    Task.Factory.StartNew(
-                        delegate { Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings); });
-
-
+                await Task.Factory.StartNew(() =>
+                        Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings));
+                
                 Log("Configuration loaded. Port: {0}", Config.Server.Port.ToString());
             }
             catch (Exception ex)
@@ -173,8 +169,7 @@ namespace Bricklayer.Core.Server.Components
                 }
 
                 if (sb != null)
-                    await
-                        logWriter.WriteLineAsync(
+                    await logWriter.WriteLineAsync(
                             sb.Clear().Append('[').Append(date.ToString("G")).Append("] ").Append(message).ToString());
 
                 lastLog = date;
@@ -244,7 +239,7 @@ namespace Bricklayer.Core.Server.Components
             }
             catch (Exception ex)
             {
-                Logger.WriteLine(LogType.Error, "IOComponent.SaveConfig - {0}", ex.ToString());
+                Logger.WriteLine(LogType.Error, $"IOComponent.SaveConfig - {ex}");
             }
         }
 

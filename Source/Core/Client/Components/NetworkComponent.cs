@@ -74,7 +74,6 @@ namespace Bricklayer.Core.Client.Components
                                      | NetIncomingMessageType.ConnectionLatencyUpdated
                                      | NetIncomingMessageType.StatusChanged
                                      | NetIncomingMessageType.UnconnectedData);
-            // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
             // Listen for init response from auth server containing token keys
             Client.Events.Network.Auth.InitReceived.AddHandler(args =>

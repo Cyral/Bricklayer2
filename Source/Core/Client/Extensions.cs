@@ -44,7 +44,7 @@ namespace Bricklayer.Core.Client
         public static void Shuffle<T>(this IList<T> list)
         {
             if (list == null)
-                throw new ArgumentNullException("list");
+                throw new ArgumentNullException(nameof(list));
             var count = list.Count;
             while (count > 1)
             {
@@ -64,6 +64,7 @@ namespace Bricklayer.Core.Client
     ///     cref="https://stackoverflow.com/questions/8871337/how-can-i-encrypt-user-settings-such-as-passwords-in-my-application" />
     internal static class ProtectString
     {
+        // TODO: Replace this with something better.
         private static readonly byte[] entropy = Encoding.Unicode.GetBytes("=LVXsQTb=|APVi_k");
 
         public static SecureString DecryptString(this string encryptedData)

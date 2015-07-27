@@ -92,7 +92,7 @@ namespace Bricklayer.Core.Client.Net
             if (Equals(im.SenderEndPoint, networkManager.AuthEndpoint) &&
                 im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
             {
-                var messageType = (MessageTypes) im.ReadByte(); // Find the type of data message sent
+                var messageType = (MessageTypes)im.ReadByte(); // Find the type of data message sent
                 switch (messageType)
                 {
                     case MessageTypes.AuthInit:
