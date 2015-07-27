@@ -30,7 +30,7 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// The resolution, in pixels, of the game window
         /// </summary>
-        public Microsoft.Xna.Framework.Point Resolution;
+        public Point Resolution;
 
         /// <summary>
         /// The current username to be used.
@@ -71,8 +71,8 @@ namespace Bricklayer.Core.Client
                 Resolution = new Point(0, 0), // Empty on default, which tells the client to go fullscreen (Windowed)
                 Username = "Guest",
                 Color = 40,
-                AuthServerAddress = Common.Globals.Values.DefaultAuthAddress,
-                AuthServerPort = Common.Globals.Values.DefaultAuthPort,
+                AuthServerAddress = Globals.Values.DefaultAuthAddress,
+                AuthServerPort = Globals.Values.DefaultAuthPort,
             };
         }
     }

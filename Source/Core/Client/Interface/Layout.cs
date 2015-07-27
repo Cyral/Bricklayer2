@@ -19,8 +19,7 @@ namespace Bricklayer.Core.Client.Interface
         public static ScreenManager ScreenManager { get; private set; }
 
 
-        public MainWindow(Manager manager, Core.Client.Client client)
-            : base(manager)
+        public MainWindow(Manager manager, Core.Client.Client client) : base(manager)
         {
             Client = client;
 

@@ -202,9 +202,9 @@ namespace Bricklayer.Core.Client
 
                 public class LevelDataEventArgs : BricklayerEventArgs
                 {
-                    public World.Level Level { get; private set; }
+                    public Level Level { get; private set; }
 
-                    public LevelDataEventArgs(World.Level level)
+                    public LevelDataEventArgs(Level level)
                     {
                         Level = level;
                     }

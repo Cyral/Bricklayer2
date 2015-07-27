@@ -30,7 +30,7 @@ namespace Bricklayer.Core.Client
             get
             {
                 var position = CurrentMouseState.GetPositionPoint();
-                return new Point(position.X / Common.World.Tile.Width, Common.World.Tile.Height);
+                return new Point(position.X / Tile.Width, Tile.Height);
             }
         }
 
