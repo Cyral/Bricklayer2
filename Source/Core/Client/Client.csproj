@@ -81,7 +81,6 @@
     <Compile Include="Interface\Windows\CreateLevelDialog.cs" />
     <Compile Include="Interface\Windows\LobbyWindow.cs" />
     <Compile Include="Interface\Windows\LoginWindow.cs" />
-    <Compile Include="Interface\Windows\ModManagerWindow.cs" />
     <Compile Include="Interface\Windows\PluginDownloadWindow.cs" />
     <Compile Include="Interface\Windows\ServerWindow.cs" />
     <Compile Include="Components\IOComponent.cs" />

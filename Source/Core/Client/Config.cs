@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Bricklayer.Core.Common;
 using Microsoft.Xna.Framework;
 
 namespace Bricklayer.Core.Client
@@ -34,7 +30,7 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// The resolution, in pixels, of the game window
         /// </summary>
-        public Microsoft.Xna.Framework.Point Resolution;
+        public Point Resolution;
 
         /// <summary>
         /// The current username to be used.
@@ -72,11 +68,11 @@ namespace Bricklayer.Core.Client
             {
                 RememberMe = true,
                 Password = string.Empty,
-                Resolution = new Point(0, 0), //Empty on default, which tells the client to go fullscreen (Windowed)
+                Resolution = new Point(0, 0), // Empty on default, which tells the client to go fullscreen (Windowed)
                 Username = "Guest",
                 Color = 40,
-                AuthServerAddress = Common.Globals.Values.DefaultAuthAddress,
-                AuthServerPort = Common.Globals.Values.DefaultAuthPort,
+                AuthServerAddress = Globals.Values.DefaultAuthAddress,
+                AuthServerPort = Globals.Values.DefaultAuthPort,
             };
         }
     }

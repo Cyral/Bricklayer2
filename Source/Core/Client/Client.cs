@@ -99,7 +99,7 @@ namespace Bricklayer.Core.Client
 
             AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
 
-            //Create the manager for MonoForce UI
+            // Create the manager for MonoForce UI
             UI = new Manager(this, "Bricklayer")
             {
                 TargetFrames = 10000,
@@ -111,7 +111,7 @@ namespace Bricklayer.Core.Client
 
         private void LogUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            //TODO: Save to a file (not important until later)
+            // TODO: Save to a file (not important until later)
         }
 
         /// <summary>
@@ -189,21 +189,21 @@ namespace Bricklayer.Core.Client
                 Graphics.ApplyChanges();
             }
 
-            //Initialize MonoForce after loading skins.
+            // Initialize MonoForce after loading skins.
             UI.Initialize();
-            SpriteBatch = UI.Renderer.SpriteBatch; //Set the spritebatch to the Neoforce managed one
+            SpriteBatch = UI.Renderer.SpriteBatch; // Set the spritebatch to the Neoforce managed one
 
 
-            //Create the main window for all content to be added to.
+            // Create the main window for all content to be added to.
             Window = new MainWindow(UI, this);
             Window.Init();
             UI.Add(Window);
             Window.SendToBack();
 
-            //Unlike the server, the clientside plugins must be loaded last.
+            // Unlike the server, the clientside plugins must be loaded last.
             await Plugins.Init();
 
-            //Now that all the textures have been loaded, set the block textures
+            // Now that all the textures have been loaded, set the block textures
             foreach (var block in BlockType.Blocks.Where(x => x.IsRenderable))
             {
                 var str = "blocks." + block.Name;
@@ -215,9 +215,7 @@ namespace Bricklayer.Core.Client
         /// UnloadContent will be called once per game and is the place to unload
         /// game-specific content.
         /// </summary>
-        protected override void UnloadContent()
-        {
-        }
+        protected override void UnloadContent() {}
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,

@@ -51,7 +51,7 @@ namespace Bricklayer.Core.Server
         {
             return new DatabaseConfig
             {
-                //Bricklayer uses SQLite by default
+                // Bricklayer uses SQLite by default
                 Provider = "System.Data.SQLite",
                 Connection = "Data Source = database.sqlite; Version = 3"
             };

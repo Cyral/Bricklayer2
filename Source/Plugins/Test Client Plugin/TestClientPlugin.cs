@@ -9,13 +9,11 @@ namespace Bricklayer.Plugins.TestClientPlugin
     /// </summary>
     public class TestClientPlugin : ClientPlugin
     {
-        public TestClientPlugin(Core.Client.Client host) : base(host)
-        {
-        }
+        public TestClientPlugin(Client host) : base(host) {}
 
         public override void Load()
         {
-            //Demo window
+            // Demo window
             var window = new Window(Client.UI);
             window.Init();
             window.SetSize(300, 120);

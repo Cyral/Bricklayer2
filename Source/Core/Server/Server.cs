@@ -4,13 +4,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Entity;
-using Bricklayer.Core.Common.World;
-using Bricklayer.Core.Server.World;
 using Bricklayer.Core.Server.Components;
+using Bricklayer.Core.Server.World;
 using Pyratron.Frameworks.Commands.Parser;
-using Level = Bricklayer.Core.Server.World.Level;
 
 namespace Bricklayer.Core.Server
 {
@@ -70,7 +67,7 @@ namespace Bricklayer.Core.Server
             Players = new List<Player>();
             Levels = new List<Level>();
 
-            //Setup server
+            // Setup server
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Clear();
             start = DateTime.Now;
@@ -80,11 +77,11 @@ namespace Bricklayer.Core.Server
             Logger.WriteLine($"{Constants.Strings.ServerTitle}");
             Logger.WriteLine($"Server is starting now, on {DateTime.Now.ToString("U", new CultureInfo("en-US"))}");
 
-            //Initialize Properties
+            // Initialize Properties
             Commands = CommandParser.CreateNew().UsePrefix(string.Empty).OnError(OnParseError);
             RegisterCommands();
 
-            //Initialize Components
+            // Initialize Components
             IO = new IOComponent(this);
             Plugins = new PluginComponent(this);
             Database = new DatabaseComponent(this);
@@ -102,11 +99,11 @@ namespace Bricklayer.Core.Server
 
             WriteHeader();
 
-            while (true) //Parse commands now that messaging has been handed off to another thread
+            while (true) // Parse commands now that messaging has been handed off to another thread
             {
                 input = string.Empty;
                 WriteCommandCursor();
-                //Read input and parse command
+                // Read input and parse command
                 while (true)
                 {
                     var key = Console.ReadKey(true);
@@ -175,7 +172,7 @@ namespace Bricklayer.Core.Server
             await RemovePlayerFromLevels(sender);
             level.Players.Add(sender);
 
-            //Add the level to the database
+            // Add the level to the database
             await Database.CreateLevel(level);
 
             Levels.Add(level);
@@ -194,7 +191,7 @@ namespace Bricklayer.Core.Server
                 sender.Level.Players.Remove(sender);
                 if (sender.Level.Players.Count == 0)
                 {
-                    await CloseLevel(sender.Level.UUID); //Close level is nobody is in it
+                    await CloseLevel(sender.Level.UUID); // Close level is nobody is in it
                 }
             }
         }
@@ -275,7 +272,7 @@ namespace Bricklayer.Core.Server
             Logger.WriteLine("Network disconnected.");
             Net.Shutdown("The server has shut down. This may be a quick restart, or regular maintenance");
             IO.LogMessage($"SERVER EXIT: The server has gracefully exited on {DateTime.Now.ToString("U")}\n");
-            Environment.Exit(0); //Peace out dudes and dudettes <3 Yay to the woo
+            Environment.Exit(0); // Peace out dudes and dudettes <3 Yay to the woo
         }
 
         /// <summary>

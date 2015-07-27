@@ -28,12 +28,12 @@ namespace Bricklayer.Core.Server.Net
         {
             while (NetManager.NetServer.Status == NetPeerStatus.Running)
             {
-                //If an issue occurs with this (again), see the discussion at:
-                //https://groups.google.com/forum/#!topic/lidgren-network-gen3/EN3vaykwBWM
+                // If an issue occurs with this (again), see the discussion at:
+                // https://groups.google.com/forum/#!topic/lidgren-network-gen3/EN3vaykwBWM
                 NetManager.NetServer.MessageReceivedEvent.WaitOne();
                 try
                 {
-                    NetIncomingMessage inc; //Used to store messages
+                    NetIncomingMessage inc; // Used to store messages
 
                     while ((inc = NetManager.ReadMessage()) != null)
                     {
@@ -46,10 +46,10 @@ namespace Bricklayer.Core.Server.Net
                             case NetIncomingMessageType.WarningMessage:
                                 Logger.WriteLine(LogType.Error, "MessageHandler Loop: " + inc.ReadString());
                                 break;
-                            //ConnectionApproval messages are sent when a client would like to connect to the server
+                            // ConnectionApproval messages are sent when a client would like to connect to the server
                             case NetIncomingMessageType.ConnectionApproval:
                             {
-                                //If client does not send username information (Purposely trying to use a modded client?)
+                                // If client does not send username information (Purposely trying to use a modded client?)
                                 if (inc.LengthBytes == 0)
                                 {
                                     inc.SenderConnection?.Deny("Invalid Hail Message");
@@ -58,7 +58,7 @@ namespace Bricklayer.Core.Server.Net
 
                                 var type =
                                     (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
-                                //Find message type
+                                // Find message type
                                 switch (type)
                                 {
                                     // The connection should come with a public key to verify the client's session
@@ -75,19 +75,19 @@ namespace Bricklayer.Core.Server.Net
                                 }
                                 break;
                             }
-                            //Data messages are all messages manually sent from client
-                            //These are the bulk of the messages, used for Sender movement, block placing, etc
+                            // Data messages are all messages manually sent from client
+                            // These are the bulk of the messages, used for Sender movement, block placing, etc
                             case NetIncomingMessageType.Data:
                             {
                                 ProcessDataMessage(inc);
                                 break;
                             }
-                            //StatusChanged messages occur when a client connects, disconnects, is approved, etc
-                            //NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with Disconnect()
+                            // StatusChanged messages occur when a client connects, disconnects, is approved, etc
+                            // NOTE: Disconnecting and Disconnected are not instant unless client is shutdown with Disconnect()
                             case NetIncomingMessageType.StatusChanged:
                             {
                                 var sender = Server.PlayerFromRUI(inc.SenderConnection.RemoteUniqueIdentifier, true);
-                                //When a player's connection is finalized
+                                // When a player's connection is finalized
                                 if (inc.SenderConnection != null &&
                                     inc.SenderConnection.Status == NetConnectionStatus.Connected)
                                 {
@@ -95,7 +95,7 @@ namespace Bricklayer.Core.Server.Net
                                         Server.Events.Network.UserConnected.Invoke(
                                             new EventManager.NetEvents.ConnectionEventArgs(sender));
                                 }
-                                //When a client disconnects
+                                // When a client disconnects
                                 else if (inc.SenderConnection != null &&
                                          (inc.SenderConnection.Status == NetConnectionStatus.Disconnected ||
                                           inc.SenderConnection.Status == NetConnectionStatus.Disconnecting))
@@ -107,17 +107,17 @@ namespace Bricklayer.Core.Server.Net
                                 }
                                 break;
                             }
-                            //Listen to unconnected data
+                            // Listen to unconnected data
                             case NetIncomingMessageType.UnconnectedData:
                             {
                                 var type = (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
 
-                                //Handle messages from the auth server differently then ones from players (ping requests)
+                                // Handle messages from the auth server differently then ones from players (ping requests)
                                 if (Equals(inc.SenderEndPoint, NetManager.AuthEndpoint))
                                 {
                                     switch (type)
                                     {
-                                        //When the auth server confirms if a session is valid or not.
+                                        // When the auth server confirms if a session is valid or not.
                                         case MessageTypes.ValidSession:
                                         {
                                             var msg = new ValidSessionMessage(inc, MessageContext.Server);
@@ -133,7 +133,7 @@ namespace Bricklayer.Core.Server.Net
                                 {
                                     switch (type)
                                     {
-                                        //When the auth server confirms if a session is valid or not.
+                                        // When the auth server confirms if a session is valid or not.
                                         case MessageTypes.ServerInfo:
                                         {
                                             // ReSharper disable once UnusedVariable
@@ -177,15 +177,15 @@ namespace Bricklayer.Core.Server.Net
         /// <param name="inc">The incoming message</param>
         private void ProcessDataMessage(NetIncomingMessage inc)
         {
-            //The type of message being recieved
+            // The type of message being recieved
             var type = (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
-            //The user who sent the message
+            // The user who sent the message
             var sender = Server.PlayerFromRUI(inc.SenderConnection.RemoteUniqueIdentifier);
             if (sender != null)
             {
                 switch (type)
                 {
-                    //If the user requests a message to be sent, send it back
+                    // If the user requests a message to be sent, send it back
                     case MessageTypes.Request:
                     {
                         var msg = new RequestMessage(inc, MessageContext.Server);

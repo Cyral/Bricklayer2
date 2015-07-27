@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Mime;
-using System.Text;
-using System.Threading.Tasks;
-using Bricklayer.Core.Client.Interface.Controls;
-using Bricklayer.Core.Client.Interface.Screens;
-using Bricklayer.Core.Common;
+﻿using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
-using EventArgs = MonoForce.Controls.EventArgs;
 
 namespace Bricklayer.Core.Client.Interface.Windows
 {
@@ -31,15 +21,15 @@ namespace Bricklayer.Core.Client.Interface.Windows
         {
             this.screen = screen;
 
-            //Events
+            // Events
 
-            //Listen for valid response from auth server
+            // Listen for valid response from auth server
             screen.Client.Events.Network.Auth.InitReceived.AddHandler(OnInit);
 
-            //Listen for failed login response from auth server
+            // Listen for failed login response from auth server
             screen.Client.Events.Network.Auth.FailedLogin.AddHandler(OnFailedLogin);
 
-            //Setup the window
+            // Setup the window
             CaptionVisible = false;
             Caption.Text = "Welcome to Bricklayer!";
             Description.Text =
@@ -52,7 +42,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Shadow = true;
             Center();
 
-            //Text boxes
+            // Text boxes
             txtUsername = new TextBox(Manager);
             txtUsername.Init();
             txtUsername.Width = ClientWidth / 2 - 16;
@@ -81,7 +71,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             chkRemember.Checked = screen.Client.IO.Config.Client.RememberMe;
             Add(chkRemember);
 
-            //Sign in buttons
+            // Sign in buttons
             btnLoginAccount = new Button(Manager);
             btnLoginAccount.Init();
             btnLoginAccount.Width = txtUsername.Width;
@@ -100,7 +90,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnLoginGuest.Text = "Try as Guest";
             BottomPanel.Add(btnLoginGuest);
 
-            //Links
+            // Links
             lnkForgot = new LinkLabel(Manager);
             lnkForgot.Init();
             lnkForgot.Width = txtUsername.Width;
@@ -122,13 +112,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lnkCreateAccount.URL = Constants.Strings.CreateAccountURL;
             BottomPanel.Add(lnkCreateAccount);
 
-            //Color selector
+            // Color selector
             bodyClr = new ColorPicker(Manager) { Left = txtUsername.Right + 16, Top = txtUsername.Top, Width = txtUsername.Width - 18 - 8, Saturation = 210, Value = 250 };
             bodyClr.Init();
             bodyClr.ValueChanged += (sender, args) =>
             {
                 BodyImg.Color = bodyClr.SelectedColor;
-                //TODO: Update value in the game class
+                // TODO: Update value in the game class
             };
             Add(bodyClr);
 
@@ -182,7 +172,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         private void LoginAccountClick(object sender, EventArgs eventArgs)
         {
-            //Simple validation
+            // Simple validation
             if (!string.IsNullOrEmpty(txtUsername.Text) && !string.IsNullOrEmpty(txtPassword.Text) && txtUsername.Text.Length < 100 && txtPassword.Text.Length < 100)
             {
                 // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed

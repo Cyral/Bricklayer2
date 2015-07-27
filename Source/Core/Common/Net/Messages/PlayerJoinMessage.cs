@@ -1,11 +1,5 @@
-﻿using Lidgren.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bricklayer.Core.Common.Data;
-using Bricklayer.Core.Common.Entity;
+﻿using Bricklayer.Core.Common.Entity;
+using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {

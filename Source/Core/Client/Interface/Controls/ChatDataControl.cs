@@ -76,8 +76,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
         public override void DrawControl(Renderer renderer, Rectangle rect, GameTime gameTime)
         {
-            //Don't draw anything
-            //base.DrawControl(renderer,rect,gameTime);
+            // Don't draw anything
+            // base.DrawControl(renderer,rect,gameTime);
         }
     }
 }

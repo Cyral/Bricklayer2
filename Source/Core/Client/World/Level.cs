@@ -1,7 +1,6 @@
 ﻿using System;
 using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.World;
-using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -22,10 +21,8 @@ namespace Bricklayer.Core.Client.World
         private static readonly float cameraSpeed = .18f;
         private static readonly float cameraParallax = .9f;
 
-        public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating) : base(creator, name, uuid, description, plays, rating)
-        {
-
-        }
+        public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating)
+            : base(creator, name, uuid, description, plays, rating) {}
 
         public Level(LevelData level, Client client) : base(level)
         {
@@ -51,10 +48,7 @@ namespace Bricklayer.Core.Client.World
             };
         }
 
-        public void Update(GameTime delta)
-        {
-            
-        }
+        public void Update(GameTime delta) {}
 
         public void Draw(SpriteBatch batch, GameTime delta)
         {
@@ -66,7 +60,7 @@ namespace Bricklayer.Core.Client.World
         /// </summary>
         private void DrawTiles(SpriteBatch batch)
         {
-            //Draw Foreground Blocks
+            // Draw Foreground Blocks
             for (var x = (int)Camera.Left / Tile.Width; x <= (int)Camera.Right / Tile.Width; x++)
             {
                 for (var y = ((int)Camera.Bottom / Tile.Height); y >= (int)Camera.Top / Tile.Height; y--)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -21,33 +20,34 @@ namespace Bricklayer.Core.Common
         /// <param name="asm">The assembly to load.</param>
         public static T CreatePluginInstance<T>(Assembly asm, object arguments, PluginData plugin) where T : Plugin
         {
-            //Search for a type of 'T : Plugin' to use
+            // Search for a type of 'T : Plugin' to use
             var types = asm.GetTypes();
             var pluginType = typeof (T);
             var mainType = types.FirstOrDefault(type => pluginType.IsAssignableFrom(type));
 
-            //Create an instance of this type and register it
-            if (mainType != null)
+            // Create an instance of this type and register it
+            if (mainType == null)
+                throw new InvalidOperationException(
+                    $"Assembly '{Path.GetFileName(plugin.Name)}' is not a valid plugin.");
+
+            try
             {
-                try
-                {
-                    var instance =  (T)Activator.CreateInstance(mainType,
-                        BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.Instance, null,
-                        new[] {arguments}, CultureInfo.CurrentCulture);
-                    instance.Path = plugin.Path;
-                    instance.Identifier = plugin.Identifier;
-                    instance.Authors = plugin.Authors;
-                    instance.Description = plugin.Description;
-                    instance.Name = plugin.Name;
-                    instance.Version = plugin.Version;
-                    instance.Dependencies = plugin.Dependencies;
-                    return instance;
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidDataException(
-                        $"Couldn't load assembly '{Path.GetFileName(plugin.Name)}': {e.InnerException}");
-                }
+                var instance =  (T)Activator.CreateInstance(mainType,
+                    BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.Instance, null,
+                    new[] {arguments}, CultureInfo.CurrentCulture);
+                instance.Path = plugin.Path;
+                instance.Identifier = plugin.Identifier;
+                instance.Authors = plugin.Authors;
+                instance.Description = plugin.Description;
+                instance.Name = plugin.Name;
+                instance.Version = plugin.Version;
+                instance.Dependencies = plugin.Dependencies;
+                return instance;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidDataException(
+                    $"Couldn't load assembly '{Path.GetFileName(plugin.Name)}': {e.InnerException}");
             }
             throw new InvalidOperationException(
                 $"Assembly '{Path.GetFileName(plugin.Name)}' is not a valid plugin.");
@@ -60,26 +60,26 @@ namespace Bricklayer.Core.Common
         public static IEnumerable<PluginData> GetPlugins(string directory, JsonSerializerSettings serializationSettings)
         {
             var plugins = new List<PluginData>();
-            //Unzip any plugin folders that are zipped (Possible if user didn't extract of left .zip inside)
+            // Unzip any plugin folders that are zipped (Possible if user didn't extract of left .zip inside)
             var zipped = Directory.GetFiles(directory, "*.zip");
             foreach (var file in zipped)
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
                 var dir = Path.Combine(directory, Path.GetFileNameWithoutExtension(file));
-                if (!Directory.Exists(dir)) //If an unzipped version doesn't exist, unzip this plugin
+                if (!Directory.Exists(dir)) // If an unzipped version doesn't exist, unzip this plugin
                     ZipFile.ExtractToDirectory(file, dir);
                 File.Delete(file);
             }
 
-            //Get all of the directories in the plugin folder
+            // Get all of the directories in the plugin folder
             var dirs = Directory.GetDirectories(directory);
             foreach (var dir in dirs)
             {
-                //Make sure there is a plugin metadata file in this folder
+                // Make sure there is a plugin metadata file in this folder
                 if (!File.Exists(Path.Combine(dir, "plugin.json")))
                     throw new InvalidOperationException(
                         $"Plugin directory '{new DirectoryInfo(dir).Name}' does not contain a plugin.json");
-                //Make sure there is a plugin in this folder
+                // Make sure there is a plugin in this folder
                 if (!File.Exists(Path.Combine(dir, "plugin.dll")))
                     throw new FileNotFoundException(
                         $"Plugin directory '{new DirectoryInfo(dir).Name}' does not contain a plugin.dll");
@@ -96,7 +96,7 @@ namespace Bricklayer.Core.Common
         /// </summary>
         public static Assembly LoadPlugin(AppDomain domain, string path)
         {
-            //Load the raw bytes of the file, to prevent locking it while the server is running, then load that into the assembly
+            // Load the raw bytes of the file, to prevent locking it while the server is running, then load that into the assembly
             return domain.Load(File.ReadAllBytes(Path.Combine(path, "plugin.dll")));
         }
     }

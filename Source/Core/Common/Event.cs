@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Bricklayer.Core.Common
 {
@@ -84,7 +81,7 @@ namespace Bricklayer.Core.Common
         public void AddHandler(EventHandler<TArgs> handler, EventPriority priority, bool ignoreCancel = false)
         {
             handlers.Add(new PrioritizedEventHandler<TArgs>(handler, priority, ignoreCancel));
-            handlers.Sort((a, b) => ((int)a.Priority).CompareTo((int)b.Priority)); //Sort by priority
+            handlers.Sort((a, b) => ((int)a.Priority).CompareTo(b.Priority)); // Sort by priority
         }
 
         /// <summary>
@@ -221,7 +218,7 @@ namespace Bricklayer.Core.Common
             Priority = priority;
         }
 
-        //The following operators are used to make this class behave like an enum (castable to int)
+        // The following operators are used to make this class behave like an enum (castable to int)
         static public EventPriority operator <=(EventPriority value1, EventPriority value2)
         {
             return value1 <= value2;

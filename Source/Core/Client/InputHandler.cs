@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -34,7 +30,7 @@ namespace Bricklayer.Core.Client
             get
             {
                 var position = CurrentMouseState.GetPositionPoint();
-                return new Point(position.X / Common.World.Tile.Width, Common.World.Tile.Height);
+                return new Point(position.X / Tile.Width, Tile.Height);
             }
         }
 
@@ -43,7 +39,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         internal InputHandler()
         {
-            //Initialize
+            // Initialize
         }
 
         /// <summary>

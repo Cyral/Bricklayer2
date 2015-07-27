@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
+using Bricklayer.Core.Client.World;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net.Messages;
-using Bricklayer.Core.Common.World;
-using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client
 {
@@ -31,7 +29,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public sealed class GameEvents
         {
-            //Arguments define what values are passed to the event handler(s).
+            // Arguments define what values are passed to the event handler(s).
             #region Arguments
 
             public class GameStateEventArgs : BricklayerEventArgs
@@ -59,8 +57,8 @@ namespace Bricklayer.Core.Client
             }
             #endregion
 
-            //Events represent a collection of event handlers.
-            //(Note: These are not standard .NET events, see the Event class)
+            // Events represent a collection of event handlers.
+            // (Note: These are not standard .NET events, see the Event class)
 
             #region Events
 
@@ -97,7 +95,7 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public sealed class AuthServerEvents
             {
-                //Arguments define what values are passed to the event handler(s).
+                // Arguments define what values are passed to the event handler(s).
                 #region Arguments
 
                 public class InitEventArgs : BricklayerEventArgs
@@ -147,8 +145,8 @@ namespace Bricklayer.Core.Client
                 }
                 #endregion
 
-                //Events represent a collection of event handlers.
-                //(Note: These are not standard .NET events, see the Event class)
+                // Events represent a collection of event handlers.
+                // (Note: These are not standard .NET events, see the Event class)
 
                 #region Events
 
@@ -184,7 +182,7 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public sealed class GameServerEvents
             {
-                //Arguments define what values are passed to the event handler(s).
+                // Arguments define what values are passed to the event handler(s).
 
                 #region Arguments
 
@@ -198,15 +196,13 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class ConnectEventArgs : BricklayerEventArgs
-                {
-                }
+                public class ConnectEventArgs : BricklayerEventArgs {}
 
                 public class LevelDataEventArgs : BricklayerEventArgs
                 {
-                    public World.Level Level { get; private set; }
+                    public Level Level { get; private set; }
 
-                    public LevelDataEventArgs(World.Level level)
+                    public LevelDataEventArgs(Level level)
                     {
                         Level = level;
                     }
@@ -291,8 +287,8 @@ namespace Bricklayer.Core.Client
                 }
                 #endregion
 
-                //Events represent a collection of event handlers.
-                //(Note: These are not standard .NET events, see the Event class)
+                // Events represent a collection of event handlers.
+                // (Note: These are not standard .NET events, see the Event class)
 
                 #region Events
 

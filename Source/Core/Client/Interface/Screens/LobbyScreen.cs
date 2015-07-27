@@ -41,7 +41,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             imgBackground.Init();
             Window.Add(imgBackground);
 
-            //Add the login window
+            // Add the login window
             wndLobby = new LobbyWindow(Manager, this);
             wndLobby.Init();
             Window.Add(wndLobby);

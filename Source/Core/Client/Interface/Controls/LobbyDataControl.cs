@@ -19,15 +19,15 @@ namespace Bricklayer.Core.Client.Interface.Controls
         public LobbyDataControl(LobbyScreen screen, Manager manager, LevelData data, Control parent)
             : base(manager)
         {
-            //Setup
+            // Setup
             Passive = false;
             Height = 60;
             Width = parent.ClientWidth;
             this.screen = screen;
             Data = data;
 
-            //Background "gradient" image
-            //TODO: Make an actual control. not a statusbar
+            // Background "gradient" image
+            // TODO: Make an actual control. not a statusbar
             gradient = new StatusBar(manager);
             gradient.Init();
             gradient.Alpha = .8f;
@@ -65,7 +65,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             lblStats.Text = $"Online: {data.Online}\nPlays: {"N/A"}";
             Add(lblStats);
 
-            //Add controls
+            // Add controls
             lblName = new Label(Manager)
             {
                 Width = 100,
@@ -94,8 +94,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
         public override void DrawControl(Renderer renderer, Rectangle rect, GameTime gameTime)
         {
-            //Don't draw anything
-            //base.DrawControl(renderer,rect,gameTime);
+            // Don't draw anything
+            // base.DrawControl(renderer,rect,gameTime);
         }
     }
 }

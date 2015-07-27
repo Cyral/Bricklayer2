@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace Bricklayer.Core.Common.World
 {
@@ -74,8 +74,8 @@ namespace Bricklayer.Core.Common.World
         /// <param name="collision">The physics that the tile will interact with entities with.</param>
         public BlockType(string name, Layer layer, BlockCollision collision = BlockCollision.Passable)
         {
-            //TODO: ID will be calulcated by server, and the list will be rearranged after plugins are loaded
-            //This way we can use an array or list instead of LINQ/for loop to find an id in `FromID`
+            // TODO: ID will be calulcated by server, and the list will be rearranged after plugins are loaded
+            // This way we can use an array or list instead of LINQ/for loop to find an id in `FromID`
             Name = name;
             Layer = layer;
             Collision = collision;

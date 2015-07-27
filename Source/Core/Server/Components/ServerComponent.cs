@@ -31,7 +31,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Performs initialization login for the component
         /// </summary>
-        #pragma warning disable 1998 //Ignore warning, as overriden Init methods may include asynchonous code.
+        #pragma warning disable 1998 // Ignore warning, as overriden Init methods may include asynchonous code.
         public virtual async Task Init()
         #pragma warning restore 1998
         {

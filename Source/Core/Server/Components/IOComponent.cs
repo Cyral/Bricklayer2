@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.World;
 using Newtonsoft.Json;
-using Level = Bricklayer.Core.Server.World.Level;
 
 namespace Bricklayer.Core.Server.Components
 {
@@ -65,13 +64,11 @@ namespace Bricklayer.Core.Server.Components
         private StreamWriter logWriter;
         private StringBuilder sb;
 
-        public IOComponent(Server server) : base(server)
-        {
-        }
+        public IOComponent(Server server) : base(server) {}
 
         public override async Task Init()
         {
-            //Paths.
+            // Paths.
             ServerDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (ServerDirectory != null)
             {
@@ -81,7 +78,7 @@ namespace Bricklayer.Core.Server.Components
                 ConfigFile = Path.Combine(ServerDirectory, "config.json");
             }
 
-            //Create directories that don't exist.
+            // Create directories that don't exist.
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
             if (!Directory.Exists(LevelsDirectory))
@@ -91,19 +88,19 @@ namespace Bricklayer.Core.Server.Components
 
             sb = new StringBuilder();
 
-            //Set up JSON.net settings.
+            // Set up JSON.net settings.
             SerializationSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
+                // Use a custom contract resolver that can read private and internal properties
                 ContractResolver = new JsonContractResolver()
-                //Use a custom contract resolver that can read private and internal properties
             };
 
-            //Log a message to the log file stating the startup time and version.
+            // Log a message to the log file stating the startup time and version.
             LogMessage(
                 $"SERVER STARTUP:\n{Constants.Strings.ServerTitle} {Constants.VersionString}\n\nServer is starting now, on {DateTime.Now.ToString("U")}\n\n");
 
-            //Load configuration.
+            // Load configuration.
             await LoadConfig();
             LoadBanner();
 
@@ -117,7 +114,7 @@ namespace Bricklayer.Core.Server.Components
         {
             try
             {
-                //If server config does not exist, create it and write the default settings
+                // If server config does not exist, create it and write the default settings
                 if (!File.Exists(ConfigFile))
                 {
                     Config = Config.GenerateDefaultConfig();
@@ -129,7 +126,7 @@ namespace Bricklayer.Core.Server.Components
                 var json = string.Empty;
                 await Task.Factory.StartNew(() => json = File.ReadAllText(ConfigFile));
 
-                //If config is empty, regenerate and read again
+                // If config is empty, regenerate and read again
                 if (string.IsNullOrWhiteSpace(json))
                 {
                     var config = Config.GenerateDefaultConfig();
@@ -137,11 +134,9 @@ namespace Bricklayer.Core.Server.Components
                     await SaveConfig(config);
                 }
 
-                await
-                    Task.Factory.StartNew(
-                        delegate { Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings); });
-
-
+                await Task.Factory.StartNew(() =>
+                        Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings));
+                
                 Log("Configuration loaded. Port: {0}", Config.Server.Port.ToString());
             }
             catch (Exception ex)
@@ -164,7 +159,7 @@ namespace Bricklayer.Core.Server.Components
                 if (logWriter == null || date.Date != lastLog.Date)
                 {
                     var path = Path.Combine(LogDirectory, date.ToString("MM-dd-yyyy") + ".txt");
-                    if (logWriter != null) //On day change, make a new stream/file
+                    if (logWriter != null) // On day change, make a new stream/file
                     {
                         logWriter.Close();
                         logWriter.Dispose();
@@ -174,8 +169,7 @@ namespace Bricklayer.Core.Server.Components
                 }
 
                 if (sb != null)
-                    await
-                        logWriter.WriteLineAsync(
+                    await logWriter.WriteLineAsync(
                             sb.Clear().Append('[').Append(date.ToString("G")).Append("] ").Append(message).ToString());
 
                 lastLog = date;
@@ -189,7 +183,7 @@ namespace Bricklayer.Core.Server.Components
                 logWriter?.Close();
             }
             #endif
-            //Logging errors occur on MONO, this fixes it (Although the performance increase on the Windows version (less file opening) is not present)
+            // Logging errors occur on MONO, this fixes it (Although the performance increase on the Windows version (less file opening) is not present)
             #if MONO
             try
             {
@@ -233,7 +227,7 @@ namespace Bricklayer.Core.Server.Components
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    //If server config does not exist, create it
+                    // If server config does not exist, create it
                     if (!File.Exists(ConfigFile))
                     {
                         var str = File.Create(ConfigFile);
@@ -245,7 +239,7 @@ namespace Bricklayer.Core.Server.Components
             }
             catch (Exception ex)
             {
-                Logger.WriteLine(LogType.Error, "IOComponent.SaveConfig - {0}", ex.ToString());
+                Logger.WriteLine(LogType.Error, $"IOComponent.SaveConfig - {ex}");
             }
         }
 
@@ -256,35 +250,32 @@ namespace Bricklayer.Core.Server.Components
         {
             var path = string.Empty;
 
-            //Scan for possible names
+            // Scan for possible names
             var formats = new[] {"jpg", "jpeg", "png"};
-            foreach (
-                var formatPath in
-                    formats.Select(format => Path.Combine(ServerDirectory, "banner." + format)).Where(File.Exists))
+
+            foreach (var formatPath in
+                formats.Select(format => Path.Combine(ServerDirectory, "banner." + format)).Where(File.Exists))
             {
                 path = formatPath;
                 break;
             }
 
-            if (!string.IsNullOrEmpty(path))
-            {
-                var img = Image.FromFile(path);
+            if (string.IsNullOrEmpty(path))
+                return;
 
-                if (img.Height <= Constants.MaxBannerHeight && img.Width <= Globals.Values.MaxBannerWidth)
+            var img = Image.FromFile(path);
+
+            if (img.Height <= Constants.MaxBannerHeight && img.Width <= Globals.Values.MaxBannerWidth)
+            {
+                using (var ms = new MemoryStream())
                 {
-                    using (var ms = new MemoryStream())
-                    {
-                        img.Save(ms, ImageFormat.Png);
-                        Banner = ms.ToArray();
-                    }
-                }
-                else
-                {
-                    Logger.WriteLine(LogType.Error,
-                        "Banner size exceeds the size limit of " + Globals.Values.MaxBannerWidth + "x" +
-                        Constants.MaxBannerHeight);
+                    img.Save(ms, ImageFormat.Png);
+                    Banner = ms.ToArray();
                 }
             }
+            else
+                Logger.WriteLine(LogType.Error,
+                    $"Banner size exceeds the size limit of {Globals.Values.MaxBannerWidth}x{Constants.MaxBannerHeight}");
         }
 
         internal async Task SaveLevel(Level level)
@@ -293,21 +284,17 @@ namespace Bricklayer.Core.Server.Components
             {
                 using (var filestream = new BufferedStream(
                     File.Open(Path.Combine(LevelsDirectory, level.UUID.ToString("N") + ".level"), FileMode.Create)))
+                using (var gzip = new GZipStream(filestream, CompressionMode.Compress, true))
+                using (var writer = new BinaryWriter(gzip))
                 {
-                    using (var gzip = new GZipStream(filestream, CompressionMode.Compress, true))
-                    {
-                        using (var writer = new BinaryWriter(gzip))
-                        {
-                            //Version used for save format migrations
-                            writer.Write(Constants.Version.Major);
-                            writer.Write(Constants.Version.Minor);
-                            writer.Write(Constants.Version.Build);
-                            writer.Write(Constants.Version.Revision);
+                    // Version used for save format migrations
+                    writer.Write(Constants.Version.Major);
+                    writer.Write(Constants.Version.Minor);
+                    writer.Write(Constants.Version.Build);
+                    writer.Write(Constants.Version.Revision);
 
-                            //Read tiles
-                            level.EncodeTiles(writer);
-                        }
-                    }
+                    // Read tiles
+                    level.EncodeTiles(writer);
                 }
             });
         }
@@ -321,27 +308,21 @@ namespace Bricklayer.Core.Server.Components
                 await Task.Run(() =>
                 {
                     using (var filestream = new BufferedStream(File.Open(path, FileMode.Open)))
+                    using (var gzip = new GZipStream(filestream, CompressionMode.Decompress, true))
+                    using (var reader = new BinaryReader(gzip))
                     {
-                        using (var gzip = new GZipStream(filestream, CompressionMode.Decompress, true))
-                        {
-                            using (var reader = new BinaryReader(gzip))
-                            {
-                                //Version used for save format migrations
-                                // ReSharper disable once UnusedVariable (This may be used in the future)
-                                var version = new Version(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(),
-                                    reader.ReadInt32());
+                        // Version used for save format migrations
+                        // ReSharper disable once UnusedVariable (This may be used in the future)
+                        var version = new Version(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(),
+                            reader.ReadInt32());
 
-                                //Read tiles
-                                level.DecodeTiles(reader);
-                            }
-                        }
+                        // Read tiles
+                        level.DecodeTiles(reader);
                     }
                 });
             }
             else
-            {
                 Logger.WriteLine(LogType.Error, $"Level file \"{uuid.ToString("N")}\" not found.");
-            }
             return level;
         }
     }

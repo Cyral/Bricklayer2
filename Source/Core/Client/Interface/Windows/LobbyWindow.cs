@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
-using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework.Graphics;
@@ -42,7 +40,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Shadow = true;
             Center();
 
-            //Group panels
+            // Group panels
             grpServer = new GroupPanel(Manager)
             {
                 Left = ClientWidth - Globals.Values.MaxBannerWidth - 1,

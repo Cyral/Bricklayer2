@@ -31,21 +31,21 @@ namespace Bricklayer.Core.Client.Interface.Controls
             this.screen = screen;
             this.manager = manager;
 
-            //Setup
+            // Setup
             Passive = false;
             Height = 76;
             data = server;
 
             Width = parent.Width + 8;
-            //Background "gradient" image
-            //TODO: Make an actual control. not a statusbar
+            // Background "gradient" image
+            // TODO: Make an actual control. not a statusbar
             gradient = new StatusBar(manager);
             gradient.Init();
             gradient.Height = ClientHeight;
             gradient.Alpha = .8f;
             Add(gradient);
 
-            //Add controls
+            // Add controls
             lblName = new Label(Manager)
             {
                 Width = Width,
@@ -126,13 +126,13 @@ namespace Bricklayer.Core.Client.Interface.Controls
         }
         public override void DrawControl(Renderer renderer, Rectangle rect, GameTime gameTime)
         {
-            //Don't draw anything
-            //base.DrawControl(renderer,rect,gameTime);
+            // Don't draw anything
+            // base.DrawControl(renderer,rect,gameTime);
         }
 
         public async void PingServer()
         {
-            //Resolve IP from host/address and port
+            // Resolve IP from host/address and port
             if (!resolvedHost && !string.IsNullOrEmpty(data.Host) && data.Port > 0 && data.Port < ushort.MaxValue)
             {
                 await Task.Factory.StartNew(() =>
@@ -148,7 +148,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
             if (endPoint != null)
             {
-                //Setup ping timer for 5 seconds
+                // Setup ping timer for 5 seconds
                 pingTimer = new Timer(state => { Error("Connection timed out."); }, null, 5000, Timeout.Infinite);
                 screen.Client.Network.SendUnconnected(endPoint, new ServerInfoMessage());
             }
