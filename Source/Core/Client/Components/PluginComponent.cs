@@ -39,15 +39,14 @@ namespace Bricklayer.Core.Client.Components
                 (sender, args) =>
                 {
                     // If a plugin.dll is trying to load a referenced assembly
-                    if (args.RequestingAssembly.FullName.Split(',')[0] == "plugin")
-                    {
-                        var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
-                        if (File.Exists(path))
-                            return Assembly.LoadFile(path);
-                        path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe"); // Try to load a .exe if .dll doesn't exist
-                        if (File.Exists(path))
-                            return Assembly.LoadFile(path);
-                    }
+                    if (args.RequestingAssembly.FullName.Split(',')[0] != "plugin")
+                        return null;
+                    var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
+                    if (File.Exists(path))
+                        return Assembly.LoadFile(path);
+                    path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe"); // Try to load a .exe if .dll doesn't exist
+                    if (File.Exists(path))
+                        return Assembly.LoadFile(path);
                     return null;
                 };
 
@@ -76,42 +75,37 @@ namespace Bricklayer.Core.Client.Components
         internal void LoadPlugins()
         {
             // Get a list of all the .dlls in the directory
-            IEnumerable<PluginData> files = null;
+            List<PluginData> files = null;
             try
             {
-                files = IOHelper.GetPlugins(Client.IO.Directories["Plugins"], Client.IO.SerializationSettings);
+                files = IOHelper.GetPlugins(Client.IO.Directories["Plugins"], Client.IO.SerializationSettings).ToList();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
-            if (files != null)
+
+            if (files == null)
+                return;
+            
+            foreach (var file in files.Where(file => !plugins.Contains(file)))
             {
-                foreach (var file in files.Where(file => !plugins.Contains(file)))
+                // TODO: Use AppDomains for security
+                // Load the assembly
+                try
                 {
-                    // TODO: Use AppDomains for security
-                    // Load the assembly
-                    try
-                    {
-                        // Make sure dependencies are met.
-                        if (file.Dependencies.Count > 0)
-                        {
-                            // ReSharper disable once PossibleMultipleEnumeration
-                            foreach (
-                                var dep in
-                                    file.Dependencies.Where(dep => !files.Any(plugin => plugin.Identifier == dep)))
-                            {
-                                throw new FileNotFoundException($"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
-                            }
-                        }
-                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
-                        loadingPlugin = file.Path;
-                        RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                    }
+                    // Make sure dependencies are met.
+                    if (file.Dependencies.Count > 0)
+                        foreach (var dep in
+                            file.Dependencies.Where(dep => files.All(plugin => plugin.Identifier != dep)))
+                            throw new FileNotFoundException($"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
+                    var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                    loadingPlugin = file.Path;
+                    RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
                 }
             }
         }

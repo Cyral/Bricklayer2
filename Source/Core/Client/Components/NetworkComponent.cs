@@ -272,16 +272,14 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="disposing">Disconnect?</param>
         private void Dispose(bool disposing)
         {
-            if (!isDisposed)
-            {
-                if (disposing)
-                    Disconnect();
-                isDisposed = true;
-            }
+            if (isDisposed)
+                return;
+
+            if (disposing)
+                Disconnect();
+            isDisposed = true;
         }
 
-        public NetworkManager(Client client) : base(client)
-        {
-        }
+        public NetworkManager(Client client) : base(client) {}
     }
 }

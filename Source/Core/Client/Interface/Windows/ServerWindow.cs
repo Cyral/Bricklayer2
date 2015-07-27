@@ -48,16 +48,16 @@ namespace Bricklayer.Core.Client.Interface.Windows
             lstServers.Init();
             Add(lstServers);
             RefreshServerList();
-            lstServers.DoubleClick += delegate (object o, EventArgs e)
+            lstServers.DoubleClick += (sender, args) =>
             {
-                if (lstServers.ItemIndex >= 0)
-                {
-                    var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
-                    // Make sure the user clicks the item and not the empty space in the list
-                    if (sdc.CheckPositionMouse(((MouseEventArgs)e).Position - lstServers.AbsoluteRect.Location))
-                        screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
-                            servers[lstServers.ItemIndex].Port);
-                }
+                if (lstServers.ItemIndex < 0)
+                    return;
+
+                var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
+                // Make sure the user clicks the item and not the empty space in the list
+                if (sdc.CheckPositionMouse(((MouseEventArgs)args).Position - lstServers.AbsoluteRect.Location))
+                    this.screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
+                        servers[lstServers.ItemIndex].Port);
             };
 
             // Add controls to the bottom panel. (Add server, edit server, etc.)
@@ -65,22 +65,22 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnEdit = new Button(manager) {Text = "Edit", Top = 8, Width = 64};
             btnEdit.Init();
             btnEdit.Left = (Width / 2) - (btnEdit.Width / 2);
-            btnEdit.Click += delegate
+            btnEdit.Click += (sender, args) =>
             {
-                if (lstServers.Items.Count > 0)
-                {
-                    var window = new AddServerDialog(manager, this, lstServers.ItemIndex, true,
-                        servers[lstServers.ItemIndex].Name, servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
-                    window.Init();
-                    Manager.Add(window);
-                    window.Show();
-                }
+                if (lstServers.Items.Count <= 0)
+                    return;
+
+                var window = new AddServerDialog(Manager, this, lstServers.ItemIndex, true,
+                    servers[lstServers.ItemIndex].Name, servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
+                window.Init();
+                Manager.Add(window);
+                window.Show();
             };
             BottomPanel.Add(btnEdit);
 
-            btnRemove = new Button(manager) {Text = "Remove", Left = btnEdit.Right + 8, Top = 8, Width = 64};
+            btnRemove = new Button(manager) { Text = "Remove", Left = btnEdit.Right + 8, Top = 8, Width = 64 };
             btnRemove.Init();
-            btnRemove.Click += delegate
+            btnRemove.Click += (clickSender, clickArgs) =>
             {
                 // Show a messagebox that asks for confirmation to delete the selected server.
                 if (lstServers.Items.Count > 0)
@@ -90,15 +90,15 @@ namespace Bricklayer.Core.Client.Interface.Windows
                         "Confirm Removal");
                     confirm.Init();
                     // When the message box is closed, check if the user clicked yes, if so, removed the server from the list.
-                    confirm.Closed += delegate(object sender, WindowClosedEventArgs args)
+                    confirm.Closed += (closedSender, closedArgs) =>
                     {
-                        var dialog = sender as Dialog;
-                        if (dialog != null && dialog.ModalResult == ModalResult.Yes) // If user clicked yes
-                        {
-                            servers.RemoveAt(lstServers.ItemIndex);
-                            lstServers.Items.RemoveAt(lstServers.ItemIndex);
-                            screen.Client.IO.WriteServers(servers); // Write the new server list to disk.
-                        }
+                        var dialog = closedSender as Dialog;
+                        if (dialog?.ModalResult != ModalResult.Yes)
+                            return;
+                        // If user clicked Yes
+                        servers.RemoveAt(lstServers.ItemIndex);
+                        lstServers.Items.RemoveAt(lstServers.ItemIndex);
+                        screen.Client.IO.WriteServers(servers); // Write the new server list to disk.
                     };
                     Manager.Add(confirm);
                     confirm.Show();
@@ -109,10 +109,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnAdd = new Button(manager) { Text = "Add", Top = 8, Width = 64 };
             btnAdd.Init();
             btnAdd.Right = btnEdit.Left - 8;
-            btnAdd.Click += delegate
+            btnAdd.Click += (sender, args) =>
             {
                 // Show add server dialog
-                var window = new AddServerDialog(manager, this, lstServers.ItemIndex, false, string.Empty,
+                var window = new AddServerDialog(Manager, this, lstServers.ItemIndex, false, string.Empty,
                     string.Empty, Globals.Values.DefaultServerPort);
                 window.Init();
                 Manager.Add(window);
@@ -123,21 +123,21 @@ namespace Bricklayer.Core.Client.Interface.Windows
             btnJoin = new Button(manager) { Text = "Connect", Top = 8, Width = 100 };
             btnJoin.Init();
             btnJoin.Right = btnAdd.Left - 8;
-            btnJoin.Click += delegate
+            btnJoin.Click += (sender, args) =>
             {
-                if (lstServers.ItemIndex >= 0)
-                {
-                    btnJoin.Enabled = false;
-                    btnJoin.Text = "Connecting...";
-                    screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
-                        servers[lstServers.ItemIndex].Port);
-                }
+                if (lstServers.ItemIndex < 0)
+                    return;
+
+                btnJoin.Enabled = false;
+                btnJoin.Text = "Connecting...";
+                this.screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
+                    servers[lstServers.ItemIndex].Port);
             };
             BottomPanel.Add(btnJoin);
 
-            btnRefresh = new Button(manager) {Text = "Refresh", Left = btnRemove.Right + 8, Top = 8, Width = 64};
+            btnRefresh = new Button(manager) { Text = "Refresh", Left = btnRemove.Right + 8, Top = 8, Width = 64 };
             btnRefresh.Init();
-            btnRefresh.Click += delegate { RefreshServerList(); };
+            btnRefresh.Click += (sender, args) => { RefreshServerList(); };
             BottomPanel.Add(btnRefresh);
 
             // Listen for when init message is recieved
@@ -197,6 +197,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 control.Init();
                 control.PingServer();
             }
+
             if (lstServers.Items.Count > 0)
                 lstServers.ItemIndex = 0;
         }

@@ -257,33 +257,30 @@ namespace Bricklayer.Core.Server.Components
 
             // Scan for possible names
             var formats = new[] {"jpg", "jpeg", "png"};
-            foreach (
-                var formatPath in
-                    formats.Select(format => Path.Combine(ServerDirectory, "banner." + format)).Where(File.Exists))
+
+            foreach (var formatPath in
+                formats.Select(format => Path.Combine(ServerDirectory, "banner." + format)).Where(File.Exists))
             {
                 path = formatPath;
                 break;
             }
 
-            if (!string.IsNullOrEmpty(path))
-            {
-                var img = Image.FromFile(path);
+            if (string.IsNullOrEmpty(path))
+                return;
 
-                if (img.Height <= Constants.MaxBannerHeight && img.Width <= Globals.Values.MaxBannerWidth)
+            var img = Image.FromFile(path);
+
+            if (img.Height <= Constants.MaxBannerHeight && img.Width <= Globals.Values.MaxBannerWidth)
+            {
+                using (var ms = new MemoryStream())
                 {
-                    using (var ms = new MemoryStream())
-                    {
-                        img.Save(ms, ImageFormat.Png);
-                        Banner = ms.ToArray();
-                    }
-                }
-                else
-                {
-                    Logger.WriteLine(LogType.Error,
-                        "Banner size exceeds the size limit of " + Globals.Values.MaxBannerWidth + "x" +
-                        Constants.MaxBannerHeight);
+                    img.Save(ms, ImageFormat.Png);
+                    Banner = ms.ToArray();
                 }
             }
+            else
+                Logger.WriteLine(LogType.Error,
+                    $"Banner size exceeds the size limit of {Globals.Values.MaxBannerWidth}x{Constants.MaxBannerHeight}");
         }
 
         internal async Task SaveLevel(Level level)
@@ -330,9 +327,7 @@ namespace Bricklayer.Core.Server.Components
                 });
             }
             else
-            {
                 Logger.WriteLine(LogType.Error, $"Level file \"{uuid.ToString("N")}\" not found.");
-            }
             return level;
         }
     }
