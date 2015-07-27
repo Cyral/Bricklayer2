@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Bricklayer.Core.Client
+﻿namespace Bricklayer.Core.Client
 {
     /// <summary>
     /// Represents a state of the game

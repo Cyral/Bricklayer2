@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Common.Data;

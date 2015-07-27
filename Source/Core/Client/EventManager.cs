@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
+using Bricklayer.Core.Client.World;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net.Messages;
-using Bricklayer.Core.Common.World;
-using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client
 {

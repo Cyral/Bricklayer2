@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net;
 using System.Threading;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.World;

@@ -1,7 +1,6 @@
 ﻿using System;
 using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.World;
-using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

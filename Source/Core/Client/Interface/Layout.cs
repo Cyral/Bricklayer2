@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Bricklayer.Core.Client.Interface.Screens;
-using Microsoft.Xna.Framework;
+﻿using Bricklayer.Core.Client.Interface.Screens;
 using MonoForce.Controls;
-using Bricklayer.Core.Client;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace Bricklayer.Client.Interface
+namespace Bricklayer.Core.Client.Interface
 {
     /// <summary>
     /// Handles the layout aspects of the window

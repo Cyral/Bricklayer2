@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using MonoForce.Controls;
 
-namespace Bricklayer.Client.Interface
+namespace Bricklayer.Core.Client.Interface
 {
     /// <summary>
     /// Handles the logical updating of UI elements
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public sealed partial class MainWindow
     {
         private static readonly TimeSpan second = TimeSpan.FromSeconds(1);
 

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.World;
 using Newtonsoft.Json;
-using Level = Bricklayer.Core.Server.World.Level;
 
 namespace Bricklayer.Core.Server.Components
 {
