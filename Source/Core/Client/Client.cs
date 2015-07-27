@@ -102,7 +102,7 @@ namespace Bricklayer.Core.Client
             //Create the manager for MonoForce UI
             UI = new Manager(this, "Bricklayer")
             {
-                TargetFrames = 100,
+                TargetFrames = 10000,
                 AutoCreateRenderTarget = true,
                 LogUnhandledExceptions = false,
                 ShowSoftwareCursor = true

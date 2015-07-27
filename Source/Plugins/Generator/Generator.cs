@@ -5,7 +5,7 @@ using Bricklayer.Core.Server;
 namespace Bricklayer.Plugins.Generator
 {
     /// <summary>
-    /// S part of the default blocks plugin.
+    /// Generates an empty world.
     /// </summary>
     public class Plugin : ServerPlugin
     {
@@ -15,6 +15,7 @@ namespace Bricklayer.Plugins.Generator
 
         public override void Load()
         {
+            // When a level is created, add a border around the world and set all others to empty.
             Server.Events.Game.Levels.LevelCreated.AddHandler(args =>
             {
                 for (var x = 0; x < args.Level.Width; x++)

@@ -51,6 +51,9 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// The function to draw this block.
         /// </summary>
+        /// <remarks>
+        /// Note: Using an Action instead of a method call or inlined code has no effect on performance :)
+        /// </remarks>
         public Action<SpriteBatch, Tile, int, int> Draw { get; set; }
 
         /// <summary>
