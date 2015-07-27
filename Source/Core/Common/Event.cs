@@ -84,7 +84,7 @@ namespace Bricklayer.Core.Common
         public void AddHandler(EventHandler<TArgs> handler, EventPriority priority, bool ignoreCancel = false)
         {
             handlers.Add(new PrioritizedEventHandler<TArgs>(handler, priority, ignoreCancel));
-            handlers.Sort((a, b) => ((int)a.Priority).CompareTo((int)b.Priority)); // Sort by priority
+            handlers.Sort((a, b) => ((int)a.Priority).CompareTo(b.Priority)); // Sort by priority
         }
 
         /// <summary>

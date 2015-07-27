@@ -27,27 +27,28 @@ namespace Bricklayer.Core.Common
             var mainType = types.FirstOrDefault(type => pluginType.IsAssignableFrom(type));
 
             // Create an instance of this type and register it
-            if (mainType != null)
+            if (mainType == null)
+                throw new InvalidOperationException(
+                    $"Assembly '{Path.GetFileName(plugin.Name)}' is not a valid plugin.");
+
+            try
             {
-                try
-                {
-                    var instance =  (T)Activator.CreateInstance(mainType,
-                        BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.Instance, null,
-                        new[] {arguments}, CultureInfo.CurrentCulture);
-                    instance.Path = plugin.Path;
-                    instance.Identifier = plugin.Identifier;
-                    instance.Authors = plugin.Authors;
-                    instance.Description = plugin.Description;
-                    instance.Name = plugin.Name;
-                    instance.Version = plugin.Version;
-                    instance.Dependencies = plugin.Dependencies;
-                    return instance;
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidDataException(
-                        $"Couldn't load assembly '{Path.GetFileName(plugin.Name)}': {e.InnerException}");
-                }
+                var instance =  (T)Activator.CreateInstance(mainType,
+                    BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.Instance, null,
+                    new[] {arguments}, CultureInfo.CurrentCulture);
+                instance.Path = plugin.Path;
+                instance.Identifier = plugin.Identifier;
+                instance.Authors = plugin.Authors;
+                instance.Description = plugin.Description;
+                instance.Name = plugin.Name;
+                instance.Version = plugin.Version;
+                instance.Dependencies = plugin.Dependencies;
+                return instance;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidDataException(
+                    $"Couldn't load assembly '{Path.GetFileName(plugin.Name)}': {e.InnerException}");
             }
             throw new InvalidOperationException(
                 $"Assembly '{Path.GetFileName(plugin.Name)}' is not a valid plugin.");

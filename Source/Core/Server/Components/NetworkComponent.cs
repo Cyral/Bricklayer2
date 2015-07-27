@@ -124,16 +124,17 @@ namespace Bricklayer.Core.Server.Components
             Server.Events.Network.MessageRequested.AddHandler(async args =>
             {
                 // When the client request an init message (refreshing the lobby)
-                if (args.Type == MessageTypes.Init)
+                switch (args.Type)
                 {
-                    Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
-                        Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels()),
-                        args.Sender);
-                }
-                else if (args.Type == MessageTypes.Banner)
-                {
-                    if (Server.IO.Banner != null)
-                        Send(new BannerMessage(Server.IO.Banner), args.Sender);
+                    case MessageTypes.Init:
+                        Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
+                            Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels()),
+                            args.Sender);
+                        break;
+                    case MessageTypes.Banner:
+                        if (Server.IO.Banner != null)
+                            Send(new BannerMessage(Server.IO.Banner), args.Sender);
+                        break;
                 }
             });
 
@@ -239,7 +240,6 @@ namespace Bricklayer.Core.Server.Components
                                      | NetIncomingMessageType.Data
                                      | NetIncomingMessageType.StatusChanged
                                      | NetIncomingMessageType.UnconnectedData);
-            // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
             // Start Lidgren server
             NetServer = new NetServer(Config);

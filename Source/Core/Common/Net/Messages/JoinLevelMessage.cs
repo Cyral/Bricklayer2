@@ -34,7 +34,7 @@ namespace Bricklayer.Core.Common.Net.Messages
         public void Decode(NetIncomingMessage im)
         {
             Guid result;
-            if (Guid.TryParse(im.ReadString(), out result));
+            if (Guid.TryParse(im.ReadString(), out result))
                 UUID = result;
         }
 
