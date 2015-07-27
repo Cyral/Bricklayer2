@@ -74,7 +74,9 @@ namespace Bricklayer.Core.Client.World
                     if (!InDrawBounds(x, y)) continue;
                     var tile = Tiles[x, y, 1];
                     if (tile.Type.IsRenderable)
+                    {
                         tile.Type.Draw(batch, tile, x, y);
+                    }
                 }
             }
         }
