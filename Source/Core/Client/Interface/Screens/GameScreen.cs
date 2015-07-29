@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.World;
@@ -19,6 +21,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
         private ControlList<PlayerListDataControl> lstPlayers;
         private TextBox txtChat;
 
+        private Panel pnInventory;
+        private Button[] btnInventory;
+        private bool OpenInventory = false;
+        private int NormWidth;
+        private int NormHeight;
+        private int WidthChange;
+        private bool Changing = false;
+
         /// <summary>
         /// Setup the game UI.
         /// </summary>
@@ -38,7 +48,35 @@ namespace Bricklayer.Core.Client.Interface.Screens
             sbStats.Add(lblStats);
             Window.Add(sbStats);
 
-            // Chat input box
+            // Inventory
+            pnInventory = new Panel(Manager)
+            {
+                Width = (48*9)+(10*10), // Make room for 9 slots and 10 space inbetween
+                Height = 50
+            };
+            pnInventory.Left = Manager.TargetWidth/2 - (pnInventory.Width/2);
+            pnInventory.Init();
+            Window.Add(pnInventory);
+            NormHeight = 50;
+            NormWidth = (48*9) + (10*10);
+
+            // Block buttons
+            btnInventory = new Button[9];
+            for (int i = 0; i < btnInventory.Count(); i++)
+            {
+                btnInventory[i] = new Button(Manager)
+                {
+                    Left = 10 + (58*i),
+                    Width = 48,
+                    Height = 48,
+                    Text = ""
+                };
+                btnInventory[i].Init();
+                pnInventory.Add(btnInventory[i]);
+            }
+
+
+            //Chat input box
             txtChat = new TextBox(Manager);
             txtChat.Init();
             txtChat.Left = 8;
@@ -109,16 +147,65 @@ namespace Bricklayer.Core.Client.Interface.Screens
             });
         }
 
+
         public override void Update(GameTime gameTime)
         {
             lblStats.Text = "FPS: " + Window.FPS;
 
             HandleInput();
+            UpdateInventory();
+
 
             base.Update(gameTime);
         }
 
+        private double effect = 9; // Effect used for inventory opening/closing effect 
+        private void UpdateInventory()
+        {
+            if (OpenInventory) // If inventory is opening or is open
+            {
+                if (pnInventory.Width < WidthChange) // If the open process is still going
+                {
+                    if (effect > 1) 
+                        effect -= 0.25;
 
+                    pnInventory.Width += (int)effect;
+                    pnInventory.Height += (int)effect;
+                    pnInventory.Left = Manager.TargetWidth / 2 - (pnInventory.Width / 2); // Center the inventory box
+
+                    // Keep buttons in the center
+                    for (var i = 0; i < btnInventory.Count(); i++)
+                        btnInventory[i].Left = ((pnInventory.Width / 2) + 208) - (58 * i);
+                }
+                else
+                {
+                    Changing = false;
+                    effect = 9;
+                }
+            }
+            else // If inventory is closing or is closed
+            {
+                if (pnInventory.Width > NormWidth) // If the close process is still going
+                {
+                    if (effect > 1)
+                        effect -= 0.25;
+
+                    pnInventory.Width -= (int)effect;
+                    pnInventory.Height -= (int)effect;
+                    pnInventory.Left = Manager.TargetWidth / 2 - (pnInventory.Width / 2); // Center the inventory box
+
+                    // Keep buttons in the center
+                    for (var i = 0; i < btnInventory.Count(); i++)
+                        btnInventory[i].Left = ((pnInventory.Width / 2) + 208) - (58 * i);
+                }
+                else
+                {
+                    Changing = false;
+                    effect = 9;
+                }
+
+            }
+        }
         private void HandleInput()
         {
             if (Client.Input.IsKeyPressed(Keys.T) && !txtChat.Visible) // Open chat
@@ -143,7 +230,24 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 txtChat.Focused = false;
                 lstChats.Items.ForEach(x => ((ChatDataControl)x).Hide());
             }
+            else if (Client.Input.IsKeyPressed(Keys.I))
+            {
+                if (!Changing)
+                {
+                    if (!OpenInventory)
+                    {
+                        OpenInventory = true;
+                        WidthChange = pnInventory.Width + 150;
+                    }
+                    else if (OpenInventory)
+                    {
+                        OpenInventory = false;
+                    }
+                    Changing = true;
+                }
+            }
             lstPlayers.Visible = Client.Input.IsKeyDown(Keys.Tab);
+
         }
 
         private void AddChat(string text, Manager manager, ControlList<ChatDataControl> chatlist)
