@@ -48,20 +48,22 @@ namespace Bricklayer.Core.Client.Interface.Screens
             sbStats.Add(lblStats);
             Window.Add(sbStats);
 
+            // Block buttons
+            btnInventory = new Button[11];
+
             // Inventory
             pnInventory = new Panel(Manager)
             {
-                Width = (48*9)+(10*10), // Make room for 9 slots and 10 space inbetween
+                // (48*9) + (10*10)
+                Width = (48*btnInventory.Length)+((btnInventory.Length+1)* 10), // Make room for 11 slots and 10 space inbetween
                 Height = 50
             };
             pnInventory.Left = Manager.TargetWidth/2 - (pnInventory.Width/2);
             pnInventory.Init();
             Window.Add(pnInventory);
             NormHeight = 50;
-            NormWidth = (48*9) + (10*10);
+            NormWidth = (48 * btnInventory.Length) + ((btnInventory.Length + 1) * 10);
 
-            // Block buttons
-            btnInventory = new Button[9];
             for (int i = 0; i < btnInventory.Count(); i++)
             {
                 btnInventory[i] = new Button(Manager)
@@ -159,7 +161,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             base.Update(gameTime);
         }
 
-        private double effect = 9; // Effect used for inventory opening/closing effect 
+        private double effect = 9; // Current movement amount for transition
         private void UpdateInventory()
         {
             if (OpenInventory) // If inventory is opening or is open
@@ -175,7 +177,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
                     // Keep buttons in the center
                     for (var i = 0; i < btnInventory.Count(); i++)
-                        btnInventory[i].Left = ((pnInventory.Width / 2) + 208) - (58 * i);
+                        btnInventory[i].Left = ((pnInventory.Width / 2) + 24 * btnInventory.Count() + 2) - (58 * i);
                 }
                 else
                 {
@@ -196,7 +198,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
                     // Keep buttons in the center
                     for (var i = 0; i < btnInventory.Count(); i++)
-                        btnInventory[i].Left = ((pnInventory.Width / 2) + 208) - (58 * i);
+                        btnInventory[i].Left = ((pnInventory.Width / 2) + 24 * btnInventory.Count() + 2) - (58 * i);
                 }
                 else
                 {
