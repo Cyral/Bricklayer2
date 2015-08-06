@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
-using Bricklayer.Core.Client.World;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
+using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
+using Bricklayer.Core.Common.World;
+using Lidgren.Network;
 
 namespace Bricklayer.Core.Client
 {
@@ -24,12 +26,84 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public NetEvents Network { get; }
 
+        internal EventManager()
+        {
+            Game = new GameEvents();
+            Network = new NetEvents();
+        }
+
         /// <summary>
         /// Events related to the main game client.
         /// </summary>
         public sealed class GameEvents
         {
+            /// <summary>
+            /// Events related to level management.
+            /// </summary>
+            public LevelEvents Level { get; }
+
+            internal GameEvents()
+            {
+                Level = new LevelEvents();
+            }
+
+            #region Nested type: Class
+
+            /// <summary>
+            /// Events related to level management.
+            /// </summary>
+            public sealed class LevelEvents
+            {
+                /// <summary>
+                /// When a block is placed.
+                /// </summary>
+                public Event<BlockPlacedEventArgs> BlockPlaced { get; } = new Event<BlockPlacedEventArgs>();
+
+                public class BlockPlacedEventArgs : BricklayerEventArgs
+                {
+                    /// <summary>
+                    /// The type of block placed.
+                    /// </summary>
+                    public BlockType Type { get; private set; }
+
+                    /// <summary>
+                    /// X grid coordinate.
+                    /// </summary>
+                    public int X { get; private set; }
+
+                    /// <summary>
+                    /// Y grid coordinate.
+                    /// </summary>
+                    public int Y { get; private set; }
+
+                    public Layer Layer { get; }
+
+                    /// <summary>
+                    /// Z grid coordinate. (Layer)
+                    /// </summary>
+                    public int Z => (int)Layer;
+
+                    public Level Level { get; private set; }
+
+                    public BlockPlacedEventArgs(Level level, int x, int y, int z, BlockType type)
+                    {
+                        X = x;
+                        Y = y;
+                        Layer = (Layer)z;
+                        Type = type;
+                    }
+
+                    public BlockPlacedEventArgs(Level level, int x, int y, Layer layer, BlockType type)
+                        : this(level, x, y, (int)layer, type)
+                    {
+                    }
+                }
+            }
+
+            #endregion
+
             // Arguments define what values are passed to the event handler(s).
+
             #region Arguments
 
             public class GameStateEventArgs : BricklayerEventArgs
@@ -55,6 +129,7 @@ namespace Bricklayer.Core.Client
                     OldScreen = oldScreen;
                 }
             }
+
             #endregion
 
             // Events represent a collection of event handlers.
@@ -71,6 +146,7 @@ namespace Bricklayer.Core.Client
             /// When the current UI screen of the game is changed. (Example: From login to in-game)
             /// </summary>
             public Event<GameScreenEventArgs> ScreenChanged { get; } = new Event<GameScreenEventArgs>();
+
             #endregion
         }
 
@@ -89,6 +165,11 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public GameServerEvents Game { get; }
 
+            internal NetEvents()
+            {
+                Game = new GameServerEvents();
+                Auth = new AuthServerEvents();
+            }
 
             /// <summary>
             /// Events related to the authentication server and proccess.
@@ -96,6 +177,7 @@ namespace Bricklayer.Core.Client
             public sealed class AuthServerEvents
             {
                 // Arguments define what values are passed to the event handler(s).
+
                 #region Arguments
 
                 public class InitEventArgs : BricklayerEventArgs
@@ -143,6 +225,7 @@ namespace Bricklayer.Core.Client
                         Message = message;
                     }
                 }
+
                 #endregion
 
                 // Events represent a collection of event handlers.
@@ -171,8 +254,8 @@ namespace Bricklayer.Core.Client
                 /// <summary>
                 /// When the auth server tells the client to download a mod. (From the install button on the website)
                 /// </summary>
-                public Event<PluginDownloadEventArgs> PluginDownloadRequested { get; } = new Event<PluginDownloadEventArgs>();
-
+                public Event<PluginDownloadEventArgs> PluginDownloadRequested { get; } =
+                    new Event<PluginDownloadEventArgs>();
 
                 #endregion
             }
@@ -196,7 +279,9 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-                public class ConnectEventArgs : BricklayerEventArgs {}
+                public class ConnectEventArgs : BricklayerEventArgs
+                {
+                }
 
                 public class LevelDataEventArgs : BricklayerEventArgs
                 {
@@ -244,7 +329,6 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-
                 public class LatencyUpdatedEventArgs : BricklayerEventArgs
                 {
                     public float Ping { get; private set; }
@@ -254,7 +338,6 @@ namespace Bricklayer.Core.Client
                         Ping = ping;
                     }
                 }
-
 
                 public class ChatEventArgs : BricklayerEventArgs
                 {
@@ -285,6 +368,7 @@ namespace Bricklayer.Core.Client
                         Pings = pings;
                     }
                 }
+
                 #endregion
 
                 // Events represent a collection of event handlers.
@@ -303,7 +387,8 @@ namespace Bricklayer.Core.Client
                 public Event<ConnectEventArgs> Connected { get; } = new Event<ConnectEventArgs>();
 
                 /// <summary>
-                /// When an init message is recieved, containing list of levels and server info. (On connect and when reload button is pressed)
+                /// When an init message is recieved, containing list of levels and server info. (On connect and when reload button is
+                /// pressed)
                 /// </summary>
                 public Event<InitEventArgs> InitReceived { get; } = new Event<InitEventArgs>();
 
@@ -344,19 +429,6 @@ namespace Bricklayer.Core.Client
 
                 #endregion
             }
-
-
-            internal NetEvents()
-            {
-                Game = new GameServerEvents();
-                Auth = new AuthServerEvents();
-            }
-        }
-
-        internal EventManager()
-        {
-            Game = new GameEvents();
-            Network = new NetEvents();
         }
     }
 }

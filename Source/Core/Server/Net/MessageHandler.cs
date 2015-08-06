@@ -57,7 +57,7 @@ namespace Bricklayer.Core.Server.Net
                                 }
 
                                 var type =
-                                    (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+                                    (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
                                 // Find message type
                                 switch (type)
                                 {
@@ -110,7 +110,7 @@ namespace Bricklayer.Core.Server.Net
                             // Listen to unconnected data
                             case NetIncomingMessageType.UnconnectedData:
                             {
-                                var type = (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+                                var type = (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
 
                                 // Handle messages from the auth server differently then ones from players (ping requests)
                                 if (Equals(inc.SenderEndPoint, NetManager.AuthEndpoint))
@@ -178,7 +178,7 @@ namespace Bricklayer.Core.Server.Net
         private void ProcessDataMessage(NetIncomingMessage inc)
         {
             // The type of message being recieved
-            var type = (MessageTypes)Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+            var type = (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
             // The user who sent the message
             var sender = Server.PlayerFromRUI(inc.SenderConnection.RemoteUniqueIdentifier);
             if (sender != null)
@@ -210,7 +210,16 @@ namespace Bricklayer.Core.Server.Net
                     case MessageTypes.Chat:
                     {
                         var msg = new ChatMessage(inc, MessageContext.Server);
-                        Server.Events.Network.ChatMessageReceived.Invoke(new EventManager.NetEvents.ChatEventArgs(sender, msg.Message));
+                        Server.Events.Network.ChatMessageReceived.Invoke(new EventManager.NetEvents.ChatEventArgs(
+                            sender, msg.Message));
+                        break;
+                    }
+                    case MessageTypes.BlockPlace:
+                    {
+                        var msg = new BlockPlaceMessage(inc, MessageContext.Server);
+                        Server.Events.Game.Level.BlockPlaced.Invoke(
+                            new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(sender, msg.Point.X,
+                                msg.Point.Y, msg.Layer, msg.Type));
                         break;
                     }
                 }

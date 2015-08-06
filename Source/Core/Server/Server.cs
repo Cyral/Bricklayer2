@@ -19,12 +19,12 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Command parser for commmands ran in the console or by users.
         /// </summary>
-        public CommandParser Commands { get; set; }
+        public CommandParser Commands { get; private set; }
 
         /// <summary>
         /// The DatabaseComponent for handling database operations.
         /// </summary>
-        public DatabaseComponent Database { get; set; }
+        public DatabaseComponent Database { get; private set; }
 
         /// <summary>
         /// Manages and lists all server events.
@@ -34,7 +34,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// IOComponent handles disk operations.
         /// </summary>
-        public IOComponent IO { get; set; }
+        public IOComponent IO { get; private set; }
 
         /// <summary>
         /// List of levels currently open.
@@ -44,7 +44,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
-        public NetworkComponent Net { get; set; }
+        public NetworkComponent Net { get; private set; }
 
         /// <summary>
         /// List of users online the server.
@@ -54,7 +54,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The PluginComponent for loading and managing plugins.
         /// </summary>
-        public PluginComponent Plugins { get; set; }
+        public PluginComponent Plugins { get; internal set; }
 
         private string clear, input;
         private bool showHeader;
@@ -103,7 +103,8 @@ namespace Bricklayer.Core.Server
             {
                 input = string.Empty;
                 WriteCommandCursor();
-                // Read input and parse command
+
+                // Read input and parse commands
                 while (true)
                 {
                     var key = Console.ReadKey(true);
@@ -127,14 +128,12 @@ namespace Bricklayer.Core.Server
                     Console.Write(key.KeyChar);
                 }
 
-
                 Commands.Parse(input.Trim());
 
                 WriteHeader();
             }
             // ReSharper disable once FunctionNeverReturns
         }
-
 
         /// <summary>
         /// Makes a player join the level with the specified UUID. If the level is not open, it will be loaded.
@@ -144,7 +143,7 @@ namespace Bricklayer.Core.Server
         /// </remarks>
         public async Task<Level> JoinLevel(Player sender, Guid uuid)
         {
-            Level level = Levels.FirstOrDefault(x => x.UUID == uuid);
+            var level = Levels.FirstOrDefault(x => x.UUID == uuid);
             if (level == null)
             {
                 level = await IO.LoadLevel(uuid);
@@ -272,7 +271,7 @@ namespace Bricklayer.Core.Server
             Logger.WriteLine("Network disconnected.");
             Net.Shutdown("The server has shut down. This may be a quick restart, or regular maintenance");
             IO.LogMessage($"SERVER EXIT: The server has gracefully exited on {DateTime.Now.ToString("U")}\n");
-            Environment.Exit(0); // Peace out dudes and dudettes <3 Yay to the woo
+            Environment.Exit(0);
         }
 
         /// <summary>
@@ -319,7 +318,7 @@ namespace Bricklayer.Core.Server
         private void WriteStats()
         {
             string stats =
-                $"Sent: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.SentBytes / 1024d / 1024, 1))}MB | Recieved: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.ReceivedBytes / 1024d / 1024, 1))}MB | Uptime: {(DateTime.Now - start).ToString("d\\:hh\\:mm")}";
+                $"Sent: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.SentBytes/1024d/1024, 1))}MB | Recieved: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.ReceivedBytes/1024d/1024, 1))}MB | Uptime: {(DateTime.Now - start).ToString("d\\:hh\\:mm")}";
 
             WriteCenteredText(stats);
         }
@@ -345,19 +344,19 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Helper method to write centered text.
         /// </summary>
-        private void WriteCenteredText(string message)
+        private static void WriteCenteredText(string message)
         {
             if (Console.WindowWidth - message.Length > 0)
             {
-                Console.Write(new string(' ', (Console.WindowWidth - message.Length) / 2));
+                Console.Write(new string(' ', (Console.WindowWidth - message.Length)/2));
                 Console.Write(message);
-                Console.WriteLine(new string(' ', (Console.WindowWidth - message.Length + 1) / 2));
+                Console.WriteLine(new string(' ', (Console.WindowWidth - message.Length + 1)/2));
             }
             else
                 Console.Write(message);
         }
 
-        private void OnParseError(object sender, string message)
+        private static void OnParseError(object sender, string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(message);

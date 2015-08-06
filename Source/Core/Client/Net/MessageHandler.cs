@@ -37,45 +37,60 @@ namespace Bricklayer.Core.Client.Net
         {
             if (im == null) throw new ArgumentNullException(nameof(im));
 
-            var type = (MessageTypes)im.ReadByte();
+            var type = (MessageTypes) im.ReadByte();
 
             switch (type)
             {
                 case MessageTypes.Init:
                 {
                     var msg = new InitMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.InitReceived.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
+                    networkManager.Client.Events.Network.Game.InitReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
                     break;
                 }
                 case MessageTypes.Banner:
                 {
                     var msg = new BannerMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.LobbyBannerReceived.Invoke(new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
+                    networkManager.Client.Events.Network.Game.LobbyBannerReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
                     break;
                 }
                 case MessageTypes.LevelData:
                 {
                     var msg = new LevelDataMessage(im, MessageContext.Client);
                     networkManager.Client.Events.Network.Game.LevelDataReceived.Invoke(
-                        new EventManager.NetEvents.GameServerEvents.LevelDataEventArgs(new Level(msg.Level, networkManager.Client)));
+                        new EventManager.NetEvents.GameServerEvents.LevelDataEventArgs(new Level(msg.Level,
+                            networkManager.Client)));
                     break;
                 }
                 case MessageTypes.Chat:
                 {
                     var msg = new ChatMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.ChatReceived.Invoke(new EventManager.NetEvents.GameServerEvents.ChatEventArgs(msg.Message));
+                    networkManager.Client.Events.Network.Game.ChatReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.ChatEventArgs(msg.Message));
                     break;
                 }
                 case MessageTypes.PlayerJoin:
                 {
                     var msg = new PlayerJoinMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.PlayerJoinReceived.Invoke(new EventManager.NetEvents.GameServerEvents.PlayerJoinEventArgs(msg.Player));
+                    networkManager.Client.Events.Network.Game.PlayerJoinReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.PlayerJoinEventArgs(msg.Player));
                     break;
                 }
                 case MessageTypes.PingUpdate:
                 {
                     var msg = new PingUpdateMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.PingUpdateReceived.Invoke(new EventManager.NetEvents.GameServerEvents.PingUpdateEventArgs(msg.Pings));
+                    networkManager.Client.Events.Network.Game.PingUpdateReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.PingUpdateEventArgs(msg.Pings));
+                    break;
+                }
+                case MessageTypes.BlockPlace:
+                {
+                    var msg = new BlockPlaceMessage(im, MessageContext.Client);
+                    networkManager.Client.Events.Game.Level.BlockPlaced.Invoke(
+                        new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(networkManager.Client.Level,
+                            msg.Point.X,
+                            msg.Point.Y, msg.Layer, msg.Type));
                     break;
                 }
             }
@@ -92,7 +107,7 @@ namespace Bricklayer.Core.Client.Net
             if (Equals(im.SenderEndPoint, networkManager.AuthEndpoint) &&
                 im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
             {
-                var messageType = (MessageTypes)im.ReadByte(); // Find the type of data message sent
+                var messageType = (MessageTypes) im.ReadByte(); // Find the type of data message sent
                 switch (messageType)
                 {
                     case MessageTypes.AuthInit:
@@ -175,7 +190,7 @@ namespace Bricklayer.Core.Client.Net
                             break;
                         case NetIncomingMessageType.StatusChanged:
                         {
-                            var status = (NetConnectionStatus)im.ReadByte();
+                            var status = (NetConnectionStatus) im.ReadByte();
                             switch (status)
                             {
                                 case NetConnectionStatus.None:
@@ -196,7 +211,8 @@ namespace Bricklayer.Core.Client.Net
                                     networkManager.Client.Events.Network.Game.Connected.Invoke(
                                         new EventManager.NetEvents.GameServerEvents.ConnectEventArgs());
                                     // And init message with actual data
-                                    networkManager.Client.Events.Network.Game.InitReceived.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
+                                    networkManager.Client.Events.Network.Game.InitReceived.Invoke(
+                                        new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
                                     break;
                                 }
                                 // When disconnected from the server

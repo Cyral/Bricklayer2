@@ -24,6 +24,8 @@
         JoinLevel,
         Chat,
         PlayerJoin,
-        PingUpdate
+        PlayerLeave,
+        PingUpdate,
+        BlockPlace,
     }
 }

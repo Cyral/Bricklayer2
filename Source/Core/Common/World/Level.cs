@@ -49,7 +49,9 @@ namespace Bricklayer.Core.Common.World
         protected Random random;
 
         public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating)
-            : this(new LevelData(creator, name, uuid, description, 0, plays, rating)) {}
+            : this(new LevelData(creator, name, uuid, description, 0, plays, rating))
+        {
+        }
 
         public Level(LevelData level)
             : base(level.Creator, level.Name, level.UUID, level.Description, 0, level.Plays, level.Rating)
@@ -69,7 +71,7 @@ namespace Bricklayer.Core.Common.World
             random = new Random();
 
             // Read player data
-            int playersLength = im.ReadInt32();
+            var playersLength = im.ReadInt32();
 
             for (var i = 0; i < playersLength; i++)
                 Players.Add(new Player(im));
@@ -97,7 +99,7 @@ namespace Bricklayer.Core.Common.World
                 {
                     for (var x = 0; x < Width; x++)
                     {
-                        Tiles[x, y, layer] = new Tile(BlockType.FromID(reader.ReadInt16()));
+                        Tiles[x, y, layer] = new Tile(BlockType.FromID(reader.ReadUInt16()));
                     }
                 }
             }
@@ -116,17 +118,19 @@ namespace Bricklayer.Core.Common.World
 
             // Write the tile data
             using (var memory = new MemoryStream())
-            // Use Gzip to compress the data
-            // Note: In Bricklayer v1, RLE was used, Gzip is simpler to use and results in better compression hower.
-            using (var gzip = new GZipStream(memory, CompressionMode.Compress, true))
             {
-                using (var writer = new BinaryWriter(gzip))
-                    EncodeTiles(writer);
-                var memArr = memory.ToArray();
-                om.Write(memArr.Length);
-                om.Write(memArr);
+                // Use Gzip to compress the data
+                // Note: In Bricklayer v1, RLE was used, Gzip is simpler to use and results in better compression hower.
+                using (var gzip = new GZipStream(memory, CompressionMode.Compress, true))
+                {
+                    using (var writer = new BinaryWriter(gzip))
+                        EncodeTiles(writer);
+                    var memArr = memory.ToArray();
+                    om.Write(memArr.Length);
+                    om.Write(memArr);
+                }
             }
-    }
+        }
 
         internal void EncodeTiles(BinaryWriter writer)
         {
