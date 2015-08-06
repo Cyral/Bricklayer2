@@ -15,7 +15,7 @@ namespace Bricklayer.Plugins.Generator
         public override void Load()
         {
             // When a level is created, add a border around the world and set all others to empty.
-            Server.Events.Game.Levels.LevelCreated.AddHandler(args =>
+            Server.Events.Game.Level.LevelCreated.AddHandler(args =>
             {
                 for (var x = 0; x < args.Level.Width; x++)
                 {

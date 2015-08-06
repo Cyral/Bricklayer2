@@ -8,6 +8,7 @@ using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
 using Lidgren.Network;
+using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client
 {

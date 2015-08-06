@@ -156,7 +156,7 @@ namespace Bricklayer.Core.Server.Components
 
                     // Fire another event with the newly created level, so that plugins can access it.
                     // (As the current event is only from the network message)
-                    Server.Events.Game.Levels.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
+                    Server.Events.Game.Level.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
 
                     Send(new LevelDataMessage(level), args.Sender);
                 }, EventPriority.InternalFinal); // Must be the last event called as it fires another event
