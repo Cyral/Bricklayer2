@@ -39,7 +39,10 @@ namespace Bricklayer.Core.Common.World
         /// Layer 0 = Background
         /// Layer 1 = Foreground
         /// </summary>
-        public virtual Tile[,,] Tiles { get; protected set; }
+        /// <remarks>
+        /// Modifying this will not send a message or raise an event. It should be used for internal purposes only.
+        /// </remarks>
+        internal virtual Tile[,,] Tiles { get; set; }
 
         /// <summary>
         /// The width, in blocks, of the map
