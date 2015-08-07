@@ -1,4 +1,5 @@
-﻿using Bricklayer.Core.Common.World;
+﻿using System.Runtime.InteropServices;
+using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
@@ -37,19 +38,26 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Left = Manager.TargetWidth/2 - (Width/2);
             Top = 8;
 
+            // Create images.
             for (var i = 0; i < images.Length; i++)
             {
                 images[i] = new ImageBox(Manager)
                 {
                     Top = 4,
-                    Left = ((Tile.Width + 2) * i),
+                    // Center.
+                    Left = (Width / 2) - (((images.Length + 1) * (Tile.Width + 2)) / 2) + ((Tile.Width + 2) * i),
                     Width = Tile.Width,
                     Height = Tile.Width,
                     Text = "",
+                    Passive = false
                 };
-                if (i < BlockType.Blocks.Count && BlockType.Blocks[i].Texture != null)
-                    images[i].Image = BlockType.Blocks[i].Texture;
                 images[i].Init();
+                if (i < BlockType.Blocks.Count && BlockType.Blocks[i].IsRenderable)
+                {
+                    images[i].Image = BlockType.Blocks[i].Texture;
+                    images[i].ToolTipType = typeof (BlockToolTip);
+                    ((BlockToolTip)images[i].ToolTip).SetBlock(BlockType.Blocks[i]);
+                }
                 images[i].SourceRect = BlockType.SourceRect;
                 Add(images[i]);
             }

@@ -65,6 +65,7 @@
     <Compile Include="Client.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="InputHandler.cs" />
+    <Compile Include="Interface\Controls\BlockToolTip.cs" />
     <Compile Include="Interface\Controls\ChatDataControl.cs" />
     <Compile Include="Interface\Controls\InventoryControl.cs" />
     <Compile Include="Interface\Controls\LobbyDataControl.cs" />
