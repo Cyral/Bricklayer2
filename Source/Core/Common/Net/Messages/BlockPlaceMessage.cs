@@ -12,6 +12,8 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class BlockPlaceMessage : IMessage
     {
+        private BlockType type;
+
         /// <summary>
         /// Block coordinate.
         /// </summary>
@@ -64,17 +66,17 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
-           im.Write((ushort)Point.X);
-           im.Write((ushort)Point.Y);
-           im.Write((byte)Layer);
-           im.Write(Type.ID);
+            Point = new Point(im.ReadUInt16(), im.ReadUInt16());
+            Layer = (Layer)im.ReadByte();
+            Type = BlockType.FromID(im.ReadUInt16());
         }
 
         public void Encode(NetOutgoingMessage om)
         {
-            Point = new Point(om.ReadUInt16(), om.ReadUInt16());
-            Layer = (Layer) om.ReadByte();
-            Type = BlockType.FromID(om.ReadUInt16());
+            om.Write((ushort)Point.X);
+            om.Write((ushort)Point.Y);
+            om.Write((byte)Layer);
+            om.Write(Type.ID);
         }
 
         #endregion

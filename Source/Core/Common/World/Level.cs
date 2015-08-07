@@ -42,7 +42,7 @@ namespace Bricklayer.Core.Common.World
         /// <remarks>
         /// Modifying this will not send a message or raise an event. It should be used for internal purposes only.
         /// </remarks>
-        internal virtual Tile[,,] Tiles { get; set; }
+        public virtual Tile[,,] Tiles { get; set; }
 
         /// <summary>
         /// The width, in blocks, of the map

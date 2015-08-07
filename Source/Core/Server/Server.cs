@@ -190,7 +190,7 @@ namespace Bricklayer.Core.Server
                 sender.Level.Players.Remove(sender);
                 if (sender.Level.Players.Count == 0)
                 {
-                    await CloseLevel(sender.Level.UUID); // Close level is nobody is in it
+                    await CloseLevel(sender.Level.UUID); // Close level if nobody is in it.
                 }
             }
         }

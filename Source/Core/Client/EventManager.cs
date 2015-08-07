@@ -88,6 +88,7 @@ namespace Bricklayer.Core.Client
 
                     public BlockPlacedEventArgs(Level level, int x, int y, int z, BlockType type)
                     {
+                        Level = level;
                         X = x;
                         Y = y;
                         Layer = (Layer)z;
@@ -427,6 +428,11 @@ namespace Bricklayer.Core.Client
                 /// When pings for players in level are recieved
                 /// </summary>
                 public Event<PingUpdateEventArgs> PingUpdateReceived { get; } = new Event<PingUpdateEventArgs>();
+
+                /// <summary>
+                /// When the server receives a block place message.
+                /// </summary>
+                public Event<GameEvents.LevelEvents.BlockPlacedEventArgs> BlockPlaceMessageReceived { get; } = new Event<GameEvents.LevelEvents.BlockPlacedEventArgs>();
 
                 #endregion
             }

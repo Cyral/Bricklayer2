@@ -6,6 +6,7 @@ using Bricklayer.Core.Client.Net;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
+using Bricklayer.Core.Common.World;
 using Lidgren.Network;
 
 namespace Bricklayer.Core.Client.Components
@@ -96,6 +97,19 @@ namespace Bricklayer.Core.Client.Components
                 else
                     Debug.WriteLine("Session verification failed");
             });
+
+            // Block place received message is invoked when the network message is received.
+            // If it is cancelled, it will not call the block placed message.
+            Client.Events.Network.Game.BlockPlaceMessageReceived.AddHandler(args =>
+            {
+                Client.Events.Game.Level.BlockPlaced.Invoke(new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(args.Level, args.X, args.Y, args.Z, args.Type));
+            }, EventPriority.InternalFinal);
+
+            Client.Events.Game.Level.BlockPlaced.AddHandler(args =>
+            {
+                args.Level.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+            });
+
             await base.Init();
         }
 
@@ -109,10 +123,10 @@ namespace Bricklayer.Core.Client.Components
         }
 
         /// <summary>
-        /// Send request to auth server for request to server
+        /// Send request to auth server to join a server.
         /// </summary>
-        /// <param name="host"></param>
-        /// <param name="port"></param>
+        /// <param name="host">Server hostname (IP or domain).</param>
+        /// <param name="port">Server port.</param>
         public void SendSessionRequest(string host, int port)
         {
             this.host = host;

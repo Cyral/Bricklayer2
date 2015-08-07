@@ -86,11 +86,14 @@ namespace Bricklayer.Core.Client.Net
                 }
                 case MessageTypes.BlockPlace:
                 {
-                    var msg = new BlockPlaceMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Game.Level.BlockPlaced.Invoke(
-                        new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(networkManager.Client.Level,
-                            msg.Point.X,
-                            msg.Point.Y, msg.Layer, msg.Type));
+                    if (networkManager.Client.Level != null)
+                    {
+                        var msg = new BlockPlaceMessage(im, MessageContext.Client);
+                        networkManager.Client.Events.Network.Game.BlockPlaceMessageReceived.Invoke(
+                            new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(networkManager.Client.Level,
+                                msg.Point.X,
+                                msg.Point.Y, msg.Layer, msg.Type));
+                    }
                     break;
                 }
             }

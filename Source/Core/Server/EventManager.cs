@@ -333,9 +333,14 @@ namespace Bricklayer.Core.Server
             public Event<CreateLevelEventArgs> CreateLevelMessageRecieved { get; } = new Event<CreateLevelEventArgs>();
 
             /// <summary>
-            /// When the server receives a chat message
+            /// When the server receives a chat message.
             /// </summary>
             public Event<ChatEventArgs> ChatMessageReceived { get; } = new Event<ChatEventArgs>();
+
+            /// <summary>
+            /// When the server receives a block place message.
+            /// </summary>
+            public Event<GameEvents.LevelEvents.BlockPlacedEventArgs> BlockPlaceMessageReceived { get; } = new Event<GameEvents.LevelEvents.BlockPlacedEventArgs>();
 
             #endregion
         }

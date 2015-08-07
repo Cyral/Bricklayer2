@@ -147,6 +147,7 @@ namespace Bricklayer.Core.Server.Components
                             Server.IO.Config.Server.MaxPlayers));
                 });
 
+            // Level events.
             Server.Events.Network.CreateLevelMessageRecieved.AddHandler(
                 async args =>
                 {
@@ -184,6 +185,18 @@ namespace Bricklayer.Core.Server.Components
                     }
                 }, EventPriority.InternalFinal);
 
+            // Block events.
+            Server.Events.Network.BlockPlaceMessageReceived.AddHandler(args =>
+            {
+                Server.Events.Game.Level.BlockPlaced.Invoke(new GameEvents.LevelEvents.BlockPlacedEventArgs(args.Sender, args.X, args.Y, args.Z, args.Type));
+            }, EventPriority.InternalFinal);
+
+            Server.Events.Game.Level.BlockPlaced.AddHandler(args =>
+            {
+                args.Level.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);   
+            });
+
+            // Logging events.
             Server.Events.Network.UserConnected.AddHandler(args =>
             {
                 Logger.WriteLine(LogType.Normal, ConsoleColor.Green, $"Player \"{args.Player.Username}\" has connected.");
