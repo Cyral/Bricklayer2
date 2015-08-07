@@ -22,12 +22,12 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 if (imgIcon == null)
                     return;
 
-                Height = imgIcon.Height + 8;
+                Height = imgIcon.Height + 24;
                 Width =
                     (int)
                         Math.Max(Manager.Skin.Fonts["Default9"].Resource.MeasureString(Block.Name).X,
                             Manager.Skin.Fonts["Default6"].Resource.MeasureString(Block.Category.Name).X) +
-                    imgIcon.Width + 24;
+                    imgIcon.Width + 26;
             }
         }
 

@@ -42,7 +42,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Add(sbStats);
 
             // Inventory.
-            pnlInventory = new InventoryControl(Manager);
+            pnlInventory = new InventoryControl(this, Manager);
             pnlInventory.Left = Manager.TargetWidth/2 - (pnlInventory.Width/2);
             pnlInventory.Init();
             Window.Add(pnlInventory);
@@ -204,6 +204,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
         public override void Remove()
         {
             Manager.Remove(sbStats);
+            Manager.Remove(lblStats);
+            Manager.Remove(lstChats);
+            Manager.Remove(lstPlayers);
+            Manager.Remove(txtChat);
+            Manager.Remove(pnlInventory);
         }
     }
 }

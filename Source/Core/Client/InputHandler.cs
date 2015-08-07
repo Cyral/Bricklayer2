@@ -215,7 +215,7 @@ namespace Bricklayer.Core.Client
                 return -1;
 
             // D0 is 9, D1 is 0, D2 is 1, and so on...
-            return pressedDigitKeys[0] == Keys.D0 ? 9 : ((int)pressedDigitKeys[0]) - 49;
+            return pressedDigitKeys[0] == Keys.D0 ? 0 : ((int)pressedDigitKeys[0]) - 48;
         }
     }
 }
