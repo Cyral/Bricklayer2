@@ -13,15 +13,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
     {
         protected internal override GameState State => GameState.Game;
         internal Level Level => Client.Level;
-        private Button[] btnInventory;
-        private bool inventorySizeChanging;
-        private int inventoryWidthChange;
-        private bool isInventoryOpen;
+
         private Label lblStats;
         private ControlList<ChatDataControl> lstChats;
         private ControlList<PlayerListDataControl> lstPlayers;
-        private int normalInventoryHeight = 64, normalInventoryWidth;
-        private Panel pnInventory;
+        private InventoryControl pnlInventory;
         private StatusBar sbStats;
         private TextBox txtChat;
 
@@ -31,7 +27,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);
-
+            
+            // Status bar.
             sbStats = new StatusBar(Manager);
             sbStats.Init();
             sbStats.Bottom = Manager.ScreenHeight;
@@ -44,40 +41,13 @@ namespace Bricklayer.Core.Client.Interface.Screens
             sbStats.Add(lblStats);
             Window.Add(sbStats);
 
-            // Block buttons
-            btnInventory = new Button[11];
-
-            // Inventory
-            normalInventoryWidth = (48*btnInventory.Length) + ((btnInventory.Length + 1)*10);
-            pnInventory = new Panel(Manager)
-            {
-                // (48*9) + (10*10)
-                // Make room for 11 slots and 10 space in between
-                Width = normalInventoryWidth,
-                Height = normalInventoryHeight
-            };
-            pnInventory.Left = Manager.TargetWidth/2 - (pnInventory.Width/2);
-            pnInventory.Init();
-
-            Window.Add(pnInventory);
-            normalInventoryHeight = 50;
-            normalInventoryWidth = (48*btnInventory.Length) + ((btnInventory.Length + 1)*10);
-
-            for (var i = 0; i < btnInventory.Count(); i++)
-            {
-                btnInventory[i] = new Button(Manager)
-                {
-                    Left = 10 + (58*i),
-                    Width = 48,
-                    Height = 48,
-                    Text = ""
-                };
-                btnInventory[i].Init();
-                pnInventory.Add(btnInventory[i]);
-            }
-
-
-            //Chat input box
+            // Inventory.
+            pnlInventory = new InventoryControl(Manager);
+            pnlInventory.Left = Manager.TargetWidth/2 - (pnlInventory.Width/2);
+            pnlInventory.Init();
+            Window.Add(pnlInventory);
+  
+            // Chat.
             txtChat = new TextBox(Manager);
             txtChat.Init();
             txtChat.Left = 8;
@@ -102,6 +72,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             lstChats.Top = txtChat.Top - lstChats.Height;
             Window.Add(lstChats);
 
+            // Tablist.
             lstPlayers = new ControlList<PlayerListDataControl>(Manager)
             {
                 Width = 256,
@@ -119,11 +90,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 lstPlayers.Items.Add(new PlayerListDataControl(player, Manager, lstPlayers));
 
 
-            // Listen for later player joins
+            // Listen for later player joins.
             Client.Events.Network.Game.PlayerJoinReceived.AddHandler(
                 args => { lstPlayers.Items.Add(new PlayerListDataControl(args.Player, Manager, lstPlayers)); });
 
-            // Listen for ping updates for players
+            // Listen for ping updates for players.
             Client.Events.Network.Game.PingUpdateReceived.AddHandler(args =>
             {
                 foreach (var ping in args.Pings)
@@ -136,11 +107,9 @@ namespace Bricklayer.Core.Client.Interface.Screens
             });
 
 
-            // Hackish way to get chats to start at the bottom
+            // Hackish way to get chats to start at the bottom.
             for (var i = 0; i < (Manager.TargetHeight*0.25f)/18; i++)
-            {
                 lstChats.Items.Add(new ChatDataControl("", Manager, lstChats, this));
-            }
 
             Client.Events.Network.Game.ChatReceived.AddHandler(args => { AddChat(args.Message, Manager, lstChats); });
         }
@@ -150,46 +119,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
             lblStats.Text = "FPS: " + Window.FPS;
 
             HandleInput();
-            UpdateInventory(gameTime);
-
 
             base.Update(gameTime);
-        }
-
-        private void UpdateInventory(GameTime gameTime)
-        {
-            if (inventorySizeChanging)
-            {
-                var delta = (float)gameTime.ElapsedGameTime.TotalSeconds * 20;
-                if (isInventoryOpen) // Make inventory bigger as it opens.
-                {
-                    // 25 is added/subtracted to make the lerp faster, as it will become very slow at the end.
-                    pnInventory.Width =
-                        (int) MathHelper.Lerp(pnInventory.Width, (normalInventoryWidth*1.5f) + 25, delta);
-                    pnInventory.Height =
-                        (int) MathHelper.Lerp(pnInventory.Height, (normalInventoryHeight*2) + 25, delta);
-                    if (pnInventory.Width >= normalInventoryWidth*1.5)
-                        inventorySizeChanging = false;
-                }
-                else
-                {
-                    pnInventory.Width =
-                        (int)MathHelper.Lerp(pnInventory.Width, normalInventoryWidth - 25, delta);
-                    pnInventory.Height =
-                        (int)MathHelper.Lerp(pnInventory.Height, normalInventoryHeight, delta);
-                    if (pnInventory.Width <= normalInventoryWidth)
-                    {
-                        inventorySizeChanging = false;
-                        pnInventory.Width = normalInventoryWidth;
-                        pnInventory.Height = normalInventoryHeight;
-                    }
-                }
-
-                // Keep inventory box and controls in the center.
-                pnInventory.Left = Manager.TargetWidth/2 - (pnInventory.Width/2);
-                for (var i = 0; i < btnInventory.Length; i++)
-                    btnInventory[i].Left = ((pnInventory.Width/2) + 24*btnInventory.Length + 2) - (58*i);
-            }
         }
 
         private void HandleInput()
@@ -218,12 +149,12 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 lstChats.Passive = true;
                 lstChats.Items.ForEach(x => ((ChatDataControl) x).Hide());
             }
-            else if (Client.Input.IsKeyPressed(Keys.E)) // Open or close inventory.
+            else if (Client.Input.IsKeyPressed(Keys.E) && !IsChatOpen()) // Open or close inventory.
             {
-                if (!inventorySizeChanging)
+                if (!pnlInventory.SizeChanging)
                 {
-                    isInventoryOpen = !isInventoryOpen;
-                    inventorySizeChanging = true;
+                    pnlInventory.IsOpen = !pnlInventory.IsOpen;
+                    pnlInventory.SizeChanging = true;
                 }
             }
             lstPlayers.Visible = Client.Input.IsKeyDown(Keys.Tab);

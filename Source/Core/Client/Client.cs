@@ -205,7 +205,7 @@ namespace Bricklayer.Core.Client
             // Now that all the textures have been loaded, set the block textures
             foreach (var block in BlockType.Blocks.Where(x => x.IsRenderable))
             {
-                var str = "blocks." + block.Name;
+                var str = "blocks." + (block.Category != null ? block.Category + "." : string.Empty) + block.Name;
                 block.Texture = Content[str];
             }
         }
