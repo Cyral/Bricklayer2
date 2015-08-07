@@ -199,6 +199,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 txtChat.Visible = true;
                 txtChat.Passive = false;
                 txtChat.Focused = true;
+                lstChats.Passive = false;
                 lstChats.Items.ForEach(x => ((ChatDataControl) x).Show());
             }
             else if ((Client.Input.IsKeyPressed(Keys.Enter) && txtChat.Visible) || Client.Input.IsKeyPressed(Keys.Escape)) // Close or send chat.
@@ -207,13 +208,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 // Cancel out of chat if player clicks escape.
                 if (!string.IsNullOrWhiteSpace(txtChat.Text) && !Client.Input.IsKeyPressed(Keys.Escape))
                 {
-                    Client.Network.Send(new ChatMessage(txtChat.Text));
+                    Client.Network.Send(new ChatMessage(txtChat.Text.Trim()));
                     txtChat.Text = string.Empty;
                 }
                 // If nothing is typed and player clicked enter, close out of chat.
                 txtChat.Visible = false;
                 txtChat.Passive = true;
                 txtChat.Focused = false;
+                lstChats.Passive = true;
                 lstChats.Items.ForEach(x => ((ChatDataControl) x).Hide());
             }
             else if (Client.Input.IsKeyPressed(Keys.E)) // Open or close inventory.
@@ -261,13 +263,9 @@ namespace Bricklayer.Core.Client.Interface.Screens
         }
 
         /// <summary>
-        /// If chat is open
+        /// If chat is open.
         /// </summary>
-        /// <returns></returns>
-        public bool ChatOpen()
-        {
-            return txtChat.Visible;
-        }
+        public bool IsChatOpen() => txtChat.Visible;
 
         /// <summary>
         /// Remove the game UI.

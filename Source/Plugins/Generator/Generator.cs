@@ -22,10 +22,10 @@ namespace Bricklayer.Plugins.Generator
                     for (var y = 0; y < args.Level.Height; y++)
                     {
                         if (x == 0 || y == 0 || x == args.Level.Width - 1 || y == args.Level.Height - 1)
-                            args.Level.Tiles[x, y, 1] = new Tile(Blocks.Default);
+                            args.Level.Tiles[x, y] = new Tile(Blocks.Default);
                         else
-                            args.Level.Tiles[x, y, 1] = new Tile(Blocks.Empty); 
-                        args.Level.Tiles[x, y, 0] = new Tile(Blocks.Empty);
+                            args.Level.Tiles[x, y] = new Tile(Blocks.Empty); 
+                        args.Level.Tiles[x, y, Layer.Background] = new Tile(Blocks.Empty);
                     }
                 }
             }, EventPriority.Initial);
