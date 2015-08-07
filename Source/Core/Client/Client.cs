@@ -124,10 +124,9 @@ namespace Bricklayer.Core.Client
 
             if (State == GameState.Game)
             {
-                var sb = new SpriteBatch(GraphicsDevice);
-                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                Level?.Draw(sb, gameTime);
-                sb.End();
+                SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                Level?.Draw(SpriteBatch, gameTime);
+                SpriteBatch.End();
             }
 
             UI.EndDraw();
@@ -145,6 +144,7 @@ namespace Bricklayer.Core.Client
         {
             base.Initialize();
 
+            SpriteBatch = new SpriteBatch(Graphics.GraphicsDevice);
             Input = new InputHandler();
         }
 
@@ -170,15 +170,15 @@ namespace Bricklayer.Core.Client
 
             if (IO.Config.Client.Resolution.X == 0 && IO.Config.Client.Resolution.Y == 0)
             {
-                Graphics.PreferredBackBufferWidth = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width * .9);
+                Graphics.PreferredBackBufferWidth = (int) (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width*.9);
                 Graphics.PreferredBackBufferHeight =
-                    (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * .8);
+                    (int) (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height*.8);
                 Graphics.ApplyChanges();
                 base.Window.Position =
                     new Point(
-                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width - Graphics.PreferredBackBufferWidth) /
+                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width - Graphics.PreferredBackBufferWidth)/
                         2,
-                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - Graphics.PreferredBackBufferHeight) /
+                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - Graphics.PreferredBackBufferHeight)/
                         2);
             }
             else
@@ -214,7 +214,9 @@ namespace Bricklayer.Core.Client
         /// UnloadContent will be called once per game and is the place to unload
         /// game-specific content.
         /// </summary>
-        protected override void UnloadContent() {}
+        protected override void UnloadContent()
+        {
+        }
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
