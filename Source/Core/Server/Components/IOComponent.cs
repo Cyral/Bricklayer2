@@ -301,7 +301,7 @@ namespace Bricklayer.Core.Server.Components
 
         internal async Task<Level> LoadLevel(Guid uuid)
         {
-            var level = new Level(await Server.Database.GetLevelData(uuid));
+            var level = new Level(Server, await Server.Database.GetLevelData(uuid));
             var path = Path.Combine(LevelsDirectory, uuid.ToString("N") + ".level");
             if (File.Exists(path))
             {

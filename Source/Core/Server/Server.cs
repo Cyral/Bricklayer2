@@ -167,7 +167,7 @@ namespace Bricklayer.Core.Server
         /// </remarks>
         public async Task<Level> CreateLevel(Player sender, string name, string description)
         {
-            var level = new Level(sender, name, Guid.NewGuid(), description, 0, 2.5);
+            var level = new Level(this, sender, name, Guid.NewGuid(), description, 0, 2.5);
             await RemovePlayerFromLevels(sender);
             level.Players.Add(sender);
 

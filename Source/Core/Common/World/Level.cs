@@ -15,11 +15,6 @@ namespace Bricklayer.Core.Common.World
     public class Level : LevelData
     {
         /// <summary>
-        /// The height, in blocks, of the map
-        /// </summary>
-        public virtual int Height { get; protected set; }
-
-        /// <summary>
         /// The number of players currently online this level.
         /// </summary>
         public override int Online => Players.Count;
@@ -27,12 +22,12 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// The list of players currently in the map, synced with the server
         /// </summary>
-        public List<Player> Players { get; set; }
+        public List<Player> Players { get; internal set; }
 
         /// <summary>
         /// The spawn point new players will originate from
         /// </summary>
-        public virtual Vector2 Spawn { get; set; }
+        public Vector2 Spawn { get; internal set; }
 
         /// <summary>
         /// The tile array for the map, containing all tiles and tile data [X, Y, Layer/Z]
@@ -40,14 +35,20 @@ namespace Bricklayer.Core.Common.World
         /// Layer 1 = Foreground
         /// </summary>
         /// <remarks>
-        /// Modifying this will not send a message or raise an event. It should be used for internal purposes only.
+        /// An indexer is used to provide custom logic to the array.
+        /// Messages and events will be sent/raised automatically on any tiles modified after world generation.
         /// </remarks>
-        public virtual Tile[,,] Tiles { get; set; }
+        public TileMap Tiles { get; internal set; }
 
         /// <summary>
         /// The width, in blocks, of the map
         /// </summary>
-        public virtual int Width { get; protected set; }
+        public int Width => Tiles.Width;
+
+        /// <summary>
+        /// The height, in blocks, of the map
+        /// </summary>
+        public int Height => Tiles.Height;
 
         protected Random random;
 
@@ -60,9 +61,7 @@ namespace Bricklayer.Core.Common.World
             : base(level.Creator, level.Name, level.UUID, level.Description, 0, level.Plays, level.Rating)
         {
             Players = new List<Player>();
-            Width = 1000;
-            Height = 500;
-            Tiles = new Tile[Width, Height, 2];
+            Tiles = new TileMap(1000, 500);
             Spawn = new Vector2(Tile.Width, Tile.Height);
             random = new Random();
         }
@@ -92,9 +91,8 @@ namespace Bricklayer.Core.Common.World
         /// </summary>
         internal void DecodeTiles(BinaryReader reader)
         {
-            Width = reader.ReadInt32();
-            Height = reader.ReadInt32();
-            Tiles = new Tile[Width, Height, 2];
+            Tiles = new TileMap(reader.ReadInt32(), reader.ReadInt32());
+
             // Read the background layer, then foreground layer.
             for (var layer = 0; layer < 2; layer++)
             {

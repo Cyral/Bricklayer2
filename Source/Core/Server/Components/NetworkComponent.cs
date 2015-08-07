@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Remoting.Channels;
 using System.Threading.Tasks;
 using System.Timers;
 using Bricklayer.Core.Common;
@@ -159,6 +160,7 @@ namespace Bricklayer.Core.Server.Components
                     // (As the current event is only from the network message)
                     Server.Events.Game.Level.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
 
+                    level.Tiles.Generated = true; //Level has been generated, all future block placements will be broadcasted.
                     Send(new LevelDataMessage(level), args.Sender);
                 }, EventPriority.InternalFinal); // Must be the last event called as it fires another event
 
@@ -193,7 +195,15 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Game.Level.BlockPlaced.AddHandler(args =>
             {
-                args.Level.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);   
+                if (args.Sender != null) //Blocks changed by plugins (not players) will be handled by the tilemap array indexer actions.
+                {
+                    //TODO: If permission was denied (event cancelled), tell the client to revert the block
+
+                    //Directly access the tile array, as we don't want to send two BlockPlaced events, as the tile indexer will
+                    //automatically call the event and send a network message.
+                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+                    Server.Net.BroadcastExcept(args.Sender, new BlockPlaceMessage(args.X, args.Y, args.Z, args.Type));
+                }
             });
 
             // Logging events.
@@ -338,9 +348,9 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
         /// <param name="player">Sender NOT to send to</param>
-        public void BroadcastExcept(IMessage gameMessage, Player player)
+        public void BroadcastExcept(Player player, IMessage gameMessage)
         {
-            BroadcastExcept(gameMessage, player.Connection);
+            BroadcastExcept(player.Connection, gameMessage);
         }
 
         /// <summary>
@@ -348,7 +358,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
         /// <param name="recipient">Client NOT to send to</param>
-        public void BroadcastExcept(IMessage gameMessage, NetConnection recipient)
+        public void BroadcastExcept(NetConnection recipient, IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage);
 
