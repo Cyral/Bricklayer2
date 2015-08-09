@@ -11,7 +11,7 @@ namespace Bricklayer.Core.Common
     public class BricklayerEventArgs : EventArgs
     {
         /// <summary>
-        /// True if the event has been cancelled and should not continue to execute any fu
+        /// True if the event has been cancelled and should not continue to execute any further.
         /// </summary>
         /// <remarks>
         /// Plugins can ignore this property by setting ignoreCancel to true when registering an event.
@@ -35,7 +35,6 @@ namespace Bricklayer.Core.Common
     /// <summary>
     /// Represents a collection of event handlers for a certain game event.
     /// </summary>
-    /// <typeparam name="THandler">The type of delegate each handler must be.</typeparam>
     /// <typeparam name="TArgs">The type of arguments for the handler.</typeparam>
     public class Event<TArgs> where TArgs : BricklayerEventArgs
     {
@@ -53,10 +52,6 @@ namespace Bricklayer.Core.Common
         /// Adds a handler to this event.
         /// </summary>
         /// <param name="handler">Delegate to be invoked when event is ran.</param>
-        /// <param name="priority">
-        /// The priority order of this handler. LOWER priorities are called FIRST, and higher priorities are
-        /// called last. The default priority is 'Normal'.
-        /// </param>
         /// <param name="ignoreCancel">If true, the handler will be executed even if a previous handler cancelled the event.</param>
         /// <remarks>
         /// For information on the priority ordering system, see <c>Priority</c>.
