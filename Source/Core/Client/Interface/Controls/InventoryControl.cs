@@ -28,7 +28,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private readonly ImageBox[] blockImages;
         private readonly ImageBox[] selectImages;
         private readonly StatusBar gradient;
-        private readonly int normalHeight = Tile.Height + 16;
+        private readonly int normalHeight = Tile.Height + 7;
         private readonly int normalWidth;
         private float realWidth, realHeight;
         private readonly TabControl tabControl;
@@ -41,12 +41,13 @@ namespace Bricklayer.Core.Client.Interface.Controls
             blockImages = new ImageBox[inventorySlots];
             selectImages = new ImageBox[inventorySlots];
 
-            normalWidth = (Tile.Width*blockImages.Length) + ((blockImages.Length + 1)*(Tile.Width + 2));
+            normalWidth = ((inventorySlots + 1)*(Tile.Width + 2)) + 8;
 
             realWidth = Width = normalWidth;
             realHeight = Height = normalHeight;
             Left = Manager.TargetWidth/2 - (Width/2);
-            Top = 8;
+            Top = 0;
+            Height += 1;
 
             // Background "gradient" image
             // TODO: Make an actual control. not a statusbar
@@ -64,7 +65,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 {
                     Top = 4,
                     // Center.
-                    Left = (Width / 2) - (((blockImages.Length + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i),
+                    Left = 12 + (Width / 2) - (((inventorySlots + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i),
                     Width = Tile.Width,
                     Height = Tile.Width,
                     Text = "",
@@ -74,7 +75,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 selectImages[i] = new ImageBox(Manager)
                 {
                     Top = 3,
-                    Left = (Width / 2) - (((blockImages.Length + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i) - 1,
+                    Left = 12 + (Width / 2) - (((inventorySlots + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i) - 1,
                     Width = Tile.Width + 2,
                     Height = Tile.Width + 2,
                     Text = "",
@@ -95,16 +96,17 @@ namespace Bricklayer.Core.Client.Interface.Controls
             }
             SelectBlock(1);
 
-            tabControl = new TabControl(Manager);
-            tabControl.Left = 8;
-            tabControl.Top = Tile.Width + 32;
-            tabControl.Width = (int)(Width*1.5f) - 16;
-            tabControl.Height = (int)(Height * 1.5f) - Tile.Width - 16 - 16;
+            tabControl = new TabControl(Manager)
+            {
+                Left = 8,
+                Top = 3 + Tile.FullHeight + 3,
+            };
             tabControl.Init();
             tabControl.AddPage("Blocks");
             tabControl.AddPage("Interactive");
             tabControl.AddPage("Miscellaneous");
             Add(tabControl);
+            tabControl.BringToFront();
         }
 
         private void SelectBlock(int index)
@@ -157,10 +159,10 @@ namespace Bricklayer.Core.Client.Interface.Controls
             if (IsOpen) // Make inventory bigger as it opens.
             {
                 realWidth += delta;
-                realHeight += delta;
+                realHeight += delta / 2;
                 Width = (int)realWidth;
                 Height = (int)realHeight;
-                if (Width >= normalWidth*1.5)
+                if (Width >= normalWidth*2)
                 {
                     SizeChanging = false;
                     speed = 5;
@@ -169,7 +171,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             else
             {
                 realWidth -= delta;
-                realHeight -= delta;
+                realHeight -= delta / 2;
                 Width = (int)realWidth;
                 Height = (int)realHeight;
                 if (Width <= normalWidth)
@@ -185,10 +187,12 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Left = Manager.TargetWidth/2 - (Width/2);
             for (var i = 0; i < blockImages.Length; i++)
             {
-                blockImages[i].Left = (Width/2) - (((blockImages.Length + 1)*(Tile.Width + 4))/2) + ((Tile.Width + 4)*i);
-                selectImages[i].Left = (Width / 2) - (((blockImages.Length + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i) - 1;
+                blockImages[i].Left = 12 + (Width/2) - (((inventorySlots + 1)*(Tile.Width + 4))/2) + ((Tile.Width + 4)*i);
+                selectImages[i].Left =  12 +(Width / 2) - (((inventorySlots + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i) - 1;
             }
 
+            tabControl.Width = Width - 14;
+            tabControl.Height = Height - tabControl.Top - 6;
             gradient.Width = Width;
             gradient.Height = Height;
         }
