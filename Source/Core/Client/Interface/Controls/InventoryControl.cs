@@ -32,7 +32,6 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private readonly int normalWidth;
         private float realWidth, realHeight;
         private readonly TabControl tabControl;
-        private float speed = 5;
 
         public InventoryControl(GameScreen screen, Manager manager) : base(manager)
         {
@@ -138,7 +137,6 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 {
                     IsOpen = !IsOpen;
                     SizeChanging = true;
-                    speed = 5;
                 }
             }
 
@@ -154,8 +152,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
         {
             if (!SizeChanging) return;
 
-            speed = MathHelper.Lerp(speed, .1f, (float)gameTime.ElapsedGameTime.TotalSeconds*12f);
-            var delta = speed;
+            var delta = (float) gameTime.ElapsedGameTime.TotalSeconds * 1300f;
+
             if (IsOpen) // Make inventory bigger as it opens.
             {
                 realWidth += delta;
@@ -165,7 +163,6 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 if (Width >= normalWidth*2)
                 {
                     SizeChanging = false;
-                    speed = 5;
                 }
             }
             else
@@ -179,7 +176,6 @@ namespace Bricklayer.Core.Client.Interface.Controls
                     SizeChanging = false;
                     Width = normalWidth;
                     Height = normalHeight;
-                    speed = 5;
                 }
             }
 
