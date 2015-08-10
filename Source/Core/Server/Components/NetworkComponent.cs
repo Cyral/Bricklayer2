@@ -83,6 +83,14 @@ namespace Bricklayer.Core.Server.Components
             // When a user requests to join, verify their account is valid with the auth server.
             Server.Events.Network.UserLoginRequested.AddHandler(args =>
             {
+                if (Server.Players.Any(p => p.UUID == args.UUID))
+                {
+                    Logger.WriteLine(LogType.Net,
+                        args.Username + " already connected. (Denied)");
+                    args.Connection.Deny("You are already connected.");
+                    return;
+                }
+
                 Logger.WriteLine(LogType.Net,
                     args.Username + " requesting to join. Verifying public key with auth server.");
                 if (pendingSessions.ContainsKey(args.UUID))
