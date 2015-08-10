@@ -72,7 +72,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                     servers[lstServers.ItemIndex].Name, servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
                 window.Init();
                 Manager.Add(window);
-                window.Show();
+                window.ShowModal();
             };
             BottomPanel.Add(btnEdit);
 
@@ -114,7 +114,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                     string.Empty, Globals.Values.DefaultServerPort);
                 window.Init();
                 Manager.Add(window);
-                window.Show();
+                window.ShowModal();
             };
             BottomPanel.Add(btnAdd);
 

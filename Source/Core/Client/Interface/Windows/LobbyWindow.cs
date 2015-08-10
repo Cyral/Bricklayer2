@@ -169,7 +169,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 var window = new CreateLevelDialog(manager, screen);
                 window.Init();
                 Manager.Add(window);
-                window.Show();
+                window.ShowModal();
             };
             BottomPanel.Add(btnCreate);
 
