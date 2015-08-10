@@ -222,6 +222,7 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Network.UserDisconnected.AddHandler(args =>
             {
+                Server.Players.Remove(args.Player);
                 Logger.WriteLine(LogType.Normal, ConsoleColor.Red, $"Player \"{args.Player.Username}\" has disconnected.");
             }, EventPriority.InternalFinal);
         }
