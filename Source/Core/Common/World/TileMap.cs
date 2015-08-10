@@ -31,7 +31,7 @@ namespace Bricklayer.Core.Common.World
         public Tile this[int x, int y, Layer layer = Layer.Foreground]
         {
             get { return this[x, y, (int) layer]; }
-            set { Tiles[x, y, (int) layer] = value; }
+            set { this[x, y, (int) layer] = value; }
         }
 
         /// <summary>

@@ -4,10 +4,8 @@ using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
-using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
-using Lidgren.Network;
 using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client
@@ -60,6 +58,24 @@ namespace Bricklayer.Core.Client
                 /// </summary>
                 public Event<BlockPlacedEventArgs> BlockPlaced { get; } = new Event<BlockPlacedEventArgs>();
 
+                /// <summary>
+                /// When the user's selected block is changed.
+                /// </summary>
+                public Event<SelectedBlockChangedEventArgs> SelectedBlockChanged { get; } =
+                    new Event<SelectedBlockChangedEventArgs>();
+
+                public class SelectedBlockChangedEventArgs : BricklayerEventArgs
+                {
+                    public BlockType NewBlock { get; private set; }
+                    public BlockType OldBlock { get; private set; }
+
+                    public SelectedBlockChangedEventArgs(BlockType newBlock, BlockType oldBlock)
+                    {
+                        NewBlock = newBlock;
+                        OldBlock = oldBlock;
+                    }
+                }
+
                 public class BlockPlacedEventArgs : BricklayerEventArgs
                 {
                     /// <summary>
@@ -82,7 +98,7 @@ namespace Bricklayer.Core.Client
                     /// <summary>
                     /// Z grid coordinate. (Layer)
                     /// </summary>
-                    public int Z => (int)Layer;
+                    public int Z => (int) Layer;
 
                     public Level Level { get; private set; }
 
@@ -91,12 +107,12 @@ namespace Bricklayer.Core.Client
                         Level = level;
                         X = x;
                         Y = y;
-                        Layer = (Layer)z;
+                        Layer = (Layer) z;
                         Type = type;
                     }
 
                     public BlockPlacedEventArgs(Level level, int x, int y, Layer layer, BlockType type)
-                        : this(level, x, y, (int)layer, type)
+                        : this(level, x, y, (int) layer, type)
                     {
                     }
                 }
@@ -292,6 +308,7 @@ namespace Bricklayer.Core.Client
                     public LevelDataEventArgs(Level level)
                     {
                         Level = level;
+                        Level.Tiles.Generated = true;
                     }
                 }
 
@@ -432,7 +449,8 @@ namespace Bricklayer.Core.Client
                 /// <summary>
                 /// When the server receives a block place message.
                 /// </summary>
-                public Event<GameEvents.LevelEvents.BlockPlacedEventArgs> BlockPlaceMessageReceived { get; } = new Event<GameEvents.LevelEvents.BlockPlacedEventArgs>();
+                public Event<GameEvents.LevelEvents.BlockPlacedEventArgs> BlockPlaceMessageReceived { get; } =
+                    new Event<GameEvents.LevelEvents.BlockPlacedEventArgs>();
 
                 #endregion
             }

@@ -107,7 +107,10 @@ namespace Bricklayer.Core.Client.Components
 
             Client.Events.Game.Level.BlockPlaced.AddHandler(args =>
             {
-                args.Level.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+                if (args.Level != null)
+                {
+                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+                }
             });
 
             await base.Init();

@@ -1,5 +1,6 @@
 ﻿using System;
 using Bricklayer.Core.Common.Data;
+using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -62,6 +63,9 @@ namespace Bricklayer.Core.Client.World
         /// </summary>
         private void BlockPlaced(int x, int y, int z, Tile tile)
         {
+            // Send message to server.
+            Client.Network.Send(new BlockPlaceMessage(x, y, z, tile.Type));
+
             //Fire event so plugins are aware of the block placement.
             Client.Events.Game.Level.BlockPlaced.Invoke(
                 new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(null, x, y, z, tile.Type));

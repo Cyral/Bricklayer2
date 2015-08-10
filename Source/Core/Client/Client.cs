@@ -57,8 +57,11 @@ namespace Bricklayer.Core.Client
             get { return state; }
             set
             {
-                Events.Game.StateChanged.Invoke(new EventManager.GameEvents.GameStateEventArgs(State, value));
-                state = value;
+                if (State != value)
+                {
+                    Events.Game.StateChanged.Invoke(new EventManager.GameEvents.GameStateEventArgs(State, value));
+                    state = value;
+                }
             }
         }
 

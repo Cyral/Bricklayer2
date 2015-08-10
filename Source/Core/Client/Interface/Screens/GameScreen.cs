@@ -1,24 +1,42 @@
 ﻿using System.Linq;
 using System.Text;
 using Bricklayer.Core.Client.Interface.Controls;
-using Bricklayer.Core.Client.World;
 using Bricklayer.Core.Common.Net.Messages;
+using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
+using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
     public class GameScreen : Screen
     {
+        /// <summary>
+        /// The currently selected block in the user's inventory.
+        /// </summary>
+        public BlockType SelectedBlock
+        {
+            get { return selectedBlock; }
+            internal set
+            {
+                if (SelectedBlock != value)
+                {
+                    Client.Events.Game.Level.SelectedBlockChanged.Invoke(
+                        new EventManager.GameEvents.LevelEvents.SelectedBlockChangedEventArgs(value, selectedBlock));
+                    selectedBlock = value;
+                }
+            }
+        }
+
         protected internal override GameState State => GameState.Game;
         internal Level Level => Client.Level;
-
         private Label lblStats;
         private ControlList<ChatDataControl> lstChats;
         private ControlList<PlayerListDataControl> lstPlayers;
         private InventoryControl pnlInventory;
         private StatusBar sbStats;
+        private BlockType selectedBlock;
         private TextBox txtChat;
 
         /// <summary>
@@ -27,7 +45,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);
-            
+
             // Status bar.
             sbStats = new StatusBar(Manager);
             sbStats.Init();
@@ -46,7 +64,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             pnlInventory.Left = Manager.TargetWidth/2 - (pnlInventory.Width/2);
             pnlInventory.Init();
             Window.Add(pnlInventory);
-  
+
             // Chat.
             txtChat = new TextBox(Manager);
             txtChat.Init();
@@ -112,6 +130,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 lstChats.Items.Add(new ChatDataControl("", Manager, lstChats, this));
 
             Client.Events.Network.Game.ChatReceived.AddHandler(args => { AddChat(args.Message, Manager, lstChats); });
+
+            // Level event handlers.
+            Client.Events.Game.Level.BlockPlaced.AddHandler(args =>
+            {
+                // Directly access the tile array, as we don't want to send two BlockPlaced events, as the tile indexer will
+                // automatically call the event and send a network message.
+                if (args.Level != null)
+                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+            });
         }
 
         public override void Update(GameTime gameTime)
@@ -125,6 +152,17 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
         private void HandleInput()
         {
+            //Mouse Input
+            if (Client.Input.IsLeftDown() && Level != null)
+            {
+                var pos = Client.Input.MouseGridPosition;
+                if (Level.InBounds(pos.X, pos.Y))
+                {
+                    Level.Tiles[pos.X, pos.Y] = new Tile(SelectedBlock);
+                }
+            }
+
+            //Key Input
             if (Client.Input.IsKeyPressed(Keys.T) && !txtChat.Visible) // Open chat.
             {
                 txtChat.Visible = true;
@@ -133,7 +171,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 lstChats.Passive = false;
                 lstChats.Items.ForEach(x => ((ChatDataControl) x).Show());
             }
-            else if ((Client.Input.IsKeyPressed(Keys.Enter) && txtChat.Visible) || Client.Input.IsKeyPressed(Keys.Escape)) // Close or send chat.
+            else if ((Client.Input.IsKeyPressed(Keys.Enter) && txtChat.Visible) || Client.Input.IsKeyPressed(Keys.Escape))
+                // Close or send chat.
             {
                 // If there's characters in chatbox, send chat.
                 // Cancel out of chat if player clicks escape.

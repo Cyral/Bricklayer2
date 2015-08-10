@@ -360,13 +360,15 @@ namespace Bricklayer.Core.Server.Components
         /// <param name="recipient">Client NOT to send to</param>
         public void BroadcastExcept(NetConnection recipient, IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage);
-
             // Search for recipients
             var recipients = NetServer.Connections.Where(x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true)?.Connection.RemoteUniqueIdentifier != recipient.RemoteUniqueIdentifier).ToList();
 
             if (recipients.Count > 0) // Send to recipients found
+            {
+                var message = EncodeMessage(gameMessage);
+
                 NetServer.SendMessage(message, recipients, deliveryMethod, 0);
+            }
         }
 
         /// <summary>

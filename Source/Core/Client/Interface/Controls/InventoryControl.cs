@@ -113,6 +113,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             foreach (var img in selectImages)
                 img.Color = Color.Black;
             selectImages[index].Color = Color.White;
+            screen.SelectedBlock = BlockType.Blocks[index];
         }
 
         protected override void Update(GameTime gameTime)
