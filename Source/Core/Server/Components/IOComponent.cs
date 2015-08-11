@@ -64,7 +64,9 @@ namespace Bricklayer.Core.Server.Components
         private StreamWriter logWriter;
         private StringBuilder sb;
 
-        public IOComponent(Server server) : base(server) {}
+        public IOComponent(Server server) : base(server)
+        {
+        }
 
         public override async Task Init()
         {
@@ -119,7 +121,7 @@ namespace Bricklayer.Core.Server.Components
                 {
                     Config = Config.GenerateDefaultConfig();
                     await SaveConfig(Config);
-                    Log("Configuration created successfully.");
+                    Log("Configuration created successfully. ({0})", ConfigFile);
                     return;
                 }
 
@@ -135,9 +137,14 @@ namespace Bricklayer.Core.Server.Components
                 }
 
                 await Task.Factory.StartNew(() =>
-                        Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings));
-                
-                Log("Configuration loaded. Port: {0}", Config.Server.Port.ToString());
+                    Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings));
+
+                if (Config.Server.AutoSaveTime <= 0)
+                    //To prevent the timer from firing endlessly if value is 0 or less. (Config file corrupted, missing value, etc.)
+                    Config.Server.AutoSaveTime = Config.GenerateDefaultConfig().Server.AutoSaveTime;
+
+                Log("Configuration loaded. Port: {0}, Auto Save: {1}m", Config.Server.Port.ToString(),
+                    Config.Server.AutoSaveTime.ToString());
             }
             catch (Exception ex)
             {
@@ -151,7 +158,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         internal async void LogMessage(string message)
         {
-            #if !MONO
+#if !MONO
             try
             {
                 message = message.Replace("\n", Environment.NewLine);
@@ -170,7 +177,7 @@ namespace Bricklayer.Core.Server.Components
 
                 if (sb != null)
                     await logWriter.WriteLineAsync(
-                            sb.Clear().Append('[').Append(date.ToString("G")).Append("] ").Append(message).ToString());
+                        sb.Clear().Append('[').Append(date.ToString("G")).Append("] ").Append(message).ToString());
 
                 lastLog = date;
             }
@@ -182,9 +189,9 @@ namespace Bricklayer.Core.Server.Components
             {
                 logWriter?.Close();
             }
-            #endif
+#endif
             // Logging errors occur on MONO, this fixes it (Although the performance increase on the Windows version (less file opening) is not present)
-            #if MONO
+#if MONO
             try
             {
                 message = message.Replace("\n", Environment.NewLine);

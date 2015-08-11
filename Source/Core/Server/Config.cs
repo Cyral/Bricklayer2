@@ -98,6 +98,11 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public int Port;
 
+        /// <summary>
+        /// The number of minutes between automatic level saves.
+        /// </summary>
+        public int AutoSaveTime;
+
         public static ServerConfig GenerateDefaultConfig()
         {
             return new ServerConfig
@@ -106,6 +111,11 @@ namespace Bricklayer.Core.Server
                 AuthServerAddress = Globals.Values.DefaultAuthAddress,
                 AuthServerPort = Globals.Values.DefaultAuthPort,
                 MaxPlayers = 64,
+#if DEBUG
+                AutoSaveTime = 1, // By default, save debug versions more often. See issue #8 for explanation.
+#else
+                AutoSaveTime = 5,
+#endif
                 Name = "Bricklayer Server",
                 Decription =
                     "A Bricklayer Server running on the default configuration.\nEdit this message in the config file.",

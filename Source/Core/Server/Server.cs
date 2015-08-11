@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Server.Components;
 using Bricklayer.Core.Server.World;
@@ -59,6 +60,7 @@ namespace Bricklayer.Core.Server
         private string clear, input;
         private bool showHeader;
         private DateTime start;
+        private Timer saveTimer;
 
         internal async Task Start()
         {
@@ -91,10 +93,15 @@ namespace Bricklayer.Core.Server
             await Plugins.Init();
             await Database.Init();
             await Net.Init();
+
+            // Create save timer
+            saveTimer = new Timer(IO.Config.Server.AutoSaveTime * 1000 * 60);
+            saveTimer.Elapsed += async (sender, args) => await SaveAll();
+            saveTimer.Start();
+
             stopwatch.Stop();
             Logger.WriteBreak();
-            Logger.WriteLine("Ready. ({0}s) Type /help for commands.",
-                Math.Round(stopwatch.Elapsed.TotalSeconds, 2));
+            Logger.WriteLine("Ready. ({0}s) Type /help for commands.", Math.Round(stopwatch.Elapsed.TotalSeconds, 2));
             Logger.WriteBreak();
 
             WriteHeader();
@@ -245,8 +252,7 @@ namespace Bricklayer.Core.Server
                 .SetDescription("Saves all levels.")
                 .SetAction(async delegate
                 {
-                    foreach (var level in Levels)
-                        await IO.SaveLevel(level);
+                    await SaveAll();
                 }));
 
             Commands.AddCommand(Command
@@ -263,13 +269,27 @@ namespace Bricklayer.Core.Server
         }
 
         /// <summary>
+        /// Save all levels.
+        /// </summary>
+        internal async Task SaveAll()
+        {
+            if (Levels.Count > 0)
+            {
+                Logger.WriteLine("Saving all levels. ({0})", Levels.Count);
+                foreach (var level in Levels)
+                    await IO.SaveLevel(level);
+            }
+        }
+
+        /// <summary>
         /// Gracefully exits, saving all everything and broadcasting an exit message.
         /// </summary>
-        private void SafeExit()
+        private async void SafeExit()
         {
             Logger.WriteLine("\nSERVER SAFE EXIT:");
             Logger.WriteLine("Network disconnected.");
             Net.Shutdown("The server has shut down. This may be a quick restart, or regular maintenance");
+            await SaveAll();
             IO.LogMessage($"SERVER EXIT: The server has gracefully exited on {DateTime.Now.ToString("U")}\n");
             Environment.Exit(0);
         }
