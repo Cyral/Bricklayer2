@@ -20,7 +20,8 @@ namespace Bricklayer.Core.Client.Interface
 
         protected override void Update(GameTime gameTime)
         {
-            Client.Input.Update();
+            if (Client.IsActive) //Pause input updates if window isn't active.
+                Client.Input.Update();
 
             // Update current screen
             ScreenManager.Update(gameTime);
