@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
@@ -25,11 +26,10 @@ namespace Bricklayer.Core.Client.Interface.Controls
         /// </summary>
         public bool IsOpen { get; internal set; }
 
-        private readonly ImageBox[] blockImages;
-        private readonly ImageBox[] selectImages;
+        private readonly InventoryBlockControl[] blockControls;
         private readonly StatusBar gradient;
         private readonly int normalHeight = Tile.Height + 7;
-        private readonly int normalWidth;
+        private readonly int normalWidth, extendedWidth;
         private float realWidth, realHeight;
         private readonly TabControl tabControl;
 
@@ -37,16 +37,16 @@ namespace Bricklayer.Core.Client.Interface.Controls
         {
             this.screen = screen;
             // Block images.
-            blockImages = new ImageBox[inventorySlots];
-            selectImages = new ImageBox[inventorySlots];
+            blockControls = new InventoryBlockControl[inventorySlots];
 
             normalWidth = ((inventorySlots + 1)*(Tile.Width + 2)) + 8;
+            extendedWidth = (int)(normalWidth*2.5f);
 
             realWidth = Width = normalWidth;
             realHeight = Height = normalHeight;
             Left = Manager.TargetWidth/2 - (Width/2);
             Top = 0;
-            Height += 1;
+            Height += 2;
 
             // Background "gradient" image
             // TODO: Make an actual control. not a statusbar
@@ -57,41 +57,17 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Add(gradient);
 
             // Create images.
-            for (var i = 0; i < blockImages.Length; i++)
+            for (var i = 0; i < Math.Min(blockControls.Length, BlockType.Blocks.Count); i++)
             {
                 // Block icon image.
-                blockImages[i] = new ImageBox(Manager)
-                {
-                    Top = 4,
-                    // Center.
-                    Left = 12 + (Width / 2) - (((inventorySlots + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i),
-                    Width = Tile.Width,
-                    Height = Tile.Width,
-                    Text = "",
-                    Passive = false
-                };
-                // Select/border image.
-                selectImages[i] = new ImageBox(Manager)
+                blockControls[i] = new InventoryBlockControl(Manager, BlockType.Blocks[i], screen)
                 {
                     Top = 3,
-                    Left = 12 + (Width / 2) - (((inventorySlots + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i) - 1,
-                    Width = Tile.Width + 2,
-                    Height = Tile.Width + 2,
-                    Text = "",
-                    Alpha = 128f,
+                    Left = 11 + (Width / 2) - (((inventorySlots + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i) // Center.
                 };
-                blockImages[i].Init();
-                selectImages[i].Init();
-                selectImages[i].Image = screen.Client.Content["gui.blockoutline"];
-                if (i < BlockType.Blocks.Count && BlockType.Blocks[i].IsRenderable)
-                {
-                    blockImages[i].Image = BlockType.Blocks[i].Texture;
-                    blockImages[i].ToolTipType = typeof (BlockToolTip);
-                    ((BlockToolTip)blockImages[i].ToolTip).SetBlock(BlockType.Blocks[i]);
-                }
-                blockImages[i].SourceRect = BlockType.SourceRect;
-                Add(selectImages[i]);
-                Add(blockImages[i]);
+           
+                blockControls[i].Init();
+                Add(blockControls[i]);
             }
             SelectBlock(1);
 
@@ -110,9 +86,9 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
         private void SelectBlock(int index)
         {
-            foreach (var img in selectImages)
-                img.Color = Color.Black;
-            selectImages[index].Color = Color.White;
+            foreach (var ctrl in blockControls)
+                ctrl.IsSelected = false;
+            blockControls[index].IsSelected = true;
             screen.SelectedBlock = BlockType.Blocks[index];
         }
 
@@ -161,7 +137,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 realHeight += delta / 2;
                 Width = (int)realWidth;
                 Height = (int)realHeight;
-                if (Width >= normalWidth*2)
+                if (Width >= extendedWidth)
                 {
                     SizeChanging = false;
                 }
@@ -182,10 +158,9 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
             // Keep inventory box and controls in the center.
             Left = Manager.TargetWidth/2 - (Width/2);
-            for (var i = 0; i < blockImages.Length; i++)
+            for (var i = 0; i < blockControls.Length; i++)
             {
-                blockImages[i].Left = 12 + (Width/2) - (((inventorySlots + 1)*(Tile.Width + 4))/2) + ((Tile.Width + 4)*i);
-                selectImages[i].Left =  12 +(Width / 2) - (((inventorySlots + 1) * (Tile.Width + 4)) / 2) + ((Tile.Width + 4) * i) - 1;
+                blockControls[i].Left = 11 + (Width/2) - (((inventorySlots + 1)*(Tile.Width + 4))/2) + ((Tile.Width + 4)*i);
             }
 
             tabControl.Width = Width - 14;
