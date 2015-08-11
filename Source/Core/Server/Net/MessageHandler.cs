@@ -218,7 +218,7 @@ namespace Bricklayer.Core.Server.Net
                     {
                         var msg = new BlockPlaceMessage(inc, MessageContext.Server);
                         Server.Events.Network.BlockPlaceMessageReceived.Invoke(
-                            new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(sender, msg.Point.X,
+                            new EventManager.NetEvents.BlockPlacedEventArgs(sender, msg.Point.X,
                                 msg.Point.Y, msg.Layer, msg.Type));
                         break;
                     }

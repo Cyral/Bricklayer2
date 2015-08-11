@@ -61,14 +61,14 @@ namespace Bricklayer.Core.Client.World
         /// Action to be run when a tile is changed.
         /// This is called by the tilemap array indexer.
         /// </summary>
-        private void BlockPlaced(int x, int y, int z, Tile tile)
+        private void BlockPlaced(int x, int y, int z, Tile newTile, Tile oldTile)
         {
             // Send message to server.
-            Client.Network.Send(new BlockPlaceMessage(x, y, z, tile.Type));
+            Client.Network.Send(new BlockPlaceMessage(x, y, z, newTile.Type));
 
             //Fire event so plugins are aware of the block placement.
             Client.Events.Game.Level.BlockPlaced.Invoke(
-                new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(null, x, y, z, tile.Type));
+                new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile.Type, oldTile.Type));
         }
 
         public void Update(GameTime delta)

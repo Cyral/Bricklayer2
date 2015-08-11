@@ -122,8 +122,6 @@ namespace Bricklayer.Core.Client
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
         protected override void Draw(GameTime gameTime)
         {
-            if (!IsActive) // Prevent high CPU usage while running in the background. (Temporary)
-                return;
             UI.BeginDraw(gameTime);
             GraphicsDevice.Clear(Color.Black);
 
@@ -230,8 +228,6 @@ namespace Bricklayer.Core.Client
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
         protected override void Update(GameTime gameTime)
         {
-            if (!IsActive) // Prevent high CPU usage while running in the background. (Temporary)
-                return;
             UI.Update(gameTime);
 
             if (State == GameState.Game)

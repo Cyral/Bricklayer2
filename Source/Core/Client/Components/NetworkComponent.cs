@@ -16,7 +16,6 @@ namespace Bricklayer.Core.Client.Components
     /// </summary>
     internal class NetworkManager : ClientComponent
     {
-        // Message delivery method
         private const NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
 
         /// <summary>
@@ -100,10 +99,13 @@ namespace Bricklayer.Core.Client.Components
 
             // Block place received message is invoked when the network message is received.
             // If it is cancelled, it will not call the block placed message.
-            Client.Events.Network.Game.BlockPlaceMessageReceived.AddHandler(args =>
-            {
-                Client.Events.Game.Level.BlockPlaced.Invoke(new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(args.Level, args.X, args.Y, args.Z, args.Type));
-            }, EventPriority.InternalFinal);
+            Client.Events.Network.Game.BlockPlaceMessageReceived.AddHandler(
+                args =>
+                {
+                    Client.Events.Game.Level.BlockPlaced.Invoke(
+                        new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(args.Level, args.X, args.Y, args.Z,
+                            args.Type, args.Level.Tiles[args.X, args.Y, args.Z].Type));
+                }, EventPriority.InternalFinal);
 
             Client.Events.Game.Level.BlockPlaced.AddHandler(args =>
             {
@@ -209,11 +211,11 @@ namespace Bricklayer.Core.Client.Components
             gameMessage.Context = MessageContext.Client;
             var message = NetClient.CreateMessage();
             // Write packet type ID
-            message.Write((byte)gameMessage.MessageType);
+            message.Write((byte) gameMessage.MessageType);
             gameMessage.Encode(message);
             return message;
         }
-        
+
         /// <summary>
         /// Send ping message to auth server. (Usually used for letting it know it recieved a message)
         /// </summary>
@@ -296,6 +298,8 @@ namespace Bricklayer.Core.Client.Components
             isDisposed = true;
         }
 
-        public NetworkManager(Client client) : base(client) {}
+        public NetworkManager(Client client) : base(client)
+        {
+        }
     }
 }

@@ -19,9 +19,10 @@ namespace Bricklayer.Core.Common.World
             get { return Tiles[x, y, z]; }
             set
             {
+                var oldVal = Tiles[x, y, z];
                 Tiles[x, y, z] = value;
                 if (Generated)
-                    BlockPlaced(x, y, z, value);
+                    BlockPlaced(x, y, z, value, oldVal);
             }
         }
 
@@ -66,7 +67,7 @@ namespace Bricklayer.Core.Common.World
         /// Action to be called upon block placement. (Only after generation)
         /// To be used for the client and server to call send network messages and fire event handlers.
         /// </summary>
-        internal Action<int, int, int, Tile> BlockPlaced { get; set; }
+        internal Action<int, int, int, Tile, Tile> BlockPlaced { get; set; }
 
         public TileMap(int width, int height)
         {

@@ -180,7 +180,7 @@ namespace Bricklayer.Core.Server.Components
                     Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {args.Sender.Username}");
                     Send(new LevelDataMessage(level), args.Sender);
                     Broadcast(level, new PlayerJoinMessage(args.Sender));
-                    Broadcast(level, new ChatMessage("[color:Green]" + args.Sender.Username + " has joined.[/color]"));
+                    Broadcast(level, new ChatMessage("[color:Lime]" + args.Sender.Username + " has joined.[/color]"));
 
                 }, EventPriority.InternalFinal);
 
@@ -196,10 +196,13 @@ namespace Bricklayer.Core.Server.Components
                 }, EventPriority.InternalFinal);
 
             // Block events.
-            Server.Events.Network.BlockPlaceMessageReceived.AddHandler(args =>
-            {
-                Server.Events.Game.Level.BlockPlaced.Invoke(new GameEvents.LevelEvents.BlockPlacedEventArgs(args.Sender, args.X, args.Y, args.Z, args.Type));
-            }, EventPriority.InternalFinal);
+            Server.Events.Network.BlockPlaceMessageReceived.AddHandler(
+                args =>
+                {
+                    Server.Events.Game.Level.BlockPlaced.Invoke(
+                        new GameEvents.LevelEvents.BlockPlacedEventArgs(args.Sender, args.X, args.Y, args.Z, args.Type,
+                            args.Level.Tiles[args.X, args.Y, args.Z].Type));
+                }, EventPriority.InternalFinal);
 
             Server.Events.Game.Level.BlockPlaced.AddHandler(args =>
             {

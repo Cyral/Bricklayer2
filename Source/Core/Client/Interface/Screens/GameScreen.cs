@@ -156,7 +156,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             if (Client.Input.IsLeftDown() && Level != null)
             {
                 var pos = Client.Input.MouseGridPosition;
-                if (Level.InBounds(pos.X, pos.Y))
+                if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y].Type != SelectedBlock)
                 {
                     Level.Tiles[pos.X, pos.Y] = new Tile(SelectedBlock);
                 }

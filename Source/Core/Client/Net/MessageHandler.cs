@@ -90,7 +90,7 @@ namespace Bricklayer.Core.Client.Net
                     {
                         var msg = new BlockPlaceMessage(im, MessageContext.Client);
                         networkManager.Client.Events.Network.Game.BlockPlaceMessageReceived.Invoke(
-                            new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(networkManager.Client.Level,
+                            new EventManager.NetEvents.GameServerEvents.BlockPlacedEventArgs(networkManager.Client.Level,
                                 msg.Point.X,
                                 msg.Point.Y, msg.Layer, msg.Type));
                     }
