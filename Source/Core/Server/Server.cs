@@ -192,7 +192,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Removes a player from any level they are currently in. (Does not send network message.)
         /// </summary>
-        private async Task RemovePlayerFromLevels(Player sender)
+        internal async Task RemovePlayerFromLevels(Player sender)
         {
             if (sender.Level != null)
             {
