@@ -178,8 +178,10 @@ namespace Bricklayer.Core.Server
             await RemovePlayerFromLevels(sender);
             level.Players.Add(sender);
 
-            // Add the level to the database
+            // Add the level to the database.
             await Database.CreateLevel(level);
+            // Save initial level.
+            await IO.SaveLevel(level);
 
             Levels.Add(level);
             sender.Level = level;
