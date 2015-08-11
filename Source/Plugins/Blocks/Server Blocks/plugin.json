@@ -1,0 +1,13 @@
+﻿{
+  "Name": "Default Blocks",
+  "Identifier": "Bricklayer.Plugins.DefaultBlocks.Server",
+  "Description": "Provides the default blocks.",
+  "Authors": [ "Cyral" ],
+  "Dependencies": [],
+  "Version": {
+      "Major": 0,
+      "Minor": 1,
+      "Build": 0,
+      "Revision": 0
+  }
+}

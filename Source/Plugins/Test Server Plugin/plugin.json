@@ -1,0 +1,15 @@
+﻿{
+  // Plugin display name
+  "Name": "Test Server Plugin",
+  // Unique identifier (Can be namespace, domain, anything unique)
+  "Identifier": "Bricklayer.Plugins.TestServerPlugin",
+  "Description": "An Example Server Plugin",
+  "Authors": [ "Cyral" ],
+  "Dependencies": [ ],
+  "Version": {
+    "Major": 0,
+    "Minor": 1,
+    "Build": 0,
+    "Revision": 0
+  }
+}

@@ -20,8 +20,8 @@ namespace Bricklayer.Core.Client
         [STAThread]
         static void Main()
         {
-            //Create an instance of the game and run it.
-            using (var game = new Game())
+            // Create an instance of the game and run it.
+            using (var game = new Client())
                 game.Run();
         }
     }

@@ -1,0 +1,13 @@
+﻿{
+  "Name": "Test Client Plugin",
+  "Identifier": "Bricklayer.Plugins.TestClientPlugin",
+  "Description": "An Example Client Plugin",
+  "Authors": [ "Cyral" ],
+  "Dependencies": [],
+  "Version": {
+      "Major": 0,
+      "Minor": 1,
+      "Build": 0,
+      "Revision": 0
+  }
+}
