@@ -33,11 +33,11 @@ namespace Bricklayer.Core.Server.World
         private void BlockPlaced(int x, int y, int z, Tile newTile, Tile oldTile)
         {
             //Send block placed message to all users in this level.
-            Server.Net.Broadcast(this, new BlockPlaceMessage(x, y, z, newTile.Type));
+            Server.Net.Broadcast(this, new BlockPlaceMessage(x, y, z, newTile));
 
             //Fire event so plugins are aware of the block placement.
             //Blocks placed by players are handled by the network component and do not flow through this method.
-            Server.Events.Game.Level.BlockPlaced.Invoke(new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile.Type, oldTile.Type));
+            Server.Events.Game.Level.BlockPlaced.Invoke(new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile, oldTile));
         }
 
         internal override void DecodeTiles(BinaryReader reader)

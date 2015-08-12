@@ -87,7 +87,7 @@ namespace Bricklayer.Plugins.Snake
 
             public void SetTile(BlockType type)
             {
-                Level.Tiles[Point.X, Point.Y] = new Tile(type);
+                Level.Tiles[Point.X, Point.Y] = type;
             }
         }
 

@@ -65,11 +65,11 @@ namespace Bricklayer.Core.Client.World
         private void BlockPlaced(int x, int y, int z, Tile newTile, Tile oldTile)
         {
             // Send message to server.
-            Client.Network.Send(new BlockPlaceMessage(x, y, z, newTile.Type));
+            Client.Network.Send(new BlockPlaceMessage(x, y, z, newTile));
 
             //Fire event so plugins are aware of the block placement.
             Client.Events.Game.Level.BlockPlaced.Invoke(
-                new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile.Type, oldTile.Type));
+                new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile, oldTile));
         }
 
         public void Update(GameTime delta)

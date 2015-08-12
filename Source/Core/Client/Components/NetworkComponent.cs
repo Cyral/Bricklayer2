@@ -111,7 +111,7 @@ namespace Bricklayer.Core.Client.Components
             {
                 if (args.Level != null)
                 {
-                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = args.Type;
                 }
             });
 

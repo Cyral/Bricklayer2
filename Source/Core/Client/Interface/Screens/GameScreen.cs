@@ -137,7 +137,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 // Directly access the tile array, as we don't want to send two BlockPlaced events, as the tile indexer will
                 // automatically call the event and send a network message.
                 if (args.Level != null)
-                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = args.Type;
             });
         }
 
@@ -156,9 +156,9 @@ namespace Bricklayer.Core.Client.Interface.Screens
             if (Client.Input.IsLeftDown() && Level != null)
             {
                 var pos = Client.Input.MouseGridPosition;
-                if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y].Type != SelectedBlock)
+                if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y] != SelectedBlock)
                 {
-                    Level.Tiles[pos.X, pos.Y] = new Tile(SelectedBlock);
+                    Level.Tiles[pos.X, pos.Y] = SelectedBlock;
                 }
             }
 

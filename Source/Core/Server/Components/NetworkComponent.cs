@@ -201,7 +201,7 @@ namespace Bricklayer.Core.Server.Components
                 {
                     Server.Events.Game.Level.BlockPlaced.Invoke(
                         new GameEvents.LevelEvents.BlockPlacedEventArgs(args.Sender, args.X, args.Y, args.Z, args.Type,
-                            args.Level.Tiles[args.X, args.Y, args.Z].Type));
+                            args.Level.Tiles[args.X, args.Y, args.Z]));
                 }, EventPriority.InternalFinal);
 
             Server.Events.Game.Level.BlockPlaced.AddHandler(args =>
@@ -212,7 +212,7 @@ namespace Bricklayer.Core.Server.Components
 
                     //Directly access the tile array, as we don't want to send two BlockPlaced events, as the tile indexer will
                     //automatically call the event and send a network message.
-                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = args.Type;
                     Server.Net.BroadcastExcept(args.Sender, new BlockPlaceMessage(args.X, args.Y, args.Z, args.Type));
                 }
             });

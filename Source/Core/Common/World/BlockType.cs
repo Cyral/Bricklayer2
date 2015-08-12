@@ -126,5 +126,31 @@ namespace Bricklayer.Core.Common.World
         {
             return Name;
         }
+
+        /// <summary>
+        /// Implicitly convert BlockType to Tile for convenience, as setting a tile requires: Tiles[x, y] = new Tile(type) without this.
+        /// </summary>
+        public static implicit operator Tile(BlockType type)
+        {
+            return new Tile(type);
+        }
+
+        /// <summary>
+        /// Implicity convert Tile to BlockType for convenience, meaning Tile.Type is not neccessary.
+        /// </summary>
+        public static implicit operator BlockType(Tile tile)
+        {
+            return tile.Type;
+        }
+
+        public static bool operator ==(BlockType type, Tile tile)
+        {
+            return type != null && tile.Type.ID == type.ID;
+        }
+
+        public static bool operator !=(BlockType type, Tile tile)
+        {
+            return !(type == tile);
+        }
     }
 }
