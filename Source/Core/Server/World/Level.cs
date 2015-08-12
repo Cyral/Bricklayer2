@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
@@ -37,6 +38,12 @@ namespace Bricklayer.Core.Server.World
             //Fire event so plugins are aware of the block placement.
             //Blocks placed by players are handled by the network component and do not flow through this method.
             Server.Events.Game.Level.BlockPlaced.Invoke(new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile.Type, oldTile.Type));
+        }
+
+        internal override void DecodeTiles(BinaryReader reader)
+        {
+            base.DecodeTiles(reader);
+            Tiles.BlockPlaced = BlockPlaced;
         }
     }
 }

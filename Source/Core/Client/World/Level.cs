@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
@@ -78,6 +79,12 @@ namespace Bricklayer.Core.Client.World
         public void Draw(SpriteBatch batch, GameTime delta)
         {
             DrawTiles(batch);
+        }
+
+        internal override void DecodeTiles(BinaryReader reader)
+        {
+            base.DecodeTiles(reader);
+            Tiles.BlockPlaced = BlockPlaced;
         }
 
         /// <summary>

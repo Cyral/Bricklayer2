@@ -22,7 +22,7 @@ namespace Bricklayer.Core.Common.World
                 var oldVal = Tiles[x, y, z];
                 Tiles[x, y, z] = value;
                 if (Generated)
-                    BlockPlaced(x, y, z, value, oldVal);
+                    BlockPlaced?.Invoke(x, y, z, value, oldVal);
             }
         }
 

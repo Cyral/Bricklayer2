@@ -89,9 +89,9 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// Reads tile data from a binary stream.
         /// </summary>
-        internal void DecodeTiles(BinaryReader reader)
+        internal virtual void DecodeTiles(BinaryReader reader)
         {
-            Tiles = new TileMap(reader.ReadInt32(), reader.ReadInt32());
+            Tiles = new TileMap(reader.ReadInt32(), reader.ReadInt32()) {Generated = true};
 
             // Read the background layer, then foreground layer.
             for (var layer = 0; layer < 2; layer++)
