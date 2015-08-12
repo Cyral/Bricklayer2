@@ -70,11 +70,11 @@ namespace Bricklayer.Core.Client.Interface.Controls
                     Left = 11 + (Width/2) - (((inventorySlots + 1)*(Tile.Width + 4))/2) + ((Tile.Width + 4)*i)
                     // Center.
                 };
+                blockControls[i].Click += (sender, args) => SelectBlock(((InventoryBlockControl)sender).Block);
 
                 blockControls[i].Init();
                 Add(blockControls[i]);
             }
-            SelectBlock(1);
 
             tabControl = new TabControl(Manager)
             {
@@ -133,6 +133,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                             Left = x
                         };
                         packBlockControls[blockIndex].Init();
+                        packBlockControls[blockIndex].Click += (sender, args) => SelectBlock(((InventoryBlockControl)sender).Block);
                         page.Add(packBlockControls[blockIndex]);
                         x += packBlockControls[blockIndex].Width + 2;
                         blockIndex++;
@@ -142,14 +143,28 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 }
             }
             extendedHeight = tabControl.Top + y + 40 + Tile.Height;
+            SelectBlock(0);
         }
 
-        private void SelectBlock(int index)
+        /// <summary>
+        /// Select the specified block as the current block and highlight all occurences of it in the inventory.
+        /// </summary>
+        /// <param name="block"></param>
+        private void SelectBlock(BlockType block)
         {
             foreach (var ctrl in blockControls)
-                ctrl.IsSelected = false;
-            blockControls[index].IsSelected = true;
-            screen.SelectedBlock = BlockType.Blocks[index];
+                ctrl.IsSelected = ctrl.Block == block;
+            foreach (var ctrl in packBlockControls)
+                ctrl.IsSelected = ctrl.Block == block;
+            screen.SelectedBlock = block;
+        }
+
+        /// <summary>
+        /// Select the block at the specified index of the inventory bar.
+        /// </summary>
+        private void SelectBlock(int index)
+        {
+            SelectBlock(blockControls[index].Block);
         }
 
         protected override void Update(GameTime gameTime)
