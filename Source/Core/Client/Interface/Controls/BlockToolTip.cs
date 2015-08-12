@@ -26,7 +26,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 Width =
                     (int)
                         Math.Max(Manager.Skin.Fonts["Default9"].Resource.MeasureString(Block.Name).X,
-                            Manager.Skin.Fonts["Default6"].Resource.MeasureString(Block.Category.Name).X) +
+                            Manager.Skin.Fonts["Default6"].Resource.MeasureString(Block.Pack.Name).X) +
                     imgIcon.Width + 26;
             }
         }
@@ -60,7 +60,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             renderer.DrawString(Manager.Skin.Fonts["Default9"].Resource, Block.Name, rect, Color.Black,
                 Alignment.TopLeft, true);
             rect.Y += (int) Manager.Skin.Fonts["Default9"].Resource.MeasureString(Text).Y - 2;
-            renderer.DrawString(Manager.Skin.Fonts["Default6"].Resource, Block.Category.Name, rect, catColor,
+            renderer.DrawString(Manager.Skin.Fonts["Default6"].Resource, Block.Pack.Name, rect, catColor,
                 Alignment.TopLeft, true);
         }
 

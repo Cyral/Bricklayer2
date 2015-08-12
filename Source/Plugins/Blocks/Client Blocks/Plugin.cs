@@ -12,7 +12,8 @@ namespace Bricklayer.Plugins.DefaultBlocks.Client
 
         public override void Load()
         {
-            Categories.AddCategories();
+            PackCategories.AddCategories();
+            BlockPacks.AddPacks();
             Blocks.AddBlocks();
         }
 

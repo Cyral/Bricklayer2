@@ -16,14 +16,14 @@ namespace Bricklayer.Plugins.Snake
     {
         private const int speed = 20; // Timer update speed (ms).
         private const int TTL = 70; // Time (ticks) to live.
-        private static readonly BlockType startType = Blocks.DefaultGreen;
+        private static readonly BlockType startType = Blocks.ClassicGreen;
         private readonly Dictionary<LevelPoint, SnakeTile> points = new Dictionary<LevelPoint, SnakeTile>();
         private readonly Dictionary<int, BlockType> types = new Dictionary<int, BlockType>();
         private Timer timer;
 
         public SnakePlugin(Server host) : base(host)
         {
-            types.Add(35, Blocks.DefaultRed);
+            types.Add(35, Blocks.ClassicRed);
         }
 
         public override void Load()

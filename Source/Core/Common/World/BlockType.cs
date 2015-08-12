@@ -62,13 +62,13 @@ namespace Bricklayer.Core.Common.World
         public bool IsRenderable { get; set; }
 
         /// <summary>
-        /// The category of this block.
+        /// The pack/category of this block.
         /// </summary>
         /// <remarks>
         /// Used for grouping in the inventory.
-        /// Blocks in a category must be placed in a subfolder in the Textures/blocks/ folder that corresponds with the name.
+        /// Blocks in a pack must be placed in a subfolder in the Textures/blocks/ folder that corresponds with the name.
         /// </remarks>
-        public BlockCategory Category { get; set; }
+        public BlockPack Pack { get; set; }
 
         /// <summary>
         /// Source rectangle for the face of a tile. (Not the 2.5d part)
@@ -86,15 +86,15 @@ namespace Bricklayer.Core.Common.World
         /// <param name="name">Name of the block</param>
         /// <param name="layer">The layer(s) the tile can be placed on.</param>
         /// <param name="collision">The physics that the tile will interact with entities with.</param>
-        /// <param name="category">Block category used for sorting in the inventory.</param>
-        public BlockType(string name, Layer layer, BlockCollision collision = BlockCollision.Passable, BlockCategory category = null)
+        /// <param name="pack">Block category used for sorting in the inventory.</param>
+        public BlockType(string name, Layer layer, BlockCollision collision = BlockCollision.Passable, BlockPack pack = null)
         {
             // TODO: ID will be calulcated by server, and the list will be rearranged after plugins are loaded
             // This way we can use an array or list instead of LINQ/for loop to find an id in `FromID`
             Name = name;
             Layer = layer;
             Collision = collision;
-            Category = category;
+            Pack = pack;
             ID = (ushort)Blocks.Count();
             IsRenderable = true;
 

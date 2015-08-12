@@ -4,7 +4,7 @@ using Bricklayer.Plugins.DefaultBlocks.Common;
 namespace Bricklayer.Plugins.DefaultBlocks.Server
 {
     /// <summary>
-    /// S part of the default blocks plugin.
+    /// Server part of the default blocks plugin.
     /// </summary>
     public class Plugin : ServerPlugin
     {
@@ -12,7 +12,8 @@ namespace Bricklayer.Plugins.DefaultBlocks.Server
 
         public override void Load()
         {
-            Categories.AddCategories();
+            PackCategories.AddCategories();
+            BlockPacks.AddPacks();
             Blocks.AddBlocks();
         }
 

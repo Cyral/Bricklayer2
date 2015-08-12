@@ -97,7 +97,8 @@
     <Compile Include="Net\MessageTypes.cs" />
     <Compile Include="PluginData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="World\BlockCategory.cs" />
+    <Compile Include="World\BlockPack.cs" />
+    <Compile Include="World\PackCategory.cs" />
     <Compile Include="World\TileMap.cs" />
     <Compile Include="World\BlockCollision.cs" />
     <Compile Include="World\BlockType.cs" />

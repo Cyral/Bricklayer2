@@ -41,7 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blocks.cs" />
-    <Compile Include="Categories.cs" />
+    <Compile Include="PackCategories.cs" />
+    <Compile Include="BlockPacks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

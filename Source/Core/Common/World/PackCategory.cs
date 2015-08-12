@@ -7,36 +7,36 @@ using System.Threading.Tasks;
 namespace Bricklayer.Core.Common.World
 {
     /// <summary>
-    /// A category for blocks.
+    /// An overall category for block packs.
     /// </summary>
-    public class BlockCategory
+    public class PackCategory
     {
         /// <summary>
-        /// List of all block categories.
+        /// List of all pack categories.
         /// </summary>
-        public static List<BlockCategory> Categories { get; }
+        public static List<PackCategory> Categories{ get; }
 
         /// <summary>
-        /// Name of the category
+        /// Name of the category.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// List of blocks in this category. (Automatically added)
+        /// List of pakcs in this category. (Automatically added)
         /// </summary>
-        public IEnumerable<BlockType> Blocks => Blocks.Where(b => b.Category == this);
+        public IEnumerable<BlockPack> Packs => BlockPack.Packs.Where(b => b.Category == this);
 
         /// <summary>
         /// ID of this category.
         /// </summary>
         public byte ID { get; private set; }
 
-        static BlockCategory()
+        static PackCategory()
         {
-            Categories = new List<BlockCategory>();
+            Categories = new List<PackCategory>();
         }
 
-        public BlockCategory(string name)
+        public PackCategory(string name)
         {
             Name = name;
             ID = (byte)Categories.Count;
