@@ -18,13 +18,13 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// The number of plugins currently loaded.
         /// </summary>
-        public int PluginCount => plugins.Count;
+        public int PluginCount => Plugins.Count;
 
-        private readonly List<ClientPlugin> plugins;
+        internal List<ClientPlugin> Plugins { get; private set; }
 
         public PluginComponent(Client client) : base(client)
         {
-            plugins = new List<ClientPlugin>();
+            Plugins = new List<ClientPlugin>();
         }
 
         private string loadingPlugin;
@@ -87,7 +87,7 @@ namespace Bricklayer.Core.Client.Components
             if (files == null)
                 return;
             
-            foreach (var file in files.Where(file => !plugins.Contains(file)))
+            foreach (var file in files.Where(file => !Plugins.Contains(file)))
             {
                 // TODO: Use AppDomains for security
                 // Load the assembly
@@ -111,12 +111,51 @@ namespace Bricklayer.Core.Client.Components
 
         private void RegisterPlugin(ClientPlugin plugin)
         {
-            plugins.Add(plugin);
+            LoadIcon(plugin);
+            Plugins.Add(plugin);
+
+            // If plugin isn't in the plugins config
+            if (!Client.IO.ReadPlugins().ContainsKey(plugin.Name))
+            {
+                var plugins = Client.IO.ReadPlugins();
+                plugins.Add(plugin.Name, true);
+                Client.IO.WritePlugins(plugins);
+            }
+            // Check if plugin is disabled
+            if (!Client.IO.ReadPlugins()[plugin.Name]) return;
             // Load plugin content
             Client.Content.LoadTextures(Path.Combine(plugin.Path, Path.Combine("Content", "Textures")), Client);
             // Load plugin
             plugin.Load();
             Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
+        }
+
+        /// <summary>
+        /// Load icon for plugin
+        /// </summary>
+        private void LoadIcon(ClientPlugin plugin)
+        {
+            var path = Path.Combine(plugin.Path, "Content");
+
+            if (Directory.Exists(path))
+            {
+                var dir = new DirectoryInfo(path);
+
+                string[] extensions = new[] { ".jpg", ".jpeg", ".png" };
+
+                var icon = dir.GetFiles().FirstOrDefault(f => f.Extension.EqualsAny(extensions) && Path.GetFileNameWithoutExtension(f.Name) == "icon");
+
+                if (icon != null)
+                {
+                    var texture = Client.TextureLoader.FromFile(icon.FullName);
+                    if (texture.Height <= 64 && texture.Width <= 64)
+                        plugin.Icon = texture;
+                    else
+                        Console.WriteLine($"Plugin Icon is bigger than the size limit of 64x64. Not loading icon.");
+                }
+            }
+            else
+                Console.WriteLine($"Directory {path} does not exist.");
         }
     }
 }

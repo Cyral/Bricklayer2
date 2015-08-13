@@ -6,6 +6,7 @@
     public enum GameState
     {
         Login,
+        PluginManager,
         Server,
         Lobby,
         Game,

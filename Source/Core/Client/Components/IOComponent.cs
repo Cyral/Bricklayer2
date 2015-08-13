@@ -52,9 +52,15 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         private readonly string serverFile;
 
+        /// <summary>
+        /// File containing list of plugin statuses (Whether or not they are enabled or disabled)
+        /// </summary>
+        private readonly string pluginsFile;
+
         public IOComponent(Client client) : base(client)
         {
             serverFile = Path.Combine(MainDirectory, "servers.config");
+            pluginsFile = Path.Combine(MainDirectory, "plugins.config");
         }
 
         public override async Task Init()
@@ -114,6 +120,46 @@ namespace Bricklayer.Core.Client.Components
                 str.Close();
             }
             var json = JsonConvert.SerializeObject(servers, SerializationSettings);
+            File.WriteAllText(fileName, json);
+        }
+
+
+        /// <summary>
+        /// Reads list of enabled and disabled Plugins
+        /// </summary>
+        public Dictionary<string, bool> ReadPlugins()
+        {
+            var fileName = pluginsFile;
+            if (!File.Exists(fileName))
+            {
+                // If server config does not exist, create it and write the default server to it
+                Dictionary<string, bool> plugins = new Dictionary<string, bool>();
+                Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Name, true));
+                WritePlugins(plugins);
+            }
+            var json = File.ReadAllText(fileName);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                Dictionary<string, bool> plugins = new Dictionary<string, bool>();
+                Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Name, true));
+                WritePlugins(plugins);
+                json = File.ReadAllText(fileName);
+            }
+            return JsonConvert.DeserializeObject<Dictionary<string, bool>>(json);
+        }
+
+        /// <summary>
+        /// Save plugin statuses into a configurable json file
+        /// </summary>
+        public void WritePlugins(Dictionary<string, bool> plugins)
+        {
+            var fileName = pluginsFile;
+            if (!File.Exists(fileName))
+            {
+                var str = File.Create(fileName);
+                str.Close();
+            }
+            var json = JsonConvert.SerializeObject(plugins, SerializationSettings);
             File.WriteAllText(fileName, json);
         }
 
