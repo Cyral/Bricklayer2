@@ -10,18 +10,27 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// </summary>
     public sealed class InventoryBlockControl : Control
     {
-        public BlockType Block { get; }
+        public BlockType Block
+        {
+            get { return block; }
+            set
+            {
+                block = value;
+                if (Block.IsRenderable)
+                    ((BlockToolTip)ToolTip).SetBlock(Block);
+            }
+        }
+
         public bool IsSelected { get; internal set; }
         private readonly GameScreen screen;
+        private BlockType block;
 
         public InventoryBlockControl(Manager manager, BlockType block, GameScreen screen) : base(manager)
         {
             this.screen = screen;
-            Block = block;
-
-            ToolTipType = typeof (BlockToolTip);
-            if (Block.IsRenderable)
-                ((BlockToolTip) ToolTip).SetBlock(Block);
+            ToolTipType = typeof(BlockToolTip);
+            if (block != null)
+                Block = block;
 
             Width = Tile.Width + 2; // Border for selection.
             Height = Tile.Height + 2;
@@ -29,11 +38,16 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
         public override void DrawControl(Renderer renderer, Rectangle rect, GameTime gameTime)
         {
-            //Draw block image and selection
-            renderer.Draw(screen.Client.Content["gui.blockoutline"], rect.X + 0, rect.Y + 0, IsSelected ? Color.White : Color.Black);
-            if (Block.IsRenderable)
-                renderer.Draw(Block.Texture, new Rectangle(rect.X + 1, rect.Y + 1, Tile.Width, Tile.Height), BlockType.SourceRect, Color.White);
-            //base.DrawControl(renderer, rect, gameTime);
+            if (block != null)
+            {
+                //Draw block image and selection
+                renderer.Draw(screen.Client.Content["gui.blockoutline"], rect.X + 0, rect.Y + 0,
+                    IsSelected ? Color.White : Color.Black);
+                if (Block.IsRenderable)
+                    renderer.Draw(Block.Texture, new Rectangle(rect.X + 1, rect.Y + 1, Tile.Width, Tile.Height),
+                        BlockType.SourceRect, Color.White);
+                //base.DrawControl(renderer, rect, gameTime);
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Input;
 namespace Bricklayer.Core.Client
 {
     /// <summary>
-    /// Gets current mouse and keyboard states and provides easy access to them
+    /// Gets current mouse and keyboard states and provides easy access to them.
     /// </summary>
     public class InputHandler
     {
@@ -18,12 +18,12 @@ namespace Bricklayer.Core.Client
         public KeyboardState PreviousKeyboardState { get; set; }
 
         /// <summary>
-        /// Returns the position of the mouse
+        /// Returns the position of the mouse.
         /// </summary>
-        public Vector2 MousePosition => CurrentMouseState.GetPositionVector();
+        public Point MousePosition => CurrentMouseState.GetPositionPoint();
 
         /// <summary>
-        /// Returns the position of the mouse, in world/grid coordinates
+        /// Returns the position of the mouse, in world/grid coordinates.
         /// </summary>
         public Point MouseGridPosition
         {
@@ -38,7 +38,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Creats a new InputHandler
+        /// Creats a new InputHandler.
         /// </summary>
         internal InputHandler()
         {
@@ -46,7 +46,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Updates the input states
+        /// Updates the input states.
         /// </summary>
         public void Update()
         {
@@ -58,7 +58,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if any of the keys specified are pressed/toggled
+        /// Checks if any of the keys specified are pressed/toggled.
         /// </summary>
         public bool AnyKeysPressed(params Keys[] keys)
         {
@@ -66,7 +66,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if any of the keys specified are down
+        /// Checks if any of the keys specified are down.
         /// </summary>
         public bool AnyKeysDown(params Keys[] keys)
         {
@@ -74,7 +74,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if any of the keys specified were down last frame
+        /// Checks if any of the keys specified were down last frame.
         /// </summary>
         public bool WasAnyKeysDown(params Keys[] keys)
         {
@@ -82,7 +82,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if all of the keys specified were up last frame
+        /// Checks if all of the keys specified were up last frame.
         /// </summary>
         public bool WasAllKeysUp(params Keys[] keys)
         {
@@ -90,7 +90,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if any of the keys specified were up the last frame
+        /// Checks if any of the keys specified were up the last frame.
         /// </summary>
         public bool WereAnyKeysUp(params Keys[] keys)
         {
@@ -98,7 +98,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if all of the keys specified are down
+        /// Checks if all of the keys specified are down.
         /// </summary>
         public bool AllKeysDown(params Keys[] keys)
         {
@@ -106,7 +106,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if a given key is currently down
+        /// Checks if a given key is currently down.
         /// </summary>
         public bool IsKeyDown(Keys key)
         {
@@ -114,7 +114,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if a given key is currently up
+        /// Checks if a given key is currently up.
         /// </summary>
         public bool IsKeyUp(Keys key)
         {
@@ -122,7 +122,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if a given key is was down last frame
+        /// Checks if a given key is was down last frame.
         /// </summary>
         public bool WasKeyDown(Keys key)
         {
@@ -130,7 +130,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if a given key is was up last frame
+        /// Checks if a given key is was up last frame.
         /// </summary>
         public bool WasKeyUp(Keys key)
         {
@@ -138,7 +138,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if a given key is currently being pressed (Was not pressed last state, but now is)
+        /// Checks if a given key is currently being pressed (Was not pressed last state, but now is).
         /// </summary>
         public bool IsKeyPressed(Keys key)
         {
@@ -146,7 +146,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if a given key has been toggled (Was pressed last state, but now isn't)
+        /// Checks if a given key has been toggled (Was pressed last state, but now isn't).
         /// </summary>
         public bool WasKeyPressed(Keys key)
         {
@@ -154,7 +154,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if the right button is being held down
+        /// Checks if the right button is being held down.
         /// </summary>
         public bool IsRightDown()
         {
@@ -162,7 +162,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if the left button is being held down
+        /// Checks if the left button is being held down.
         /// </summary>
         public bool IsLeftDown()
         {
@@ -170,7 +170,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if the right button is currently up
+        /// Checks if the right button is currently up.
         /// </summary>
         public bool IsRightUp()
         {
@@ -178,7 +178,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if the left button is currently up
+        /// Checks if the left button is currently up.
         /// </summary>
         public bool IsLeftUp()
         {
@@ -186,7 +186,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if the left button is being clicked (Currently is down, wasn't last frame)
+        /// Checks if the left button is being clicked (Currently is down, wasn't last frame).
         /// </summary>
         /// <returns></returns>
         public bool IsLeftClicked()
@@ -196,7 +196,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Checks if the right button is being clicked (Currently is down, wasn't last frame)
+        /// Checks if the right button is being clicked (Currently is down, wasn't last frame).
         /// </summary>
         /// <returns></returns>
         public bool IsRightClicked()
@@ -206,7 +206,7 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Gets the current number key pressed, returns -1 if none
+        /// Gets the current number key pressed, returns -1 if none.
         /// </summary>
         public int GetDigitPressed()
         {

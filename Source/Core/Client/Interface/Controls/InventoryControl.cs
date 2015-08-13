@@ -26,6 +26,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         public bool IsOpen { get; internal set; }
 
         private readonly InventoryBlockControl[] blockControls;
+        private readonly InventoryBlockControl cursorBlock;
         private readonly StatusBar gradient;
         private readonly int normalHeight = Tile.Height + 7;
         private readonly int normalWidth, extendedWidth, extendedHeight;
@@ -33,6 +34,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private readonly Label[] packLabels;
         private readonly GameScreen screen;
         private readonly TabControl tabControl;
+        private BlockType draggingBlock;
+        private bool isDragging, preDrag;
         private float realWidth, realHeight;
 
         public InventoryControl(GameScreen screen, Manager manager) : base(manager)
@@ -60,6 +63,11 @@ namespace Bricklayer.Core.Client.Interface.Controls
             gradient.Height = Height;
             Add(gradient);
 
+            cursorBlock = new InventoryBlockControl(Manager, null, screen) {Visible = false};
+            cursorBlock.Init();
+            cursorBlock.Passive = true;
+            Manager.Add(cursorBlock);
+
             // Create images.
             for (var i = 0; i < Math.Min(blockControls.Length, BlockType.Blocks.Count); i++)
             {
@@ -70,7 +78,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                     Left = 11 + (Width/2) - (((inventorySlots + 1)*(Tile.Width + 4))/2) + ((Tile.Width + 4)*i)
                     // Center.
                 };
-                blockControls[i].Click += (sender, args) => SelectBlock(((InventoryBlockControl)sender).Block);
+                blockControls[i].Click += (sender, args) => SelectBlock(((InventoryBlockControl) sender).Block);
 
                 blockControls[i].Init();
                 Add(blockControls[i]);
@@ -133,7 +141,15 @@ namespace Bricklayer.Core.Client.Interface.Controls
                             Left = x
                         };
                         packBlockControls[blockIndex].Init();
-                        packBlockControls[blockIndex].Click += (sender, args) => SelectBlock(((InventoryBlockControl)sender).Block);
+                        packBlockControls[blockIndex].MouseMove += (sender, args) =>
+                        {
+                            if (args.Button == MouseButton.Left)
+                            {
+                                DragBlock(((InventoryBlockControl) sender).Block);
+                            }
+                        };
+                        packBlockControls[blockIndex].Click +=
+                            (sender, args) => SelectBlock(((InventoryBlockControl) sender).Block);
                         page.Add(packBlockControls[blockIndex]);
                         x += packBlockControls[blockIndex].Width + 2;
                         blockIndex++;
@@ -144,6 +160,15 @@ namespace Bricklayer.Core.Client.Interface.Controls
             }
             extendedHeight = tabControl.Top + y + 40 + Tile.Height;
             SelectBlock(0);
+        }
+
+        private void DragBlock(BlockType block)
+        {
+            isDragging = true;
+            draggingBlock = block;
+            cursorBlock.Block = block;
+            cursorBlock.Visible = true;
+            cursorBlock.Passive = true;
         }
 
         /// <summary>
@@ -181,6 +206,27 @@ namespace Bricklayer.Core.Client.Interface.Controls
         {
             if (screen.IsChatOpen())
                 return;
+
+            // Handle dragging of blocks.
+            if (isDragging)
+            {
+                cursorBlock.Left = screen.Client.Input.MousePosition.X - Tile.Width/2;
+                cursorBlock.Top = screen.Client.Input.MousePosition.Y - Tile.Height/2;
+            }
+            var rect = new Rectangle(screen.Client.Input.MousePosition.X, screen.Client.Input.MousePosition.Y, 1, 1);
+            if (isDragging)
+            {
+                if (screen.Client.Input.IsLeftUp())
+                {
+                    foreach (var ctrl in blockControls.Where(ctrl => ctrl.AbsoluteRect.Intersects(rect)))
+                    {
+                        ctrl.Block = draggingBlock;
+                        SelectBlock(draggingBlock);
+                    }
+                    isDragging = false;
+                    cursorBlock.Visible = false;
+                }
+            }
 
             // Open or close inventory.
             if (screen.Client.Input.IsKeyPressed(Keys.E))
@@ -227,7 +273,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 }
                 else
                 {
-                    realHeight += delta/(extendedWidth/(float) extendedHeight) * 1.5f; // Use ratio for height.
+                    realHeight += delta/(extendedWidth/(float) extendedHeight)*1.5f; // Use ratio for height.
                     Height = (int) realHeight;
                 }
 
@@ -254,7 +300,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 }
                 else
                 {
-                    realHeight -= delta/(extendedWidth/(float) extendedHeight) * 1.5f; // Use ratio for height.
+                    realHeight -= delta/(extendedWidth/(float) extendedHeight)*1.5f; // Use ratio for height.
                     Height = (int) realHeight;
                 }
 
