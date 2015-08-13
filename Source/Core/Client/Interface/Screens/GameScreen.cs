@@ -152,17 +152,19 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
         private void HandleInput()
         {
-            //Mouse Input
+            // Mouse Input.
             if (Client.Input.IsLeftDown() && Level != null)
             {
                 var pos = Client.Input.MouseGridPosition;
-                if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y] != SelectedBlock)
+                if (!Window.IsMouseOverUI())
                 {
-                    Level.Tiles[pos.X, pos.Y] = SelectedBlock;
+                    // Place block.
+                    if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y] != SelectedBlock)
+                        Level.Tiles[pos.X, pos.Y] = SelectedBlock;
                 }
             }
 
-            //Key Input
+            // Key Input.
             if (Client.Input.IsKeyPressed(Keys.T) && !txtChat.Visible) // Open chat.
             {
                 txtChat.Visible = true;

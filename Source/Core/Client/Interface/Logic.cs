@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 
 namespace Bricklayer.Core.Client.Interface
@@ -37,6 +38,20 @@ namespace Bricklayer.Core.Client.Interface
             totalFrames++;
 
             base.Update(gameTime);
+        }
+
+        /// <summary>
+        /// Returns true if the mouse position is over a UI control.
+        /// </summary>
+        public bool IsMouseOverUI()
+        {
+            var pos = Client.Input.MousePosition;
+            var rect = new Rectangle(pos.X, pos.Y, 1, 1);
+            return
+                Manager.Controls.First()
+                    .Controls.First()
+                    .Controls.Any(
+                        control => control.Visible && !control.Passive && control.AbsoluteRect.Intersects(rect));
         }
     }
 }
