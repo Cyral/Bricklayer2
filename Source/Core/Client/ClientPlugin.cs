@@ -1,4 +1,5 @@
 ﻿using Bricklayer.Core.Common;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Bricklayer.Core.Client
 {
@@ -11,6 +12,11 @@ namespace Bricklayer.Core.Client
         /// The client host.
         /// </summary>
         public Client Client { get; set; }
+
+        /// <summary>
+        /// Optional icon to display in Plugin Manager
+        /// </summary>
+        public Texture2D Icon { get; set; }
 
         /// <summary>
         /// Creates an instance of the plugin with the specified client host.

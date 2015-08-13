@@ -1,21 +1,23 @@
-﻿using Bricklayer.Core.Client.Interface.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Bricklayer.Core.Client.Interface.Windows;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
-    public class ServerScreen : Screen
+    public class PluginManagerScreen : Screen
     {
-        // Controls
-        private ServerWindow wndServer;
+        protected internal override GameState State => GameState.PluginManager;
+        private PluginManagerWindow wndPlugins;
         private ImageBox imgBackground;
-        private Button btnPlugins;
-
-        protected internal override GameState State => GameState.Server;
 
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);
-            Client.State = GameState.Lobby;
+            Client.State = GameState.PluginManager;
 
             imgBackground = new ImageBox(Manager)
             {
@@ -27,18 +29,17 @@ namespace Bricklayer.Core.Client.Interface.Screens
             imgBackground.Init();
             Window.Add(imgBackground);
 
-            // Add the server window
-            wndServer = new ServerWindow(Manager, this);
-            wndServer.Init();
-            Window.Add(wndServer);
-            wndServer.Show();
-        }
-
+            wndPlugins = new PluginManagerWindow(Manager, this);
+            wndPlugins.Init();
+            Window.Add(wndPlugins);
+            wndPlugins.Show();
+         }
+        
         public override void Remove()
         {
-            Window.Remove(wndServer);
-            wndServer.Dispose();
+            Window.Remove(wndPlugins);
             Window.Remove(imgBackground);
+            wndPlugins?.Dispose();
         }
     }
 }

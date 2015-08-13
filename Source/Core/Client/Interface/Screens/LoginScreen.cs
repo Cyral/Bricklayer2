@@ -7,13 +7,12 @@ namespace Bricklayer.Core.Client.Interface.Screens
 {
     internal class LoginScreen : Screen
     {
-        protected internal override GameState State => GameState.Login;
+        private Button btnPlugins;
         // Controls
         private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
         private Label lblVersion;
         private LoginWindow wndLogin;
-
-
+        protected internal override GameState State => GameState.Login;
 
         /// <summary>
         /// Setup the login and serverlist screen content and controls.
@@ -37,7 +36,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             imgLogo = new ImageBox(Manager) {Image = Client.Content["gui.logosmall"], SizeMode = SizeMode.Normal};
             imgLogo.Init();
             imgLogo.SetSize(imgLogo.Image.Width, imgLogo.Image.Height);
-            imgLogo.SetPosition((Window.Width / 2) - (imgLogo.Image.Width / 2), 0);
+            imgLogo.SetPosition((Window.Width/2) - (imgLogo.Image.Width/2), 0);
             Window.Add(imgLogo);
 
             // Add github contribute link
@@ -50,8 +49,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
             imgGithub.SetSize(imgGithub.Width, imgGithub.Height);
             imgGithub.SetPosition(Window.Width - imgGithub.Width - 8, Window.Height - imgGithub.Height - 8);
             imgGithub.Init();
-            imgGithub.Color = Color.White * .9f;
-            imgGithub.MouseOut += (sender, args) => imgGithub.Color = Color.White * .9f;
+            imgGithub.Color = Color.White*.9f;
+            imgGithub.MouseOut += (sender, args) => imgGithub.Color = Color.White*.9f;
             imgGithub.MouseOver += (sender, args) => imgGithub.Color = Color.White;
             imgGithub.Click +=
                 (sender, args) => { if (Manager.Game.IsActive) Process.Start(Constants.Strings.GithubURL); };
@@ -68,8 +67,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
             imgPyratron.SetPosition(Window.Width - imgGithub.Width - 16 - imgPyratron.Width,
                 Window.Height - imgPyratron.Height - 8);
             imgPyratron.Init();
-            imgPyratron.Color = Color.White * .9f;
-            imgPyratron.MouseOut += (sender, args) => imgPyratron.Color = Color.White * .9f;
+            imgPyratron.Color = Color.White*.9f;
+            imgPyratron.MouseOut += (sender, args) => imgPyratron.Color = Color.White*.9f;
             imgPyratron.MouseOver += (sender, args) => imgPyratron.Color = Color.White;
             imgPyratron.Click +=
                 (sender, args) => { if (Manager.Game.IsActive) Process.Start(Constants.Strings.PyratronURL); };
@@ -78,10 +77,24 @@ namespace Bricklayer.Core.Client.Interface.Screens
             // Add version tag
             lblVersion = new Label(Manager) {Font = FontSize.Default14};
             lblVersion.Init();
-            lblVersion.SetSize(200, 20);
             lblVersion.SetPosition(8, Window.Height - lblVersion.Height - 8);
             lblVersion.Text = Constants.VersionString;
+            lblVersion.Width =
+                (int)
+                    Manager.Skin.Fonts[lblVersion.Font.ToString()].Resource.MeasureRichString(lblVersion.Text, Manager)
+                        .X;
             Window.Add(lblVersion);
+
+            btnPlugins = new Button(Manager)
+            {
+                Text = "Manage Plugins",
+                Width = 100,
+                Top = lblVersion.Top - 4,
+                Left = lblVersion.Right + 8
+            };
+            btnPlugins.Init();
+            Window.Add(btnPlugins);
+            btnPlugins.Click += (sender, args) => { ScreenManager.SwitchScreen(new PluginManagerScreen()); };
 
             wndLogin = new LoginWindow(Manager, this);
             wndLogin.Init();
@@ -89,9 +102,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
             if (wndLogin.Top < imgLogo.Top + imgLogo.Height + 8)
                 wndLogin.Top = imgLogo.Top + imgLogo.Height + 24;
             Window.Add(wndLogin);
-
-           
-
         }
 
         /// <summary>
@@ -105,6 +115,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Window.Remove(imgGithub);
             Window.Remove(lblVersion);
             Window.Remove(wndLogin);
+            Window.Remove(btnPlugins);
             wndLogin?.Dispose();
         }
     }

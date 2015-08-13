@@ -71,11 +71,13 @@
     <Compile Include="Interface\Controls\InventoryControl.cs" />
     <Compile Include="Interface\Controls\LobbyDataControl.cs" />
     <Compile Include="Interface\Controls\PlayerListDataControl.cs" />
+    <Compile Include="Interface\Controls\PluginDataControl.cs" />
     <Compile Include="Interface\Controls\ServerDataControl.cs" />
     <Compile Include="Interface\Layout.cs" />
     <Compile Include="Interface\Logic.cs" />
     <Compile Include="Interface\Screens\LobbyScreen.cs" />
     <Compile Include="Interface\Screens\GameScreen.cs" />
+    <Compile Include="Interface\Screens\PluginManagerScreen.cs" />
     <Compile Include="Interface\Screens\Screen.cs" />
     <Compile Include="Interface\Screens\LoginScreen.cs" />
     <Compile Include="Interface\Screens\ScreenManager.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="Interface\Windows\LobbyWindow.cs" />
     <Compile Include="Interface\Windows\LoginWindow.cs" />
     <Compile Include="Interface\Windows\PluginDownloadWindow.cs" />
+    <Compile Include="Interface\Windows\PluginManagerWindow.cs" />
     <Compile Include="Interface\Windows\ServerWindow.cs" />
     <Compile Include="Components\IOComponent.cs" />
     <Compile Include="Net\MessageHandler.cs" />
