@@ -98,10 +98,12 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
             // For each block pack, add it to the appropriate tab.
             // Keep spacing in mind and go to a new line when space runs out.
-            int x = 8, y = 8;
+            var y = 0;
             int packIndex = 0, blockIndex = 0;
             for (var catIndex = 0; catIndex < PackCategory.Categories.Count; catIndex++)
             {
+                var x = 8;
+                y = 8;
                 var category = PackCategory.Categories[catIndex];
                 var page = tabControl.TabPages[catIndex];
                 foreach (var pack in category.Packs)

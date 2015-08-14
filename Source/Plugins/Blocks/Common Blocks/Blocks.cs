@@ -36,7 +36,8 @@ namespace Bricklayer.Plugins.DefaultBlocks.Common
         public static void AddBlocks()
         {
             // Set default blocks.
-            Empty = new BlockType("Empty", Layer.All) {IsRenderable = false, Pack = BlockPacks.Classic, };
+            Empty = BlockType.FromID(0);
+            Empty.Pack = BlockPacks.Classic;
 
             ClassicGray = new BlockType("Gray", Layer.All, BlockCollision.Impassable, BlockPacks.Classic);
             ClassicWhite = new BlockType("White", Layer.All, BlockCollision.Impassable, BlockPacks.Classic);

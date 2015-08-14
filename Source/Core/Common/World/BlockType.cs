@@ -41,7 +41,7 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// Name of the block.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// The texture of this block. (Null on serverside)
@@ -77,7 +77,12 @@ namespace Bricklayer.Core.Common.World
 
         static BlockType()
         {
+            // ReSharper disable once UseObjectOrCollectionInitializer
             Blocks = new List<BlockType>();
+
+            //Add hardcoded blocks:
+            // ReSharper disable once ObjectCreationAsStatement
+            new BlockType("Empty", Layer.All) {IsRenderable = false};
         }
 
         /// <summary>
@@ -87,7 +92,8 @@ namespace Bricklayer.Core.Common.World
         /// <param name="layer">The layer(s) the tile can be placed on.</param>
         /// <param name="collision">The physics that the tile will interact with entities with.</param>
         /// <param name="pack">Block category used for sorting in the inventory.</param>
-        public BlockType(string name, Layer layer, BlockCollision collision = BlockCollision.Passable, BlockPack pack = null)
+        public BlockType(string name, Layer layer, BlockCollision collision = BlockCollision.Passable,
+            BlockPack pack = null)
         {
             // TODO: ID will be calulcated by server, and the list will be rearranged after plugins are loaded
             // This way we can use an array or list instead of LINQ/for loop to find an id in `FromID`
@@ -95,13 +101,10 @@ namespace Bricklayer.Core.Common.World
             Layer = layer;
             Collision = collision;
             Pack = pack;
-            ID = (ushort)Blocks.Count();
+            ID = (ushort) Blocks.Count();
             IsRenderable = true;
 
-            Draw = (batch, tile, x, y) =>
-            {
-                batch.Draw(Texture, new Vector2(x * Tile.Width, y * Tile.Height));
-            };
+            Draw = (batch, tile, x, y) => { batch.Draw(Texture, new Vector2(x*Tile.Width, y*Tile.Height)); };
 
             Blocks.Add(this);
         }
@@ -128,7 +131,8 @@ namespace Bricklayer.Core.Common.World
         }
 
         /// <summary>
-        /// Implicitly convert BlockType to Tile for convenience, as setting a tile requires: Tiles[x, y] = new Tile(type) without this.
+        /// Implicitly convert BlockType to Tile for convenience, as setting a tile requires: Tiles[x, y] = new Tile(type) without
+        /// this.
         /// </summary>
         public static implicit operator Tile(BlockType type)
         {
