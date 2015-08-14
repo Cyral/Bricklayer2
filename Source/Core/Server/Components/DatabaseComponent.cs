@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
@@ -53,10 +54,15 @@ namespace Bricklayer.Core.Server.Components
 
                 while (reader.Read())
                 {
-                    // Create and add each level data to the list
-                    var briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
-                        reader.GetGuid(0), reader.GetString(2), 0,
-                        reader.GetInt32(3), 3.5d);
+                    LevelData briefing;
+                    // If level is already open
+                    if (Server.Levels.FirstOrDefault(x => x.UUID == reader.GetGuid(0)) != null)
+                        briefing = Server.Levels.FirstOrDefault(x => x.UUID == reader.GetGuid(0));
+                    else // Create new LevelData other wise
+                        briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
+                            reader.GetGuid(0), reader.GetString(2), 0,
+                            reader.GetInt32(3), 3.5d);
+
                     levels.Add(briefing);
                 }
             });
