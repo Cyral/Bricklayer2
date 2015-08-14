@@ -1,96 +1,95 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bricklayer.Core.Client.Interface.Screens;
-using Bricklayer.Core.Client.Interface.Windows;
-using Bricklayer.Core.Common;
-using Bricklayer.Core.Common.Data;
+﻿using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Controls
 {
     /// <summary>
-    /// A control for displaying a level's name, rating, online, etc, in the lobby.
+    /// A control for displaying plugin data in the plugin manager.
     /// </summary>
     public sealed class PluginDataControl : Control
     {
-        private readonly ImageBox imgIcon;
-        private readonly StatusBar gradient;
-        private readonly Label lblName, lblDescription, lblStatus;
-        private readonly PluginManagerScreen screen;
-        public readonly ClientPlugin data;
+        public ClientPlugin Data { get; private set; }
 
-        public PluginDataControl(PluginManagerScreen screen, Manager manager, Control parent, ClientPlugin data, bool enabled)
+        public PluginDataControl(Manager manager, Control parent, ClientPlugin data,
+            bool enabled)
             : base(manager)
         {
-            // Setup
+            // Setup.
             Passive = true;
-            Height = 70;
+            Height = 64 + 3;
             Width = parent.ClientWidth;
-            this.screen = screen;
-            this.data = data;
+            Data = data;
 
             // Background "gradient" image
             // TODO: Make an actual control. not a statusbar
-            gradient = new StatusBar(manager);
+            var gradient = new StatusBar(manager);
             gradient.Init();
             gradient.Alpha = .8f;
             Add(gradient);
 
-            lblStatus = new Label(Manager)
+            var lblStatus = new Label(Manager)
             {
                 Width = 100,
-                Left = ClientWidth - 100 - 16,
-                Top = 8,
-                Alignment = Alignment.TopLeft,
-                TextColor = new Color(160, 160, 160)
+                Top = 4,
+                Alignment = Alignment.TopLeft
             };
             lblStatus.Init();
-            lblStatus.Text = enabled ? "[color:green]Enabled[/color]" : "[color:red]Disabled[/color]";
+            lblStatus.Text = enabled ? "Enabled" : "Disabled";
+            lblStatus.TextColor = enabled ? Color.Lime : Color.Red;
+            lblStatus.Left = ClientWidth - 26 -
+                              (int)Manager.Skin.Fonts[lblStatus.Font.ToString()].Resource.MeasureString(lblStatus.Text).X;
             Add(lblStatus);
 
-            // Add controls
-            lblName = new Label(Manager)
+            var lblName = new Label(Manager)
             {
-                Width = 100,
+                Width = ClientWidth,
                 Text = data.Name,
                 Left = 4,
                 Top = 4,
-                Font = FontSize.Default14,
+                Font = FontSize.Default12,
                 Alignment = Alignment.TopLeft
             };
             lblName.Init();
             Add(lblName);
             lblName.Text = data.Name;
 
-            lblDescription = new Label(Manager)
+            var lblDescription = new Label(Manager)
             {
-                Width = 200,
+                Width = ClientWidth,
                 Left = 4,
-                Top = lblName.Bottom + 4,
+                Top = lblName.Bottom + 2,
                 Alignment = Alignment.TopLeft
             };
             lblDescription.Init();
             Add(lblDescription);
             lblDescription.Text = data.Description;
 
+            var lblPackage = new Label(Manager)
+            {
+                Width = ClientWidth,
+                Left = 4,
+                Top = lblDescription.Bottom,
+                Alignment = Alignment.TopLeft,
+                TextColor = Color.Gray
+            };
+            lblPackage.Init();
+            lblPackage.Text = "v" + Data.Version + " - " + Data.Identifier;
+            Add(lblPackage);
 
             if (data.Icon != null)
             {
-                imgIcon = new ImageBox(Manager)
+                var imgIcon = new ImageBox(Manager)
                 {
-                    Left = 10,
                     Image = data.Icon
                 };
-                imgIcon.Top = (ClientHeight/2) - (imgIcon.Height/2);
+                imgIcon.Top = (ClientHeight / 2) - (imgIcon.Height / 2) + 1;
+                imgIcon.Left = 64 - (imgIcon.Height) + 1;
                 imgIcon.Init();
                 Add(imgIcon);
-                lblName.Left += imgIcon.Width + 20;
-                lblDescription.Left += imgIcon.Width + 20;
+                lblName.Left = imgIcon.Width + 6;
+                lblDescription.Left = imgIcon.Width + 6;
+                lblPackage.Left = imgIcon.Width + 6;
             }
         }
 

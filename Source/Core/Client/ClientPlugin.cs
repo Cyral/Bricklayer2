@@ -14,7 +14,7 @@ namespace Bricklayer.Core.Client
         public Client Client { get; set; }
 
         /// <summary>
-        /// Optional icon to display in Plugin Manager
+        /// Optional icon to display in the plugin manager.
         /// </summary>
         public Texture2D Icon { get; set; }
 

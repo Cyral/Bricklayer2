@@ -182,11 +182,11 @@ namespace Bricklayer.Core.Client.Interface.Windows
             RefreshServerList();
         }
 
-        private void RefreshServerList()
+        private async void RefreshServerList()
         {
             lstServers.Items.Clear();
             // Read the servers from config
-            servers = screen.Client.IO.ReadServers();
+            servers = await screen.Client.IO.ReadServers();
             // Populate the list 
             foreach (var server in servers)
             {

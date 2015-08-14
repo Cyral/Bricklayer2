@@ -38,6 +38,11 @@ namespace Bricklayer.Core.Client
             public static string PyratronURL { get; } = "https://www.pyratron.com";
 
             /// <summary>
+            /// URL to plugin database.
+            /// </summary>
+            public static string PluginDB_URL { get; } = "https://community.pyratron.com/db/";
+
+            /// <summary>
             /// URL to reset Pyratron account password.
             /// </summary>
             internal static string ForgotPasswordURL { get; } = "https://www.pyratron.com/component/users/?view=reset";

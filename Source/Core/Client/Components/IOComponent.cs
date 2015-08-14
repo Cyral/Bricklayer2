@@ -90,18 +90,18 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Reads a list of servers from the json server config file
         /// </summary>
-        public List<ServerData> ReadServers()
+        public async Task<List<ServerData>> ReadServers()
         {
             var fileName = serverFile;
             if (!File.Exists(fileName))
             {
                 // If server config does not exist, create it and write the default server to it
-                WriteServers(new List<ServerData> {CreateDefaultServer()});
+                await WriteServers(new List<ServerData> {CreateDefaultServer()});
             }
             var json = File.ReadAllText(fileName);
             if (string.IsNullOrWhiteSpace(json))
             {
-                WriteServers(new List<ServerData> {CreateDefaultServer()});
+                await WriteServers(new List<ServerData> {CreateDefaultServer()});
                 json = File.ReadAllText(fileName);
             }
             var servers = JsonConvert.DeserializeObject<List<ServerData>>(json);
@@ -111,36 +111,38 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Save servers into a configurable json file
         /// </summary>
-        public void WriteServers(List<ServerData> servers)
+        public async Task WriteServers(List<ServerData> servers)
         {
-            var fileName = serverFile;
-            if (!File.Exists(fileName))
+            await Task.Factory.StartNew(() =>
             {
-                var str = File.Create(fileName);
-                str.Close();
-            }
-            var json = JsonConvert.SerializeObject(servers, SerializationSettings);
-            File.WriteAllText(fileName, json);
+                var fileName = serverFile;
+                if (!File.Exists(fileName))
+                {
+                    var str = File.Create(fileName);
+                    str.Close();
+                }
+                var json = JsonConvert.SerializeObject(servers, SerializationSettings);
+                File.WriteAllText(fileName, json);
+            });
         }
 
-
         /// <summary>
-        /// Reads list of enabled and disabled Plugins
+        /// Reads and returns collection of enabled and disabled plugins.
         /// </summary>
         public Dictionary<string, bool> ReadPlugins()
         {
+            var plugins = new Dictionary<string, bool>();
             var fileName = pluginsFile;
             if (!File.Exists(fileName))
             {
-                // If server config does not exist, create it and write the default server to it
-                Dictionary<string, bool> plugins = new Dictionary<string, bool>();
+                // If plugin config doesn't exist, create it.
                 Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Name, true));
                 WritePlugins(plugins);
             }
             var json = File.ReadAllText(fileName);
             if (string.IsNullOrWhiteSpace(json))
             {
-                Dictionary<string, bool> plugins = new Dictionary<string, bool>();
+                // If file is empty, create the contents.
                 Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Name, true));
                 WritePlugins(plugins);
                 json = File.ReadAllText(fileName);
@@ -149,7 +151,7 @@ namespace Bricklayer.Core.Client.Components
         }
 
         /// <summary>
-        /// Save plugin statuses into a configurable json file
+        /// Save plugin statuses into a configurable json file.
         /// </summary>
         public void WritePlugins(Dictionary<string, bool> plugins)
         {

@@ -7,9 +7,9 @@ namespace Bricklayer.Plugins.TestClientPlugin
     /// <summary>
     /// A test Client plugin.
     /// </summary>
-    public class TestClientPlugin : ClientPlugin
+    public class TestPluginData : ClientPlugin
     {
-        public TestClientPlugin(Client host) : base(host) {}
+        public TestPluginData(Client host) : base(host) {}
 
         public override void Load()
         {

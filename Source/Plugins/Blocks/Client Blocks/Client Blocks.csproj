@@ -42,7 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Plugin.cs" />
+    <Compile Include="PluginData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -65,9 +65,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\icon.png">
+    <None Include="icon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="Content\Textures\blocks\classic\black.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -133,6 +133,7 @@
   <PropertyGroup>
     <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.dll"
 echo F|xcopy /y "$(TargetDir)plugin.json" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.json"
+echo F|xcopy /y "$(TargetDir)icon.png" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\icon.png"
 echo F|xcopy /y "$(TargetDir)Common Blocks.dll" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Common Blocks.dll"
 mkdir "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Content"
 xcopy /s /i /y "$(TargetDir)Content" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\Content"</PostBuildEvent>

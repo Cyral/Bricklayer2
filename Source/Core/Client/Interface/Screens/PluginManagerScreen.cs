@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bricklayer.Core.Client.Interface.Windows;
+﻿using Bricklayer.Core.Client.Interface.Windows;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
@@ -11,8 +6,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
     public class PluginManagerScreen : Screen
     {
         protected internal override GameState State => GameState.PluginManager;
-        private PluginManagerWindow wndPlugins;
         private ImageBox imgBackground;
+        private PluginManagerWindow wndPlugins;
 
         public override void Add(ScreenManager screenManager)
         {
@@ -33,8 +28,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
             wndPlugins.Init();
             Window.Add(wndPlugins);
             wndPlugins.Show();
-         }
-        
+        }
+
         public override void Remove()
         {
             Window.Remove(wndPlugins);
