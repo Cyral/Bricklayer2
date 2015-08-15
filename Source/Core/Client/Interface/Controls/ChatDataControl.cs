@@ -18,7 +18,6 @@ namespace Bricklayer.Core.Client.Interface.Controls
         {
             Width = parent.ClientWidth;
             Height = 16;
-            Parent = parent;
 
             lblMsg = new Label(Manager)
             {
