@@ -34,16 +34,7 @@ namespace Bricklayer.Core.Common.Data
         internal PlayerData(NetIncomingMessage im)
         {
             IsGuest = im.ReadBoolean();
-            Guid uuid;
-            var s = im.ReadString();
-            if (Guid.TryParse(s, out uuid))
-            {
-                UUID = uuid;
-            }
-            else
-            {
-                Debug.WriteLine("UUID sent is in incorrect format: " + s);
-            }
+            UUID = Guid.Parse(im.ReadString());
             Username = im.ReadString();
         }
 

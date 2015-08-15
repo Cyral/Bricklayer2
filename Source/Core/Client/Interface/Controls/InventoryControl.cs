@@ -31,11 +31,10 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private readonly int normalHeight = Tile.Height + 7;
         private readonly int normalWidth, extendedWidth, extendedHeight;
         private readonly InventoryBlockControl[] packBlockControls;
-        private readonly Label[] packLabels;
         private readonly GameScreen screen;
         private readonly TabControl tabControl;
         private BlockType draggingBlock;
-        private bool isDragging, preDrag;
+        private bool isDragging;
         private float realWidth, realHeight;
 
         public InventoryControl(GameScreen screen, Manager manager) : base(manager)
@@ -44,7 +43,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             // Block images.
             blockControls = new InventoryBlockControl[inventorySlots];
             packBlockControls = new InventoryBlockControl[BlockType.Blocks.Count];
-            packLabels = new Label[BlockPack.Packs.Count];
+            var packLabels = new Label[BlockPack.Packs.Count];
 
             normalWidth = ((inventorySlots + 1)*(Tile.Width + 2)) + 8;
             extendedWidth = (int) (normalWidth*2.5f);

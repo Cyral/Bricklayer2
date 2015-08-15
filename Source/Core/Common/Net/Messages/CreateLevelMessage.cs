@@ -10,7 +10,7 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class CreateLevelMessage : IMessage
     {
-        public const int MaxNameLength = 24, MaxDescriptionLength = 80, MaxDescriptionLines = 2;
+        public const int MaxNameLength = 24, MaxDescriptionLength = 128, MaxDescriptionLines = 2;
         public string Description { get; set; }
         public string Name { get; set; }
 

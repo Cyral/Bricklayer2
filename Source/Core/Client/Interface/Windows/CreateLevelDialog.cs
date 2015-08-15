@@ -37,16 +37,11 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
             txtName = new TextBox(manager) { Left = 8, Top = lblName.Bottom + 4, Width = ClientWidth - 16 };
             txtName.Init();
+            txtName.MaxLength = CreateLevelMessage.MaxNameLength;
+            txtName.Text = ""; // Fix bug with cursor caret not showing.
             txtName.TextChanged += (sender, args) =>
             {
-                // If you're trying to fix this function, please check out line 77 first.
-                if (txtName.Text.Length > CreateLevelMessage.MaxNameLength)
-                    txtName.Text = txtName.Text.Truncate(CreateLevelMessage.MaxNameLength);
-
                 createBtn.Enabled = !string.IsNullOrWhiteSpace(txtName.Text);
-
-                // Makes sure aspects like text selection rendering gets covered by MonoForce
-                args.Handled = false;
             };
             Add(txtName);
 
@@ -70,40 +65,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 ScrollBars = ScrollBars.None
             };
             txtDescription.Init();
-            txtDescription.TextChanged += (sender, args) =>
-            {
-                // Dear maintainer:
-                //
-                // If you've come here to avoid the truncation and instead
-                // stop the player from typing those characters on the first place
-                // then you're reading the right comment, because I already tried it!
-                //
-                // Here is why it doesn't work:
-                // * NeoForce just straight ignore args.Handled on this function;
-                // * KeyDown works however if you hold down a key it just ignores your code;
-                // * KeyUp is useless, as is KeyPress;
-                //
-                // Once you are done trying to 'fix' this routine, and have realized
-                // what a terrible mistake that was, please increment the following
-                // counter as a warning to the next guy:
-                //
-                // total_hours_wasted_here = 4
-
-                if (txtDescription.Text.Length > CreateLevelMessage.MaxDescriptionLength)
-                    txtDescription.Text = txtDescription.Text.Truncate(CreateLevelMessage.MaxDescriptionLength);
-
-                var newLines = txtDescription.Text.Count(c => c == '\n') + 1; // There is always one line!
-                if (newLines > CreateLevelMessage.MaxDescriptionLines)
-                {
-                    txtDescription.Text = string.Join("\n",
-                        txtDescription.Text.Split('\n'), 0, CreateLevelMessage.MaxDescriptionLines);
-                    txtDescription.CursorPosition = txtDescription.Text.Length - 1;
-                }
-
-                // Makes sure aspects like text selection rendering gets covered by MonoForce
-                // Works everytime, 50% of the time.
-                args.Handled = false;
-            };
+            txtDescription.MaxLines = CreateLevelMessage.MaxDescriptionLines;
+            txtDescription.MaxLength = CreateLevelMessage.MaxDescriptionLength;
             Add(txtDescription);
 
             createBtn = new Button(manager) { Top = 8, Text = "Create", Enabled = false };
