@@ -166,7 +166,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 {
                     // Place block.
                     if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y, layer] != SelectedBlock)
-                    {
+                    { 
                          Level.Tiles[pos.X, pos.Y, layer] = SelectedBlock;
                     }
                 }

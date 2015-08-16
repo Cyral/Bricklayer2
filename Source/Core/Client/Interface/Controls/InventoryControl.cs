@@ -102,6 +102,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             // Keep spacing in mind and go to a new line when space runs out.
             var y = 0;
             int packIndex = 0, blockIndex = 0;
+            int maxY = 0;
             for (var catIndex = 0; catIndex < PackCategory.Categories.Count; catIndex++)
             {
                 var x = 8;
@@ -161,8 +162,9 @@ namespace Bricklayer.Core.Client.Interface.Controls
                     x += 8;
                     packIndex++;
                 }
+                maxY = Math.Max(maxY, y); // Record the highest Y value for each category, so the extended height can be set.
             }
-            extendedHeight = tabControl.Top + y + 40 + Tile.Height;
+            extendedHeight = tabControl.Top + maxY + 40 + Tile.Height;
             SelectBlock(0);
         }
 

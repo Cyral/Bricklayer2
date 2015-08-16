@@ -7,13 +7,14 @@ namespace Bricklayer.Plugins.DefaultBlocks.Common
     /// </summary>
     public class BlockPacks
     {
-        public static BlockPack Classic, Metal;
+        public static BlockPack Classic, Metal, Materials;
 
         public static void AddPacks()
         {
             // Set default packs.
             Classic = new BlockPack("Classic", PackCategories.Blocks);
             Metal = new BlockPack("Metal", PackCategories.Blocks);
+            Materials = new BlockPack("Materials", PackCategories.Blocks);
         }
     }
 }

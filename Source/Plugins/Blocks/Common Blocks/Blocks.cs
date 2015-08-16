@@ -31,7 +31,15 @@ namespace Bricklayer.Plugins.DefaultBlocks.Common
             MetalGreen,
             MetalCyan,
             MetalBlue,
-            MetalPurple;
+            MetalPurple,
+
+            MaterialStone,
+            MaterialDirt,
+            MaterialGrass,
+            MaterialBrick,
+            MaterialWood,
+            MaterialSlab,
+            MaterialGlass;
 
         public static void AddBlocks()
         {
@@ -60,6 +68,14 @@ namespace Bricklayer.Plugins.DefaultBlocks.Common
             MetalCyan = new BlockType("Cyan", Layer.All, BlockCollision.Impassable, BlockPacks.Metal);
             MetalBlue = new BlockType("Blue", Layer.All, BlockCollision.Impassable, BlockPacks.Metal);
             MetalPurple = new BlockType("Purple", Layer.All, BlockCollision.Impassable, BlockPacks.Metal);
+
+            MaterialStone = new BlockType("Stone", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
+            MaterialDirt = new BlockType("Dirt", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
+            MaterialGrass = new BlockType("Grass", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
+            MaterialBrick = new BlockType("Brick", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
+            MaterialWood = new BlockType("Wood", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
+            MaterialSlab = new BlockType("Slab", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
+            MaterialGlass = new BlockType("Glass", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
         }
     }
 }
