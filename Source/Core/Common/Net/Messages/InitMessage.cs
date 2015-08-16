@@ -10,9 +10,9 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class InitMessage : IMessage
     {
-        public string ServerName { get; set; }
-        public string Description { get; set; }
-        public string Intro { get; set; }
+        public string ServerName { get; private set; }
+        public string Description { get; private set; }
+        public string Intro { get; private set; }
         public int Online { get; private set; }
         public List<LevelData> Levels { get; }
 
@@ -33,8 +33,6 @@ namespace Bricklayer.Core.Common.Net.Messages
         }
 
 
-        #region IMessage Members
-
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.Init;
 
@@ -47,7 +45,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             int levelsLength = im.ReadByte();
             for (var i = 0; i < levelsLength; i++)
             {
-                Levels.Add(new LevelData(im)); // The level class will handle decoding the message
+                Levels.Add(new LevelData(im)); // The level class will handle decoding the message.
             }
         }
 
@@ -64,7 +62,5 @@ namespace Bricklayer.Core.Common.Net.Messages
                 data.Encode(om);
             }
         }
-
-        #endregion
     }
 }

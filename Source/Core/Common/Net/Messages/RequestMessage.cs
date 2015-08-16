@@ -3,12 +3,13 @@
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Used by client to request packets from server 
+    /// Used by client to request messages from server.
+    /// Client => Server
     /// </summary>
     public class RequestMessage : IMessage
     {
         public MessageContext Context { get; set; }
-        public MessageTypes Type { get; set; }
+        public MessageTypes Type { get; private set; }
    
         public RequestMessage(NetIncomingMessage im, MessageContext context) { Context = context; Decode(im); }
 
@@ -16,8 +17,6 @@ namespace Bricklayer.Core.Common.Net.Messages
         {
             Type = type;
         }
-
-        #region IMessage Members
 
         public MessageTypes MessageType => MessageTypes.Request;
 
@@ -30,7 +29,5 @@ namespace Bricklayer.Core.Common.Net.Messages
         {
             om.Write((byte) Type);
         }
-
-        #endregion
     }
 }

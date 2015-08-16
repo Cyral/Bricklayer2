@@ -75,6 +75,7 @@
     <Compile Include="Net\Messages\LevelDataMessage.cs" />
     <Compile Include="Net\Messages\PingAuthMessage.cs" />
     <Compile Include="Net\Messages\PingUpdateMessage.cs" />
+    <Compile Include="Net\Messages\PlayerLeaveMessage.cs" />
     <Compile Include="Net\Messages\PlayerJoinMessage.cs" />
     <Compile Include="Net\Messages\PluginDownloadMessage.cs" />
     <Compile Include="IOHelper.cs" />

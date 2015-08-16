@@ -144,7 +144,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Sends a message once connected to join a server officially.
         /// </summary>
-        public async Task Join(string host, int port, string username, Guid uuid, string publicKey)
+        public async Task Join(string host, int port, string username, Guid uuid, byte[] publicKey)
         {
             await Task.Factory.StartNew(() =>
             {

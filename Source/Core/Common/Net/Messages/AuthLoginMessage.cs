@@ -17,12 +17,6 @@ namespace Bricklayer.Core.Common.Net.Messages
         public string Username { get; set; }
         public Version Version { get; set; }
 
-        public AuthLoginMessage(NetIncomingMessage im, MessageContext context)
-        {
-            Context = context;
-            Decode(im);
-        }
-
         public AuthLoginMessage(Version version, string username, string password)
         {
             Version = version;
@@ -30,28 +24,21 @@ namespace Bricklayer.Core.Common.Net.Messages
             Password = password;
         }
 
-        #region IMessage Members
-
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.AuthLogin;
 
         public void Decode(NetIncomingMessage im)
         {
-            Version = new Version(im.ReadInt32(), im.ReadInt32(), im.ReadInt32(), im.ReadInt32());
+            Version = im.ReadVersion();
             Username = im.ReadString();
             Password = im.ReadString();
         }
 
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write(Version.Major);
-            om.Write(Version.Minor);
-            om.Write(Version.Build);
-            om.Write(Version.Revision);
+            om.Write(Version);
             om.Write(Username);
             om.Write(Password);
         }
-
-        #endregion
     }
 }

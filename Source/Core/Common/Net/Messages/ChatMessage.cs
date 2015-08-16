@@ -1,4 +1,6 @@
-﻿using Lidgren.Network;
+﻿using Bricklayer.Core.Common.Entity;
+using Lidgren.Network;
+using Microsoft.Win32;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
@@ -7,6 +9,8 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class ChatMessage : IMessage
     {
+        public static readonly int MaxChatLength = 1024;
+
         /// <summary>
         /// Message text.
         /// </summary>
@@ -23,22 +27,18 @@ namespace Bricklayer.Core.Common.Net.Messages
             Message = message;
         }
 
-        #region IMessage Members
-
         public MessageContext Context { get; set; }
 
         public MessageTypes MessageType => MessageTypes.Chat;
 
         public void Decode(NetIncomingMessage im)
         {
-            Message = im.ReadString();
+            Message = im.ReadString().Truncate(MaxChatLength);
         }
 
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write(Message);
+            om.Write(Message.Truncate(MaxChatLength));
         }
-
-        #endregion
     }
 }

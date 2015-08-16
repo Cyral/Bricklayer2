@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -59,12 +60,86 @@ namespace Bricklayer.Core.Common
         /// </summary>
         public static Color ReadColor(this BinaryReader reader)
         {
-            Color color = Color.White;
+            var color = Color.White;
             color.R = reader.ReadByte();
             color.G = reader.ReadByte();
             color.B = reader.ReadByte();
             color.A = reader.ReadByte();
             return color;
+        }
+    }
+
+    public static class NetExtensions
+    {
+        /// <summary>
+        /// Encode a GUID as a byte array.
+        /// </summary>
+        public static void Write(this NetOutgoingMessage om, Guid guid)
+        {
+            om.Write(guid.ToByteArray());
+        }
+
+        /// <summary>
+        /// Read a GUID from a 16 byte array.
+        /// </summary>
+        public static Guid ReadGuid(this NetIncomingMessage im)
+        {
+            return new Guid(im.ReadBytes(16));
+        }
+
+        /// <summary>
+        /// Encode a Version.
+        /// </summary>
+        public static void Write(this NetOutgoingMessage om, Version version)
+        {
+            om.Write(version.Major);
+            om.Write(version.Minor);
+            om.Write(version.Build);
+            om.Write(version.Revision);
+        }
+
+        /// <summary>
+        /// Read a Version.
+        /// </summary>
+        public static Version ReadVersion(this NetIncomingMessage im)
+        {
+            return new Version(im.ReadInt32(), im.ReadInt32(), im.ReadInt32(), im.ReadInt32());
+        }
+
+        /// <summary>
+        /// Encode a Point as two short values.
+        /// </summary>
+        public static void Write(this NetOutgoingMessage om, Point point)
+        {
+            om.Write((short)point.X);
+            om.Write((short)point.Y);
+        }
+
+        /// <summary>
+        /// Read a Point from two short values.
+        /// </summary>
+        public static Point ReadPoint(this NetIncomingMessage im)
+        {
+            return new Point(im.ReadInt16(), im.ReadInt16());
+        }
+
+        /// <summary>
+        /// Encode an IP address.
+        /// </summary>
+        public static void Write(this NetOutgoingMessage om, IPAddress ip)
+        {
+            var bytes = ip.GetAddressBytes();
+            om.Write((byte)bytes.Length);
+            om.Write(bytes);
+        }
+
+        /// <summary>
+        /// Read an IP address.
+        /// </summary>
+        public static IPAddress ReadIPAddress(this NetIncomingMessage im)
+        {
+            var bytes = im.ReadByte();
+            return new IPAddress(im.ReadBytes(bytes));
         }
     }
 

@@ -24,8 +24,6 @@ namespace Bricklayer.Core.Common.Net.Messages
         }
 
 
-        #region IMessage Members
-
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.LevelData;
 
@@ -38,7 +36,5 @@ namespace Bricklayer.Core.Common.Net.Messages
         {
             Level.Encode(om);
         }
-
-        #endregion
     }
 }

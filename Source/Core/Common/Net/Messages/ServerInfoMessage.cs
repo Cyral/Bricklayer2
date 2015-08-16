@@ -8,11 +8,9 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class ServerInfoMessage : IMessage
     {
-        public double MessageTime { get; set; }
-
-        public string Description { get; set; }
-        public int Players { get; set; }
-        public int MaxPlayers { get; set; }
+        public string Description { get; private set; }
+        public int Players { get; private set; }
+        public int MaxPlayers { get; private set; }
 
         public ServerInfoMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -27,10 +25,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             Description = description;
             Players = players;
             MaxPlayers = maxPlayers;
-            MessageTime = NetTime.Now;
         }
-
-        #region IMessage Members
 
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.ServerInfo;
@@ -55,7 +50,5 @@ namespace Bricklayer.Core.Common.Net.Messages
                 om.Write(MaxPlayers);
             }
         }
-
-        #endregion
     }
 }

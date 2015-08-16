@@ -3,7 +3,7 @@
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Send response to Auth server
+    /// Response sent to auth server. (Such as to acknoledge a message was received)
     /// Client => Auth Server
     /// Byte: Response Type
     /// String: Data
@@ -25,8 +25,6 @@ namespace Bricklayer.Core.Common.Net.Messages
             Info = info;
         }
 
-        #region IMessage Members
-
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.PingAuth;
 
@@ -42,11 +40,15 @@ namespace Bricklayer.Core.Common.Net.Messages
             om.Write(Info);
         }
 
+        /// <summary>
+        /// Possible responses.
+        /// </summary>
         public enum PingResponse : byte
         {
+            /// <summary>
+            /// The receiver received the plugin message successfully.
+            /// </summary>
             GotPlugin
         }
-
-        #endregion
     }
 }

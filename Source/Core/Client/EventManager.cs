@@ -222,13 +222,13 @@ namespace Bricklayer.Core.Client
                 {
                     public Guid UUID { get; private set; }
                     public string Username { get; private set; }
-                    internal string PrivateKey { get; private set; }
-                    public string PublicKey { get; private set; }
+                    internal byte[] PrivateKey { get; private set; }
+                    public byte[] PublicKey { get; private set; }
 
-                    public InitEventArgs(string username, string uuid, string privateKey, string publicKey)
+                    public InitEventArgs(string username, Guid uuid, byte[] privateKey, byte[] publicKey)
                     {
                         Username = username;
-                        UUID = Guid.Parse(uuid);
+                        UUID = uuid;
                         PrivateKey = privateKey;
                         PublicKey = publicKey;
                     }

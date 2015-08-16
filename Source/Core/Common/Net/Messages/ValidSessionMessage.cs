@@ -1,4 +1,5 @@
-﻿using Lidgren.Network;
+﻿using System;
+using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
@@ -15,25 +16,23 @@ namespace Bricklayer.Core.Common.Net.Messages
         /// <summary>
         /// The user's name.
         /// </summary>
-        public string Username { get; set; }
+        public string Username { get; private set; }
 
         /// <summary>
         /// The user's unique ID.
         /// </summary>
-        public string UUID { get; set; }
+        public Guid UUID { get; private set; }
 
         /// <summary>
         /// Is the session valid?
         /// </summary>
-        public bool Valid { get; set; }
+        public bool Valid { get; private set; }
 
         public ValidSessionMessage(NetIncomingMessage im, MessageContext context)
         {
             Context = context;
             Decode(im);
         }
-
-        #region IMessage Members
 
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.ValidSession;
@@ -42,7 +41,7 @@ namespace Bricklayer.Core.Common.Net.Messages
         {
             Valid = im.ReadBoolean();
             Username = im.ReadString();
-            UUID = im.ReadString();
+            UUID = im.ReadGuid();
         }
 
         public void Encode(NetOutgoingMessage om)
@@ -51,7 +50,5 @@ namespace Bricklayer.Core.Common.Net.Messages
             om.Write(Username);
             om.Write(UUID);
         }
-
-        #endregion
     }
 }

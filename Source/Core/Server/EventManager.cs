@@ -166,14 +166,14 @@ namespace Bricklayer.Core.Server
                 /// <summary>
                 /// The public key to be verified.
                 /// </summary>
-                public string PublicKey { get; private set; }
+                public byte[] PublicKey { get; private set; }
                 public string Username { get; private set; }
                 public Guid UUID { get; private set; }
 
-                public LoginRequestEventArgs(string username, string uuid, string publicKey, NetConnection connection)
+                public LoginRequestEventArgs(string username, Guid uuid, byte[] publicKey, NetConnection connection)
                 {
                     Username = username;
-                    UUID = Guid.Parse(uuid);
+                    UUID = uuid;
                     PublicKey = publicKey;
                     Connection = connection;
                 }
@@ -222,10 +222,10 @@ namespace Bricklayer.Core.Server
                 /// </summary>
                 public bool Valid { get; private set; }
 
-                public SessionEventArgs(string username, string uuid, bool valid)
+                public SessionEventArgs(string username, Guid uuid, bool valid)
                 {
                     Username = username;
-                    UUID = Guid.Parse(uuid);
+                    UUID = uuid;
                     Valid = valid;
                 }
             }

@@ -10,9 +10,9 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class CreateLevelMessage : IMessage
     {
-        public const int MaxNameLength = 24, MaxDescriptionLength = 128, MaxDescriptionLines = 2;
-        public string Description { get; set; }
-        public string Name { get; set; }
+        public static readonly int MaxNameLength = 24, MaxDescriptionLength = 128, MaxDescriptionLines = 2;
+        public string Description { get; private set; }
+        public string Name { get; private set; }
 
         public CreateLevelMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -26,8 +26,6 @@ namespace Bricklayer.Core.Common.Net.Messages
             Description = description;
         }
 
-        #region IMessage Members
-
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.CreateLevel;
 
@@ -39,10 +37,8 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write(Name);
-            om.Write(Description);
+            om.Write(Name.Truncate(MaxNameLength));
+            om.Write(Description.Truncate(MaxDescriptionLength));
         }
-
-        #endregion
     }
 }

@@ -8,8 +8,7 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class BannerMessage : IMessage
     {
-        public byte[] Banner { get; set; }
-        public double MessageTime { get; set; }
+        public byte[] Banner { get; private set; }
 
         public BannerMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -19,11 +18,8 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public BannerMessage(byte[] banner)
         {
-            MessageTime = NetTime.Now;
             Banner = banner;
         }
-
-        #region IMessage Members
 
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.Banner;
@@ -41,7 +37,5 @@ namespace Bricklayer.Core.Common.Net.Messages
             om.WritePadBits();
             om.Write(Banner);
         }
-
-        #endregion
     }
 }

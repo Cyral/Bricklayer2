@@ -74,6 +74,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             txtChat.Width = (int) (Manager.TargetWidth*.4f) - 16; // Remove 16 to align due to invisible scrollbar
             txtChat.Visible = false;
             txtChat.Passive = true;
+            txtChat.MaxLength = ChatMessage.MaxChatLength;
             Window.Add(txtChat);
 
             lstChats = new ControlList<ChatDataControl>(Manager)

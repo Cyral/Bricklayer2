@@ -6,14 +6,13 @@ using Microsoft.Xna.Framework;
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Sent to the server to join a level.
-    /// Client => Server
-    /// String: Level's UUID
+    /// Notify receiver of a block placed.
+    /// Point: Point
+    /// Bool: Foreground
+    /// UShort: Type
     /// </summary>
     public class BlockPlaceMessage : IMessage
     {
-        private BlockType type;
-
         /// <summary>
         /// Block coordinate.
         /// </summary>
@@ -59,26 +58,22 @@ namespace Bricklayer.Core.Common.Net.Messages
             Layer = layer;
         }
 
-        #region IMessage Members
-
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.BlockPlace;
 
         public void Decode(NetIncomingMessage im)
         {
             Point = new Point(im.ReadUInt16(), im.ReadUInt16());
-            Layer = (Layer)im.ReadByte();
+            Layer = im.ReadBoolean() ? Layer.Foreground : Layer.Background;
             Type = BlockType.FromID(im.ReadUInt16());
         }
 
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write((ushort)Point.X);
-            om.Write((ushort)Point.Y);
-            om.Write((byte)Layer);
+            om.Write((ushort) Point.X);
+            om.Write((ushort) Point.Y);
+            om.Write(Layer == Layer.Foreground);
             om.Write(Type.ID);
         }
-
-        #endregion
     }
 }

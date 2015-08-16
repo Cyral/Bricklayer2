@@ -4,20 +4,19 @@ using Lidgren.Network;
 namespace Bricklayer.Core.Common.Net.Messages
 {
     /// <summary>
-    /// Message sent from server broadcasting about a player joining.
-    /// Server => Client
+    /// Message sent from server broadcasting about a player leaving.
     /// </summary>
-    public class PlayerJoinMessage : IMessage
+    public class PlayerLeaveMessage : IMessage
     {
-        public Player Player { get; private set; }
+        public Player Player { get; set; }
 
-        public PlayerJoinMessage(NetIncomingMessage im, MessageContext context)
+        public PlayerLeaveMessage(NetIncomingMessage im, MessageContext context)
         {
             Context = context;
             Decode(im);
         }
 
-        public PlayerJoinMessage(Player player)
+        public PlayerLeaveMessage(Player player)
         {
             Player = player;
         }

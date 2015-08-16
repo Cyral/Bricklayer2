@@ -5,6 +5,13 @@ using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
+    /// <summary>
+    /// Send ping times to all users in a room.
+    /// Server => Client.
+    /// For each user:
+    ///   Byte(16): GUID
+    ///   UShort: Ping Time (ms)
+    /// </summary>
     public class PingUpdateMessage : IMessage
     {
         public Dictionary<Guid, int> Pings { get; private set; }
@@ -14,7 +21,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             Pings = new Dictionary<Guid, int>();
             foreach (var player in level.Players)
             {
-                Pings.Add(player.UUID, (int) player.Connection.AverageRoundtripTime*1000);
+                Pings.Add(player.UUID, (int)(player.Connection.AverageRoundtripTime*1000));
             }
         }
 
@@ -25,9 +32,6 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-
-        #region IMessage Members
-
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.PingUpdate;
 
@@ -36,24 +40,17 @@ namespace Bricklayer.Core.Common.Net.Messages
             var count = im.ReadInt32();
 
             for (var i = 0; i < count; i++)
-            {
-                var guid = Guid.Parse(im.ReadString());
-                var ping = im.ReadInt32();
-
-                Pings.Add(guid, ping);
-            }
+                Pings.Add(im.ReadGuid(), im.ReadUInt16());
         }
 
         public void Encode(NetOutgoingMessage om)
         {
             om.Write(Pings.Count);
-            foreach (var i in Pings)
+            foreach (var ping in Pings)
             {
-                om.Write(i.Key.ToString("N"));
-                om.Write(i.Value);
+                om.Write(ping.Key);
+                om.Write((ushort)ping.Value);
             }
         }
-
-        #endregion
     }
 }

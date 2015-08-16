@@ -7,14 +7,14 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// Contains the public key and the username that goes with it. 
     /// Client => Game Server => Auth Server
     /// String: Username
-    /// String: UUID
+    /// Byte(16): UUID
     /// String: Public Key
     /// </summary>
     public class PublicKeyMessage : IMessage
     {
-        public string Username { get; set; }
-        public string UUID { get; set; }
-        public string PublicKey { get; set; }
+        public string Username { get; private set; }
+        public Guid UUID { get; private set; }
+        public byte[] PublicKey { get; private set; }
 
         public PublicKeyMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -22,14 +22,12 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public PublicKeyMessage(string username, Guid uuid, string publicKey)
+        public PublicKeyMessage(string username, Guid uuid, byte[] publicKey)
         {
-            UUID = uuid.ToString("N");
+            UUID = uuid;
             Username = username;
             PublicKey = publicKey;
         }
-
-        #region IMessage Members
 
         public MessageContext Context { get; set; }
         public MessageTypes MessageType => MessageTypes.PublicKey;
@@ -37,17 +35,17 @@ namespace Bricklayer.Core.Common.Net.Messages
         public void Decode(NetIncomingMessage im)
         {
             Username = im.ReadString();
-            UUID = im.ReadString();
-            PublicKey = im.ReadString();
+            UUID = im.ReadGuid();
+            var length = im.ReadUInt16();
+            PublicKey = im.ReadBytes(length);
         }
 
         public void Encode(NetOutgoingMessage om)
         {
             om.Write(Username);
             om.Write(UUID);
+            om.Write((ushort)PublicKey.Length);
             om.Write(PublicKey);
         }
-
-        #endregion
     }
 }

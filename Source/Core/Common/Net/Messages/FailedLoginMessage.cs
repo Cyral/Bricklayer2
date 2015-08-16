@@ -11,20 +11,13 @@ namespace Bricklayer.Core.Common.Net.Messages
         /// <summary>
         /// Reason for failed login.
         /// </summary>
-        public string ErrorMessage { get; set; }
+        public string ErrorMessage { get; private set; }
 
         public FailedLoginMessage(NetIncomingMessage im, MessageContext context)
         {
             Context = context;
             Decode(im);
         }
-
-        public FailedLoginMessage(string errorMessage)
-        {
-            ErrorMessage = errorMessage;
-        }
-
-        #region IMessage Members
 
         public MessageContext Context { get; set; }
 
@@ -39,7 +32,5 @@ namespace Bricklayer.Core.Common.Net.Messages
         {
             om.Write(ErrorMessage);
         }
-
-        #endregion
     }
 }
