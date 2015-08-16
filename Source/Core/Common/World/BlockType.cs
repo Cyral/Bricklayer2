@@ -54,7 +54,7 @@ namespace Bricklayer.Core.Common.World
         /// <remarks>
         /// Note: Using an Action instead of a method call or inlined code has no effect on performance :)
         /// </remarks>
-        public Action<SpriteBatch, Tile, int, int> Draw { get; set; }
+        public Action<SpriteBatch, Tile, int, int, Layer> Draw { get; set; }
 
         /// <summary>
         /// Indicates whether or not this block has a texture and should be rendered.
@@ -73,7 +73,12 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// Source rectangle for the face of a tile. (Not the 2.5d part)
         /// </summary>
-        public static Rectangle SourceRect { get; private set; } = new Rectangle(0, 4, Tile.Width, Tile.Height);
+        public static Rectangle SourceRect { get; } = new Rectangle(0, 4, Tile.Width, Tile.Height);
+
+        /// <summary>
+        /// Source rectangle for the tile, including all faces. (2.5d)
+        /// </summary>
+        public static Rectangle FullSourceRect { get; } = new Rectangle(0, 0, Tile.FullWidth, Tile.FullHeight);
 
         static BlockType()
         {
@@ -104,7 +109,19 @@ namespace Bricklayer.Core.Common.World
             ID = (ushort) Blocks.Count();
             IsRenderable = true;
 
-            Draw = (batch, tile, x, y) => { batch.Draw(Texture, new Vector2(x*Tile.Width, y*Tile.Height)); };
+            Draw = (batch, tile, x, y, z) =>
+            {
+                if (z == Layer.Background)
+                {
+                    // If a foreground block is being drawn on the backgrount, make it darker automatically.
+                    if (tile.Type.Layer.HasFlag(Layer.Foreground))
+                        batch.Draw(Texture, new Vector2((x*Tile.Width) + (Tile.FullWidth - Tile.Width), y*Tile.Height), SourceRect, Color.Gray);
+                    else
+                        batch.Draw(Texture, new Vector2((x*Tile.Width) + (Tile.FullHeight - Tile.Height), y*Tile.Height), sourceRectangle: SourceRect);
+                }
+                else
+                    batch.Draw(Texture, new Vector2(x*Tile.Width, y*Tile.Height));
+            };
 
             Blocks.Add(this);
         }

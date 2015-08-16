@@ -92,7 +92,20 @@ namespace Bricklayer.Core.Client.World
         /// </summary>
         private void DrawTiles(SpriteBatch batch)
         {
-            // Draw Foreground Blocks
+            // Draw background blocks.
+            for (var x = (int)Camera.Left / Tile.Width; x <= (int)Camera.Right / Tile.Width; x++)
+            {
+                for (var y = ((int)Camera.Bottom / Tile.Height); y >= (int)Camera.Top / Tile.Height; y--)
+                {
+                    //TODO: Don't draw backgrounds that are covered by a foreground block. (Alpha value of texture must be found)
+                    if (!InDrawBounds(x, y)) continue;
+                    var tile = Tiles[x, y, 0];
+                    if (tile.Type.IsRenderable)
+                        tile.Type.Draw(batch, tile, x, y, Layer.Background);
+                }
+            }
+
+            // Draw foreground blocks.
             for (var x = (int) Camera.Left/Tile.Width; x <= (int) Camera.Right/Tile.Width; x++)
             {
                 for (var y = ((int) Camera.Bottom/Tile.Height); y >= (int) Camera.Top/Tile.Height; y--)
@@ -100,9 +113,7 @@ namespace Bricklayer.Core.Client.World
                     if (!InDrawBounds(x, y)) continue;
                     var tile = Tiles[x, y, 1];
                     if (tile.Type.IsRenderable)
-                    {
-                        tile.Type.Draw(batch, tile, x, y);
-                    }
+                        tile.Type.Draw(batch, tile, x, y, Layer.Foreground);
                 }
             }
         }

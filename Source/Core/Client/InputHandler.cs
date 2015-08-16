@@ -23,7 +23,7 @@ namespace Bricklayer.Core.Client
         public Point MousePosition => CurrentMouseState.GetPositionPoint();
 
         /// <summary>
-        /// Returns the position of the mouse, in world/grid coordinates.
+        /// Returns the position of the mouse, in (foreground) world/grid coordinates.
         /// </summary>
         public Point MouseGridPosition
         {
@@ -31,9 +31,8 @@ namespace Bricklayer.Core.Client
             {
                 var pos = CurrentMouseState.GetPositionPoint();
                 return new Point((int) Math.Floor(pos.X/(float) Tile.Width),
-                    (int)
-                        Math.Floor((pos.Y - (Tile.FullHeight - Tile.Height) /* Account for 4px top side */ )/
-                                   (float) Tile.Height));
+                    (int) Math.Floor((pos.Y - (Tile.FullHeight - Tile.Height) /* Account for 4px top side */)/
+                                     (float) Tile.Height));
             }
         }
 
@@ -43,6 +42,22 @@ namespace Bricklayer.Core.Client
         internal InputHandler()
         {
             // Initialize
+        }
+
+        /// <summary>
+        /// Returns the position of the mouse in world/grid coordinates. This differs between each layer as the block perspective
+        /// causes the foreground and background layers to be slightly off.
+        /// </summary>
+        public Point GetMouseGridPositon(Layer layer)
+        {
+            var pos = CurrentMouseState.GetPositionPoint();
+            if (layer.HasFlag(Layer.Foreground))
+                return new Point((int) Math.Floor(pos.X/(float) Tile.Width),
+                    (int) Math.Floor((pos.Y - (Tile.FullHeight - Tile.Height))/
+                                     (float) Tile.Height));
+            return new Point((int) Math.Floor((pos.X - (Tile.FullWidth - Tile.Width)) / (float)Tile.Width),
+                (int) Math.Floor(pos.Y/
+                                 (float) Tile.Height));
         }
 
         /// <summary>

@@ -36,15 +36,17 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private BlockType draggingBlock;
         private bool isDragging;
         private float realWidth, realHeight;
+        private int lastBlock;
 
         public InventoryControl(GameScreen screen, Manager manager) : base(manager)
         {
             this.screen = screen;
-            // Block images.
+
             blockControls = new InventoryBlockControl[inventorySlots];
             packBlockControls = new InventoryBlockControl[BlockType.Blocks.Count];
             var packLabels = new Label[BlockPack.Packs.Count];
-
+            
+            // Find width of normal inventory size, and set an expanded target size.
             normalWidth = ((inventorySlots + 1)*(Tile.Width + 2)) + 8;
             extendedWidth = (int) (normalWidth*2.5f);
 
@@ -62,12 +64,13 @@ namespace Bricklayer.Core.Client.Interface.Controls
             gradient.Height = Height;
             Add(gradient);
 
+            // Block image on the cursor when a block is dragged.
             cursorBlock = new InventoryBlockControl(Manager, null, screen) {Visible = false};
             cursorBlock.Init();
             cursorBlock.Passive = true;
             Manager.Add(cursorBlock);
 
-            // Create images.
+            // Create main blocks.
             for (var i = 0; i < Math.Min(blockControls.Length, BlockType.Blocks.Count); i++)
             {
                 // Block icon image.
@@ -178,10 +181,21 @@ namespace Bricklayer.Core.Client.Interface.Controls
         /// <param name="block"></param>
         private void SelectBlock(BlockType block)
         {
+            // Set all occurences of the block to selected status.
             foreach (var ctrl in blockControls)
                 ctrl.IsSelected = ctrl.Block == block;
             foreach (var ctrl in packBlockControls)
                 ctrl.IsSelected = ctrl.Block == block;
+
+            // Record the last block set, so pressing shift can quickly switch.
+            for (var i = 1; i < blockControls.Length; i++)
+            {
+                if (blockControls[i].Block.ID == block.ID)
+                {
+                    lastBlock = i;
+                    break;
+                }
+            }
             screen.SelectedBlock = block;
         }
 
@@ -211,12 +225,14 @@ namespace Bricklayer.Core.Client.Interface.Controls
             // Handle dragging of blocks.
             if (isDragging)
             {
+                // Update block position to match cursor.
                 cursorBlock.Left = screen.Client.Input.MousePosition.X - Tile.Width/2;
                 cursorBlock.Top = screen.Client.Input.MousePosition.Y - Tile.Height/2;
             }
             var rect = new Rectangle(screen.Client.Input.MousePosition.X, screen.Client.Input.MousePosition.Y, 1, 1);
             if (isDragging)
             {
+                // If clicked on a main block, replace it, else, stop dragging.
                 if (screen.Client.Input.IsLeftUp())
                 {
                     foreach (var ctrl in blockControls.Where(ctrl => ctrl.AbsoluteRect.Intersects(rect)))
@@ -240,11 +256,14 @@ namespace Bricklayer.Core.Client.Interface.Controls
             }
 
             // Change selected block.
+            // 0-9 controls selected block, holding shift selects the first (empty) block.
             var key = screen.Client.Input.GetDigitPressed();
             if (key >= 0)
                 SelectBlock(key == 0 ? 10 : key);
             else if (screen.Client.Input.IsKeyPressed(Keys.LeftShift))
                 SelectBlock(0);
+            else if (screen.Client.Input.WasKeyPressed(Keys.LeftShift))
+                SelectBlock(lastBlock);
         }
 
         /// <summary>

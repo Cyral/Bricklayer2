@@ -30,7 +30,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         }
 
         protected internal override GameState State => GameState.Game;
-        internal Level Level => Client.Level;
+        private Level Level => Client.Level;
         private Label lblStats;
         private ControlList<ChatDataControl> lstChats;
         private ControlList<PlayerListDataControl> lstPlayers;
@@ -150,17 +150,25 @@ namespace Bricklayer.Core.Client.Interface.Screens
             base.Update(gameTime);
         }
 
+        /// <summary>
+        /// Handle input related to the game screen.
+        /// </summary>
         private void HandleInput()
         {
             // Mouse Input.
             if (Client.Input.IsLeftDown() && Level != null)
             {
-                var pos = Client.Input.MouseGridPosition;
+                var layer = Client.Input.IsKeyDown(Keys.LeftAlt) && SelectedBlock.Layer.HasFlag(Layer.Background)
+                    ? Layer.Background
+                    : SelectedBlock.Layer;
+                var pos = Client.Input.GetMouseGridPositon(layer);
                 if (!Window.IsMouseOverUI())
                 {
                     // Place block.
-                    if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y] != SelectedBlock)
-                        Level.Tiles[pos.X, pos.Y] = SelectedBlock;
+                    if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y, layer] != SelectedBlock)
+                    {
+                         Level.Tiles[pos.X, pos.Y, layer] = SelectedBlock;
+                    }
                 }
             }
 
