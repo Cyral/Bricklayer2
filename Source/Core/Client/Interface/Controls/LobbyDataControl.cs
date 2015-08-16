@@ -40,7 +40,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                     Top = 4,
                     Width = 16,
                     Height = 16,
-                    Left = ClientWidth - (((4 - i) * 18) + 48)
+                    Left = ClientWidth - (((4 - i)*18) + 48)
                 };
                 imgRating[i].Init();
                 var half = data.Rating > i + .25 && data.Rating < i + .75;

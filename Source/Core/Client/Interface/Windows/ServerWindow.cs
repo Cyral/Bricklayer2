@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
@@ -12,18 +13,31 @@ namespace Bricklayer.Core.Client.Interface.Windows
     /// </summary>
     internal sealed class ServerWindow : Dialog
     {
-        private readonly Button btnAdd;
-        private readonly Button btnEdit;
-        private readonly Button btnJoin;
-        private readonly Button btnRefresh;
-        private readonly Button btnRemove;
-        private readonly ControlList<ServerDataControl> lstServers; // The listbox of server control items
-        private List<ServerData> servers; // The list of loaded servers
+        public Button BtnAdd { get; }
+        public Button BtnEdit { get; }
+
+        /// <summary>
+        /// Button to connect to the selected server.
+        /// </summary>
+        public Button BtnJoin { get; }
+
+        /// <summary>
+        /// Button to refresh and ping all servers again.
+        /// </summary>
+        public Button BtnRefresh { get; }
+
+        public Button BtnRemove { get; }
+
+        /// <summary>
+        /// The listbox of server control items
+        /// </summary>
+        public ControlList<ServerDataControl> LstServers { get; }
+
         private readonly ServerScreen screen;
+        private List<ServerData> servers; // The list of loaded servers
 
         public ServerWindow(Manager manager, ServerScreen screen) : base(manager)
         {
-
             this.screen = screen;
             // Setup the window
             CaptionVisible = false;
@@ -36,107 +50,108 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Center();
 
             // Create main server list
-            lstServers = new ControlList<ServerDataControl>(manager)
+            LstServers = new ControlList<ServerDataControl>(manager)
             {
                 Left = 8,
                 Top = 8,
                 Width = ClientWidth - 16,
-                Height = ClientHeight - BottomPanel.Height - 16,
+                Height = ClientHeight - BottomPanel.Height - 16
             };
-            lstServers.Init();
-            Add(lstServers);
+            LstServers.Init();
+            Add(LstServers);
             RefreshServerList();
-            lstServers.DoubleClick += (sender, args) =>
+            LstServers.DoubleClick += (sender, args) =>
             {
-                if (lstServers.ItemIndex < 0)
+                if (LstServers.ItemIndex < 0)
                     return;
 
-                var sdc = (ServerDataControl)lstServers.Items[lstServers.ItemIndex];
+                var sdc = (ServerDataControl) LstServers.Items[LstServers.ItemIndex];
                 // Make sure the user clicks the item and not the empty space in the list
-                if (sdc.CheckPositionMouse(((MouseEventArgs)args).Position - lstServers.AbsoluteRect.Location))
-                    this.screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
-                        servers[lstServers.ItemIndex].Port);
+                if (sdc.CheckPositionMouse(((MouseEventArgs) args).Position - LstServers.AbsoluteRect.Location))
+                    this.screen.Client.Network.SendSessionRequest(servers[LstServers.ItemIndex].Host,
+                        servers[LstServers.ItemIndex].Port);
             };
 
             // Add controls to the bottom panel. (Add server, edit server, etc.)
 
-            btnEdit = new Button(manager) {Text = "Edit", Top = 8, Width = 64};
-            btnEdit.Init();
-            btnEdit.Left = (Width / 2) - (btnEdit.Width / 2);
-            btnEdit.Click += (sender, args) =>
+            BtnEdit = new Button(manager) {Text = "Edit", Top = 8, Width = 64};
+            BtnEdit.Init();
+            BtnEdit.Left = (Width/2) - (BtnEdit.Width/2);
+            BtnEdit.Click += (sender, args) =>
             {
-                if (lstServers.Items.Count <= 0)
+                if (LstServers.Items.Count <= 0)
                     return;
 
-                var window = new AddServerDialog(Manager, this, lstServers.ItemIndex, true,
-                    servers[lstServers.ItemIndex].Name, servers[lstServers.ItemIndex].Host, servers[lstServers.ItemIndex].Port);
+                var window = new AddServerDialog(Manager, this, LstServers.ItemIndex, true,
+                    servers[LstServers.ItemIndex].Name, servers[LstServers.ItemIndex].Host,
+                    servers[LstServers.ItemIndex].Port);
                 window.Init();
                 Manager.Add(window);
                 window.ShowModal();
             };
-            BottomPanel.Add(btnEdit);
+            BottomPanel.Add(BtnEdit);
 
-            btnRemove = new Button(manager) { Text = "Remove", Left = btnEdit.Right + 8, Top = 8, Width = 64 };
-            btnRemove.Init();
-            btnRemove.Click += (clickSender, clickArgs) =>
+            BtnRemove = new Button(manager) {Text = "Remove", Left = BtnEdit.Right + 8, Top = 8, Width = 64};
+            BtnRemove.Init();
+            BtnRemove.Click += (clickSender, clickArgs) =>
             {
                 // Show a messagebox that asks for confirmation to delete the selected server.
-                if (lstServers.Items.Count > 0)
+                if (LstServers.Items.Count > 0)
                 {
                     var confirm = new MessageBox(manager, MessageBoxType.YesNo,
                         "Are you sure you would like to remove\nthis server from your server list?",
                         "Confirm Removal");
                     confirm.Init();
                     // When the message box is closed, check if the user clicked yes, if so, removed the server from the list.
-                    confirm.Closed += (closedSender, closedArgs) =>
+                    confirm.Closed += async (closedSender, closedArgs) =>
                     {
                         var dialog = closedSender as Dialog;
                         if (dialog?.ModalResult != ModalResult.Yes)
                             return;
                         // If user clicked Yes
-                        servers.RemoveAt(lstServers.ItemIndex);
-                        lstServers.Items.RemoveAt(lstServers.ItemIndex);
-                        screen.Client.IO.WriteServers(servers); // Write the new server list to disk.
+                        servers.RemoveAt(LstServers.ItemIndex);
+                        LstServers.Items.RemoveAt(LstServers.ItemIndex);
+                        await screen.Client.IO.WriteServers(servers); // Write the new server list to disk.
                     };
                     Manager.Add(confirm);
                     confirm.Show();
                 }
             };
-            BottomPanel.Add(btnRemove);
+            BottomPanel.Add(BtnRemove);
 
-            btnAdd = new Button(manager) { Text = "Add", Top = 8, Width = 64 };
-            btnAdd.Init();
-            btnAdd.Right = btnEdit.Left - 8;
-            btnAdd.Click += (sender, args) =>
+            BtnAdd = new Button(manager) {Text = "Add", Top = 8, Width = 64};
+            BtnAdd.Init();
+            BtnAdd.Right = BtnEdit.Left - 8;
+            BtnAdd.Click += (sender, args) =>
             {
                 // Show add server dialog
-                var window = new AddServerDialog(Manager, this, lstServers.ItemIndex, false, string.Empty,
+                var window = new AddServerDialog(Manager, this, LstServers.ItemIndex, false, string.Empty,
                     string.Empty, Globals.Values.DefaultServerPort);
                 window.Init();
                 Manager.Add(window);
                 window.ShowModal();
             };
-            BottomPanel.Add(btnAdd);
+            BottomPanel.Add(BtnAdd);
 
-            btnJoin = new Button(manager) { Text = "Connect", Top = 8, Width = 100 };
-            btnJoin.Init();
-            btnJoin.Right = btnAdd.Left - 8;
-            btnJoin.Click += (sender, args) =>
+            BtnJoin = new Button(manager) {Text = "Connect", Top = 8, Width = 100};
+            BtnJoin.Init();
+            BtnJoin.Right = BtnAdd.Left - 8;
+            BtnJoin.Click += (sender, args) =>
             {
-                if (lstServers.ItemIndex < 0)
+                if (LstServers.ItemIndex < 0)
                     return;
 
-                btnJoin.Enabled = false;
-                btnJoin.Text = "Connecting...";
-                this.screen.Client.Network.SendSessionRequest(servers[lstServers.ItemIndex].Host,
-                    servers[lstServers.ItemIndex].Port);
+                BtnJoin.Enabled = false;
+                BtnJoin.Text = "Connecting...";
+                this.screen.Client.Network.SendSessionRequest(servers[LstServers.ItemIndex].Host,
+                    servers[LstServers.ItemIndex].Port);
             };
-            BottomPanel.Add(btnJoin);
+            BottomPanel.Add(BtnJoin);
 
-            btnRefresh = new Button(manager) { Text = "Refresh", Left = btnRemove.Right + 8, Top = 8, Width = 64 };
-            btnRefresh.Init();
-            btnRefresh.Click += (sender, args) => { RefreshServerList(); };
-            BottomPanel.Add(btnRefresh);
+            BtnRefresh = new Button(manager) {Text = "Refresh", Left = BtnRemove.Right + 8, Top = 8, Width = 64};
+            BtnRefresh.Init();
+            BtnRefresh.Click += (sender, args) => { RefreshServerList(); };
+            BottomPanel.Add(BtnRefresh);
 
             // Listen for when init message is recieved
             screen.Client.Events.Network.Game.InitReceived.AddHandler(OnInit);
@@ -153,8 +168,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         private void OnDisconnect(EventManager.NetEvents.GameServerEvents.DisconnectEventArgs args)
         {
-            btnJoin.Enabled = true;
-            btnJoin.Text = "Connect";
+            BtnJoin.Enabled = true;
+            BtnJoin.Text = "Connect";
             var msgBox = new MessageBox(Manager, MessageBoxType.Warning, args.Reason, "Error Connecting to Server");
             msgBox.Init();
             screen.ScreenManager.Manager.Add(msgBox);
@@ -168,36 +183,36 @@ namespace Bricklayer.Core.Client.Interface.Windows
             base.Dispose(disposing);
         }
 
-        public void AddServer(ServerData server)
+        public async void AddServer(ServerData server)
         {
             servers.Add(server);
-            screen.Client.IO.WriteServers(servers);
+            await screen.Client.IO.WriteServers(servers);
             RefreshServerList();
         }
 
-        public void EditServer(int index, ServerData server)
+        public async void EditServer(int index, ServerData server)
         {
             servers[index] = server;
-            screen.Client.IO.WriteServers(servers);
+            await screen.Client.IO.WriteServers(servers);
             RefreshServerList();
         }
 
         private async void RefreshServerList()
         {
-            lstServers.Items.Clear();
+            LstServers.Items.Clear();
             // Read the servers from config
             servers = await screen.Client.IO.ReadServers();
             // Populate the list 
-            foreach (var server in servers)
+            foreach (var control in servers.Select(server => new ServerDataControl(screen, Manager, server, LstServers))
+                )
             {
-                var control = new ServerDataControl(screen, Manager, server, lstServers);
-                lstServers.Items.Add(control);
+                LstServers.Items.Add(control);
                 control.Init();
                 control.PingServer();
             }
 
-            if (lstServers.Items.Count > 0)
-                lstServers.ItemIndex = 0;
+            if (LstServers.Items.Count > 0)
+                LstServers.ItemIndex = 0;
         }
     }
 }

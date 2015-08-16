@@ -25,27 +25,51 @@ namespace Bricklayer.Core.Client.Interface.Controls
         /// </summary>
         public bool IsOpen { get; internal set; }
 
-        private readonly InventoryBlockControl[] blockControls;
-        private readonly InventoryBlockControl cursorBlock;
+        /// <summary>
+        /// Block controls for the main bar.
+        /// </summary>
+        public InventoryBlockControl[] BlockControls { get; }
+
+        /// <summary>
+        /// Block control that follows the cursor when a block is being dragged.
+        /// </summary>
+        public InventoryBlockControl CursorBlock { get; }
+
+        /// <summary>
+        /// Block controls for the extended inventory area.
+        /// </summary>
+        public InventoryBlockControl[] ExtendedBlockControls { get; }
+
+        /// <summary>
+        /// Tab control inside the inventory to select the category.
+        /// </summary>
+        public TabControl TabControl { get; }
+
+        /// <summary>
+        /// The block type being dragged.
+        /// </summary>
+        public BlockType DraggingBlock { get; private set; }
+
+        /// <summary>
+        /// Indicates if the user is dragging an extended block control to the main bar.
+        /// </summary>
+        public bool IsDragging { get; private set; }
+
         private readonly StatusBar gradient;
         private readonly int normalHeight = Tile.Height + 7;
         private readonly int normalWidth, extendedWidth, extendedHeight;
-        private readonly InventoryBlockControl[] packBlockControls;
         private readonly GameScreen screen;
-        private readonly TabControl tabControl;
-        private BlockType draggingBlock;
-        private bool isDragging;
-        private float realWidth, realHeight;
         private int lastBlock;
+        private float realWidth, realHeight;
 
         public InventoryControl(GameScreen screen, Manager manager) : base(manager)
         {
             this.screen = screen;
 
-            blockControls = new InventoryBlockControl[inventorySlots];
-            packBlockControls = new InventoryBlockControl[BlockType.Blocks.Count];
+            BlockControls = new InventoryBlockControl[inventorySlots];
+            ExtendedBlockControls = new InventoryBlockControl[BlockType.Blocks.Count];
             var packLabels = new Label[BlockPack.Packs.Count];
-            
+
             // Find width of normal inventory size, and set an expanded target size.
             normalWidth = ((inventorySlots + 1)*(Tile.Width + 2)) + 8;
             extendedWidth = (int) (normalWidth*2.5f);
@@ -65,50 +89,48 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Add(gradient);
 
             // Block image on the cursor when a block is dragged.
-            cursorBlock = new InventoryBlockControl(Manager, null, screen) {Visible = false};
-            cursorBlock.Init();
-            cursorBlock.Passive = true;
-            Manager.Add(cursorBlock);
+            CursorBlock = new InventoryBlockControl(Manager, null, screen) {Visible = false};
+            CursorBlock.Init();
+            CursorBlock.Passive = true;
+            Manager.Add(CursorBlock);
 
             // Create main blocks.
-            for (var i = 0; i < Math.Min(blockControls.Length, BlockType.Blocks.Count); i++)
+            for (var i = 0; i < Math.Min(BlockControls.Length, BlockType.Blocks.Count); i++)
             {
                 // Block icon image.
-                blockControls[i] = new InventoryBlockControl(Manager, BlockType.Blocks[i], screen)
+                BlockControls[i] = new InventoryBlockControl(Manager, BlockType.Blocks[i], screen)
                 {
                     Top = 3,
                     Left = 11 + (Width/2) - (((inventorySlots + 1)*(Tile.Width + 4))/2) + ((Tile.Width + 4)*i)
                     // Center.
                 };
-                blockControls[i].Click += (sender, args) => SelectBlock(((InventoryBlockControl) sender).Block);
+                BlockControls[i].Click += (sender, args) => SelectBlock(((InventoryBlockControl) sender).Block);
 
-                blockControls[i].Init();
-                Add(blockControls[i]);
+                BlockControls[i].Init();
+                Add(BlockControls[i]);
             }
 
-            tabControl = new TabControl(Manager)
+            TabControl = new TabControl(Manager)
             {
                 Left = 8,
                 Top = 3 + Tile.FullHeight + 3
             };
-            tabControl.Init();
+            TabControl.Init();
             // For each type of block pack (blocks, interactive, etc.), add a tab.
             foreach (var category in PackCategory.Categories)
-                tabControl.AddPage(category.Name);
-            Add(tabControl);
-            tabControl.BringToFront();
+                TabControl.AddPage(category.Name);
+            Add(TabControl);
+            TabControl.BringToFront();
 
             // For each block pack, add it to the appropriate tab.
             // Keep spacing in mind and go to a new line when space runs out.
-            var y = 0;
             int packIndex = 0, blockIndex = 0;
-            int maxY = 0;
+            var maxY = 0;
             for (var catIndex = 0; catIndex < PackCategory.Categories.Count; catIndex++)
             {
-                var x = 8;
-                y = 8;
+                int x = 8, y = 8;
                 var category = PackCategory.Categories[catIndex];
-                var page = tabControl.TabPages[catIndex];
+                var page = TabControl.TabPages[catIndex];
                 foreach (var pack in category.Packs)
                 {
                     // Calculate width this block pack will use.
@@ -140,41 +162,42 @@ namespace Bricklayer.Core.Client.Interface.Controls
                     // For each block in this pack, add a block icon.
                     foreach (var block in pack.Blocks)
                     {
-                        packBlockControls[blockIndex] = new InventoryBlockControl(Manager, block, screen)
+                        ExtendedBlockControls[blockIndex] = new InventoryBlockControl(Manager, block, screen)
                         {
                             Top = y,
                             Left = x
                         };
-                        packBlockControls[blockIndex].Init();
-                        packBlockControls[blockIndex].MouseMove += (sender, args) =>
+                        ExtendedBlockControls[blockIndex].Init();
+                        ExtendedBlockControls[blockIndex].MouseMove += (sender, args) =>
                         {
                             if (args.Button == MouseButton.Left)
                             {
                                 DragBlock(((InventoryBlockControl) sender).Block);
                             }
                         };
-                        packBlockControls[blockIndex].Click +=
+                        ExtendedBlockControls[blockIndex].Click +=
                             (sender, args) => SelectBlock(((InventoryBlockControl) sender).Block);
-                        page.Add(packBlockControls[blockIndex]);
-                        x += packBlockControls[blockIndex].Width + 2;
+                        page.Add(ExtendedBlockControls[blockIndex]);
+                        x += ExtendedBlockControls[blockIndex].Width + 2;
                         blockIndex++;
                     }
                     x += 8;
                     packIndex++;
                 }
-                maxY = Math.Max(maxY, y); // Record the highest Y value for each category, so the extended height can be set.
+                maxY = Math.Max(maxY, y);
+                // Record the highest Y value for each category, so the extended height can be set.
             }
-            extendedHeight = tabControl.Top + maxY + 40 + Tile.Height;
+            extendedHeight = TabControl.Top + maxY + 40 + Tile.Height;
             SelectBlock(0);
         }
 
         private void DragBlock(BlockType block)
         {
-            isDragging = true;
-            draggingBlock = block;
-            cursorBlock.Block = block;
-            cursorBlock.Visible = true;
-            cursorBlock.Passive = true;
+            IsDragging = true;
+            DraggingBlock = block;
+            CursorBlock.Block = block;
+            CursorBlock.Visible = true;
+            CursorBlock.Passive = true;
         }
 
         /// <summary>
@@ -184,15 +207,15 @@ namespace Bricklayer.Core.Client.Interface.Controls
         private void SelectBlock(BlockType block)
         {
             // Set all occurences of the block to selected status.
-            foreach (var ctrl in blockControls)
+            foreach (var ctrl in BlockControls)
                 ctrl.IsSelected = ctrl.Block == block;
-            foreach (var ctrl in packBlockControls)
+            foreach (var ctrl in ExtendedBlockControls)
                 ctrl.IsSelected = ctrl.Block == block;
 
             // Record the last block set, so pressing shift can quickly switch.
-            for (var i = 1; i < blockControls.Length; i++)
+            for (var i = 1; i < BlockControls.Length; i++)
             {
-                if (blockControls[i].Block.ID == block.ID)
+                if (BlockControls[i].Block.ID == block.ID)
                 {
                     lastBlock = i;
                     break;
@@ -206,7 +229,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         /// </summary>
         private void SelectBlock(int index)
         {
-            SelectBlock(blockControls[index].Block);
+            SelectBlock(BlockControls[index].Block);
         }
 
         protected override void Update(GameTime gameTime)
@@ -225,25 +248,25 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 return;
 
             // Handle dragging of blocks.
-            if (isDragging)
+            if (IsDragging)
             {
                 // Update block position to match cursor.
-                cursorBlock.Left = screen.Client.Input.MousePosition.X - Tile.Width/2;
-                cursorBlock.Top = screen.Client.Input.MousePosition.Y - Tile.Height/2;
+                CursorBlock.Left = screen.Client.Input.MousePosition.X - Tile.Width/2;
+                CursorBlock.Top = screen.Client.Input.MousePosition.Y - Tile.Height/2;
             }
             var rect = new Rectangle(screen.Client.Input.MousePosition.X, screen.Client.Input.MousePosition.Y, 1, 1);
-            if (isDragging)
+            if (IsDragging)
             {
                 // If clicked on a main block, replace it, else, stop dragging.
                 if (screen.Client.Input.IsLeftUp())
                 {
-                    foreach (var ctrl in blockControls.Where(ctrl => ctrl.AbsoluteRect.Intersects(rect)))
+                    foreach (var ctrl in BlockControls.Where(ctrl => ctrl.AbsoluteRect.Intersects(rect)))
                     {
-                        ctrl.Block = draggingBlock;
-                        SelectBlock(draggingBlock);
+                        ctrl.Block = DraggingBlock;
+                        SelectBlock(DraggingBlock);
                     }
-                    isDragging = false;
-                    cursorBlock.Visible = false;
+                    IsDragging = false;
+                    CursorBlock.Visible = false;
                 }
             }
 
@@ -334,14 +357,14 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
             // Keep inventory box and controls in the center.
             Left = Manager.TargetWidth/2 - (Width/2);
-            for (var i = 0; i < blockControls.Length; i++)
+            for (var i = 0; i < BlockControls.Length; i++)
             {
-                blockControls[i].Left = 11 + (Width/2) - (((inventorySlots + 1)*(Tile.Width + 4))/2) +
+                BlockControls[i].Left = 11 + (Width/2) - (((inventorySlots + 1)*(Tile.Width + 4))/2) +
                                         ((Tile.Width + 4)*i);
             }
 
-            tabControl.Width = Width - 14;
-            tabControl.Height = Height - tabControl.Top - 6;
+            TabControl.Width = Width - 14;
+            TabControl.Height = Height - TabControl.Top - 6;
             gradient.Width = Width;
             gradient.Height = Height;
         }

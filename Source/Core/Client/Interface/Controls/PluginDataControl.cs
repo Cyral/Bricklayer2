@@ -1,5 +1,4 @@
-﻿using Bricklayer.Core.Client.Interface.Screens;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Controls
@@ -9,7 +8,20 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// </summary>
     public sealed class PluginDataControl : Control
     {
-        public ClientPlugin Data { get; private set; }
+        /// <summary>
+        /// ClientPlugin this item is for.
+        /// </summary>
+        public ClientPlugin Data { get; }
+
+        /// <summary>
+        /// Label to display enabled or disabled status.
+        /// </summary>
+        public Label LblStatus { get; }
+
+        public Label LblPackage { get; }
+        public Label LblDescription { get; }
+        public Label LblName { get; }
+        public ImageBox ImgIcon { get; }
 
         public PluginDataControl(Manager manager, Control parent, ClientPlugin data,
             bool enabled)
@@ -28,20 +40,21 @@ namespace Bricklayer.Core.Client.Interface.Controls
             gradient.Alpha = .8f;
             Add(gradient);
 
-            var lblStatus = new Label(Manager)
+            LblStatus = new Label(Manager)
             {
                 Width = 100,
                 Top = 4,
                 Alignment = Alignment.TopLeft
             };
-            lblStatus.Init();
-            lblStatus.Text = enabled ? "Enabled" : "Disabled";
-            lblStatus.TextColor = enabled ? Color.Lime : Color.Red;
-            lblStatus.Left = ClientWidth - 26 -
-                              (int)Manager.Skin.Fonts[lblStatus.Font.ToString()].Resource.MeasureString(lblStatus.Text).X;
-            Add(lblStatus);
+            LblStatus.Init();
+            LblStatus.Text = enabled ? "Enabled" : "Disabled";
+            LblStatus.TextColor = enabled ? Color.Lime : Color.Red;
+            LblStatus.Left = ClientWidth - 26 -
+                             (int)
+                                 Manager.Skin.Fonts[LblStatus.Font.ToString()].Resource.MeasureString(LblStatus.Text).X;
+            Add(LblStatus);
 
-            var lblName = new Label(Manager)
+            LblName = new Label(Manager)
             {
                 Width = ClientWidth,
                 Text = data.Name,
@@ -50,46 +63,46 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 Font = FontSize.Default12,
                 Alignment = Alignment.TopLeft
             };
-            lblName.Init();
-            Add(lblName);
-            lblName.Text = data.Name;
+            LblName.Init();
+            Add(LblName);
+            LblName.Text = data.Name;
 
-            var lblDescription = new Label(Manager)
+            LblDescription = new Label(Manager)
             {
                 Width = ClientWidth,
                 Left = 4,
-                Top = lblName.Bottom + 2,
+                Top = LblName.Bottom + 2,
                 Alignment = Alignment.TopLeft
             };
-            lblDescription.Init();
-            Add(lblDescription);
-            lblDescription.Text = data.Description;
+            LblDescription.Init();
+            Add(LblDescription);
+            LblDescription.Text = data.Description;
 
-            var lblPackage = new Label(Manager)
+            LblPackage = new Label(Manager)
             {
                 Width = ClientWidth,
                 Left = 4,
-                Top = lblDescription.Bottom,
+                Top = LblDescription.Bottom,
                 Alignment = Alignment.TopLeft,
                 TextColor = Color.Gray
             };
-            lblPackage.Init();
-            lblPackage.Text = "v" + Data.Version + " - " + Data.Identifier;
-            Add(lblPackage);
+            LblPackage.Init();
+            LblPackage.Text = "v" + Data.Version + " - " + Data.Identifier;
+            Add(LblPackage);
 
             if (data.Icon != null)
             {
-                var imgIcon = new ImageBox(Manager)
+                ImgIcon = new ImageBox(Manager)
                 {
                     Image = data.Icon
                 };
-                imgIcon.Top = (ClientHeight / 2) - (imgIcon.Height / 2) + 1;
-                imgIcon.Left = 64 - (imgIcon.Height) + 1;
-                imgIcon.Init();
-                Add(imgIcon);
-                lblName.Left = imgIcon.Width + 6;
-                lblDescription.Left = imgIcon.Width + 6;
-                lblPackage.Left = imgIcon.Width + 6;
+                ImgIcon.Top = (ClientHeight/2) - (ImgIcon.Height/2) + 1;
+                ImgIcon.Left = 64 - (ImgIcon.Height) + 1;
+                ImgIcon.Init();
+                Add(ImgIcon);
+                LblName.Left = ImgIcon.Width + 6;
+                LblDescription.Left = ImgIcon.Width + 6;
+                LblPackage.Left = ImgIcon.Width + 6;
             }
         }
 

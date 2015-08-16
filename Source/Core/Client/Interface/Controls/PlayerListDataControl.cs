@@ -9,9 +9,35 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// </summary>
     public class PlayerListDataControl : Control
     {
+        /// <summary>
+        /// The user the control is for.
+        /// </summary>
         public Player User { get; private set; }
-        private readonly Label lblName;
-        private readonly Label lblPing;
+
+        /// <summary>
+        /// The ping time, in milliseconds. Updated by the server regularly.
+        /// </summary>
+        public int Ping
+        {
+            get { return ping; }
+            internal set
+            {
+                ping = value;
+                if (LblPing != null)
+                {
+                    LblPing.TextColor = GetTextColor(ping);
+                    LblPing.Text = $"{ping} ms";
+                    LblPing.Left = Width -
+                                   (int)
+                                       Manager.Skin.Fonts[LblPing.Font.ToString()].Resource.MeasureString(LblPing.Text)
+                                           .X - 2;
+                }
+            }
+        }
+
+        public Label LblName { get; }
+        public Label LblPing { get; }
+        private int ping;
 
         public PlayerListDataControl(Player user, Manager manager, Control parent) : base(manager)
         {
@@ -19,29 +45,22 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Height = 16;
             Width = parent.Width - 24; // -24 due to scrollbar, TODO: remove scrollbar completely
 
-            lblName = new Label(manager)
+            LblName = new Label(manager)
             {
                 Text = user.Username,
                 Left = 2
             };
-            lblName.Init();
-            Add(lblName);
+            LblName.Init();
+            Add(LblName);
 
-            lblPing = new Label(manager);
-            lblPing.Init();
-            lblPing.Width = 100;
-            ChangePing(0);
-            Add(lblPing);
+            LblPing = new Label(manager);
+            LblPing.Init();
+            LblPing.Width = 100;
+            Ping = 0;
+            Add(LblPing);
         }
 
-        public void ChangePing(int ping)
-        {
-            lblPing.TextColor = GetTextColor(ping);
-            lblPing.Text = $"{ping} ms";
-            lblPing.Left = Width - (int)Manager.Skin.Fonts[lblPing.Font.ToString()].Resource.MeasureString(lblPing.Text).X - 2;
-        }
-
-        private Color GetTextColor(int ping)
+        private static Color GetTextColor(int ping)
         {
             var color = Color.Lime;
             if (ping > 500)

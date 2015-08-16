@@ -10,6 +10,9 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// </summary>
     public sealed class InventoryBlockControl : Control
     {
+        /// <summary>
+        /// Block type.
+        /// </summary>
         public BlockType Block
         {
             get { return block; }
@@ -17,18 +20,23 @@ namespace Bricklayer.Core.Client.Interface.Controls
             {
                 block = value;
                 if (Block.IsRenderable)
-                    ((BlockToolTip)ToolTip).SetBlock(Block);
+                    ((BlockToolTip) ToolTip).SetBlock(Block);
             }
         }
 
+        /// <summary>
+        /// If the block control has been selected. Either by the user clicking it, selecting it via a key, or a control of the
+        /// same block type being selected.
+        /// </summary>
         public bool IsSelected { get; internal set; }
+
         private readonly GameScreen screen;
         private BlockType block;
 
         public InventoryBlockControl(Manager manager, BlockType block, GameScreen screen) : base(manager)
         {
             this.screen = screen;
-            ToolTipType = typeof(BlockToolTip);
+            ToolTipType = typeof (BlockToolTip);
             if (block != null)
                 Block = block;
 

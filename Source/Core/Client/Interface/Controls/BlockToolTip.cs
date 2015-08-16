@@ -11,7 +11,12 @@ namespace Bricklayer.Core.Client.Interface.Controls
     public class BlockToolTip : ToolTip
     {
         private static readonly Color catColor = new Color(50, 50, 50);
+
+        /// <summary>
+        /// Type of block.
+        /// </summary>
         public BlockType Block { get; set; }
+
         // Visible property should be always overriden in this manner.
         // You can set width and height of the tooltip according to it's content.    
         public override bool Visible
@@ -32,7 +37,6 @@ namespace Bricklayer.Core.Client.Interface.Controls
         }
 
         private ImageBox imgIcon;
-        private Label lblCategory;
 
         public BlockToolTip(Manager manager) : base(manager)
         {

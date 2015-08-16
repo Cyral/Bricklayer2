@@ -16,7 +16,7 @@ namespace Bricklayer.Core.Client.Interface
         /// <summary>
         /// The main <c>ScreenManager</c> that handles control adding/removing.
         /// </summary>
-        public static ScreenManager ScreenManager { get; private set; }
+        public ScreenManager ScreenManager { get; }
 
         public MainWindow(Manager manager, Client client) : base(manager)
         {
@@ -38,10 +38,8 @@ namespace Bricklayer.Core.Client.Interface
             ScreenManager = new ScreenManager(this);
             ScreenManager.SwitchScreen(new LoginScreen());
 
-            Client.Events.Network.Auth.InitReceived.AddHandler(args =>
-            {
-                ScreenManager.SwitchScreen(new ServerScreen());
-            });
+            Client.Events.Network.Auth.InitReceived.AddHandler(
+                args => { ScreenManager.SwitchScreen(new ServerScreen()); });
         }
     }
 }

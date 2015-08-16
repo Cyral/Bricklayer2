@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
@@ -15,19 +16,48 @@ namespace Bricklayer.Core.Client.Interface.Windows
     /// </summary>
     public sealed class PluginManagerWindow : Dialog
     {
-        private readonly Button btnToggle, btnDelete;
-        private readonly ControlList<PluginDataControl> lstPlugins;
+        /// <summary>
+        /// Button to toggle enabled/disabled status.
+        /// </summary>
+        public Button BtnToggle { get; }
+
+        /// <summary>
+        /// Button to delete a plugin.
+        /// </summary>
+        public Button BtnDelete { get; }
+
+        /// <summary>
+        /// List of plugin controls displaying plugin info.
+        /// </summary>
+        public ControlList<PluginDataControl> LstPlugins { get; }
+
+        /// <summary>
+        /// Button to exit back to login screen.
+        /// </summary>
+        public Button BtnClose { get; }
+
+        /// <summary>
+        /// Button to open plugins folder.
+        /// </summary>
+        public Button BtnOpenFolder { get; }
+
+        /// <summary>
+        /// Button to go to plugin DB on website.
+        /// </summary>
+        public Button BtnGetPlugins { get; }
+
         private readonly PluginManagerScreen pluginScreen;
         private Dictionary<string, bool> pluginsStatus;
 
         public PluginManagerWindow(Manager manager, PluginManagerScreen screen) : base(manager)
         {
             pluginScreen = screen;
+
             // Setup the window.
             CaptionVisible = false;
             Movable = false;
             Resizable = false;
-            Width = (int) (Manager.ScreenWidth*.7);
+            Width = (int) (Manager.ScreenWidth*.75);
             Height = (int) (Manager.ScreenHeight*.9);
             Center();
 
@@ -35,35 +65,39 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Description.Text = "Many plugins come installed by default and are required for most servers.";
             TopPanel.Height -= 6;
 
-            pluginsStatus = screen.Client.IO.ReadPlugins();
+            pluginsStatus = screen.Client.IO.ReadPluginStatus();
 
             // List of installed plugins.
-            lstPlugins = new ControlList<PluginDataControl>(Manager)
+            LstPlugins = new ControlList<PluginDataControl>(Manager)
             {
                 Left = 8,
                 Top = TopPanel.Bottom + 8,
                 Width = ClientWidth - 16,
                 Height = BottomPanel.Top - TopPanel.Bottom - 16
             };
-            lstPlugins.Init();
-            Add(lstPlugins);
+            LstPlugins.Init();
+            Add(LstPlugins);
 
             // Toggle button.
-            btnToggle = new Button(Manager)
+            BtnToggle = new Button(Manager)
             {
                 Top = 8,
                 Left = 8,
                 Width = 128
             };
-            btnToggle.Init();
-            BottomPanel.Add(btnToggle);
+            BtnToggle.Init();
+            BottomPanel.Add(BtnToggle);
 
             // If user enables or disables a plugin.
-            btnToggle.Click += (sender, args) =>
+            BtnToggle.Click += (sender, args) =>
             {
-                pluginsStatus[((PluginDataControl) lstPlugins.Items[lstPlugins.ItemIndex]).Data.Name] =
-                    !pluginsStatus[((PluginDataControl) lstPlugins.Items[lstPlugins.ItemIndex]).Data.Name];
-                screen.Client.IO.WritePlugins(pluginsStatus);
+                var identifier =  ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data.Identifier;
+                pluginsStatus[identifier] =
+                    !pluginsStatus[identifier];
+                var plugin = screen.Client.Plugins.Plugins.FirstOrDefault(x => x.Identifier.Equals(identifier));
+                if (plugin != null)
+                    plugin.IsEnabled = pluginsStatus[identifier];
+                screen.Client.IO.WritePluginStatus(pluginsStatus);
                 RefreshList();
                 var msgBox = new MessageBox(Manager, MessageBoxType.Warning,
                     "Bricklayer must be restarted for changes to take affect.", "Note");
@@ -73,22 +107,23 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
 
             // Delete button.
-            btnDelete = new Button(Manager)
+            BtnDelete = new Button(Manager)
             {
                 Top = 8,
-                Left = btnToggle.Right + 8,
+                Left = BtnToggle.Right + 8,
                 Text = "Delete Plugin",
                 Width = 128
             };
-            btnDelete.Init();
-            BottomPanel.Add(btnDelete);
+            BtnDelete.Init();
+            BottomPanel.Add(BtnDelete);
 
             // If user wants to delete a plugin.
-            btnDelete.Click += (sender, args) =>
+            BtnDelete.Click += (sender, args) =>
             {
                 var msgBox = new MessageBox(Manager, MessageBoxType.YesNo,
                     "Are you sure you want to delete \"" +
-                    ((PluginDataControl) lstPlugins.Items[lstPlugins.ItemIndex]).Data.Name + "\"? The plugin and plugin files will be permanently deleted.", "Confirm");
+                    ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data.Name +
+                    "\"? The plugin and plugin files will be permanently deleted.", "Confirm");
                 msgBox.Init();
                 manager.Add(msgBox);
                 msgBox.ShowModal();
@@ -98,10 +133,13 @@ namespace Bricklayer.Core.Client.Interface.Windows
                     if (dialog?.ModalResult != ModalResult.Yes)
                         return;
                     // If user clicked yes:
-                    var data = ((PluginDataControl) lstPlugins.Items[lstPlugins.ItemIndex]).Data;
-                    pluginsStatus.Remove(data.Name);
-                    lstPlugins.Items.RemoveAt(lstPlugins.ItemIndex);
-                    screen.Client.IO.WritePlugins(pluginsStatus);
+                    var data = ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data;
+                    pluginsStatus.Remove(data.Identifier);
+                    LstPlugins.Items.RemoveAt(LstPlugins.ItemIndex);
+                    var plugin = screen.Client.Plugins.Plugins.FirstOrDefault(x => x.Identifier.Equals(data.Identifier));
+                    if (plugin != null)
+                        plugin.IsEnabled = pluginsStatus[data.Identifier];
+                    screen.Client.IO.WritePluginStatus(pluginsStatus);
 
                     try
                     {
@@ -115,54 +153,54 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
                     pluginScreen.Client.Plugins.Plugins.Remove(data);
 
-                    lstPlugins.ItemIndex = 0;
+                    LstPlugins.ItemIndex = 0;
                 };
             };
 
             // Right buttons.
-            var btnClose = new Button(Manager) {Text = "Back", Width = 100, Right = ClientWidth - 8, Top = 8};
-            btnClose.Init();
-            btnClose.Click += (sender, args) => screen.ScreenManager.SwitchScreen(new LoginScreen());
-            BottomPanel.Add(btnClose);
+            BtnClose = new Button(Manager) {Text = "Back", Width = 100, Right = ClientWidth - 8, Top = 8};
+            BtnClose.Init();
+            BtnClose.Click += (sender, args) => screen.ScreenManager.SwitchScreen(new LoginScreen());
+            BottomPanel.Add(BtnClose);
 
-            var btnOpenFolder = new Button(Manager)
+            BtnOpenFolder = new Button(Manager)
             {
                 Top = 8,
                 Text = "Open Folder",
                 Width = 100,
-                Right = btnClose.Left - 8
+                Right = BtnClose.Left - 8
             };
-            btnOpenFolder.Init();
-            btnOpenFolder.ToolTip = new ToolTip(Manager) { Text = "Open plugins folder." };
-            btnOpenFolder.Click += (sender, args) =>
+            BtnOpenFolder.Init();
+            BtnOpenFolder.ToolTip = new ToolTip(Manager) {Text = "Open plugins folder."};
+            BtnOpenFolder.Click += (sender, args) =>
             {
                 // Open plugins folder.
                 Process.Start(screen.Client.IO.Directories["Plugins"]);
             };
-            BottomPanel.Add(btnOpenFolder);
+            BottomPanel.Add(BtnOpenFolder);
 
-            var btnGetPlugins = new Button(Manager)
+            BtnGetPlugins = new Button(Manager)
             {
                 Top = 8,
                 Text = "Get Plugins",
                 Width = 100,
-                Right = btnOpenFolder.Left - 8
+                Right = BtnOpenFolder.Left - 8
             };
-            btnGetPlugins.Init();
-            btnGetPlugins.ToolTip = new ToolTip(Manager) { Text = "Download plugins from website." };
-            btnGetPlugins.Click += (sender, args) =>
+            BtnGetPlugins.Init();
+            BtnGetPlugins.ToolTip = new ToolTip(Manager) {Text = "Download plugins from website."};
+            BtnGetPlugins.Click += (sender, args) =>
             {
                 // Open plugin DB site.
                 Process.Start(Constants.Strings.PluginDB_URL);
             };
-            BottomPanel.Add(btnGetPlugins);
+            BottomPanel.Add(BtnGetPlugins);
 
             // When user clicks plugin on list, update text.
-            lstPlugins.MouseUp += (sender, args) =>
+            LstPlugins.MouseUp += (sender, args) =>
             {
-                var data = ((PluginDataControl) lstPlugins.Items[lstPlugins.ItemIndex]).Data;
-                btnToggle.Text = (pluginsStatus[data.Name] ? "Disable " : "Enable ") + " Plugin";
-                btnToggle.TextColor = !pluginsStatus[data.Name] ? Color.Lime : Color.Red;
+                var data = ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data;
+                BtnToggle.Text = (pluginsStatus[data.Identifier] ? "Disable " : "Enable ") + " Plugin";
+                BtnToggle.TextColor = !pluginsStatus[data.Identifier] ? Color.Lime : Color.Red;
             };
 
             // Add plugins to list.
@@ -175,23 +213,23 @@ namespace Bricklayer.Core.Client.Interface.Windows
         private void RefreshList()
         {
             pluginsStatus.Clear();
-            pluginsStatus = pluginScreen.Client.IO.ReadPlugins();
-            lstPlugins.Items.Clear();
+            pluginsStatus = pluginScreen.Client.IO.ReadPluginStatus();
+            LstPlugins.Items.Clear();
 
             foreach (var plugin in pluginScreen.Client.Plugins.Plugins)
-                lstPlugins.Items.Add(new PluginDataControl(Manager, lstPlugins, plugin, pluginsStatus[plugin.Name]));
+                LstPlugins.Items.Add(new PluginDataControl(Manager, LstPlugins, plugin, pluginsStatus[plugin.Identifier]));
 
-            if (lstPlugins.Items.Count > 0)
+            if (LstPlugins.Items.Count > 0)
             {
-                lstPlugins.ItemIndex = 0;
+                LstPlugins.ItemIndex = 0;
 
-                var item = ((PluginDataControl) lstPlugins.Items[lstPlugins.ItemIndex]).Data;
-                btnToggle.Text = (pluginsStatus[item.Name] ? "Disable " : "Enable ") + " Plugin";
-                btnToggle.TextColor = !pluginsStatus[item.Name]
+                var item = ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data;
+                BtnToggle.Text = (pluginsStatus[item.Identifier] ? "Disable " : "Enable ") + " Plugin";
+                BtnToggle.TextColor = !pluginsStatus[item.Identifier]
                     ? Color.Lime
                     : Color.Red;
             }
-            btnToggle.Enabled = btnDelete.Enabled = lstPlugins.Items.Count > 0;
+            BtnToggle.Enabled = BtnDelete.Enabled = LstPlugins.Items.Count > 0;
         }
     }
 }

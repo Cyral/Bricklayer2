@@ -5,103 +5,137 @@ using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
-    internal class LoginScreen : Screen
+    /// <summary>
+    /// The first screen, with a login window, logo, etc.
+    /// </summary>
+    public class LoginScreen : Screen
     {
-        private Button btnPlugins;
-        // Controls
-        private ImageBox imgLogo, imgGithub, imgPyratron, imgBackground;
-        private Label lblVersion;
-        private LoginWindow wndLogin;
-        protected internal override GameState State => GameState.Login;
+        /// <summary>
+        /// Button to open the plugin manager.
+        /// </summary>
+        public Button BtnManagePlugins { get; private set; }
 
         /// <summary>
-        /// Setup the login and serverlist screen content and controls.
+        /// Logo image above the login window.
         /// </summary>
-        /// <param name="screenManager"></param>
+        public ImageBox ImgLogo { get; private set; }
+
+        /// <summary>
+        /// GitHub icon linking to the project page.
+        /// </summary>
+        public ImageBox ImgGithub { get; private set; }
+
+        /// <summary>
+        /// Pyratron icon linking to the project page.
+        /// </summary>
+        public ImageBox ImgPyratron { get; private set; }
+
+        /// <summary>
+        /// Background image of the screen.
+        /// </summary>
+        public ImageBox ImgBackground { get; private set; }
+
+        /// <summary>
+        /// Label with the current version.
+        /// </summary>
+        public Label LblVersion { get; private set; }
+
+        /// <summary>
+        /// Login window.
+        /// </summary>
+        public LoginWindow WndLogin { get; private set; }
+
+        public override GameState State => GameState.Login;
+
+        /// <summary>
+        /// Setup the login screen content and controls. (Login window, logo, etc.)
+        /// </summary>
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);
 
-            imgBackground = new ImageBox(Manager)
+            // Set the background.
+            ImgBackground = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.background"],
                 SizeMode = SizeMode.Stretched
             };
-            imgBackground.SetSize(Window.Width, Window.Height);
-            imgBackground.SetPosition(0, 0);
-            imgBackground.Init();
-            Window.Add(imgBackground);
+            ImgBackground.SetSize(Window.Width, Window.Height);
+            ImgBackground.SetPosition(0, 0);
+            ImgBackground.Init();
+            Window.Add(ImgBackground);
 
-            // Add the logo image
-            imgLogo = new ImageBox(Manager) {Image = Client.Content["gui.logosmall"], SizeMode = SizeMode.Normal};
-            imgLogo.Init();
-            imgLogo.SetSize(imgLogo.Image.Width, imgLogo.Image.Height);
-            imgLogo.SetPosition((Window.Width/2) - (imgLogo.Image.Width/2), 0);
-            Window.Add(imgLogo);
+            // Add the logo image.
+            ImgLogo = new ImageBox(Manager) {Image = Client.Content["gui.logosmall"], SizeMode = SizeMode.Normal};
+            ImgLogo.Init();
+            ImgLogo.SetSize(ImgLogo.Image.Width, ImgLogo.Image.Height);
+            ImgLogo.SetPosition((Window.Width/2) - (ImgLogo.Image.Width/2), 0);
+            Window.Add(ImgLogo);
 
-            // Add github contribute link
-            imgGithub = new ImageBox(Manager)
+            // Add github contribute link.
+            ImgGithub = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.icons.github"],
                 SizeMode = SizeMode.Auto,
                 ToolTip = {Text = "Contribute to Bricklayer on GitHub."}
             };
-            imgGithub.SetSize(imgGithub.Width, imgGithub.Height);
-            imgGithub.SetPosition(Window.Width - imgGithub.Width - 8, Window.Height - imgGithub.Height - 8);
-            imgGithub.Init();
-            imgGithub.Color = Color.White*.9f;
-            imgGithub.MouseOut += (sender, args) => imgGithub.Color = Color.White*.9f;
-            imgGithub.MouseOver += (sender, args) => imgGithub.Color = Color.White;
-            imgGithub.Click +=
+            ImgGithub.SetSize(ImgGithub.Width, ImgGithub.Height);
+            ImgGithub.SetPosition(Window.Width - ImgGithub.Width - 8, Window.Height - ImgGithub.Height - 8);
+            ImgGithub.Init();
+            ImgGithub.Color = Color.White*.9f;
+            ImgGithub.MouseOut += (sender, args) => ImgGithub.Color = Color.White*.9f;
+            ImgGithub.MouseOver += (sender, args) => ImgGithub.Color = Color.White;
+            ImgGithub.Click +=
                 (sender, args) => { if (Manager.Game.IsActive) Process.Start(Constants.Strings.GithubURL); };
-            Window.Add(imgGithub);
+            Window.Add(ImgGithub);
 
-            // Add Pyratron link
-            imgPyratron = new ImageBox(Manager)
+            // Add Pyratron link.
+            ImgPyratron = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.icons.pyratron"],
                 SizeMode = SizeMode.Auto,
                 ToolTip = {Text = "Visit Pyratron Studios."}
             };
-            imgPyratron.SetSize(imgPyratron.Width, imgPyratron.Height);
-            imgPyratron.SetPosition(Window.Width - imgGithub.Width - 16 - imgPyratron.Width,
-                Window.Height - imgPyratron.Height - 8);
-            imgPyratron.Init();
-            imgPyratron.Color = Color.White*.9f;
-            imgPyratron.MouseOut += (sender, args) => imgPyratron.Color = Color.White*.9f;
-            imgPyratron.MouseOver += (sender, args) => imgPyratron.Color = Color.White;
-            imgPyratron.Click +=
+            ImgPyratron.SetSize(ImgPyratron.Width, ImgPyratron.Height);
+            ImgPyratron.SetPosition(Window.Width - ImgGithub.Width - 16 - ImgPyratron.Width,
+                Window.Height - ImgPyratron.Height - 8);
+            ImgPyratron.Init();
+            ImgPyratron.Color = Color.White*.9f;
+            ImgPyratron.MouseOut += (sender, args) => ImgPyratron.Color = Color.White*.9f;
+            ImgPyratron.MouseOver += (sender, args) => ImgPyratron.Color = Color.White;
+            ImgPyratron.Click +=
                 (sender, args) => { if (Manager.Game.IsActive) Process.Start(Constants.Strings.PyratronURL); };
-            Window.Add(imgPyratron);
+            Window.Add(ImgPyratron);
 
-            // Add version tag
-            lblVersion = new Label(Manager) {Font = FontSize.Default14};
-            lblVersion.Init();
-            lblVersion.SetPosition(8, Window.Height - lblVersion.Height - 8);
-            lblVersion.Text = Constants.VersionString;
-            lblVersion.Width =
+            // Add version tag.
+            LblVersion = new Label(Manager) {Font = FontSize.Default14};
+            LblVersion.Init();
+            LblVersion.SetPosition(8, Window.Height - LblVersion.Height - 8);
+            LblVersion.Text = Constants.VersionString;
+            LblVersion.Width =
                 (int)
-                    Manager.Skin.Fonts[lblVersion.Font.ToString()].Resource.MeasureRichString(lblVersion.Text, Manager)
+                    Manager.Skin.Fonts[LblVersion.Font.ToString()].Resource.MeasureRichString(LblVersion.Text, Manager)
                         .X;
-            Window.Add(lblVersion);
+            Window.Add(LblVersion);
 
-            btnPlugins = new Button(Manager)
+            BtnManagePlugins = new Button(Manager)
             {
                 Text = "Manage Plugins",
                 Width = 100,
-                Top = lblVersion.Top - 4,
-                Left = lblVersion.Right + 8
+                Top = LblVersion.Top - 4,
+                Left = LblVersion.Right + 8
             };
-            btnPlugins.Init();
-            Window.Add(btnPlugins);
-            btnPlugins.Click += (sender, args) => { ScreenManager.SwitchScreen(new PluginManagerScreen()); };
+            BtnManagePlugins.Init();
+            Window.Add(BtnManagePlugins);
+            BtnManagePlugins.Click += (sender, args) => { ScreenManager.SwitchScreen(new PluginManagerScreen()); };
 
-            wndLogin = new LoginWindow(Manager, this);
-            wndLogin.Init();
+            WndLogin = new LoginWindow(Manager, this);
+            WndLogin.Init();
+
             // If the login window is overlapping the logo, push it down a bit. (For smaller screens)
-            if (wndLogin.Top < imgLogo.Top + imgLogo.Height + 8)
-                wndLogin.Top = imgLogo.Top + imgLogo.Height + 24;
-            Window.Add(wndLogin);
+            if (WndLogin.Top < ImgLogo.Top + ImgLogo.Height + 8)
+                WndLogin.Top = ImgLogo.Top + ImgLogo.Height + 24;
+            Window.Add(WndLogin);
         }
 
         /// <summary>
@@ -109,14 +143,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// </summary>
         public override void Remove()
         {
-            Window.Remove(imgBackground);
-            Window.Remove(imgLogo);
-            Window.Remove(imgPyratron);
-            Window.Remove(imgGithub);
-            Window.Remove(lblVersion);
-            Window.Remove(wndLogin);
-            Window.Remove(btnPlugins);
-            wndLogin?.Dispose();
+            Window.Remove(ImgBackground);
+            Window.Remove(ImgLogo);
+            Window.Remove(ImgPyratron);
+            Window.Remove(ImgGithub);
+            Window.Remove(LblVersion);
+            Window.Remove(WndLogin);
+            Window.Remove(BtnManagePlugins);
+            WndLogin?.Dispose();
         }
     }
 }

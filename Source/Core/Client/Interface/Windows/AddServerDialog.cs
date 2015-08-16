@@ -11,102 +11,113 @@ namespace Bricklayer.Core.Client.Interface.Windows
     /// </summary>
     internal sealed class AddServerDialog : Dialog
     {
-        private readonly Button btnSave;
+        /// <summary>
+        /// Button to save or add the server.
+        /// </summary>
+        public Button BtnSave { get; }
 
         /// <summary>
-        /// True if editing a server (as opposed to adding a new one)
+        /// True if editing a server (as opposed to adding a new one).
         /// </summary>
-        private readonly bool edit;
+        public bool IsEditing { get; }
 
         /// <summary>
-        /// Index of the server in the list
+        /// Index of the server in the list.
         /// </summary>
-        private readonly int index;
+        public int Index { get; }
 
-        private readonly Label lblHost;
-        private readonly Label lblName;
+        public Label LblHost { get; }
+        public Label LblName { get; }
+
+        /// <summary>
+        /// Textbox for hostname and port.
+        /// </summary>
+        public TextBox TxtHost { get; }
+
+        /// <summary>
+        /// Text box for user defined server name.
+        /// </summary>
+        public TextBox TxtName { get; }
+
         private readonly char[] separator = {':'};
-        private readonly TextBox txtHost;
-        private readonly TextBox txtName;
         private readonly ServerWindow wndServer;
         private string host;
         private int port;
 
-        public AddServerDialog(Manager manager, ServerWindow parent, int index, bool edit, string name, string host,
+        public AddServerDialog(Manager manager, ServerWindow parent, int index, bool isEditing, string name, string host,
             int port)
             : base(manager)
         {
-            // Are we editing a server or adding one (They use same dialog)
-            this.edit = edit;
-            this.index = index;
+            // Are we editing a server or adding one? (The same dialog is used)
+            IsEditing = isEditing;
+            Index = index;
             wndServer = parent;
 
-            // Setup the window
-            Text = this.edit ? "Edit Server" : "Add Server";
+            // Setup the window.
+            Text = IsEditing ? "Edit Server" : "Add Server";
             TopPanel.Visible = false;
             Resizable = false;
             Width = 250;
             Height = 180;
             Center();
 
-            // Add controls
-            lblName = new Label(manager) {Left = 8, Top = 8, Text = "Name:", Width = ClientWidth - 16};
-            lblName.Init();
-            Add(lblName);
+            // Add controls.
+            LblName = new Label(manager) {Left = 8, Top = 8, Text = "Name:", Width = ClientWidth - 16};
+            LblName.Init();
+            Add(LblName);
 
-            txtName = new TextBox(manager) {Left = 8, Top = lblName.Bottom + 4, Width = ClientWidth - 16};
-            txtName.Init();
-            txtName.Text = name;
-            txtName.TextChanged += TxtNameTextChanged;
-            Add(txtName);
+            TxtName = new TextBox(manager) {Left = 8, Top = LblName.Bottom + 4, Width = ClientWidth - 16};
+            TxtName.Init();
+            TxtName.Text = name;
+            TxtName.TextChanged += TxtNameTextChanged;
+            Add(TxtName);
 
-            lblHost = new Label(manager)
+            LblHost = new Label(manager)
             {
                 Left = 8,
-                Top = txtName.Bottom + 8,
+                Top = TxtName.Bottom + 8,
                 Text = $"Address: (Default port is {Globals.Values.DefaultServerPort})",
                 Width = ClientWidth - 16
             };
-            lblHost.Init();
-            Add(lblHost);
+            LblHost.Init();
+            Add(LblHost);
 
-            txtHost = new TextBox(manager) {Left = 8, Top = lblHost.Bottom + 4, Width = ClientWidth - 16};
-            txtHost.Init();
-            txtHost.Text = port != 0 && port != Globals.Values.DefaultServerPort ? $"{host}:{port}" : host;
-            txtHost.TextChanged += TxtHostTextChanged;
-            Add(txtHost);
+            TxtHost = new TextBox(manager) {Left = 8, Top = LblHost.Bottom + 4, Width = ClientWidth - 16};
+            TxtHost.Init();
+            TxtHost.Text = port != 0 && port != Globals.Values.DefaultServerPort ? $"{host}:{port}" : host;
+            TxtHost.TextChanged += TxtHostTextChanged;
+            Add(TxtHost);
 
-            btnSave = new Button(manager) {Top = 8, Text = this.edit ? "Save" : "Add"};
-            btnSave.Init();
-            btnSave.Left = (Width / 2) - (btnSave.Width / 2);
-            btnSave.Click += BtnSaveClick;
-            BottomPanel.Add(btnSave);
+            BtnSave = new Button(manager) {Top = 8, Text = IsEditing ? "Save" : "Add"};
+            BtnSave.Init();
+            BtnSave.Left = (Width/2) - (BtnSave.Width/2);
+            BtnSave.Click += BtnSaveClick;
+            BottomPanel.Add(BtnSave);
 
-            if (this.edit)
-                Validate(); // Validate existing text
+            if (IsEditing)
+                Validate(); // Validate existing text.
         }
 
         /// <summary>
-        /// When the save button is clicked, add the server or edit the existing one
+        /// When the save button is clicked, add the server or edit the existing one.
         /// </summary>
         private void BtnSaveClick(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtName.Text) || string.IsNullOrEmpty(txtHost.Text))
+            if (string.IsNullOrEmpty(TxtName.Text) || string.IsNullOrEmpty(TxtHost.Text))
                 return;
-            if (edit)
-                wndServer.EditServer(index, new ServerData(txtName.Text, host, port));
+            if (IsEditing)
+                wndServer.EditServer(Index, new ServerData(TxtName.Text, host, port));
             else
-                wndServer.AddServer(new ServerData(txtName.Text, host, port));
+                wndServer.AddServer(new ServerData(TxtName.Text, host, port));
             Close();
         }
 
         private void TxtHostTextChanged(object sender, EventArgs e) => Validate();
-
         private void TxtNameTextChanged(object sender, EventArgs e) => Validate();
 
         private void Validate()
         {
-            var address = txtHost.Text.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            var address = TxtHost.Text.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
             port = 0;
             if (address.Length > 0)

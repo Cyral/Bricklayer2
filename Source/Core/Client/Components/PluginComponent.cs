@@ -36,14 +36,14 @@ namespace Bricklayer.Core.Client.Components
             AppDomain.CurrentDomain.AssemblyResolve +=
                 (sender, args) =>
                 {
-                    // If a plugin.dll is trying to load a referenced assembly
+                    // If a plugin.dll is trying to load a referenced assembly.
                     if (args.RequestingAssembly.FullName.Split(',')[0] != "plugin")
                         return null;
                     var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
                     if (File.Exists(path))
                         return Assembly.LoadFile(path);
                     path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe");
-                    // Try to load a .exe if .dll doesn't exist
+                    // Try to load a .exe if .dll doesn't exist.
                     return File.Exists(path) ? Assembly.LoadFile(path) : null;
                 };
 
@@ -60,7 +60,7 @@ namespace Bricklayer.Core.Client.Components
                     Client.Window.Add(pluginWindow);
                     pluginWindow.Show();
                 }
-                // Tell the auth server it got the message
+                // Tell the auth server it got the message.
                 Client.Network.PingAuthMessage(PingAuthMessage.PingResponse.GotPlugin, args.Message.ID.ToString());
             });
 
@@ -72,7 +72,10 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         internal void LoadPlugins()
         {
-            // Get a list of all the .dlls in the directory
+            // Load list of enabled/disabled plugins.
+            var statuses = Client.IO.ReadPluginStatus();
+
+            // Get a list of all the .dlls in the directory.
             List<PluginData> files = null;
             try
             {
@@ -89,24 +92,40 @@ namespace Bricklayer.Core.Client.Components
             foreach (var file in files.Where(file => !Plugins.Contains(file)))
             {
                 // TODO: Use AppDomains for security (Ask Cyral)
-                // Load the assembly
+                // Load the assembly.
                 try
                 {
-                    // Make sure dependencies are met.
-                    if (file.Dependencies.Count > 0)
-                        foreach (var dep in
-                            file.Dependencies.Where(dep => files.All(plugin => plugin.Identifier != dep)))
-                            throw new FileNotFoundException(
-                                $"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
-                    var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
-                    loadingPlugin = file.Path;
-                    RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
+                    // If plugin is enabled.
+                    if (!statuses.ContainsKey(file.Identifier) || statuses[file.Identifier])
+                    {
+                        // Make sure dependencies are met.
+                        if (file.Dependencies.Count > 0)
+                            foreach (var dep in
+                                file.Dependencies.Where(dep => files.All(plugin => plugin.Identifier != dep)))
+                                throw new FileNotFoundException(
+                                    $"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
+                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                        loadingPlugin = file.Path;
+                        RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
+                    }
+                    else
+                    {
+                        // Create plugin instance with no actual assembly, to be displayed in the plugin manager list.
+                        var pluginData = new FakePlugin(Client, file);
+                        LoadIcon(pluginData);
+                        Plugins.Add(pluginData);   
+                    }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                 }
             }
+
+            // Write updated statuses.
+            statuses = new Dictionary<string, bool>();
+            Plugins.ForEach(f => statuses.Add(f.Identifier, f.IsEnabled));
+            Client.IO.WritePluginStatus(statuses);
         }
 
         private void RegisterPlugin(ClientPlugin pluginData)
@@ -114,18 +133,9 @@ namespace Bricklayer.Core.Client.Components
             LoadIcon(pluginData);
             Plugins.Add(pluginData);
 
-            // If plugin isn't in the plugins config
-            if (!Client.IO.ReadPlugins().ContainsKey(pluginData.Name))
-            {
-                var plugins = Client.IO.ReadPlugins();
-                plugins.Add(pluginData.Name, true);
-                Client.IO.WritePlugins(plugins);
-            }
-            // Check if plugin is disabled
-            if (!Client.IO.ReadPlugins()[pluginData.Name]) return;
-            // Load plugin content
+            // Load plugin content.
             Client.Content.LoadTextures(Path.Combine(pluginData.Path, Path.Combine("Content", "Textures")), Client);
-            // Load plugin
+            // Load plugin.
             pluginData.Load();
             Console.WriteLine($"Plugin: Loaded {pluginData.GetInfoString()}");
         }
@@ -157,6 +167,32 @@ namespace Bricklayer.Core.Client.Components
             }
             else
                 Console.WriteLine($"Directory {pluginData} does not exist.");
+        }
+
+        /// <summary>
+        /// Dummy class for disabled plugins, as an instance is needed to display in the plugin manager.
+        /// </summary>
+        public class FakePlugin : ClientPlugin
+        {
+            public FakePlugin(Client host, PluginData file) : base(host)
+            {
+                Identifier = file.Identifier;
+                Name = file.Name;
+                Description = file.Name;
+                Authors = file.Authors;
+                Dependencies = file.Dependencies;
+                Version = file.Version;
+                Path = file.Path;
+                IsEnabled = false;
+            }
+
+            public override void Load()
+            {
+            }
+
+            protected override void Unload()
+            {
+            }
         }
     }
 }

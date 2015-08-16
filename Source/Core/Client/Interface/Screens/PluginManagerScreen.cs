@@ -5,36 +5,43 @@ namespace Bricklayer.Core.Client.Interface.Screens
 {
     public class PluginManagerScreen : Screen
     {
-        protected internal override GameState State => GameState.PluginManager;
-        private ImageBox imgBackground;
-        private PluginManagerWindow wndPlugins;
+        public override GameState State => GameState.PluginManager;
+
+        /// <summary>
+        /// Plugin manager window.
+        /// </summary>
+        public PluginManagerWindow WndPlugins { get; set; }
+
+        /// <summary>
+        /// Background image.
+        /// </summary>
+        public ImageBox ImgBackground { get; set; }
 
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);
-            Client.State = GameState.PluginManager;
 
-            imgBackground = new ImageBox(Manager)
+            ImgBackground = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.background"],
                 SizeMode = SizeMode.Stretched
             };
-            imgBackground.SetSize(Window.Width, Window.Height);
-            imgBackground.SetPosition(0, 0);
-            imgBackground.Init();
-            Window.Add(imgBackground);
+            ImgBackground.SetSize(Window.Width, Window.Height);
+            ImgBackground.SetPosition(0, 0);
+            ImgBackground.Init();
+            Window.Add(ImgBackground);
 
-            wndPlugins = new PluginManagerWindow(Manager, this);
-            wndPlugins.Init();
-            Window.Add(wndPlugins);
-            wndPlugins.Show();
+            WndPlugins = new PluginManagerWindow(Manager, this);
+            WndPlugins.Init();
+            Window.Add(WndPlugins);
+            WndPlugins.Show();
         }
 
         public override void Remove()
         {
-            Window.Remove(wndPlugins);
-            Window.Remove(imgBackground);
-            wndPlugins?.Dispose();
+            Window.Remove(WndPlugins);
+            Window.Remove(ImgBackground);
+            WndPlugins?.Dispose();
         }
     }
 }

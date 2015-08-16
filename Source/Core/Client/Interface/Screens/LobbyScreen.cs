@@ -7,15 +7,39 @@ namespace Bricklayer.Core.Client.Interface.Screens
 {
     public class LobbyScreen : Screen
     {
+        /// <summary>
+        /// The server description.
+        /// </summary>
         public string Description { get; }
+
+        /// <summary>
+        /// The server intro/MOTD text.
+        /// </summary>
         public string Intro { get; }
-        public List<LevelData> Levels { get; private set; }
+
+        internal List<LevelData> Levels { get; }
+
+        /// <summary>
+        /// The server name
+        /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// The number of players online.
+        /// </summary>
         public int Online { get; }
 
-        protected internal override GameState State => GameState.Lobby;
-        private ImageBox imgBackground;
-        private LobbyWindow wndLobby;
+        public override GameState State => GameState.Lobby;
+
+        /// <summary>
+        /// Background image.
+        /// </summary>
+        public ImageBox ImgBackground { get; set; }
+
+        /// <summary>
+        /// Lobby window with list of levels.
+        /// </summary>
+        public LobbyWindow WndLobby { get; set; }
 
         public LobbyScreen(string description, string name, string intro, int online, List<LevelData> levels)
         {
@@ -31,27 +55,27 @@ namespace Bricklayer.Core.Client.Interface.Screens
             base.Add(screenManager);
             Client.State = GameState.Lobby;
 
-            imgBackground = new ImageBox(Manager)
+            ImgBackground = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.background"],
                 SizeMode = SizeMode.Stretched
             };
-            imgBackground.SetSize(Window.Width, Window.Height);
-            imgBackground.SetPosition(0, 0);
-            imgBackground.Init();
-            Window.Add(imgBackground);
+            ImgBackground.SetSize(Window.Width, Window.Height);
+            ImgBackground.SetPosition(0, 0);
+            ImgBackground.Init();
+            Window.Add(ImgBackground);
 
             // Add the login window
-            wndLobby = new LobbyWindow(Manager, this);
-            wndLobby.Init();
-            Window.Add(wndLobby);
-            wndLobby.Show();
+            WndLobby = new LobbyWindow(Manager, this);
+            WndLobby.Init();
+            Window.Add(WndLobby);
+            WndLobby.Show();
         }
 
         public override void Remove()
         {
-            Window.Remove(wndLobby);
-            Window.Remove(imgBackground);
+            Window.Remove(WndLobby);
+            Window.Remove(ImgBackground);
         }
     }
 }

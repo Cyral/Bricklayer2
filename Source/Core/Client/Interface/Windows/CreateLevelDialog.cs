@@ -1,23 +1,30 @@
-﻿using System.Linq;
-using Bricklayer.Core.Client.Interface.Screens;
-using Bricklayer.Core.Common;
+﻿using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common.Net.Messages;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
 {
     /// <summary>
-    /// Dialog for creating levels in the lobby list
+    /// Dialog for creating levels in the lobby list.
     /// </summary>
     public sealed class CreateLevelDialog : Dialog
     {
         // Controls
-        private readonly Button createBtn;
-        private readonly Label lblDescription;
-        private readonly Label lblName;
+        public Button CreateBtn { get; }
+        public Label LblDescription { get; }
+        public Label LblName { get; }
+
+        /// <summary>
+        /// Text box for level description.
+        /// </summary>
+        public TextBox TxtDescription { get; }
+
+        /// <summary>
+        /// Textbox for level name.
+        /// </summary>
+        public TextBox TxtName { get; }
+
         private readonly LobbyScreen screen;
-        private readonly TextBox txtDescription;
-        private readonly TextBox txtName;
 
         public CreateLevelDialog(Manager manager, LobbyScreen screen) : base(manager)
         {
@@ -31,49 +38,46 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Center();
 
             // Add controls
-            lblName = new Label(manager) { Left = 8, Top = 8, Text = "Name:", Width = ClientWidth - 16 };
-            lblName.Init();
-            Add(lblName);
+            LblName = new Label(manager) {Left = 8, Top = 8, Text = "Name:", Width = ClientWidth - 16};
+            LblName.Init();
+            Add(LblName);
 
-            txtName = new TextBox(manager) { Left = 8, Top = lblName.Bottom + 4, Width = ClientWidth - 16 };
-            txtName.Init();
-            txtName.MaxLength = CreateLevelMessage.MaxNameLength;
-            txtName.Text = ""; // Fix bug with cursor caret not showing.
-            txtName.TextChanged += (sender, args) =>
-            {
-                createBtn.Enabled = !string.IsNullOrWhiteSpace(txtName.Text);
-            };
-            Add(txtName);
+            TxtName = new TextBox(manager) {Left = 8, Top = LblName.Bottom + 4, Width = ClientWidth - 16};
+            TxtName.Init();
+            TxtName.MaxLength = CreateLevelMessage.MaxNameLength;
+            TxtName.Text = ""; // Fix bug with cursor caret not showing.
+            TxtName.TextChanged += (sender, args) => { CreateBtn.Enabled = !string.IsNullOrWhiteSpace(TxtName.Text); };
+            Add(TxtName);
 
-            lblDescription = new Label(manager)
+            LblDescription = new Label(manager)
             {
                 Left = 8,
-                Top = txtName.Bottom + 4,
+                Top = TxtName.Bottom + 4,
                 Text = "Description:",
                 Width = ClientWidth - 16
             };
-            lblDescription.Init();
-            Add(lblDescription);
+            LblDescription.Init();
+            Add(LblDescription);
 
-            txtDescription = new TextBox(manager)
+            TxtDescription = new TextBox(manager)
             {
                 Left = 8,
-                Top = lblDescription.Bottom + 4,
+                Top = LblDescription.Bottom + 4,
                 Width = ClientWidth - 16,
                 Height = 40,
                 Mode = TextBoxMode.Multiline,
                 ScrollBars = ScrollBars.None
             };
-            txtDescription.Init();
-            txtDescription.MaxLines = CreateLevelMessage.MaxDescriptionLines;
-            txtDescription.MaxLength = CreateLevelMessage.MaxDescriptionLength;
-            Add(txtDescription);
+            TxtDescription.Init();
+            TxtDescription.MaxLines = CreateLevelMessage.MaxDescriptionLines;
+            TxtDescription.MaxLength = CreateLevelMessage.MaxDescriptionLength;
+            Add(TxtDescription);
 
-            createBtn = new Button(manager) { Top = 8, Text = "Create", Enabled = false };
-            createBtn.Init();
-            createBtn.Left = (Width / 2) - (createBtn.Width / 2);
-            createBtn.Click += CreateBtn_Click;
-            BottomPanel.Add(createBtn);
+            CreateBtn = new Button(manager) {Top = 8, Text = "Create", Enabled = false};
+            CreateBtn.Init();
+            CreateBtn.Left = (Width/2) - (CreateBtn.Width/2);
+            CreateBtn.Click += CreateBtn_Click;
+            BottomPanel.Add(CreateBtn);
         }
 
         /// <summary>
@@ -81,7 +85,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// </summary>
         private void CreateBtn_Click(object sender, EventArgs e)
         {
-            screen.Client.Network.Send(new CreateLevelMessage(txtName.Text, txtDescription.Text));
+            screen.Client.Network.Send(new CreateLevelMessage(TxtName.Text, TxtDescription.Text));
             Close();
         }
     }

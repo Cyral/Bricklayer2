@@ -129,22 +129,22 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Reads and returns collection of enabled and disabled plugins.
         /// </summary>
-        public Dictionary<string, bool> ReadPlugins()
+        public Dictionary<string, bool> ReadPluginStatus()
         {
             var plugins = new Dictionary<string, bool>();
             var fileName = pluginsFile;
             if (!File.Exists(fileName))
             {
                 // If plugin config doesn't exist, create it.
-                Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Name, true));
-                WritePlugins(plugins);
+                Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Identifier, true));
+                WritePluginStatus(plugins);
             }
             var json = File.ReadAllText(fileName);
             if (string.IsNullOrWhiteSpace(json))
             {
                 // If file is empty, create the contents.
-                Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Name, true));
-                WritePlugins(plugins);
+                Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Identifier, true));
+                WritePluginStatus(plugins);
                 json = File.ReadAllText(fileName);
             }
             return JsonConvert.DeserializeObject<Dictionary<string, bool>>(json);
@@ -153,7 +153,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Save plugin statuses into a configurable json file.
         /// </summary>
-        public void WritePlugins(Dictionary<string, bool> plugins)
+        public void WritePluginStatus(Dictionary<string, bool> plugins)
         {
             var fileName = pluginsFile;
             if (!File.Exists(fileName))

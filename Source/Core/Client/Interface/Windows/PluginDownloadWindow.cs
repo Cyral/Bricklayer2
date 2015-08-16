@@ -14,25 +14,17 @@ namespace Bricklayer.Core.Client.Interface.Windows
     internal sealed class PluginDownloadWindow : Dialog
     {
         private static readonly List<int> downloads;
-        private readonly MainWindow window;
-        private readonly int id;
-        private readonly string fileName;
+        public int ID { get; }
+        public string FileName { get; }
+        public Label LblName { get; }
+        public Label LblPercent { get; }
+        public ProgressBar PbDownloaded { get; }
         private readonly WebClient client;
-        private readonly Label lblName;
-        private readonly Label lblPercent;
-        private readonly ProgressBar pbDownloaded;
+        private readonly MainWindow window;
 
         static PluginDownloadWindow()
         {
             downloads = new List<int>();
-        }
-
-        /// <summary>
-        /// Returns true if the plugin/revision ID is already downloading.
-        /// </summary>
-        internal static bool IsDownloading(int id)
-        {
-            return downloads.Contains(id); // Already downloading this plugin
         }
 
         public PluginDownloadWindow(Manager manager, MainWindow window, string modName, int id, string fileName,
@@ -40,8 +32,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             : base(manager)
         {
             this.window = window;
-            this.id = id;
-            this.fileName = fileName;
+            ID = id;
+            FileName = fileName;
             CaptionVisible = false;
             TopPanel.Visible = false;
             BottomPanel.Visible = false;
@@ -54,31 +46,37 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Top = 24;
 
             // Add controls
-            lblName = new Label(manager)
+            LblName = new Label(manager)
             {
                 Left = 8,
                 Top = 8,
                 Text = updating ? "Updating " : "Downloading \"" + modName + "\"",
                 Width = ClientWidth - 16
             };
-            lblName.Init();
-            lblName.Alignment = Alignment.TopLeft;
-            Add(lblName);
+            LblName.Init();
+            LblName.Alignment = Alignment.TopLeft;
+            Add(LblName);
 
             // Add controls
-            lblPercent = new Label(manager) {Left = 8, Top = 8, Text = "0%", Width = ClientWidth - 16};
-            lblPercent.Init();
-            lblPercent.Alignment = Alignment.TopRight;
-            Add(lblPercent);
+            LblPercent = new Label(manager) {Left = 8, Top = 8, Text = "0%", Width = ClientWidth - 16};
+            LblPercent.Init();
+            LblPercent.Alignment = Alignment.TopRight;
+            Add(LblPercent);
 
-            pbDownloaded = new ProgressBar(manager) {Left = 8, Top = lblName.Bottom + 4, Width = ClientWidth - 16, Color = Color.LawnGreen};
-            pbDownloaded.Init();
-            Add(pbDownloaded);
+            PbDownloaded = new ProgressBar(manager)
+            {
+                Left = 8,
+                Top = LblName.Bottom + 4,
+                Width = ClientWidth - 16,
+                Color = Color.LawnGreen
+            };
+            PbDownloaded.Init();
+            Add(PbDownloaded);
 
-            Height = MinimumHeight = pbDownloaded.Bottom + 22;
+            Height = MinimumHeight = PbDownloaded.Bottom + 22;
 
             // For multiple dialogs, stack them.
-            Top += (Height + 8) * downloads.Count;
+            Top += (Height + 8)*downloads.Count;
 
             // Download the file
             downloads.Add(id);
@@ -92,9 +90,17 @@ namespace Bricklayer.Core.Client.Interface.Windows
             }
             catch (Exception e)
             {
-                lblName.Text = "Error Downloading (Hover)";
-                lblName.ToolTip.Text = e.Message;
+                LblName.Text = "Error Downloading (Hover)";
+                LblName.ToolTip.Text = e.Message;
             }
+        }
+
+        /// <summary>
+        /// Returns true if the plugin/revision ID is already downloading.
+        /// </summary>
+        internal static bool IsDownloading(int id)
+        {
+            return downloads.Contains(id); // Already downloading this plugin
         }
 
         protected override void Dispose(bool disposing)
@@ -108,16 +114,16 @@ namespace Bricklayer.Core.Client.Interface.Windows
         {
             // Load new plugin (LoadPlugins will only load new plugins, not existing ones again)
             window.Client.Plugins.LoadPlugins();
-            downloads.Remove(id);
+            downloads.Remove(ID);
             Close();
         }
 
         private void DownloadProgress(object sender, DownloadProgressChangedEventArgs e)
         {
-            var percentage = e.BytesReceived / (double)e.TotalBytesToReceive * 100;
+            var percentage = e.BytesReceived/(double) e.TotalBytesToReceive*100;
 
-            lblPercent.Text = $"{Math.Round(percentage)}% of {(e.TotalBytesToReceive / 1024) / 1024}MB";
-            pbDownloaded.Value = (int)percentage;
+            LblPercent.Text = $"{Math.Round(percentage)}% of {(e.TotalBytesToReceive/1024)/1024}MB";
+            PbDownloaded.Value = (int) percentage;
         }
     }
 }

@@ -5,12 +5,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
 {
     public class ServerScreen : Screen
     {
+        public override GameState State => GameState.Server;
+        private Button btnPlugins;
+        private ImageBox imgBackground;
         // Controls
         private ServerWindow wndServer;
-        private ImageBox imgBackground;
-        private Button btnPlugins;
-
-        protected internal override GameState State => GameState.Server;
 
         public override void Add(ScreenManager screenManager)
         {

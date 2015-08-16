@@ -55,7 +55,7 @@ namespace Bricklayer.Core.Client
         public GameState State
         {
             get { return state; }
-            set
+            internal set
             {
                 if (State != value)
                 {

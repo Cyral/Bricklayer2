@@ -31,7 +31,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// The game state associated with this screen.
         /// </summary>
-        protected internal abstract GameState State { get; }
+        public abstract GameState State { get; }
 
         /// <summary>
         /// Adds the controls for this screen to the window.
@@ -44,8 +44,12 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// Removes the controls for this screen from the window.
         /// </summary>
-        public virtual void Remove() {}
+        public virtual void Remove()
+        {
+        }
 
-        public virtual void Update(GameTime gameTime) {}
+        public virtual void Update(GameTime gameTime)
+        {
+        }
     }
 }

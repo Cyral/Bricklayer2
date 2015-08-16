@@ -55,7 +55,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             fadeImage.Init();
             fadeImage.Image = fadeTexture;
             fadeImage.Alpha = 0;
-            fadeImage.Color = Color.White * fadeImage.Alpha;
+            fadeImage.Color = Color.White*fadeImage.Alpha;
             window.Add(fadeImage);
             fadeImage.BringToFront();
         }
@@ -72,7 +72,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
         /// <summary>
         /// Transitions from the current screen to the next.
-        /// If the screen is the same screen as the current screeen, it will simply fade in and out without removing and adding the controls.
+        /// If the screen is the same screen as the current screeen, it will simply fade in and out without removing and adding the
+        /// controls.
         /// </summary>
         public void SwitchScreen(Screen newScreen)
         {
@@ -84,14 +85,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
         public void Update(GameTime gameTime)
         {
-            var elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            var elapsed = (float) gameTime.ElapsedGameTime.TotalSeconds;
 
             // Fade the screen in or out, and add/remove its controls accordingly.
             if (state == FadeState.In)
             {
-                fadeAlpha = MathHelper.Clamp(fadeAlpha - (elapsed * FadeSpeed), 0, 1);
+                fadeAlpha = MathHelper.Clamp(fadeAlpha - (elapsed*FadeSpeed), 0, 1);
                 fadeImage.Alpha = fadeAlpha;
-                fadeImage.Color = Color.White * fadeImage.Alpha;
+                fadeImage.Color = Color.White*fadeImage.Alpha;
                 if (fadeAlpha <= 0)
                 {
                     state = FadeState.Idle;
@@ -99,12 +100,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
             }
             else if (state == FadeState.Out)
             {
-                fadeAlpha = MathHelper.Clamp(fadeAlpha + (elapsed * FadeSpeed), 0, 1);
+                fadeAlpha = MathHelper.Clamp(fadeAlpha + (elapsed*FadeSpeed), 0, 1);
                 fadeImage.Alpha = fadeAlpha;
-                fadeImage.Color = Color.White * fadeImage.Alpha;
+                fadeImage.Color = Color.White*fadeImage.Alpha;
                 if (fadeAlpha >= 1) // Done fading to black, now set new screen and fade into it
                 {
-                    Window.Client.Events.Game.ScreenChanged.Invoke(new EventManager.GameEvents.GameScreenEventArgs(fadeTo, Current));
                     // Destory objects from the first screen
                     if (Current != fadeTo)
                     {
@@ -113,6 +113,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
                         Current.Add(this);
                         Window.Client.State = Current.State;
                     }
+                    Window.Client.Events.Game.ScreenChanged.Invoke(
+                        new EventManager.GameEvents.GameScreenEventArgs(fadeTo, Current));
                     state = FadeState.In;
                     fadeImage.BringToFront();
                 }

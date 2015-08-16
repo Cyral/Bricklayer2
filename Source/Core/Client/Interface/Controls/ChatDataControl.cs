@@ -1,5 +1,4 @@
-﻿using System;
-using Bricklayer.Core.Client.Interface.Screens;
+﻿using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
@@ -7,7 +6,11 @@ namespace Bricklayer.Core.Client.Interface.Controls
 {
     public sealed class ChatDataControl : Control
     {
-        private readonly Label lblMsg;
+        /// <summary>
+        /// Label for displaying the text.
+        /// </summary>
+        public Label LblMsg { get; }
+
         private bool allowTrans = true;
         private bool done;
         private bool startTrans;
@@ -19,16 +22,16 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Width = parent.ClientWidth;
             Height = 16;
 
-            lblMsg = new Label(Manager)
+            LblMsg = new Label(Manager)
             {
                 Width = parent.Width - 8
             };
-            lblMsg.Init();
-            lblMsg.DrawFormattedText = true;
-            lblMsg.Ellipsis = false;
-            lblMsg.Text = text;
-            lblMsg.Shadow = true;
-            Add(lblMsg);
+            LblMsg.Init();
+            LblMsg.DrawFormattedText = true;
+            LblMsg.Ellipsis = false;
+            LblMsg.Text = text;
+            LblMsg.Shadow = true;
+            Add(LblMsg);
 
             if (screen.IsChatOpen())
             {
@@ -52,8 +55,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
             }
             else if (startTrans) // If transition is started
             {
-                if (lblMsg.Alpha > 0) // If not already faded away
-                    lblMsg.Alpha -= (float) timePassed*255f;
+                if (LblMsg.Alpha > 0) // If not already faded away
+                    LblMsg.Alpha -= (float) timePassed*255f;
                 else
                     done = true;
             }
@@ -61,7 +64,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
 
         public override void Show()
         {
-            lblMsg.Alpha = 255;
+            LblMsg.Alpha = 255;
             allowTrans = false;
         }
 
@@ -70,7 +73,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             if (!done)
                 allowTrans = true;
             else
-                lblMsg.Alpha = 0;
+                LblMsg.Alpha = 0;
         }
 
         public override void DrawControl(Renderer renderer, Rectangle rect, GameTime gameTime)

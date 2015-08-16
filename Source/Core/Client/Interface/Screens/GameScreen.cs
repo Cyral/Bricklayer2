@@ -10,6 +10,9 @@ using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client.Interface.Screens
 {
+    /// <summary>
+    /// Main screen used for the in-game/level view.
+    /// </summary>
     public class GameScreen : Screen
     {
         /// <summary>
@@ -29,15 +32,40 @@ namespace Bricklayer.Core.Client.Interface.Screens
             }
         }
 
-        protected internal override GameState State => GameState.Game;
+        public override GameState State => GameState.Game;
         private Level Level => Client.Level;
-        private Label lblStats;
-        private ControlList<ChatDataControl> lstChats;
-        private ControlList<PlayerListDataControl> lstPlayers;
-        private InventoryControl pnlInventory;
-        private StatusBar sbStats;
+
+        /// <summary>
+        /// Stats label showing FPS.
+        /// </summary>
+        public Label LblStats { get; private set; }
+
+        /// <summary>
+        /// List of chat messages.
+        /// </summary>
+        public ControlList<ChatDataControl> LstChats { get; private set; }
+
+        /// <summary>
+        /// List of players and their pings, for the tablist.
+        /// </summary>
+        public ControlList<PlayerListDataControl> LstPlayers { get; private set; }
+
+        /// <summary>
+        /// Inventory bar/panel with selectable blocks.
+        /// </summary>
+        public InventoryControl Inventory { get; private set; }
+
+        /// <summary>
+        /// Bottom status bar.
+        /// </summary>
+        public StatusBar SbStats { get; private set; }
+
+        /// <summary>
+        /// Textbox for entering chat messages.
+        /// </summary>
+        public TextBox TxtChat { get; private set; }
+
         private BlockType selectedBlock;
-        private TextBox txtChat;
 
         /// <summary>
         /// Setup the game UI.
@@ -47,71 +75,71 @@ namespace Bricklayer.Core.Client.Interface.Screens
             base.Add(screenManager);
 
             // Status bar.
-            sbStats = new StatusBar(Manager);
-            sbStats.Init();
-            sbStats.Bottom = Manager.ScreenHeight;
-            sbStats.Left = 0;
-            sbStats.Width = Manager.ScreenWidth;
+            SbStats = new StatusBar(Manager);
+            SbStats.Init();
+            SbStats.Bottom = Manager.ScreenHeight;
+            SbStats.Left = 0;
+            SbStats.Width = Manager.ScreenWidth;
 
-            lblStats = new Label(Manager) {Top = 4, Left = 8, Width = Manager.ScreenWidth - 16};
-            lblStats.Init();
+            LblStats = new Label(Manager) {Top = 4, Left = 8, Width = Manager.ScreenWidth - 16};
+            LblStats.Init();
 
-            sbStats.Add(lblStats);
-            Window.Add(sbStats);
+            SbStats.Add(LblStats);
+            Window.Add(SbStats);
 
             // Inventory.
-            pnlInventory = new InventoryControl(this, Manager);
-            pnlInventory.Left = Manager.TargetWidth/2 - (pnlInventory.Width/2);
-            pnlInventory.Init();
-            Window.Add(pnlInventory);
+            Inventory = new InventoryControl(this, Manager);
+            Inventory.Left = Manager.TargetWidth/2 - (Inventory.Width/2);
+            Inventory.Init();
+            Window.Add(Inventory);
 
             // Chat.
-            txtChat = new TextBox(Manager);
-            txtChat.Init();
-            txtChat.Left = 8;
-            txtChat.DrawFormattedText = false;
-            txtChat.Bottom = sbStats.Top - 8;
-            txtChat.Width = (int) (Manager.TargetWidth*.4f) - 16; // Remove 16 to align due to invisible scrollbar
-            txtChat.Visible = false;
-            txtChat.Passive = true;
-            txtChat.MaxLength = ChatMessage.MaxChatLength;
-            Window.Add(txtChat);
+            TxtChat = new TextBox(Manager);
+            TxtChat.Init();
+            TxtChat.Left = 8;
+            TxtChat.DrawFormattedText = false;
+            TxtChat.Bottom = SbStats.Top - 8;
+            TxtChat.Width = (int) (Manager.TargetWidth*.4f) - 16; // Remove 16 to align due to invisible scrollbar
+            TxtChat.Visible = false;
+            TxtChat.Passive = true;
+            TxtChat.MaxLength = ChatMessage.MaxChatLength;
+            Window.Add(TxtChat);
 
-            lstChats = new ControlList<ChatDataControl>(Manager)
+            LstChats = new ControlList<ChatDataControl>(Manager)
             {
-                Left = txtChat.Left,
-                Width = txtChat.Width + 16,
+                Left = TxtChat.Left,
+                Width = TxtChat.Width + 16,
                 Height = (int) (Manager.TargetHeight*.25f)
             };
-            lstChats.Init();
-            lstChats.Color = Color.Transparent;
-            lstChats.HideSelection = true;
-            lstChats.Passive = true;
-            lstChats.HideScrollbars = true;
-            lstChats.Top = txtChat.Top - lstChats.Height;
-            Window.Add(lstChats);
+            LstChats.Init();
+            LstChats.Color = Color.Transparent;
+            LstChats.HideSelection = true;
+            LstChats.Passive = true;
+            LstChats.HideScrollbars = true;
+            LstChats.Top = TxtChat.Top - LstChats.Height;
+            Window.Add(LstChats);
 
             // Tablist.
-            lstPlayers = new ControlList<PlayerListDataControl>(Manager)
+            LstPlayers = new ControlList<PlayerListDataControl>(Manager)
             {
                 Width = 256,
                 Top = 256
             };
-            lstPlayers.Init();
-            lstPlayers.HideSelection = true;
-            lstPlayers.Left = Manager.TargetWidth/2 - (lstPlayers.Width/2);
-            lstPlayers.Passive = true;
-            lstPlayers.HideScrollbars = true;
-            lstPlayers.Visible = false;
-            Window.Add(lstPlayers);
+            LstPlayers.Init();
+            LstPlayers.HideSelection = true;
+            LstPlayers.Left = Manager.TargetWidth/2 - (LstPlayers.Width/2);
+            LstPlayers.Passive = true;
+            LstPlayers.HideScrollbars = true;
+            LstPlayers.Visible = false;
+            Window.Add(LstPlayers);
 
             foreach (var player in Level.Players)
-                lstPlayers.Items.Add(new PlayerListDataControl(player, Manager, lstPlayers));
+                LstPlayers.Items.Add(new PlayerListDataControl(player, Manager, LstPlayers));
 
 
             // Listen for later player joins.
             Client.Events.Network.Game.PlayerJoinReceived.AddHandler(
-                args => { lstPlayers.Items.Add(new PlayerListDataControl(args.Player, Manager, lstPlayers)); });
+                args => { LstPlayers.Items.Add(new PlayerListDataControl(args.Player, Manager, LstPlayers)); });
 
             // Listen for ping updates for players.
             Client.Events.Network.Game.PingUpdateReceived.AddHandler(args =>
@@ -120,17 +148,17 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 {
                     var control =
                         (PlayerListDataControl)
-                            lstPlayers.Items.FirstOrDefault(i => ((PlayerListDataControl) i).User.UUID == ping.Key);
-                    control?.ChangePing(ping.Value);
+                            LstPlayers.Items.FirstOrDefault(i => ((PlayerListDataControl) i).User.UUID == ping.Key);
+                    if (control != null) control.Ping = ping.Value;
                 }
             });
 
 
             // Hackish way to get chats to start at the bottom.
             for (var i = 0; i < (Manager.TargetHeight*0.25f)/18; i++)
-                lstChats.Items.Add(new ChatDataControl("", Manager, lstChats, this));
+                LstChats.Items.Add(new ChatDataControl("", Manager, LstChats, this));
 
-            Client.Events.Network.Game.ChatReceived.AddHandler(args => { AddChat(args.Message, Manager, lstChats); });
+            Client.Events.Network.Game.ChatReceived.AddHandler(args => { AddChat(args.Message); });
 
             // Level event handlers.
             Client.Events.Game.Level.BlockPlaced.AddHandler(args =>
@@ -144,7 +172,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
         public override void Update(GameTime gameTime)
         {
-            lblStats.Text = "FPS: " + Window.FPS;
+            LblStats.Text = "FPS: " + Window.FPS;
 
             HandleInput();
 
@@ -167,55 +195,61 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 {
                     // Place block.
                     if (Level.InBounds(pos.X, pos.Y) && Level.Tiles[pos.X, pos.Y, layer] != SelectedBlock)
-                    { 
-                         Level.Tiles[pos.X, pos.Y, layer] = SelectedBlock;
+                    {
+                        Level.Tiles[pos.X, pos.Y, layer] = SelectedBlock;
                     }
                 }
             }
 
             // Key Input.
-            if (Client.Input.IsKeyPressed(Keys.T) && !txtChat.Visible) // Open chat.
+            if (Client.Input.IsKeyPressed(Keys.T) && !TxtChat.Visible) // Open chat.
             {
-                txtChat.Visible = true;
-                txtChat.Passive = false;
-                txtChat.Focused = true;
-                lstChats.Passive = false;
-                lstChats.Items.ForEach(x => ((ChatDataControl) x).Show());
+                TxtChat.Visible = true;
+                TxtChat.Passive = false;
+                TxtChat.Focused = true;
+                LstChats.Passive = false;
+                LstChats.Items.ForEach(x => ((ChatDataControl) x).Show());
             }
-            else if ((Client.Input.IsKeyPressed(Keys.Enter) && txtChat.Visible) || Client.Input.IsKeyPressed(Keys.Escape))
+            else if ((Client.Input.IsKeyPressed(Keys.Enter) && TxtChat.Visible) || Client.Input.IsKeyPressed(Keys.Escape))
                 // Close or send chat.
             {
                 // If there's characters in chatbox, send chat.
                 // Cancel out of chat if player clicks escape.
-                if (!string.IsNullOrWhiteSpace(txtChat.Text) && !Client.Input.IsKeyPressed(Keys.Escape))
+                if (!string.IsNullOrWhiteSpace(TxtChat.Text) && !Client.Input.IsKeyPressed(Keys.Escape))
                 {
-                    Client.Network.Send(new ChatMessage(txtChat.Text.Trim()));
-                    txtChat.Text = string.Empty;
+                    Client.Network.Send(new ChatMessage(TxtChat.Text.Trim()));
+                    TxtChat.Text = string.Empty;
                 }
                 // If nothing is typed and player clicked enter, close out of chat.
-                txtChat.Visible = false;
-                txtChat.Passive = true;
-                txtChat.Focused = false;
-                lstChats.Passive = true;
-                lstChats.Items.ForEach(x => ((ChatDataControl) x).Hide());
+                TxtChat.Visible = false;
+                TxtChat.Passive = true;
+                TxtChat.Focused = false;
+                LstChats.Passive = true;
+                LstChats.Items.ForEach(x => ((ChatDataControl) x).Hide());
             }
             else if (Client.Input.IsKeyPressed(Keys.E) && !IsChatOpen()) // Open or close inventory.
             {
-                if (!pnlInventory.SizeChanging)
+                if (!Inventory.SizeChanging)
                 {
-                    pnlInventory.IsOpen = !pnlInventory.IsOpen;
-                    pnlInventory.SizeChanging = true;
+                    Inventory.IsOpen = !Inventory.IsOpen;
+                    Inventory.SizeChanging = true;
                 }
             }
-            lstPlayers.Visible = Client.Input.IsKeyDown(Keys.Tab);
+            LstPlayers.Visible = Client.Input.IsKeyDown(Keys.Tab);
         }
 
-        private void AddChat(string text, Manager manager, ControlList<ChatDataControl> chatlist)
+        /// <summary>
+        /// Adds a chat message to the list of chats, wrapping the text if too long.
+        /// </summary>
+        /// <remarks>
+        /// The latest message will be scrolled to.
+        /// </remarks>
+        public void AddChat(string text)
         {
-            var lines = WrapText(text, lstChats.Width - 8, FontSize.Default9).Split('\n');
+            var lines = WrapText(text, LstChats.Width - 8, FontSize.Default8).Split('\n');
             foreach (var line in lines)
-                chatlist.Items.Add(new ChatDataControl(line, manager, chatlist, this));
-            chatlist.ScrollTo(chatlist.Items.Count);
+                LstChats.Items.Add(new ChatDataControl(line, Manager, LstChats, this));
+            LstChats.ScrollTo(LstChats.Items.Count);
         }
 
         private string WrapText(string text, float maxLineWidth, FontSize fontsize)
@@ -246,19 +280,19 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// If chat is open.
         /// </summary>
-        public bool IsChatOpen() => txtChat.Visible;
+        public bool IsChatOpen() => TxtChat.Visible;
 
         /// <summary>
-        /// Remove the game UI.
+        /// Removes the game UI.
         /// </summary>
         public override void Remove()
         {
-            Manager.Remove(sbStats);
-            Manager.Remove(lblStats);
-            Manager.Remove(lstChats);
-            Manager.Remove(lstPlayers);
-            Manager.Remove(txtChat);
-            Manager.Remove(pnlInventory);
+            Manager.Remove(SbStats);
+            Manager.Remove(LblStats);
+            Manager.Remove(LstChats);
+            Manager.Remove(LstPlayers);
+            Manager.Remove(TxtChat);
+            Manager.Remove(Inventory);
         }
     }
 }
