@@ -6,6 +6,7 @@ using System.Linq;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
 using Console = System.Console;
 
@@ -47,7 +48,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         public Button BtnGetPlugins { get; }
 
         private readonly PluginManagerScreen pluginScreen;
-        private Dictionary<string, bool> pluginsStatus;
+        private Dictionary<string, bool> pluginStatuses;
 
         public PluginManagerWindow(Manager manager, PluginManagerScreen screen) : base(manager)
         {
@@ -64,8 +65,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Caption.Text = "Manage your Bricklayer client plugins.";
             Description.Text = "Many plugins come installed by default and are required for most servers.";
             TopPanel.Height -= 6;
-
-            pluginsStatus = screen.Client.IO.ReadPluginStatus();
 
             // List of installed plugins.
             LstPlugins = new ControlList<PluginDataControl>(Manager)
@@ -89,18 +88,41 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(BtnToggle);
 
             // If user enables or disables a plugin.
-            BtnToggle.Click += (sender, args) =>
+            BtnToggle.Click += async (sender, args) =>
             {
                 var identifier =  ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data.Identifier;
-                pluginsStatus[identifier] =
-                    !pluginsStatus[identifier];
+                pluginStatuses[identifier] =
+                    !pluginStatuses[identifier];
                 var plugin = screen.Client.Plugins.Plugins.FirstOrDefault(x => x.Identifier.Equals(identifier));
-                if (plugin != null)
-                    plugin.IsEnabled = pluginsStatus[identifier];
-                screen.Client.IO.WritePluginStatus(pluginsStatus);
-                RefreshList();
+
+                try
+                {
+                    if (!pluginStatuses[identifier])
+                        await screen.Client.Plugins.DisablePlugin(plugin, pluginStatuses);
+                    else
+                        plugin = await screen.Client.Plugins.EnablePlugin(plugin, pluginStatuses);
+                }
+                catch (Exception e)
+                {
+                    pluginStatuses[identifier] =
+                        !pluginStatuses[identifier];
+                    //Show error if plugin could not be disabled or enabled. (Missing dependencies?)
+                    var errorBox = new MessageBox(Manager, MessageBoxType.Warning,
+                    e.ToString(), "Error");
+                    errorBox.Init();
+                    manager.Add(errorBox);
+                    errorBox.ShowModal();
+                }
+
+                LstPlugins.Items[LstPlugins.ItemIndex] = new PluginDataControl(Manager, LstPlugins,
+                    plugin);
+                BtnToggle.Text = (pluginStatuses[identifier] ? "Disable " : "Enable ") + " Plugin";
+                BtnToggle.TextColor = !pluginStatuses[identifier]
+                    ? Color.Lime
+                    : Color.Red;
+
                 var msgBox = new MessageBox(Manager, MessageBoxType.Warning,
-                    "Bricklayer must be restarted for changes to take affect.", "Note");
+                    "Bricklayer may need to be restarted for all changes to take effect.", "Note");
                 msgBox.Init();
                 manager.Add(msgBox);
                 msgBox.ShowModal();
@@ -127,31 +149,19 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 msgBox.Init();
                 manager.Add(msgBox);
                 msgBox.ShowModal();
-                msgBox.Closed += (closedSender, closedArgs) =>
+                msgBox.Closed += async (closedSender, closedArgs) =>
                 {
                     var dialog = closedSender as Dialog;
                     if (dialog?.ModalResult != ModalResult.Yes)
                         return;
-                    // If user clicked yes:
+                    // If user clicked yes, remove plugin from list and delete it.
                     var data = ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data;
-                    pluginsStatus.Remove(data.Identifier);
+                    pluginStatuses.Remove(data.Identifier);
                     LstPlugins.Items.RemoveAt(LstPlugins.ItemIndex);
+
                     var plugin = screen.Client.Plugins.Plugins.FirstOrDefault(x => x.Identifier.Equals(data.Identifier));
                     if (plugin != null)
-                        plugin.IsEnabled = pluginsStatus[data.Identifier];
-                    screen.Client.IO.WritePluginStatus(pluginsStatus);
-
-                    try
-                    {
-                        if (Directory.Exists(data.Path))
-                            Directory.Delete(data.Path, true);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.ToString());
-                    }
-
-                    pluginScreen.Client.Plugins.Plugins.Remove(data);
+                        await screen.Client.Plugins.DeletePlugin(plugin, pluginStatuses);
 
                     LstPlugins.ItemIndex = 0;
                 };
@@ -199,8 +209,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             LstPlugins.MouseUp += (sender, args) =>
             {
                 var data = ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data;
-                BtnToggle.Text = (pluginsStatus[data.Identifier] ? "Disable " : "Enable ") + " Plugin";
-                BtnToggle.TextColor = !pluginsStatus[data.Identifier] ? Color.Lime : Color.Red;
+                BtnToggle.Text = (pluginStatuses[data.Identifier] ? "Disable " : "Enable ") + " Plugin";
+                BtnToggle.TextColor = !pluginStatuses[data.Identifier] ? Color.Lime : Color.Red;
             };
 
             // Add plugins to list.
@@ -210,22 +220,21 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// <summary>
         /// Refesh plugin list.
         /// </summary>
-        private void RefreshList()
+        private async void RefreshList()
         {
-            pluginsStatus.Clear();
-            pluginsStatus = pluginScreen.Client.IO.ReadPluginStatus();
+            pluginStatuses = await pluginScreen.Client.IO.ReadPluginStatus();
             LstPlugins.Items.Clear();
 
             foreach (var plugin in pluginScreen.Client.Plugins.Plugins)
-                LstPlugins.Items.Add(new PluginDataControl(Manager, LstPlugins, plugin, pluginsStatus[plugin.Identifier]));
+                LstPlugins.Items.Add(new PluginDataControl(Manager, LstPlugins, plugin));
 
             if (LstPlugins.Items.Count > 0)
             {
                 LstPlugins.ItemIndex = 0;
 
                 var item = ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data;
-                BtnToggle.Text = (pluginsStatus[item.Identifier] ? "Disable " : "Enable ") + " Plugin";
-                BtnToggle.TextColor = !pluginsStatus[item.Identifier]
+                BtnToggle.Text = (pluginStatuses[item.Identifier] ? "Disable " : "Enable ") + " Plugin";
+                BtnToggle.TextColor = !pluginStatuses[item.Identifier]
                     ? Color.Lime
                     : Color.Red;
             }

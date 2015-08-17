@@ -17,6 +17,6 @@ namespace Bricklayer.Plugins.DefaultBlocks.Client
             Blocks.AddBlocks();
         }
 
-        protected override void Unload() {}
+        public override void Unload() {}
     }
 }

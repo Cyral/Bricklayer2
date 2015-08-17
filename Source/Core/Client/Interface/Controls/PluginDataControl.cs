@@ -23,8 +23,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         public Label LblName { get; }
         public ImageBox ImgIcon { get; }
 
-        public PluginDataControl(Manager manager, Control parent, ClientPlugin data,
-            bool enabled)
+        public PluginDataControl(Manager manager, Control parent, ClientPlugin data)
             : base(manager)
         {
             // Setup.
@@ -47,8 +46,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 Alignment = Alignment.TopLeft
             };
             LblStatus.Init();
-            LblStatus.Text = enabled ? "Enabled" : "Disabled";
-            LblStatus.TextColor = enabled ? Color.Lime : Color.Red;
+            LblStatus.Text = data.IsEnabled ? "Enabled" : "Disabled";
+            LblStatus.TextColor = data.IsEnabled ? Color.Lime : Color.Red;
             LblStatus.Left = ClientWidth - 26 -
                              (int)
                                  Manager.Skin.Fonts[LblStatus.Font.ToString()].Resource.MeasureString(LblStatus.Text).X;

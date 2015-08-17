@@ -1,4 +1,5 @@
-﻿using Bricklayer.Core.Common;
+﻿using System.Reflection;
+using Bricklayer.Core.Common;
 
 namespace Bricklayer.Core.Server
 {

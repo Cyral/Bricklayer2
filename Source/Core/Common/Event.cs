@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Bricklayer.Core.Common
 {
@@ -33,10 +35,31 @@ namespace Bricklayer.Core.Common
     }
 
     /// <summary>
+    /// Base class for all events.
+    /// </summary>
+    /// <remarks>
+    /// This class is used to solve the issue of automatically removing events.
+    /// All events are added a list. Each event's RemoveHandlers method is then called, which will remove all events
+    /// registered to a certain plugin, based on the assembly name found when it registered the event.
+    /// </remarks>
+    public class BaseEvent
+    {
+        /// <summary>
+        /// All events.
+        /// </summary>
+        internal static List<BaseEvent> Events = new List<BaseEvent>(); 
+
+        internal virtual void RemoveHandlers(string mainTypeName)
+        {
+            
+        }
+    }
+
+    /// <summary>
     /// Represents a collection of event handlers for a certain game event.
     /// </summary>
     /// <typeparam name="TArgs">The type of arguments for the handler.</typeparam>
-    public class Event<TArgs> where TArgs : BricklayerEventArgs
+    public class Event<TArgs> : BaseEvent where TArgs : BricklayerEventArgs
     {
         private readonly List<PrioritizedEventHandler<TArgs>> handlers;
 
@@ -46,6 +69,7 @@ namespace Bricklayer.Core.Common
         public Event()
         {
             handlers = new List<PrioritizedEventHandler<TArgs>>();
+            Events.Add(this);
         }
 
         /// <summary>
@@ -58,7 +82,8 @@ namespace Bricklayer.Core.Common
         /// </remarks>
         public void AddHandler(EventHandler<TArgs> handler, bool ignoreCancel = false)
         {
-            AddHandler(handler, EventPriority.Normal, ignoreCancel);
+            var asm = Assembly.GetCallingAssembly();
+            addHandler(asm, handler, EventPriority.Normal, ignoreCancel);
         }
 
         /// <summary>
@@ -75,7 +100,29 @@ namespace Bricklayer.Core.Common
         /// </remarks>
         public void AddHandler(EventHandler<TArgs> handler, EventPriority priority, bool ignoreCancel = false)
         {
-            handlers.Add(new PrioritizedEventHandler<TArgs>(handler, priority, ignoreCancel));
+            var asm = Assembly.GetCallingAssembly();
+            addHandler(asm, handler, priority, ignoreCancel);
+        }
+
+        private void addHandler(Assembly asm, EventHandler<TArgs> handler, EventPriority priority, bool ignoreCancel)
+        {
+            // Attempt to find the calling plugin. 
+            // This is used when a plugin is unloaded, to automatically remove any events.
+            // TODO: Only issue is, the event must be registered from the main assembly (plugin.dll)
+            // I (Cyral) have tried reflection and a bunch of ideas, but decided that it is best to try
+            // and remove the events we can. In certain cases the author will manually have to remove events however.
+            var callerTypeName = string.Empty;
+            if (asm.FullName.Split(',')[0].Equals("plugin"))
+            {
+                // If found, find the main type name that inherits from the plugin class.
+                var types = asm.GetTypes();
+                var pluginType = typeof(Plugin);
+                var mainType = types.FirstOrDefault(type => pluginType.IsAssignableFrom(type));
+                if (mainType != null)
+                    callerTypeName = mainType.FullName;
+            }
+
+            handlers.Add(new PrioritizedEventHandler<TArgs>(handler, priority, ignoreCancel, callerTypeName));
             handlers.Sort((a, b) => ((int)a.Priority).CompareTo(b.Priority)); // Sort by priority
         }
 
@@ -99,6 +146,21 @@ namespace Bricklayer.Core.Common
         public void RemoveHandler(EventHandler<TArgs> handler)
         {
             handlers.RemoveAll(e => e.Event.Equals(handler));
+        }
+
+        /// <summary>
+        /// Removes all handlers that were created by the specified type name.
+        /// </summary>
+        internal override void RemoveHandlers(string mainTypeName)
+        {
+            for (var i = handlers.Count - 1; i >= 0; i--)
+            {
+                if (handlers[i].CallerTypeName.Equals(mainTypeName))
+                {
+                    handlers.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
         /// <summary>
@@ -131,11 +193,17 @@ namespace Bricklayer.Core.Common
             /// </summary>
             public bool IgnoreCancel { get; }
 
-            public PrioritizedEventHandler(EventHandler<TArgsType> handler, EventPriority priority, bool ignoreCancel = false)
+            /// <summary>
+            /// The name of the caller who created the event. Used for automatic unsubscription when a plugin is unloaded.
+            /// </summary>
+            public string CallerTypeName { get; }
+
+            public PrioritizedEventHandler(EventHandler<TArgsType> handler, EventPriority priority, bool ignoreCancel = false, string callerTypeName = "")
             {
                 Event = handler;
                 Priority = priority;
                 IgnoreCancel = ignoreCancel;
+                CallerTypeName = callerTypeName;
             }
         }
 
@@ -153,7 +221,7 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// The level of priority from 0 to 100.
         /// </summary>
-        internal int Priority { get; set; }
+        internal int Priority { get; private set; }
 
         /// <summary>
         /// This priority level is only accessible to the core game, and is called before <c>Initial</c>.

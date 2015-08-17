@@ -21,9 +21,18 @@ namespace Bricklayer.Core.Common
         public static T CreatePluginInstance<T>(Assembly asm, object arguments, PluginData plugin) where T : Plugin
         {
             // Search for a type of 'T : Plugin' to use
-            var types = asm.GetTypes();
-            var pluginType = typeof (T);
-            var mainType = types.FirstOrDefault(type => pluginType.IsAssignableFrom(type));
+            Type mainType = null;
+            try
+            {
+                var types = asm.GetTypes();
+                var pluginType = typeof (T);
+                mainType = types.FirstOrDefault(type => pluginType.IsAssignableFrom(type));
+            }
+            catch (Exception e)
+            {
+                throw new InvalidDataException(
+                    $"Couldn't load assembly '{Path.GetFileName(plugin.Name)}': {e.InnerException}");
+            }
 
             // Create an instance of this type and register it
             if (mainType == null)
@@ -35,6 +44,7 @@ namespace Bricklayer.Core.Common
                 var instance =  (T)Activator.CreateInstance(mainType,
                     BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.Instance, null,
                     new[] {arguments}, CultureInfo.CurrentCulture);
+                instance.MainTypeName = mainType.FullName;
                 instance.Path = plugin.Path;
                 instance.Identifier = plugin.Identifier;
                 instance.Authors = plugin.Authors;
@@ -47,10 +57,8 @@ namespace Bricklayer.Core.Common
             catch (Exception e)
             {
                 throw new InvalidDataException(
-                    $"Couldn't load assembly '{Path.GetFileName(plugin.Name)}': {e.InnerException}");
+                    $"Couldn't create instance of assembly '{Path.GetFileName(plugin.Name)}': {e.InnerException}");
             }
-            throw new InvalidOperationException(
-                $"Assembly '{Path.GetFileName(plugin.Name)}' is not a valid plugin.");
         }
 
         /// <summary>

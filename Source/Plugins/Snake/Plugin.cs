@@ -70,7 +70,7 @@ namespace Bricklayer.Plugins.Snake
             }, EventPriority.Initial);
         }
 
-        protected override void Unload()
+        public override void Unload()
         {
         }
 

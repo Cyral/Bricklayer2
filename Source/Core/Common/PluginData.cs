@@ -51,6 +51,12 @@ namespace Bricklayer.Core.Common
         public Version Version { get; internal set; }
 
         /// <summary>
+        /// Full name of the main type loaded.
+        /// </summary>
+        [JsonIgnore]
+        internal string MainTypeName { get; set; }
+
+        /// <summary>
         /// Path to this plugin's root folder.
         /// </summary>
         [JsonIgnore]

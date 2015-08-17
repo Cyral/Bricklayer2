@@ -10,16 +10,17 @@ namespace Bricklayer.Plugins.TestClientPlugin
     /// </summary>
     public class TestClientPlugin : ClientPlugin
     {
+        private Window window;
+
         public TestClientPlugin(Client host) : base(host) {}
 
         public override void Load()
         {
-            // Demo window
-            var window = new Window(Client.UI);
+            // Demo window.
+            window = new Window(Client.UI);
             window.Init();
             window.SetSize(300, 120);
             window.Text = "Test Plugin";
-
 
             var textbox = new TextBox(Client.UI) { Text = "This window was created\n by a loaded plugin!"};
             textbox.Init();
@@ -31,12 +32,28 @@ namespace Bricklayer.Plugins.TestClientPlugin
 
             Client.UI.Add(window);
 
+           var  d = new Derp(Client);
+
             Console.WriteLine("Test Plugin Loaded!");
         }
 
-        protected override void Unload()
+        public override void Unload()
         {
+            Client.UI.Remove(window);
             Console.WriteLine("Test Plugin Unloaded!");
+        }
+    }
+
+    public class Derp
+    {
+        public Derp(Client client)
+        {
+
+            client.Events.Game.Level.BlockPlaced.AddHandler(args =>
+            {
+                Console.Write(args.Type);
+            });
+
         }
     }
 }

@@ -70,10 +70,10 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Loads all plugins that are not already loaded.
         /// </summary>
-        internal void LoadPlugins()
+        internal async void LoadPlugins()
         {
             // Load list of enabled/disabled plugins.
-            var statuses = Client.IO.ReadPluginStatus();
+            var statuses = await Client.IO.ReadPluginStatus();
 
             // Get a list of all the .dlls in the directory.
             List<PluginData> files = null;
@@ -125,11 +125,12 @@ namespace Bricklayer.Core.Client.Components
             // Write updated statuses.
             statuses = new Dictionary<string, bool>();
             Plugins.ForEach(f => statuses.Add(f.Identifier, f.IsEnabled));
-            Client.IO.WritePluginStatus(statuses);
+            await Client.IO.WritePluginStatus(statuses);
         }
 
         private void RegisterPlugin(ClientPlugin pluginData)
         {
+            pluginData.IsEnabled = true;
             LoadIcon(pluginData);
             Plugins.Add(pluginData);
 
@@ -176,6 +177,7 @@ namespace Bricklayer.Core.Client.Components
         {
             public FakePlugin(Client host, PluginData file) : base(host)
             {
+                MainTypeName = ">FakePlugin";
                 Identifier = file.Identifier;
                 Name = file.Name;
                 Description = file.Name;
@@ -190,8 +192,100 @@ namespace Bricklayer.Core.Client.Components
             {
             }
 
-            protected override void Unload()
+            public override void Unload()
             {
+            }
+        }
+
+        /// <summary>
+        /// Disables a plugin and updates the statuses file.
+        /// </summary>
+        public async Task DisablePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
+        {
+            if (plugin != null)
+            {
+                if (Plugins.Any(p => p.Dependencies.Contains(plugin.Identifier)))
+                    throw new InvalidOperationException("Other plugins depend on this plugin and must be disabled first.");
+                // Set enabled status to false.
+                pluginStatuses[plugin.Identifier] = plugin.IsEnabled = false;
+                await Client.IO.WritePluginStatus(pluginStatuses);
+
+                // Remove all event handlers which match the main type name.
+                foreach (var e in BaseEvent.Events)
+                    e.RemoveHandlers(plugin.MainTypeName);
+
+                // Call plugin unload method.
+                plugin.Unload();
+            }
+        }
+
+        /// <summary>
+        /// Enables a disabled plugin and updates the statuses file.
+        /// </summary>
+        /// <returns>The new plugin, if it was loaded from a FakePlugin for the first time.</returns>
+        public async Task<ClientPlugin> EnablePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
+        {
+            if (plugin != null)
+            {
+                if (Plugins.Contains(plugin) && !(plugin is FakePlugin))
+                {
+                    // Set enabled status to true.
+                    pluginStatuses[plugin.Identifier] = plugin.IsEnabled = true;
+                    await Client.IO.WritePluginStatus(pluginStatuses);
+
+                    // Call plugin load method.
+                    plugin.Load();
+                }
+                else
+                {
+                    if (Plugins.Contains(plugin) && (plugin is FakePlugin))
+                        Plugins.Remove(plugin);
+                    if (plugin.Dependencies.Count > 0)
+                        foreach (var dep in
+                            plugin.Dependencies.Where(dep => Plugins.All(p => p.Identifier != dep)))
+                            throw new FileNotFoundException(
+                                $"Dependency \"{dep}\" for plugin \"{plugin.Name}\" not loaded or enabled.");
+                    var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, plugin.Path);
+                    loadingPlugin = plugin.Path;
+                    var retPlugin = IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, plugin);
+                    RegisterPlugin(retPlugin);
+                    return retPlugin;
+                }
+            }
+            return plugin;
+        }
+
+        /// <summary>
+        /// Removes a plugin from the status list, deletes its directory, and calls its unload method.
+        /// </summary>
+        public async Task DeletePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
+        {
+            if (plugin != null)
+            {
+                // Remove from status list.
+                pluginStatuses.Remove(plugin.Identifier);
+                plugin.IsEnabled = false;
+                await Client.IO.WritePluginStatus(pluginStatuses);
+                try
+                {
+                    // Delete directory.
+                    if (Directory.Exists(plugin.Path))
+                        Directory.Delete(plugin.Path, true);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+
+                Plugins.Remove(plugin);
+
+                // Remove all event handlers which match the main type name.
+                //Client.Events.Game.Level.BlockPlaced.RemoveHandlers(plugin.MainTypeName);
+                foreach (var e in BaseEvent.Events)
+                    e.RemoveHandlers(plugin.MainTypeName);
+
+                // Call plugin unload method.
+                plugin.Unload();
             }
         }
     }

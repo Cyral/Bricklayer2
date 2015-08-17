@@ -15,22 +15,19 @@ namespace Bricklayer.Plugins.TestServerPlugin
     {
         public TestServerPlugin(Server host) : base(host) {}
 
-        private Random random = new Random();
-
         public override void Load()
         {
             Server.Commands.AddCommand(
                 Command.Create("Test", "test", "A test command!")
                     .SetAction(((arguments, o) => { Console.WriteLine("Hello!"); })));
 
-            /* Server.Events.Connection.Connection.AddHandler(
-                args => { Logger.WriteLine(LogType.Plugin, $"{args.Username} has joined!"); }); */
-
             Logger.WriteLine(LogType.Plugin, "Test Plugin Loaded!");
         }
 
-        protected override void Unload()
+        public override void Unload()
         {
+            Server.Commands.Commands.RemoveAll(c => c.Name.Equals("Test"));
+
             Logger.WriteLine(LogType.Plugin, "Test Plugin Unloaded!");
         }
     }

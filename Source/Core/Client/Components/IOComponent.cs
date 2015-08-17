@@ -93,16 +93,17 @@ namespace Bricklayer.Core.Client.Components
         public async Task<List<ServerData>> ReadServers()
         {
             var fileName = serverFile;
+            var json = string.Empty;
             if (!File.Exists(fileName))
             {
                 // If server config does not exist, create it and write the default server to it
-                await WriteServers(new List<ServerData> {CreateDefaultServer()});
+                json = await WriteServers(new List<ServerData> {CreateDefaultServer()});
             }
-            var json = File.ReadAllText(fileName);
+            else
+                json = File.ReadAllText(fileName);
             if (string.IsNullOrWhiteSpace(json))
             {
-                await WriteServers(new List<ServerData> {CreateDefaultServer()});
-                json = File.ReadAllText(fileName);
+                json = await WriteServers(new List<ServerData> {CreateDefaultServer()});
             }
             var servers = JsonConvert.DeserializeObject<List<ServerData>>(json);
             return servers;
@@ -111,9 +112,9 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Save servers into a configurable json file
         /// </summary>
-        public async Task WriteServers(List<ServerData> servers)
+        public async Task<string> WriteServers(List<ServerData> servers)
         {
-            await Task.Factory.StartNew(() =>
+            return await Task.Factory.StartNew(() =>
             {
                 var fileName = serverFile;
                 if (!File.Exists(fileName))
@@ -123,29 +124,31 @@ namespace Bricklayer.Core.Client.Components
                 }
                 var json = JsonConvert.SerializeObject(servers, SerializationSettings);
                 File.WriteAllText(fileName, json);
+                return json;
             });
         }
 
         /// <summary>
         /// Reads and returns collection of enabled and disabled plugins.
         /// </summary>
-        public Dictionary<string, bool> ReadPluginStatus()
+        public async Task<Dictionary<string, bool>> ReadPluginStatus()
         {
             var plugins = new Dictionary<string, bool>();
             var fileName = pluginsFile;
+            var json = string.Empty;
             if (!File.Exists(fileName))
             {
                 // If plugin config doesn't exist, create it.
                 Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Identifier, true));
-                WritePluginStatus(plugins);
+                json = await WritePluginStatus(plugins);
             }
-            var json = File.ReadAllText(fileName);
+            else
+                json = File.ReadAllText(fileName);
             if (string.IsNullOrWhiteSpace(json))
             {
                 // If file is empty, create the contents.
                 Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Identifier, true));
-                WritePluginStatus(plugins);
-                json = File.ReadAllText(fileName);
+                json = await WritePluginStatus(plugins);
             }
             return JsonConvert.DeserializeObject<Dictionary<string, bool>>(json);
         }
@@ -153,16 +156,20 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Save plugin statuses into a configurable json file.
         /// </summary>
-        public void WritePluginStatus(Dictionary<string, bool> plugins)
+        public async Task<string> WritePluginStatus(Dictionary<string, bool> plugins)
         {
-            var fileName = pluginsFile;
-            if (!File.Exists(fileName))
+            return await Task.Factory.StartNew(() =>
             {
-                var str = File.Create(fileName);
-                str.Close();
-            }
-            var json = JsonConvert.SerializeObject(plugins, SerializationSettings);
-            File.WriteAllText(fileName, json);
+                var fileName = pluginsFile;
+                if (!File.Exists(fileName))
+                {
+                    var str = File.Create(fileName);
+                    str.Close();
+                }
+                var json = JsonConvert.SerializeObject(plugins, SerializationSettings);
+                File.WriteAllText(fileName, json);
+                return json;
+            });
         }
 
         /// <summary>

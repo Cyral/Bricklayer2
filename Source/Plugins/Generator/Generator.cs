@@ -31,6 +31,6 @@ namespace Bricklayer.Plugins.Generator
             }, EventPriority.Initial);
         }
 
-        protected override void Unload() {}
+        public override void Unload() {}
     }
 }
