@@ -28,6 +28,10 @@ is disabled, it finds all events that have the plugin assembly's FullName, and r
 of these events, Event<TArgs> derives from BaseEvent, which has a static list of events and a method that is overloaded
 to unload all events with the specified full name.
 
+For the client, plugins should only be disabled/enabled from the login screen.
+On the server, plugins can be disabled at any time, however this could cause issues. (Imagine disabling the default blocks plugin
+while the server is running...) As said above, it is not recommended to run the client or server after disabling a plugin.
+
 Note: Any .zip files in the plugin folder will be extracted at runtime. 
 
 Plugins can also automatically be installed (on the client) by using the plugin database on the website. The install button
@@ -132,6 +136,7 @@ namespace Bricklayer.Core.Client.Components
                                 file.Dependencies.Where(dep => files.All(plugin => plugin.Identifier != dep)))
                                 throw new FileNotFoundException(
                                     $"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
+                        statuses[file.Identifier] = true;
                         var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
                         assemblies[file.Identifier] = asm;
                         loadingPlugin = file.Path;

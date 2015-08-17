@@ -11,17 +11,12 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// The client host.
         /// </summary>
-        public Client Client { get; set; }
+        public Client Client { get; protected set; }
 
         /// <summary>
         /// Optional icon to display in the plugin manager.
         /// </summary>
         public Texture2D Icon { get; set; }
-
-        /// <summary>
-        /// Gets or sets if the plugin is enabled and should be ran.
-        /// </summary>
-        public bool IsEnabled { get; internal set; }
 
         /// <summary>
         /// Creates an instance of the plugin with the specified client host.

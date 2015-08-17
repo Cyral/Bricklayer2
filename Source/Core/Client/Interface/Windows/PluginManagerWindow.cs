@@ -222,10 +222,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// </summary>
         private async void RefreshList()
         {
+            if (!pluginScreen.Client.Plugins.Initialized) return;
+
             pluginStatuses = await pluginScreen.Client.IO.ReadPluginStatus();
             LstPlugins.Items.Clear();
 
-            foreach (var plugin in pluginScreen.Client.Plugins.Plugins)
+            foreach (var plugin in pluginScreen.Client.Plugins.Plugins.OrderBy(x => !x.IsEnabled).ThenBy(x => x.Name))
                 LstPlugins.Items.Add(new PluginDataControl(Manager, LstPlugins, plugin));
 
             if (LstPlugins.Items.Count > 0)

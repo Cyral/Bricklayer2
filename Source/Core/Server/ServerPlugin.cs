@@ -11,7 +11,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The server host.
         /// </summary>
-        public Server Server { get; set; }
+        public Server Server { get; protected set; }
 
         /// <summary>
         /// Creates an instance of the plugin with the specified server host.
@@ -19,6 +19,7 @@ namespace Bricklayer.Core.Server
         public ServerPlugin(Server host)
         {
             Server = host;
+            IsEnabled = true;
         }
     }
 }

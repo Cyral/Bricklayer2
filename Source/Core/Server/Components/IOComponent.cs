@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -60,6 +61,11 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         internal JsonSerializerSettings SerializationSettings { get; private set; }
 
+        /// <summary>
+        /// File containing list of plugin statuses (Whether or not they are enabled or disabled)
+        /// </summary>
+        private string pluginsFile;
+
         private DateTime lastLog;
         private StreamWriter logWriter;
         private StringBuilder sb;
@@ -78,6 +84,7 @@ namespace Bricklayer.Core.Server.Components
                 LevelsDirectory = Path.Combine(ServerDirectory, "levels");
                 PluginsDirectory = Path.Combine(ServerDirectory, "plugins");
                 ConfigFile = Path.Combine(ServerDirectory, "config.json");
+                pluginsFile = Path.Combine(ServerDirectory, "plugins.json");
             }
 
             // Create directories that don't exist.
@@ -126,7 +133,7 @@ namespace Bricklayer.Core.Server.Components
                 }
 
                 var json = string.Empty;
-                await Task.Factory.StartNew(() => json = File.ReadAllText(ConfigFile));
+                await Task.Run(() => json = File.ReadAllText(ConfigFile));
 
                 // If config is empty, regenerate and read again
                 if (string.IsNullOrWhiteSpace(json))
@@ -136,8 +143,7 @@ namespace Bricklayer.Core.Server.Components
                     await SaveConfig(config);
                 }
 
-                await Task.Factory.StartNew(() =>
-                    Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings));
+                Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings);
 
                 if (Config.Server.AutoSaveTime <= 0)
                     //To prevent the timer from firing endlessly if value is 0 or less. (Config file corrupted, missing value, etc.)
@@ -150,6 +156,47 @@ namespace Bricklayer.Core.Server.Components
             {
                 Logger.WriteLine(LogType.Error, "IOComponent.LoadConfig - {0}", ex.ToString());
             }
+        }
+
+        /// <summary>
+        /// Reads and returns collection of enabled and disabled plugins.
+        /// </summary>
+        public Dictionary<string, bool> ReadPluginStatus()
+        {
+            var plugins = new Dictionary<string, bool>();
+            var fileName = pluginsFile;
+            var json = string.Empty;
+            if (!File.Exists(fileName))
+            {
+                // If plugin config doesn't exist, create it.
+                Server.Plugins.Plugins.ForEach(p => plugins.Add(p.Identifier, true));
+                json = WritePluginStatus(plugins);
+            }
+            else
+                json = File.ReadAllText(fileName);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                // If file is empty, create the contents.
+                Server.Plugins.Plugins.ForEach(p => plugins.Add(p.Identifier, true));
+                json = WritePluginStatus(plugins);
+            }
+            return JsonConvert.DeserializeObject<Dictionary<string, bool>>(json);
+        }
+
+        /// <summary>
+        /// Save plugin statuses into a configurable json file.
+        /// </summary>
+        public string WritePluginStatus(Dictionary<string, bool> plugins)
+        {
+                var fileName = pluginsFile;
+                if (!File.Exists(fileName))
+                {
+                    var str = File.Create(fileName);
+                    str.Close();
+                }
+                var json = JsonConvert.SerializeObject(plugins, SerializationSettings);
+                File.WriteAllText(fileName, json);
+                return json;
         }
 
         /// <summary>

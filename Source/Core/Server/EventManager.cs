@@ -93,7 +93,7 @@ namespace Bricklayer.Core.Server
                     /// <summary>
                     /// Z grid coordinate. (Layer)
                     /// </summary>
-                    public int Z => (int) Layer;
+                    public int Z => (int)Layer;
 
                     /// <summary>
                     /// Player who placed block. Null if placed by plugin or game.
@@ -108,7 +108,7 @@ namespace Bricklayer.Core.Server
                         Level = sender.Level;
                     }
 
-                    public BlockPlacedEventArgs(Level level, int x, int y, int z, BlockType newType, BlockType oldType) : this(x, y,z, newType, oldType)
+                    public BlockPlacedEventArgs(Level level, int x, int y, int z, BlockType newType, BlockType oldType) : this(x, y, z, newType, oldType)
                     {
                         Level = level;
                     }
@@ -123,7 +123,8 @@ namespace Bricklayer.Core.Server
                     }
 
                     public BlockPlacedEventArgs(Player sender, int x, int y, Layer layer, BlockType newType, BlockType oldType)
-                        : this(sender, x, y, (int) layer, newType, oldType) { } 
+                        : this(sender, x, y, (int)layer, newType, oldType)
+                    { }
                 }
 
                 /// <summary>
@@ -137,8 +138,33 @@ namespace Bricklayer.Core.Server
                 /// <summary>
                 /// When a block is placed.
                 /// </summary>
-                public Event<BlockPlacedEventArgs> BlockPlaced { get; } = new Event<BlockPlacedEventArgs>(); 
+                public Event<BlockPlacedEventArgs> BlockPlaced { get; } = new Event<BlockPlacedEventArgs>();
             }
+
+            #endregion
+
+            #region Arguments
+
+            public class PluginStatusEventArgs : BricklayerEventArgs
+            {
+                public ServerPlugin Plugin { get; private set; }
+
+                public bool Enabled => Plugin.IsEnabled;
+
+                public PluginStatusEventArgs(ServerPlugin plugin)
+                {
+                    Plugin = plugin;
+                }
+            }
+
+            #endregion
+
+            #region Events 
+
+            /// <summary>
+            /// When a plugin is loaded, enabled, or disabled.
+            /// </summary>
+            public Event<PluginStatusEventArgs> PluginStatusChanged { get; } = new Event<PluginStatusEventArgs>();
 
             #endregion
         }

@@ -58,9 +58,9 @@ namespace Bricklayer.Core.Server
         public PluginComponent Plugins { get; internal set; }
 
         private string clear, input;
+        private Timer saveTimer;
         private bool showHeader;
         private DateTime start;
-        private Timer saveTimer;
 
         internal async Task Start()
         {
@@ -95,7 +95,7 @@ namespace Bricklayer.Core.Server
             await Net.Init();
 
             // Create save timer
-            saveTimer = new Timer(IO.Config.Server.AutoSaveTime * 1000 * 60);
+            saveTimer = new Timer(IO.Config.Server.AutoSaveTime*1000*60);
             saveTimer.Elapsed += async (sender, args) => await SaveAll();
             saveTimer.Start();
 
@@ -229,7 +229,22 @@ namespace Bricklayer.Core.Server
                 .SetAction(delegate
                 {
                     foreach (var command in Commands.Commands)
-                        Console.WriteLine(command.ShowHelp());
+                    {
+                        Console.Write(command.Name + ": ");
+
+                        if (!string.IsNullOrEmpty(command.Description))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Gray;
+                            Console.Write(command.Description + " ");
+                        }
+
+                        Console.Write("(Usage: ");
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write(command.GenerateUsage());
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.WriteLine(")");
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
                 }));
 
             Commands.AddCommand(Command
@@ -252,10 +267,95 @@ namespace Bricklayer.Core.Server
                 .Create("Save All")
                 .AddAlias("save", "saveall")
                 .SetDescription("Saves all levels.")
-                .SetAction(async delegate
+                .SetAction(async delegate { await SaveAll(); }));
+
+            Commands.AddCommand(Command
+                .Create("Plugin List")
+                .AddAlias("plugins", "pl")
+                .SetDescription("Lists all plugins.")
+                .SetAction(delegate
                 {
-                    await SaveAll();
+                    if (!Plugins.Initialized) return;
+                    Console.WriteLine("Installed plugins list:");
+                    var plugins = Plugins.Plugins.OrderBy(x => !x.IsEnabled).ThenBy(x => x.Name);
+                    foreach (var plugin in plugins)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Black;
+                        Console.BackgroundColor = plugin.IsEnabled ? ConsoleColor.Green : ConsoleColor.Red;
+                        Console.Write(plugin.IsEnabled ? " Enabled " : " Disabled");
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write(" " + plugin.Name);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.WriteLine(" " + plugin.Identifier + " - v" + plugin.Version + " ");
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
                 }));
+
+            Commands.AddCommand(Command
+                .Create("Plugin Status")
+                .AddAlias("plugin")
+                .SetDescription(
+                    "Enables or disables a plugin. It is recommended to restart after enabling or disabling a plugin.")
+                .SetAction((args, data) =>
+                {
+                    if (!Plugins.Initialized) return;
+                    // Find plugin.
+                    var plugin =
+                        Plugins.Plugins.FirstOrDefault(
+                            x =>
+                                x.Identifier.Equals(args.FromName("plugin-identifier-or-name"),
+                                    StringComparison.OrdinalIgnoreCase)
+                                ||
+                                x.Name.Equals(args.FromName("plugin-identifier-or-name"),
+                                    StringComparison.OrdinalIgnoreCase));
+                    if (plugin != null)
+                    {
+                        var enabled = args.FromName("status").Equals("enable", StringComparison.OrdinalIgnoreCase);
+                        var status = enabled ? "enabled" : "disabled";
+                        if (plugin.IsEnabled != enabled) // If not already in the state.
+                        {
+                            try
+                            {
+                                if (enabled)
+                                    Plugins.EnablePlugin(plugin);
+                                else
+                                    Plugins.DisablePlugin(plugin);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine(e.Message);
+                                Console.ForegroundColor = ConsoleColor.White;
+                                return;
+                            }
+
+                            Console.WriteLine($"Plugin \"{plugin.Name}\" {status}.");
+
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine(
+                                "It is recommended to restart the server for all changes to take effect. Plugins may be left in an unstable state.");
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                        else
+                        {
+                            Console.WriteLine(
+                                $"Plugin with identifier \"{args.FromName("plugin-identifier-or-name")}\" already {status}.");
+                        }
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(
+                            $"Plugin with identifier \"{args.FromName("plugin-identifier-or-name")}\" not found.");
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                })
+                .AddArgument(Argument
+                    .Create("status")
+                    .AddOption(Argument.Create("enable"))
+                    .AddOption(Argument.Create("disable")))
+                .AddArgument(Argument.Create("plugin-identifier-or-name")));
 
             Commands.AddCommand(Command
                 .Create("Exit")
@@ -352,12 +452,8 @@ namespace Bricklayer.Core.Server
         /// <param name="ignoreError">If true and the sender is not found, null will be returned instead of throwing an error.</param>
         public Player PlayerFromRUI(long remoteUniqueIdentifier, bool ignoreError = false)
         {
-            Player found = null;
-            foreach (var user in Players)
-            {
-                if (user.Connection.RemoteUniqueIdentifier == remoteUniqueIdentifier)
-                    found = user;
-            }
+            var found =
+                Players.FirstOrDefault(user => user.Connection.RemoteUniqueIdentifier == remoteUniqueIdentifier);
             if (found != null) return found;
             if (ignoreError) return null;
             throw new KeyNotFoundException($"Could not find user from RemoteUniqueIdentifier: {remoteUniqueIdentifier}");

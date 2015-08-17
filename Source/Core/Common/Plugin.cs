@@ -6,6 +6,11 @@
     public abstract class Plugin : PluginData
     {
         /// <summary>
+        /// Gets or sets if the plugin is enabled and should be ran.
+        /// </summary>
+        public bool IsEnabled { get; internal set; }
+
+        /// <summary>
         /// Performed when the plugin is loaded.
         /// </summary>
         /// <remarks>

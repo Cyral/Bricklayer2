@@ -59,8 +59,8 @@ namespace Bricklayer.Core.Client.Components
 
         public IOComponent(Client client) : base(client)
         {
-            serverFile = Path.Combine(MainDirectory, "servers.config");
-            pluginsFile = Path.Combine(MainDirectory, "plugins.config");
+            serverFile = Path.Combine(MainDirectory, "servers.json");
+            pluginsFile = Path.Combine(MainDirectory, "plugins.json");
         }
 
         public override async Task Init()
@@ -93,14 +93,14 @@ namespace Bricklayer.Core.Client.Components
         public async Task<List<ServerData>> ReadServers()
         {
             var fileName = serverFile;
-            var json = string.Empty;
+            string json;
             if (!File.Exists(fileName))
             {
                 // If server config does not exist, create it and write the default server to it
                 json = await WriteServers(new List<ServerData> {CreateDefaultServer()});
             }
             else
-                json = File.ReadAllText(fileName);
+                json = await Task.Run(() => File.ReadAllText(fileName));
             if (string.IsNullOrWhiteSpace(json))
             {
                 json = await WriteServers(new List<ServerData> {CreateDefaultServer()});
