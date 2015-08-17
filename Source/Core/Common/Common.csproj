@@ -79,6 +79,7 @@
     <Compile Include="Net\Messages\PlayerJoinMessage.cs" />
     <Compile Include="Net\Messages\PluginDownloadMessage.cs" />
     <Compile Include="IOHelper.cs" />
+    <Compile Include="Net\Messages\RatingMessage.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="JsonContractResolver.cs" />
     <Compile Include="Net\IMessage.cs" />

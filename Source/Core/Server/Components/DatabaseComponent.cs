@@ -45,7 +45,7 @@ namespace Bricklayer.Core.Server.Components
                 return levels;
             // Select the level data (name, description, plays, etc.), and find the name of the creator
             command.CommandText =
-                "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator";
+                "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Level.Rating Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator";
             // Query the database and add all resulting levels to the level list
             await PerformQuery(connectionString, command, reader =>
             {
@@ -142,7 +142,8 @@ namespace Bricklayer.Core.Server.Components
             {
                 initialCommand.CommandText =
                     "CREATE TABLE IF NOT EXISTS Levels (GUID GUID PRIMARY KEY,Name TEXT,Description TEXT,Plays INTEGER, Creator GUID);" +
-                    "CREATE TABLE IF NOT EXISTS Players (Username Text UNIQUE,GUID GUID PRIMARY KEY)";
+                    "CREATE TABLE IF NOT EXISTS Players (Username Text UNIQUE,GUID GUID PRIMARY KEY);" +
+                    "CREATE TABLE IF NOT EXISTS Ratings (User GUID UNIQUE,Level GUID UNIQUE,Rating DOUBLE,Id INT AUTO_INCREMENT PRIMARY KEY)";
                 await PerformOperation(connectionString, initialCommand);
             }
 
@@ -160,6 +161,43 @@ namespace Bricklayer.Core.Server.Components
                             {"username", args.Player.Username},
                             {"uuid", args.Player.UUID.ToString("N")}
                         });
+                    await PerformOperation(connectionString, insertCommand);
+                }
+            }, EventPriority.InternalFinal);
+
+            // When a (new) user connects, add them to the database.
+            Server.Events.Network.UserConnected.AddHandler(async args =>
+            {
+                var insertCommand = providerFactory.CreateCommand();
+                if (insertCommand != null)
+                {
+                    insertCommand.CommandText =
+                        "INSERT OR IGNORE INTO Players (Username, GUID) VALUES (@username, @uuid);";
+                    AddParamaters(insertCommand,
+                        new Dictionary<string, string>
+                        {
+                            {"username", args.Player.Username},
+                            {"uuid", args.Player.UUID.ToString("N")}
+                        });
+                    await PerformOperation(connectionString, insertCommand);
+                }
+            }, EventPriority.InternalFinal);
+
+            // When a user sends a rating of a level
+            Server.Events.Network.RatingMessageReceived.AddHandler(async args =>
+            {
+                var insertCommand = providerFactory.CreateCommand();
+                if (insertCommand != null)
+                {
+                    insertCommand.CommandText =
+                        "INSERT INTO Ratings (User, Level) VALUES (@user, @level) " +
+                        "ON DUPLICATE KEY UPDATE User = VALUES(User), Level = VALUES(Level)";
+                    AddParamaters(insertCommand,
+                       new Dictionary<string, string>
+                       {
+                            {"username", args.Sender.UUID.ToString("N")},
+                            {"level", args.Level.ToString("N")}
+                       });
                     await PerformOperation(connectionString, insertCommand);
                 }
             }, EventPriority.InternalFinal);

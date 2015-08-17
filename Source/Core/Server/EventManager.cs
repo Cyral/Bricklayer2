@@ -330,6 +330,20 @@ namespace Bricklayer.Core.Server
                 }
             }
 
+            public class RatingEventArgs : BricklayerEventArgs
+            {
+                public Guid Level { get; private set; }
+                public double Rating { get; private set; }
+                public Player Sender { get; private set; }
+
+                public RatingEventArgs(Guid level, Player sender, double rating)
+                {
+                    Level = level;
+                    Sender = sender;
+                    Rating = rating;
+                }
+            }
+
             public class BlockPlacedEventArgs : BricklayerEventArgs
             {
                 /// <summary>
@@ -431,6 +445,11 @@ namespace Bricklayer.Core.Server
             /// When the server receives a block place message.
             /// </summary>
             public Event<BlockPlacedEventArgs> BlockPlaceMessageReceived { get; } = new Event<BlockPlacedEventArgs>();
+
+            /// <summary>
+            /// When the server receives a rating for a level from a player
+            /// </summary>
+            public Event<RatingEventArgs> RatingMessageReceived { get; } = new Event<RatingEventArgs>();
 
             #endregion
         }

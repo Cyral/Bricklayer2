@@ -222,6 +222,13 @@ namespace Bricklayer.Core.Server.Net
                                 msg.Point.Y, msg.Layer, msg.Type));
                         break;
                     }
+                    case MessageTypes.Rating:
+                    {
+                        var msg = new RatingMessage(inc, MessageContext.Server);
+                        Server.Events.Network.RatingMessageReceived.Invoke(
+                            new EventManager.NetEvents.RatingEventArgs(msg.Level, sender, msg.Rating));
+                        break;
+                    }
                 }
             }
         }
