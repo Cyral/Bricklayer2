@@ -168,6 +168,18 @@ namespace Bricklayer.Core.Client
                 }
             }
 
+            public class PluginStatusEventArgs : BricklayerEventArgs
+            {
+                public ClientPlugin Plugin { get; private set; }
+
+                public bool Enabled => Plugin.IsEnabled;
+
+                public PluginStatusEventArgs(ClientPlugin plugin)
+                {
+                    Plugin = plugin;
+                }
+            }
+
             #endregion
 
             // Events represent a collection of event handlers.
@@ -184,6 +196,11 @@ namespace Bricklayer.Core.Client
             /// When the current UI screen of the game is changed. (Example: From login to in-game)
             /// </summary>
             public Event<GameScreenEventArgs> ScreenChanged { get; } = new Event<GameScreenEventArgs>();
+
+            /// <summary>
+            /// When a plugin is loaded, enabled, or disabled.
+            /// </summary>
+            public Event<PluginStatusEventArgs> PluginStatusChanged { get; } = new Event<PluginStatusEventArgs>();
 
             #endregion
         }

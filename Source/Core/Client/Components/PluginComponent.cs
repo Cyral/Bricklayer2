@@ -8,6 +8,33 @@ using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net.Messages;
 
+/* 
+Plugin System Explanation:
+
+When the game starts, all folders in the plugin directory that are valid are loaded to a list.
+Any dependencies are checked for, and referenced .dlls are resolved with AssemblyResolve.
+Each plugin is loaded using Activator.CreateInstance. If a plugin is disabled (plugins.config), it
+is not loaded, but a 'FakePlugin' class instance is created. This FakePlugin has all of the details
+(name, authors, etc.), but no loaded assembly. This is used so the plugin manager can list disabled plugins.
+
+In my research, it seems references (in this case, to the Client or Server), cannot be shared across AppDomains.
+This makes it impossible to use AppDomains to sandbox plugins (which we would like to do).
+
+Plugin reloading was decided not to be included, but disabling/enabling a plugin will call the plugin's Load or
+Unload method, respectively. It is up to the plugin author to implement functionality to completely reset a plugin.
+However, any events registered by the plugin's main assembly (plugin.dll) will automatically be unregistered.
+(When an event is added, the event manager tries to find the executing plugin using reflection. When a plugin
+is disabled, it finds all events that have the plugin assembly's FullName, and removes them.) To keep a list of all
+of these events, Event<TArgs> derives from BaseEvent, which has a static list of events and a method that is overloaded
+to unload all events with the specified full name.
+
+Note: Any .zip files in the plugin folder will be extracted at runtime. 
+
+Plugins can also automatically be installed (on the client) by using the plugin database on the website. The install button
+on the website sends a message to the auth server, which tells the client to download the plugin (in the case of it recently
+being online), if it doesn't get a response back from the client, it will queue the download for next time the user is online.
+*/
+
 namespace Bricklayer.Core.Client.Components
 {
     /// <summary>
@@ -21,6 +48,7 @@ namespace Bricklayer.Core.Client.Components
         public int PluginCount => Plugins.Count;
 
         internal List<ClientPlugin> Plugins { get; }
+        private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
         private string loadingPlugin;
 
         public PluginComponent(Client client) : base(client)
@@ -105,6 +133,7 @@ namespace Bricklayer.Core.Client.Components
                                 throw new FileNotFoundException(
                                     $"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
                         var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                        assemblies[file.Identifier] = asm;
                         loadingPlugin = file.Path;
                         RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
                     }
@@ -113,7 +142,7 @@ namespace Bricklayer.Core.Client.Components
                         // Create plugin instance with no actual assembly, to be displayed in the plugin manager list.
                         var pluginData = new FakePlugin(Client, file);
                         LoadIcon(pluginData);
-                        Plugins.Add(pluginData);   
+                        Plugins.Add(pluginData);
                     }
                 }
                 catch (Exception e)
@@ -128,17 +157,18 @@ namespace Bricklayer.Core.Client.Components
             await Client.IO.WritePluginStatus(statuses);
         }
 
-        private void RegisterPlugin(ClientPlugin pluginData)
+        private void RegisterPlugin(ClientPlugin plugin)
         {
-            pluginData.IsEnabled = true;
-            LoadIcon(pluginData);
-            Plugins.Add(pluginData);
+            plugin.IsEnabled = true;
+            LoadIcon(plugin);
+            Plugins.Add(plugin);
 
             // Load plugin content.
-            Client.Content.LoadTextures(Path.Combine(pluginData.Path, Path.Combine("Content", "Textures")), Client);
+            Client.Content.LoadTextures(Path.Combine(plugin.Path, Path.Combine("Content", "Textures")), Client);
             // Load plugin.
-            pluginData.Load();
-            Console.WriteLine($"Plugin: Loaded {pluginData.GetInfoString()}");
+            plugin.Load();
+            Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
+            Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
         }
 
         /// <summary>
@@ -171,33 +201,6 @@ namespace Bricklayer.Core.Client.Components
         }
 
         /// <summary>
-        /// Dummy class for disabled plugins, as an instance is needed to display in the plugin manager.
-        /// </summary>
-        public class FakePlugin : ClientPlugin
-        {
-            public FakePlugin(Client host, PluginData file) : base(host)
-            {
-                MainTypeName = ">FakePlugin";
-                Identifier = file.Identifier;
-                Name = file.Name;
-                Description = file.Name;
-                Authors = file.Authors;
-                Dependencies = file.Dependencies;
-                Version = file.Version;
-                Path = file.Path;
-                IsEnabled = false;
-            }
-
-            public override void Load()
-            {
-            }
-
-            public override void Unload()
-            {
-            }
-        }
-
-        /// <summary>
         /// Disables a plugin and updates the statuses file.
         /// </summary>
         public async Task DisablePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
@@ -205,17 +208,22 @@ namespace Bricklayer.Core.Client.Components
             if (plugin != null)
             {
                 if (Plugins.Any(p => p.Dependencies.Contains(plugin.Identifier)))
-                    throw new InvalidOperationException("Other plugins depend on this plugin and must be disabled first.");
+                    throw new InvalidOperationException(
+                        "Other plugins depend on this plugin and must be disabled first.");
                 // Set enabled status to false.
                 pluginStatuses[plugin.Identifier] = plugin.IsEnabled = false;
                 await Client.IO.WritePluginStatus(pluginStatuses);
 
                 // Remove all event handlers which match the main type name.
+                // See explanation at top of file.
                 foreach (var e in BaseEvent.Events)
                     e.RemoveHandlers(plugin.MainTypeName);
 
+                Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
+
                 // Call plugin unload method.
                 plugin.Unload();
+                Console.WriteLine($"Plugin: Disabled {plugin.GetInfoString()}");
             }
         }
 
@@ -233,11 +241,19 @@ namespace Bricklayer.Core.Client.Components
                     pluginStatuses[plugin.Identifier] = plugin.IsEnabled = true;
                     await Client.IO.WritePluginStatus(pluginStatuses);
 
-                    // Call plugin load method.
-                    plugin.Load();
+                    // Create new instance and call plugin load method.
+                    loadingPlugin = plugin.Path;
+                    if (Plugins.Contains(plugin))
+                        Plugins.Remove(plugin);
+                    var newPlugin = IOHelper.CreatePluginInstance<ClientPlugin>(assemblies[plugin.Identifier], Client, plugin);
+                    newPlugin.Load();
+                    Plugins.Add(newPlugin);
+                    Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
+                    Console.WriteLine($"Plugin: Enabled {plugin.GetInfoString()}");
                 }
                 else
                 {
+                    // If the plugin hasn't been loaded yet (disabled at startup), create an instance and load it.
                     if (Plugins.Contains(plugin) && (plugin is FakePlugin))
                         Plugins.Remove(plugin);
                     if (plugin.Dependencies.Count > 0)
@@ -246,9 +262,12 @@ namespace Bricklayer.Core.Client.Components
                             throw new FileNotFoundException(
                                 $"Dependency \"{dep}\" for plugin \"{plugin.Name}\" not loaded or enabled.");
                     var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, plugin.Path);
+                    assemblies[plugin.Identifier] = asm;
                     loadingPlugin = plugin.Path;
                     var retPlugin = IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, plugin);
                     RegisterPlugin(retPlugin);
+                    pluginStatuses[retPlugin.Identifier] = true;
+                    await Client.IO.WritePluginStatus(pluginStatuses);
                     return retPlugin;
                 }
             }
@@ -280,12 +299,41 @@ namespace Bricklayer.Core.Client.Components
                 Plugins.Remove(plugin);
 
                 // Remove all event handlers which match the main type name.
-                //Client.Events.Game.Level.BlockPlaced.RemoveHandlers(plugin.MainTypeName);
                 foreach (var e in BaseEvent.Events)
                     e.RemoveHandlers(plugin.MainTypeName);
 
+                Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
+
                 // Call plugin unload method.
                 plugin.Unload();
+                Console.WriteLine($"Plugin: Deleted {plugin.GetInfoString()}");
+            }
+        }
+
+        /// <summary>
+        /// Dummy class for disabled plugins, as an instance is needed to display in the plugin manager.
+        /// </summary>
+        private class FakePlugin : ClientPlugin
+        {
+            public FakePlugin(Client host, PluginData file) : base(host)
+            {
+                MainTypeName = ">FakePlugin";
+                Identifier = file.Identifier;
+                Name = file.Name;
+                Description = file.Name;
+                Authors = file.Authors;
+                Dependencies = file.Dependencies;
+                Version = file.Version;
+                Path = file.Path;
+                IsEnabled = false;
+            }
+
+            public override void Load()
+            {
+            }
+
+            public override void Unload()
+            {
             }
         }
     }

@@ -63,8 +63,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Center();
 
             Caption.Text = "Manage your Bricklayer client plugins.";
-            Description.Text = "Many plugins come installed by default and are required for most servers.";
-            TopPanel.Height -= 6;
+            Description.Text = "Many plugins come installed by default and are required for most servers.\nDisabling or enabling a plugin does not garauntee it to function properly.\nIt is recommended to restart after disabling or enabling a plugin.";
+            TopPanel.Height += 22;
 
             // List of installed plugins.
             LstPlugins = new ControlList<PluginDataControl>(Manager)
@@ -122,7 +122,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                     : Color.Red;
 
                 var msgBox = new MessageBox(Manager, MessageBoxType.Warning,
-                    "Bricklayer may need to be restarted for all changes to take effect.", "Note");
+                    "It is recommended to restart Bricklayer for all changes to take effect.","Note");
                 msgBox.Init();
                 manager.Add(msgBox);
                 msgBox.ShowModal();

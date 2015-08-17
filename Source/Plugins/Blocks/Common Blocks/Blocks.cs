@@ -77,5 +77,39 @@ namespace Bricklayer.Plugins.DefaultBlocks.Common
             MaterialSlab = new BlockType("Slab", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
             MaterialGlass = new BlockType("Glass", Layer.All, BlockCollision.Impassable, BlockPacks.Materials);
         }
+
+        public static void RemoveBlocks()
+        {
+            // Remove blocks when plugin is unloaded.
+            BlockType.Blocks.Remove(ClassicGray);
+            BlockType.Blocks.Remove(ClassicWhite);
+            BlockType.Blocks.Remove(ClassicBlack);
+            BlockType.Blocks.Remove(ClassicRed);
+            BlockType.Blocks.Remove(ClassicOrange);
+            BlockType.Blocks.Remove(ClassicYellow);
+            BlockType.Blocks.Remove(ClassicGreen);
+            BlockType.Blocks.Remove(ClassicCyan);
+            BlockType.Blocks.Remove(ClassicBlue);
+            BlockType.Blocks.Remove(ClassicPurple);
+
+            BlockType.Blocks.Remove(MetalGray);
+            BlockType.Blocks.Remove(MetalWhite);
+            BlockType.Blocks.Remove(MetalBlack);
+            BlockType.Blocks.Remove(MetalRed);
+            BlockType.Blocks.Remove(MetalOrange);
+            BlockType.Blocks.Remove(MetalYellow);
+            BlockType.Blocks.Remove(MetalGreen);
+            BlockType.Blocks.Remove(MetalCyan);
+            BlockType.Blocks.Remove(MetalBlue);
+            BlockType.Blocks.Remove(MetalPurple);
+
+            BlockType.Blocks.Remove(MaterialStone);
+            BlockType.Blocks.Remove(MaterialDirt);
+            BlockType.Blocks.Remove(MaterialGrass);
+            BlockType.Blocks.Remove(MaterialBrick);
+            BlockType.Blocks.Remove(MaterialWood);
+            BlockType.Blocks.Remove(MaterialSlab);
+            BlockType.Blocks.Remove(MaterialGlass);
+        }
     }
 }

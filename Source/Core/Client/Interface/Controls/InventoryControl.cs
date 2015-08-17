@@ -13,7 +13,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// </summary>
     public class InventoryControl : Panel
     {
-        private static readonly int inventorySlots = 11;
+        private int inventorySlots;
 
         /// <summary>
         /// Indicates if the inventory is trazsitioning from open to closed or vice-versa.
@@ -66,12 +66,15 @@ namespace Bricklayer.Core.Client.Interface.Controls
         {
             this.screen = screen;
 
+            // 11 main slots by default.
+            inventorySlots = Math.Min(11, BlockType.Blocks.Count);
+
             BlockControls = new InventoryBlockControl[inventorySlots];
-            ExtendedBlockControls = new InventoryBlockControl[BlockType.Blocks.Count];
+            ExtendedBlockControls = new InventoryBlockControl[PackCategory.Categories.Count > 0 ? BlockType.Blocks.Count : 0];
             var packLabels = new Label[BlockPack.Packs.Count];
 
             // Find width of normal inventory size, and set an expanded target size.
-            normalWidth = ((inventorySlots + 1)*(Tile.Width + 2)) + 8;
+            normalWidth = inventorySlots* (Tile.Width + 4) + 6;
             extendedWidth = (int) (normalWidth*2.5f);
 
             realWidth = Width = normalWidth;
@@ -95,7 +98,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             Manager.Add(CursorBlock);
 
             // Create main blocks.
-            for (var i = 0; i < Math.Min(BlockControls.Length, BlockType.Blocks.Count); i++)
+            for (var i = 0; i < BlockControls.Length; i++)
             {
                 // Block icon image.
                 BlockControls[i] = new InventoryBlockControl(Manager, BlockType.Blocks[i], screen)
@@ -271,7 +274,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             }
 
             // Open or close inventory.
-            if (screen.Client.Input.IsKeyPressed(Keys.E))
+            if (screen.Client.Input.IsKeyPressed(Keys.E) && PackCategory.Categories.Count > 0)
             {
                 if (!SizeChanging)
                 {

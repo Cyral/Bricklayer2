@@ -203,14 +203,17 @@ namespace Bricklayer.Core.Client
             Window.SendToBack();
 
             // Unlike the server, the clientside plugins must be loaded last.
-            await Plugins.Init();
-
-            // Now that all the textures have been loaded, set the block textures
-            foreach (var block in BlockType.Blocks.Where(x => x.IsRenderable))
+            Events.Game.PluginStatusChanged.AddHandler((args =>
             {
-                var str = "blocks." + (block.Pack != null ? block.Pack + "." : string.Empty) + block.Name;
-                block.Texture = Content[str];
-            }
+                if (!args.Enabled) return;
+                // Set any block textures that need to be set.
+                foreach (var block in BlockType.Blocks.Where(x => x.IsRenderable && x.Texture == null))
+                {
+                    var str = "blocks." + (block.Pack != null ? block.Pack + "." : string.Empty) + block.Name;
+                    block.Texture = Content[str];
+                }
+            }));
+            await Plugins.Init();
         }
 
         /// <summary>

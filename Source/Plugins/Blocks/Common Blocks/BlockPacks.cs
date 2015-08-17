@@ -16,5 +16,13 @@ namespace Bricklayer.Plugins.DefaultBlocks.Common
             Metal = new BlockPack("Metal", PackCategories.Blocks);
             Materials = new BlockPack("Materials", PackCategories.Blocks);
         }
+
+        public static void RemovePacks()
+        {
+            // Remove packs when plugin is unloaded.
+            BlockPack.Packs.Remove(Classic);
+            BlockPack.Packs.Remove(Metal);
+            BlockPack.Packs.Remove(Materials);
+        }
     }
 }

@@ -16,5 +16,12 @@ namespace Bricklayer.Plugins.DefaultBlocks.Common
             Interactive = new PackCategory("Interactive");
             Miscellaneous = new PackCategory("Miscellaneous");
         }
+
+        public static void RemoveCategories()
+        {
+            PackCategory.Categories.Remove(Blocks);
+            PackCategory.Categories.Remove(Interactive);
+            PackCategory.Categories.Remove(Miscellaneous);
+        }
     }
 }

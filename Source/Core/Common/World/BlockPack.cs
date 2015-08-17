@@ -42,7 +42,6 @@ namespace Bricklayer.Core.Common.World
         {
             Name = name;
             ID = (byte)Packs.Count;
-            Packs.Add(this);
             if (PackCategory.Categories.Count > 0) // Choose default category.
                 Category = PackCategory.Categories[0];
         }
@@ -51,8 +50,8 @@ namespace Bricklayer.Core.Common.World
         {
             Name = name;
             ID = (byte)Packs.Count;
-            Packs.Add(this);
             Category = category;
+            Packs.Add(this);
         }
 
         public override string ToString()

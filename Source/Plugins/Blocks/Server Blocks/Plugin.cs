@@ -17,6 +17,11 @@ namespace Bricklayer.Plugins.DefaultBlocks.Server
             Blocks.AddBlocks();
         }
 
-        public override void Unload() {}
+        public override void Unload()
+        {
+            PackCategories.RemoveCategories();
+            BlockPacks.RemovePacks();
+            Blocks.RemoveBlocks();
+        }
     }
 }

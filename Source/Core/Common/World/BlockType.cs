@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Common.World
     public class BlockType
     {
         /// <summary>
-        /// List of all block types.
+        /// List of all block types. Blocks must be added as soon as plugins are loaded.
         /// </summary>
         public static List<BlockType> Blocks { get; }
 
@@ -85,7 +85,7 @@ namespace Bricklayer.Core.Common.World
             // ReSharper disable once UseObjectOrCollectionInitializer
             Blocks = new List<BlockType>();
 
-            //Add hardcoded blocks:
+            // Add hardcoded blocks:
             // ReSharper disable once ObjectCreationAsStatement
             new BlockType("Empty", Layer.All) {IsRenderable = false};
         }
@@ -122,7 +122,6 @@ namespace Bricklayer.Core.Common.World
                 else
                     batch.Draw(Texture, new Vector2(x*Tile.Width, y*Tile.Height));
             };
-
             Blocks.Add(this);
         }
 
@@ -139,7 +138,7 @@ namespace Bricklayer.Core.Common.World
                 var x = Blocks[i];
                 if (x.ID == ID) return x;
             }
-            return null;
+            return Blocks[0]; // Return empty block if block not found (Blocks not loaded by plugin?)
         }
 
         public override string ToString()
