@@ -58,6 +58,8 @@ namespace Bricklayer.Core.Server
         public PluginComponent Plugins { get; internal set; }
 
         private string clear, input;
+        private int historyIndex;
+        private List<string> inputHistory;
         private Timer saveTimer;
         private bool showHeader;
         private DateTime start;
@@ -106,6 +108,8 @@ namespace Bricklayer.Core.Server
 
             WriteHeader();
 
+            inputHistory = new List<string>();
+
             while (true) // Parse commands now that messaging has been handed off to another thread
             {
                 input = string.Empty;
@@ -120,22 +124,88 @@ namespace Bricklayer.Core.Server
                         if (input.Length - 1 >= 0)
                         {
                             input = input.Substring(0, input.Length - 1);
-                            Console.CursorLeft = 3 + input.Length - 1;
-                            Console.Write(' ');
-                            Console.CursorLeft = 3 + input.Length - 1;
+                            Console.CursorLeft = 2 + input.Length;
+                            Console.Write(" \b");
                         }
                         continue;
                     }
                     if (key.Key == ConsoleKey.Enter)
                     {
-                        Console.WriteLine("");
+                        // Enter press will parse the command.
+                        Console.WriteLine();
                         break;
+                    }
+                    // Arrow keys will scroll through command history.
+                    switch (key.Key)
+                    {
+                        case ConsoleKey.UpArrow:
+                            if (historyIndex > 0 && inputHistory.Count > 0)
+                            {
+                                historyIndex--;
+                                Console.CursorLeft = 2;
+                                if (historyIndex >= inputHistory.Count - 1)
+                                    Console.Write(inputHistory[historyIndex] + new string(' ', input.Length));
+                                else if (historyIndex < inputHistory.Count - 1 &&
+                                         inputHistory[historyIndex + 1].Length + 1 - inputHistory[historyIndex].Length <=
+                                         0)
+                                    Console.Write(inputHistory[historyIndex]);
+                                else
+                                    Console.Write(inputHistory[historyIndex] +
+                                                  new string(' ', Math.Max(0, Math.Max(input.Length, 
+                                                          inputHistory[historyIndex + 1].Length + 1 -
+                                                          inputHistory[historyIndex].Length))));
+                                Console.CursorLeft = inputHistory[historyIndex].Length + 2;
+                                input = inputHistory[historyIndex];
+                            }
+                            continue;
+                        case ConsoleKey.DownArrow:
+                            if (historyIndex < inputHistory.Count && inputHistory.Count > 0)
+                            {
+                                historyIndex++;
+                                Console.CursorLeft = 2;
+                                if (historyIndex == inputHistory.Count)
+                                {
+                                    Console.Write(new string(' ',
+                                        Math.Max(0, Math.Max(input.Length, inputHistory[historyIndex - 1].Length))));
+                                    input = string.Empty;
+                                    Console.CursorLeft = 2;
+                                    continue;
+                                }
+                                if (inputHistory[historyIndex - 1].Length + 1 - inputHistory[historyIndex].Length <= 0)
+                                    Console.Write(inputHistory[historyIndex]);
+                                else
+                                    Console.Write(inputHistory[historyIndex] +
+                                                  new string(' ',
+                                                      Math.Max(0, Math.Max(input.Length,
+                                                          inputHistory[historyIndex - 1].Length + 1 -
+                                                          inputHistory[historyIndex].Length))));
+                                Console.CursorLeft = inputHistory[historyIndex].Length + 2;
+                                input = inputHistory[historyIndex];
+                            }
+                            continue;
+                        case ConsoleKey.LeftArrow:
+                            if (Console.CursorLeft > 2)
+                                Console.CursorLeft--;
+                            continue;
+                        case ConsoleKey.RightArrow:
+                            if (Console.CursorLeft < Math.Min(2 + input.Length, Console.BufferWidth - 1))
+                                Console.CursorLeft++;
+                            continue;
                     }
                     input += key.KeyChar;
                     Console.Write(key.KeyChar);
                 }
 
-                Commands.Parse(input.Trim());
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    inputHistory.Add(input.Trim());
+                    Commands.Parse(input.Trim());
+
+                    // Set history index and remove old entries.
+                    historyIndex = inputHistory.Count;
+                    if (inputHistory.Count > 50)
+                        inputHistory.RemoveAt(0);
+                }
 
                 WriteHeader();
             }
