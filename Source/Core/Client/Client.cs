@@ -6,6 +6,7 @@ using Bricklayer.Core.Client.Interface;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 using EventArgs = System.EventArgs;
 using Level = Bricklayer.Core.Client.World.Level;
@@ -20,7 +21,7 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// Manages and handles all game assets and content.
         /// </summary>
-        public new ContentManager Content { get; private set; }
+        public new ContentComponent Content { get; private set; }
 
         public EventManager Events { get; }
 
@@ -85,12 +86,8 @@ namespace Bricklayer.Core.Client
         /// </summary>
         internal NetworkManager Network { get; private set; }
 
-        /// <summary>
-        /// Texture loader for loading texture assets.
-        /// </summary>
-        internal TextureLoader TextureLoader { get; private set; }
-
         private GameState state;
+        private RenderTarget2D backgroundTarget, foregroundTarget, lightingTarget;
 
         internal Client()
         {
@@ -127,8 +124,46 @@ namespace Bricklayer.Core.Client
 
             if (State == GameState.Game)
             {
+                // Draw level background.
+                GraphicsDevice.SetRenderTarget(backgroundTarget);
+                GraphicsDevice.Clear(new Color(24,24,24));
                 SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                Level?.Draw(SpriteBatch, gameTime);
+                Level?.DrawBackground(SpriteBatch, gameTime);
+                SpriteBatch.End();
+
+                // Draw level foreground.
+                GraphicsDevice.SetRenderTarget(foregroundTarget);
+                GraphicsDevice.Clear(Color.Transparent);
+                SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                Level?.DrawForeground(SpriteBatch, gameTime);
+                SpriteBatch.End();
+
+                // Draw lighting and shadows.
+                if ((Input.IsKeyUp(Keys.S)))
+                {
+                    GraphicsDevice.SetRenderTarget(lightingTarget);
+                    GraphicsDevice.Clear(Color.Transparent);
+
+
+                    SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                    Content.Effects["blur"].CurrentTechnique.Passes[0].Apply();
+                    Content.Effects["blur"].Parameters["Resolution"]?.SetValue(
+                            new Vector2(GraphicsDevice.PresentationParameters.BackBufferWidth,
+                                GraphicsDevice.PresentationParameters.BackBufferHeight));
+
+                    SpriteBatch.Draw(foregroundTarget,
+                        new Rectangle(0, 2, GraphicsDevice.PresentationParameters.BackBufferWidth,
+                            GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                    //SpriteBatch.Draw(Content["gui.background"], new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                    SpriteBatch.End();
+                }
+
+                GraphicsDevice.SetRenderTarget(null);
+                SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                SpriteBatch.Draw(backgroundTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                if (Input.IsKeyUp(Keys.S))
+                SpriteBatch.Draw(lightingTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                SpriteBatch.Draw(foregroundTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
                 SpriteBatch.End();
             }
 
@@ -157,20 +192,16 @@ namespace Bricklayer.Core.Client
         /// </summary>
         protected override async void LoadContent()
         {
-            base.LoadContent();
-
+            // Initialize components.
             IO = new IOComponent(this);
+            Content = new ContentComponent(this);
             Plugins = new PluginComponent(this);
             Network = new NetworkManager(this);
 
             await IO.Init();
-            await IO.LoadConfig();
             await Network.Init();
 
-            Content = new ContentManager();
-            TextureLoader = new TextureLoader(Graphics.GraphicsDevice);
-            Content.LoadTextures(Path.Combine(IO.Directories["Content"], "Textures"), this);
-
+            // Set resolution.
             if (IO.Config.Client.Resolution.X == 0 && IO.Config.Client.Resolution.Y == 0)
             {
                 Graphics.PreferredBackBufferWidth = (int) (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width*.9);
@@ -191,10 +222,19 @@ namespace Bricklayer.Core.Client
                 Graphics.ApplyChanges();
             }
 
+            await Content.Init();
+
             // Initialize MonoForce after loading skins.
             UI.Initialize();
             SpriteBatch = UI.Renderer.SpriteBatch; // Set the spritebatch to the Neoforce managed one
 
+            // Create render targets.
+            backgroundTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.PresentationParameters.BackBufferWidth,
+                GraphicsDevice.PresentationParameters.BackBufferHeight);
+            foregroundTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.PresentationParameters.BackBufferWidth,
+                GraphicsDevice.PresentationParameters.BackBufferHeight);
+            lightingTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.PresentationParameters.BackBufferWidth,
+                GraphicsDevice.PresentationParameters.BackBufferHeight);
 
             // Create the main window for all content to be added to.
             Window = new MainWindow(UI, this);
@@ -214,6 +254,7 @@ namespace Bricklayer.Core.Client
                 }
             }));
             await Plugins.Init();
+            base.LoadContent();
         }
 
         /// <summary>
@@ -226,10 +267,10 @@ namespace Bricklayer.Core.Client
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
+        /// checking for collisions, gathering input, and playing audio.  
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
-        protected override void Update(GameTime gameTime)
+        protected async override void Update(GameTime gameTime)
         {
             UI.Update(gameTime);
 

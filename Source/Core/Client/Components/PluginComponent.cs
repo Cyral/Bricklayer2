@@ -169,7 +169,8 @@ namespace Bricklayer.Core.Client.Components
             Plugins.Add(plugin);
 
             // Load plugin content.
-            Client.Content.LoadTextures(Path.Combine(plugin.Path, Path.Combine("Content", "Textures")), Client);
+            Client.Content.LoadPluginContent(plugin);
+
             // Load plugin.
             plugin.Load();
             Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
@@ -179,7 +180,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Load icon for plugin.
         /// </summary>
-        private void LoadIcon(ClientPlugin pluginData)
+        private async void LoadIcon(ClientPlugin pluginData)
         {
             if (Directory.Exists(pluginData.Path))
             {
@@ -194,7 +195,7 @@ namespace Bricklayer.Core.Client.Components
 
                 if (icon != null)
                 {
-                    var texture = Client.TextureLoader.FromFile(icon.FullName);
+                    var texture = await Client.IO.LoadTexture(icon.FullName);
                     if (texture.Height <= 64 && texture.Width <= 64)
                         pluginData.Icon = texture;
                     else

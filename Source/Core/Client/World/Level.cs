@@ -76,11 +76,6 @@ namespace Bricklayer.Core.Client.World
         {
         }
 
-        public void Draw(SpriteBatch batch, GameTime delta)
-        {
-            DrawTiles(batch);
-        }
-
         internal override void DecodeTiles(BinaryReader reader)
         {
             base.DecodeTiles(reader);
@@ -88,9 +83,9 @@ namespace Bricklayer.Core.Client.World
         }
 
         /// <summary>
-        /// Draws the foreground and background blocks of a map
+        /// Draws the background tiles of a map
         /// </summary>
-        private void DrawTiles(SpriteBatch batch)
+        public void DrawBackground(SpriteBatch batch, GameTime delta)
         {
             // Draw background blocks.
             for (var x = (int)Camera.Left / Tile.Width; x <= (int)Camera.Right / Tile.Width; x++)
@@ -104,7 +99,14 @@ namespace Bricklayer.Core.Client.World
                         tile.Type.Draw(batch, tile, x, y, Layer.Background);
                 }
             }
+        }
 
+
+        /// <summary>
+        /// Draws the background tiles of a map
+        /// </summary>
+        public void DrawForeground(SpriteBatch batch, GameTime delta)
+        {
             // Draw foreground blocks.
             for (var x = (int) Camera.Left/Tile.Width; x <= (int) Camera.Right/Tile.Width; x++)
             {

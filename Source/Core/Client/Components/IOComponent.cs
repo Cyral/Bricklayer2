@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Data;
+using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
 namespace Bricklayer.Core.Client.Components
@@ -57,6 +58,11 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         private readonly string pluginsFile;
 
+        /// <summary>
+        /// Loader to load textures properly without the content pipeline.
+        /// </summary>
+        private TextureLoader textureLoader;
+
         public IOComponent(Client client) : base(client)
         {
             serverFile = Path.Combine(MainDirectory, "servers.json");
@@ -73,6 +79,8 @@ namespace Bricklayer.Core.Client.Components
                 // Use a custom contract resolver that can read private and internal properties
             };
 
+            textureLoader = new TextureLoader(Client.GraphicsDevice);
+
             if (!Directory.Exists(MainDirectory))
                 Directory.CreateDirectory(MainDirectory);
             ConfigFile = Path.Combine(MainDirectory, "config.json");
@@ -84,7 +92,25 @@ namespace Bricklayer.Core.Client.Components
             Directories.Add("Screenshots", Path.Combine(MainDirectory, "Screenshots"));
 
             CheckFiles();
+            await LoadConfig();
             await base.Init();
+        }
+
+        /// <summary>
+        /// Loads a MonoGame Effect file.
+        /// </summary>
+        public async Task<Effect> LoadEffect(string path)
+        {
+            var bytes = await Task.Run(() => File.ReadAllBytes(path));
+            return new Effect(Client.GraphicsDevice, bytes);
+        }
+
+        /// <summary>
+        /// Load a Texture2D from path.
+        /// </summary>
+        public async Task<Texture2D> LoadTexture(string path)
+        {
+            return await textureLoader.FromFile(path);
         }
 
         /// <summary>

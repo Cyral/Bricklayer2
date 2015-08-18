@@ -82,7 +82,7 @@ namespace Bricklayer.Core.Server.Components
 
             AddParameters(command, new Dictionary<string, string>
             {
-                {"uuid", guid.ToString("N")}
+                {"guid", guid.ToString("N")}
             });
 
             await PerformQuery(connectionString, command, reader =>

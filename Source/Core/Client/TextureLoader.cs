@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -7,13 +8,15 @@ namespace Bricklayer.Core.Client
 {
     /// <summary>
     /// Loads textures without use of the content pipeline.
-    /// Based on http://jakepoz.com/jake_poznanski__background_load_xna.html 
+    /// Needed to load textures with alpha/transparency properly.
+    /// Based on: http://jakepoz.com/jake_poznanski__background_load_xna.html and
+    /// http://gamedev.stackexchange.com/questions/35460/load-texture-from-image-content-in-runtime
     /// </summary>
     internal class TextureLoader : IDisposable
     {
         static TextureLoader()
         {
-            BlendColorBlendState = new BlendState
+            blendColorBlendState = new BlendState
             {
                 ColorDestinationBlend = Blend.Zero,
                 ColorWriteChannels = ColorWriteChannels.Red | ColorWriteChannels.Green | ColorWriteChannels.Blue,
@@ -22,7 +25,7 @@ namespace Bricklayer.Core.Client
                 ColorSourceBlend = Blend.SourceAlpha
             };
 
-            BlendAlphaBlendState = new BlendState
+            blendAlphaBlendState = new BlendState
             {
                 ColorWriteChannels = ColorWriteChannels.Alpha,
                 AlphaDestinationBlend = Blend.Zero,
@@ -35,15 +38,16 @@ namespace Bricklayer.Core.Client
         public TextureLoader(GraphicsDevice graphicsDevice)
         {
             this.graphicsDevice = graphicsDevice;
-            spriteBatch = new SpriteBatch(this.graphicsDevice);
+            spriteBatch = new SpriteBatch(graphicsDevice);
         }
 
-        public Texture2D FromFile(string path, bool preMultiplyAlpha = true)
+        public async Task<Texture2D> FromFile(string path, bool preMultiplyAlpha = true)
         {
-            using (Stream fileStream = File.OpenRead(path))
-                return FromStream(fileStream, preMultiplyAlpha);
+   
+                using (Stream fileStream = File.OpenRead(path))
+                    return FromStream(fileStream, preMultiplyAlpha);
+            
         }
-
 
         public Texture2D FromStream(Stream stream, bool preMultiplyAlpha = true)
         {
@@ -59,12 +63,12 @@ namespace Bricklayer.Core.Client
                     graphicsDevice.Clear(Color.Black);
 
                     // Multiply each color by the source alpha, and write in just the color values into the final texture
-                    spriteBatch.Begin(SpriteSortMode.Immediate, BlendColorBlendState);
+                    spriteBatch.Begin(SpriteSortMode.Immediate, blendColorBlendState);
                     spriteBatch.Draw(texture, texture.Bounds, Color.White);
                     spriteBatch.End();
 
                     // Now copy over the alpha values from the source texture to the final one, without multiplying them
-                    spriteBatch.Begin(SpriteSortMode.Immediate, BlendAlphaBlendState);
+                    spriteBatch.Begin(SpriteSortMode.Immediate, blendAlphaBlendState);
                     spriteBatch.Draw(texture, texture.Bounds, Color.White);
                     spriteBatch.End();
 
@@ -86,19 +90,15 @@ namespace Bricklayer.Core.Client
             return texture;
         }
 
-        private static readonly BlendState BlendColorBlendState;
-        private static readonly BlendState BlendAlphaBlendState;
+        private static readonly BlendState blendColorBlendState;
+        private static readonly BlendState blendAlphaBlendState;
 
         private readonly GraphicsDevice graphicsDevice;
         private readonly SpriteBatch spriteBatch;
-
-        #region IDisposable Members
 
         public void Dispose()
         {
             spriteBatch.Dispose();
         }
-
-        #endregion
     }
 }
