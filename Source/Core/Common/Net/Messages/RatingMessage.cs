@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
+    /// <summary>
+    /// Client => Server
+    /// Rates a level.
+    /// </summary>
     public class RatingMessage : IMessage
     {
-        public Guid Level { get; set; }
-        public int Rating { get; set; }
+        public Guid Level { get; private set; }
+        public int Rating { get; private set; }
 
         public RatingMessage(NetIncomingMessage im, MessageContext context)
         {

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Sockets;
-using System.Runtime.InteropServices.ComTypes;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Data;
@@ -13,7 +11,7 @@ using Bricklayer.Core.Common.Data;
 namespace Bricklayer.Core.Server.Components
 {
     /// <summary>
-    /// Handles user authentication and other database functions
+    /// Handles user authentication and other database functions.
     /// </summary>
     public class DatabaseComponent : ServerComponent
     {
@@ -21,12 +19,14 @@ namespace Bricklayer.Core.Server.Components
         private string connectionString;
         private DbProviderFactory providerFactory;
 
-        public DatabaseComponent(Server server) : base(server) {}
+        public DatabaseComponent(Server server) : base(server)
+        {
+        }
 
         /// <summary>
         /// Adds the specified named parameters to the command.
         /// </summary>
-        public void AddParamaters(DbCommand command, Dictionary<string, string> parameters)
+        public static void AddParameters(DbCommand command, Dictionary<string, string> parameters)
         {
             foreach (var param in parameters)
             {
@@ -38,10 +38,8 @@ namespace Bricklayer.Core.Server.Components
         }
 
         /// <summary>
-        /// Get ratings for levels
+        /// Get ratings for all levels.
         /// </summary>
-        /// <param name="level"></param>
-        /// <returns></returns>
         public async Task<List<RatingsData>> GetLevelRatings()
         {
             var ratings = new List<RatingsData>();
@@ -56,11 +54,44 @@ namespace Bricklayer.Core.Server.Components
 
             await PerformQuery(connectionString, command, reader =>
             {
-                if(!reader.HasRows)
+                if (!reader.HasRows)
                     return;
                 while (reader.Read())
                 {
                     ratings.Add(new RatingsData(reader.GetGuid(0), reader.GetGuid(1), reader.GetInt32(2)));
+                }
+            });
+
+            return ratings;
+        }
+
+        /// <summary>
+        /// Get ratings for a level.
+        /// </summary>
+        public async Task<List<RatingsData>> GetLevelRatings(Guid guid)
+        {
+            var ratings = new List<RatingsData>();
+
+            var command = providerFactory.CreateCommand();
+            if (command == null)
+                return ratings;
+
+            // Select ratings info
+            command.CommandText =
+                "SELECT User, Rating FROM Ratings WHERE Level = @guid";
+
+            AddParameters(command, new Dictionary<string, string>
+            {
+                {"uuid", guid.ToString("N")}
+            });
+
+            await PerformQuery(connectionString, command, reader =>
+            {
+                if (!reader.HasRows)
+                    return;
+                while (reader.Read())
+                {
+                    ratings.Add(new RatingsData(reader.GetGuid(0), guid, reader.GetInt32(1)));
                 }
             });
 
@@ -97,7 +128,7 @@ namespace Bricklayer.Core.Server.Components
                         var ratings = new List<int>();
                         allRatings.ForEach(x =>
                         {
-                            if (x.Level == reader.GetGuid(0)) 
+                            if (x.Level == reader.GetGuid(0))
                                 ratings.Add(x.Rating);
                         });
 
@@ -120,14 +151,13 @@ namespace Bricklayer.Core.Server.Components
         {
             LevelData data = null;
             var command = providerFactory.CreateCommand();
-            var allRatings = await GetLevelRatings();
-            if (command == null)
-                return data;
+            var rating = await GetLevelRatings(uuid);
+
             // Select the level data (name, description, plays, etc.), and find the name of the creator
             command.CommandText =
                 "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator WHERE Level.Guid = @uuid";
 
-            AddParamaters(command, new Dictionary<string, string>
+            AddParameters(command, new Dictionary<string, string>
             {
                 {"uuid", uuid.ToString("N")}
             });
@@ -136,15 +166,10 @@ namespace Bricklayer.Core.Server.Components
             {
                 if (reader.Read())
                 {
-                    var ratings = new List<int>();
-                    allRatings.ForEach(x =>
-                    {
-                        if (x.Level == reader.GetGuid(0))
-                            ratings.Add(x.Rating);
-                    });
+                    var ratings = rating.Select(x => x.Rating).ToList();
                     data = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
                         reader.GetGuid(0), reader.GetString(2), 0,
-                        reader.GetInt32(3), ratings.Count != 0 ? (int)ratings.Average() : 5);
+                        reader.GetInt32(3), ratings.Count != 0 ? (int)Math.Round(ratings.Average()) : 5);
                 }
             });
 
@@ -161,7 +186,7 @@ namespace Bricklayer.Core.Server.Components
             if (command != null)
             {
                 command.CommandText = "SELECT username FROM Players WHERE guid = @uuid";
-                AddParamaters(command, new Dictionary<string, string> {{"uuid", uuid.ToString("N")}});
+                AddParameters(command, new Dictionary<string, string> {{"uuid", uuid.ToString("N")}});
                 await PerformQuery(connectionString, command, reader =>
                 {
                     if (reader.Read())
@@ -208,25 +233,7 @@ namespace Bricklayer.Core.Server.Components
                 {
                     insertCommand.CommandText =
                         "INSERT OR IGNORE INTO Players (Username, GUID) VALUES (@username, @uuid);";
-                    AddParamaters(insertCommand,
-                        new Dictionary<string, string>
-                        {
-                            {"username", args.Player.Username},
-                            {"uuid", args.Player.UUID.ToString("N")}
-                        });
-                    await PerformOperation(connectionString, insertCommand);
-                }
-            }, EventPriority.InternalFinal);
-
-            // When a (new) user connects, add them to the database.
-            Server.Events.Network.UserConnected.AddHandler(async args =>
-            {
-                var insertCommand = providerFactory.CreateCommand();
-                if (insertCommand != null)
-                {
-                    insertCommand.CommandText =
-                        "INSERT OR IGNORE INTO Players (Username, GUID) VALUES (@username, @uuid);";
-                    AddParamaters(insertCommand,
+                    AddParameters(insertCommand,
                         new Dictionary<string, string>
                         {
                             {"username", args.Player.Username},
@@ -244,13 +251,13 @@ namespace Bricklayer.Core.Server.Components
                 {
                     insertCommand.CommandText =
                         "INSERT OR REPLACE INTO Ratings (User, Level, Rating) VALUES (@user,@level,@rating)";
-                    AddParamaters(insertCommand,
-                       new Dictionary<string, string>
-                       {
+                    AddParameters(insertCommand,
+                        new Dictionary<string, string>
+                        {
                             {"user", args.Sender.UUID.ToString("N")},
                             {"level", args.Level.ToString("N")},
-                            {"rating", args.Rating.ToString() }
-                       });
+                            {"rating", args.Rating.ToString()}
+                        });
                     await PerformOperation(connectionString, insertCommand);
                 }
             }, EventPriority.InternalFinal);
@@ -265,7 +272,7 @@ namespace Bricklayer.Core.Server.Components
             {
                 command.CommandText =
                     "INSERT INTO Levels (GUID,Name,Description, Plays, Creator) VALUES(@guid, @name, @desc, 0, @creator)";
-                AddParamaters(command, new Dictionary<string, string>
+                AddParameters(command, new Dictionary<string, string>
                 {
                     {"guid", data.UUID.ToString("N")},
                     {"name", data.Name},

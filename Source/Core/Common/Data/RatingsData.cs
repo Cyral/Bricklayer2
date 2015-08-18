@@ -1,28 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bricklayer.Core.Common.Data
 {
     /// <summary>
-    /// Data for ratings of level
+    /// Data for ratings of level.
     /// </summary>
     public class RatingsData
     {
         /// <summary>
-        /// Player Guid of rater
+        /// UUID of rater.
         /// </summary>
         public Guid Player { get; private set; }
 
         /// <summary>
-        /// Guid of level rated
+        /// GUID of level rated.
         /// </summary>
         public Guid Level { get; private set; }
 
         /// <summary>
-        /// Rating of level
+        /// Rating of level,
         /// </summary>
         public int Rating { get; private set; }
 
