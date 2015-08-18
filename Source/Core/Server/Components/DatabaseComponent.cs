@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Data;
@@ -35,12 +38,43 @@ namespace Bricklayer.Core.Server.Components
         }
 
         /// <summary>
+        /// Get ratings for levels
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public async Task<List<RatingsData>> GetLevelRatings()
+        {
+            var ratings = new List<RatingsData>();
+
+            var command = providerFactory.CreateCommand();
+            if (command == null)
+                return ratings;
+
+            // Select ratings info
+            command.CommandText =
+                "SELECT User, Level, Rating FROM Ratings";
+
+            await PerformQuery(connectionString, command, reader =>
+            {
+                if(!reader.HasRows)
+                    return;
+                while (reader.Read())
+                {
+                    ratings.Add(new RatingsData(reader.GetGuid(0), reader.GetGuid(1), reader.GetInt32(2)));
+                }
+            });
+
+            return ratings;
+        }
+
+        /// <summary>
         /// Gets a list of all levels in the database.
         /// </summary>
         public async Task<List<LevelData>> GetAllLevels()
         {
             var levels = new List<LevelData>();
             var command = providerFactory.CreateCommand();
+            var allRatings = await GetLevelRatings();
             if (command == null)
                 return levels;
             // Select the level data (name, description, plays, etc.), and find the name of the creator
@@ -59,10 +93,19 @@ namespace Bricklayer.Core.Server.Components
                     if (Server.Levels.FirstOrDefault(x => x.UUID == reader.GetGuid(0)) != null)
                         briefing = Server.Levels.FirstOrDefault(x => x.UUID == reader.GetGuid(0));
                     else // Create new LevelData other wise
-                        briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
-                            reader.GetGuid(0), reader.GetString(2), 0,
-                            reader.GetInt32(3), 3.5d);
+                    {
+                        var ratings = new List<int>();
+                        allRatings.ForEach(x =>
+                        {
+                            if (x.Level == reader.GetGuid(0)) 
+                                ratings.Add(x.Rating);
+                        });
 
+                        briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)),
+                            reader.GetString(1),
+                            reader.GetGuid(0), reader.GetString(2), 0,
+                            reader.GetInt32(3), ratings.Count != 0 ? (int) ratings.Average() : 5);
+                    }
                     levels.Add(briefing);
                 }
             });
@@ -77,22 +120,31 @@ namespace Bricklayer.Core.Server.Components
         {
             LevelData data = null;
             var command = providerFactory.CreateCommand();
+            var allRatings = await GetLevelRatings();
             if (command == null)
                 return data;
             // Select the level data (name, description, plays, etc.), and find the name of the creator
             command.CommandText =
                 "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator WHERE Level.Guid = @uuid";
+
             AddParamaters(command, new Dictionary<string, string>
             {
                 {"uuid", uuid.ToString("N")}
             });
+
             await PerformQuery(connectionString, command, reader =>
             {
                 if (reader.Read())
                 {
+                    var ratings = new List<int>();
+                    allRatings.ForEach(x =>
+                    {
+                        if (x.Level == reader.GetGuid(0))
+                            ratings.Add(x.Rating);
+                    });
                     data = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
                         reader.GetGuid(0), reader.GetString(2), 0,
-                        reader.GetInt32(3), 3.5d);
+                        reader.GetInt32(3), ratings.Count != 0 ? (int)ratings.Average() : 5);
                 }
             });
 
@@ -142,7 +194,9 @@ namespace Bricklayer.Core.Server.Components
             {
                 initialCommand.CommandText =
                     "CREATE TABLE IF NOT EXISTS Levels (GUID GUID PRIMARY KEY,Name TEXT,Description TEXT,Plays INTEGER, Creator GUID);" +
-                    "CREATE TABLE IF NOT EXISTS Players (Username Text UNIQUE,GUID GUID PRIMARY KEY)";
+                    "CREATE TABLE IF NOT EXISTS Players (Username Text UNIQUE,GUID GUID PRIMARY KEY);" +
+                    "CREATE TABLE IF NOT EXISTS Ratings (User GUID,Level GUID,Rating TINYINT,CONSTRAINT user_level UNIQUE (User, Level))";
+
                 await PerformOperation(connectionString, initialCommand);
             }
 
@@ -160,6 +214,43 @@ namespace Bricklayer.Core.Server.Components
                             {"username", args.Player.Username},
                             {"uuid", args.Player.UUID.ToString("N")}
                         });
+                    await PerformOperation(connectionString, insertCommand);
+                }
+            }, EventPriority.InternalFinal);
+
+            // When a (new) user connects, add them to the database.
+            Server.Events.Network.UserConnected.AddHandler(async args =>
+            {
+                var insertCommand = providerFactory.CreateCommand();
+                if (insertCommand != null)
+                {
+                    insertCommand.CommandText =
+                        "INSERT OR IGNORE INTO Players (Username, GUID) VALUES (@username, @uuid);";
+                    AddParamaters(insertCommand,
+                        new Dictionary<string, string>
+                        {
+                            {"username", args.Player.Username},
+                            {"uuid", args.Player.UUID.ToString("N")}
+                        });
+                    await PerformOperation(connectionString, insertCommand);
+                }
+            }, EventPriority.InternalFinal);
+
+            // When a user sends a rating of a level
+            Server.Events.Network.RatingMessageReceived.AddHandler(async args =>
+            {
+                var insertCommand = providerFactory.CreateCommand();
+                if (insertCommand != null)
+                {
+                    insertCommand.CommandText =
+                        "INSERT OR REPLACE INTO Ratings (User, Level, Rating) VALUES (@user,@level,@rating)";
+                    AddParamaters(insertCommand,
+                       new Dictionary<string, string>
+                       {
+                            {"user", args.Sender.UUID.ToString("N")},
+                            {"level", args.Level.ToString("N")},
+                            {"rating", args.Rating.ToString() }
+                       });
                     await PerformOperation(connectionString, insertCommand);
                 }
             }, EventPriority.InternalFinal);

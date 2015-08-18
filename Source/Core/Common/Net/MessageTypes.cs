@@ -27,5 +27,6 @@
         PlayerLeave,
         PingUpdate,
         BlockPlace,
+        Rating
     }
 }
