@@ -1,5 +1,7 @@
 ﻿using Bricklayer.Core.Client;
 using Bricklayer.Core.Client.Interface.Screens;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
 using Console = System.Console;
 
@@ -31,29 +33,24 @@ namespace Bricklayer.Plugins.TestClientPlugin
             window.SetPosition(8,8);
 
             Client.UI.Add(window);
-
-           var  d = new Derp(Client);
-
             Console.WriteLine("Test Plugin Loaded!");
+        }
+
+        public override void Draw(DrawPass pass, SpriteBatch spriteBatch, GameTime delta)
+        {
+            if (pass == DrawPass.Before && Client.State == GameState.Game)
+            {
+                spriteBatch.Draw(Client.Content["map.background"],
+                    new Rectangle(0, 0, Client.GraphicsDevice.PresentationParameters.BackBufferWidth,
+                        Client.GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+            }
+            base.Draw(pass, spriteBatch, delta);
         }
 
         public override void Unload()
         {
             Client.UI.Remove(window);
             Console.WriteLine("Test Plugin Unloaded!");
-        }
-    }
-
-    public class Derp
-    {
-        public Derp(Client client)
-        {
-
-            client.Events.Game.Level.BlockPlaced.AddHandler(args =>
-            {
-                Console.Write(args.Type);
-            });
-
         }
     }
 }

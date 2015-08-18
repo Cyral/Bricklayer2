@@ -1,12 +1,10 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 using EventArgs = System.EventArgs;
 using Level = Bricklayer.Core.Client.World.Level;
@@ -48,7 +46,7 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// The game's sprite batch for drawing content.
         /// </summary>
-        public SpriteBatch SpriteBatch { get; private set; }
+        internal SpriteBatch SpriteBatch { get; private set; }
 
         /// <summary>
         /// The current state of the game. (Login, server list, in game, etc.)
@@ -86,8 +84,8 @@ namespace Bricklayer.Core.Client
         /// </summary>
         internal NetworkManager Network { get; private set; }
 
-        private GameState state;
         private RenderTarget2D backgroundTarget, foregroundTarget, lightingTarget;
+        private GameState state;
 
         internal Client()
         {
@@ -124,11 +122,19 @@ namespace Bricklayer.Core.Client
 
             if (State == GameState.Game)
             {
-                // Draw level background.
                 GraphicsDevice.SetRenderTarget(backgroundTarget);
-                GraphicsDevice.Clear(new Color(24,24,24));
+                GraphicsDevice.Clear(Color.Transparent);
+
+                // Draw level background.
                 SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                // Draw plugins before anything is drawn.
+                foreach (var plugin in Plugins.Plugins.Where(x => x.IsEnabled))
+                    plugin.Draw(DrawPass.Before, SpriteBatch, gameTime);
                 Level?.DrawBackground(SpriteBatch, gameTime);
+
+                // Draw plugins after the background layer has been drawn.
+                foreach (var plugin in Plugins.Plugins.Where(x => x.IsEnabled))
+                    plugin.Draw(DrawPass.Background, SpriteBatch, gameTime);
                 SpriteBatch.End();
 
                 // Draw level foreground.
@@ -136,36 +142,49 @@ namespace Bricklayer.Core.Client
                 GraphicsDevice.Clear(Color.Transparent);
                 SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                 Level?.DrawForeground(SpriteBatch, gameTime);
+
+                // Draw plugins after the foreground layer has been drawn.
+                foreach (var plugin in Plugins.Plugins.Where(x => x.IsEnabled))
+                    plugin.Draw(DrawPass.Foreground, SpriteBatch, gameTime);
                 SpriteBatch.End();
 
+
                 // Draw lighting and shadows.
-                if ((Input.IsKeyUp(Keys.S)))
-                {
-                    GraphicsDevice.SetRenderTarget(lightingTarget);
-                    GraphicsDevice.Clear(Color.Transparent);
+                GraphicsDevice.SetRenderTarget(lightingTarget);
+                GraphicsDevice.Clear(Color.Transparent);
 
 
-                    SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-                    Content.Effects["blur"].CurrentTechnique.Passes[0].Apply();
-                    Content.Effects["blur"].Parameters["Resolution"]?.SetValue(
-                            new Vector2(GraphicsDevice.PresentationParameters.BackBufferWidth,
-                                GraphicsDevice.PresentationParameters.BackBufferHeight));
+                SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                Content.Effects["blur"].CurrentTechnique.Passes[0].Apply();
+                Content.Effects["blur"].Parameters["Resolution"]?.SetValue(
+                    new Vector2(GraphicsDevice.PresentationParameters.BackBufferWidth,
+                        GraphicsDevice.PresentationParameters.BackBufferHeight));
 
-                    SpriteBatch.Draw(foregroundTarget,
-                        new Rectangle(0, 2, GraphicsDevice.PresentationParameters.BackBufferWidth,
-                            GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                    //SpriteBatch.Draw(Content["gui.background"], new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                    SpriteBatch.End();
-                }
+                SpriteBatch.Draw(foregroundTarget,
+                    new Rectangle(0, 2, GraphicsDevice.PresentationParameters.BackBufferWidth,
+                        GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                //SpriteBatch.Draw(Content["gui.background"], new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                SpriteBatch.End();
 
                 GraphicsDevice.SetRenderTarget(null);
                 SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-                SpriteBatch.Draw(backgroundTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                if (Input.IsKeyUp(Keys.S))
-                SpriteBatch.Draw(lightingTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                SpriteBatch.Draw(foregroundTarget, new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                SpriteBatch.Draw(backgroundTarget,
+                    new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth,
+                        GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                SpriteBatch.Draw(lightingTarget,
+                    new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth,
+                        GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                SpriteBatch.Draw(foregroundTarget,
+                    new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth,
+                        GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
                 SpriteBatch.End();
             }
+
+            // Draw plugins after everthing is drawn.
+            SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            foreach (var plugin in Plugins.Plugins.Where(x => x.IsEnabled))
+                plugin.Draw(DrawPass.After, SpriteBatch, gameTime);
+            SpriteBatch.End();
 
             UI.EndDraw();
 
@@ -267,12 +286,15 @@ namespace Bricklayer.Core.Client
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.  
+        /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
-        protected async override void Update(GameTime gameTime)
+        protected override async void Update(GameTime gameTime)
         {
             UI.Update(gameTime);
+
+            foreach (var plugin in Plugins.Plugins)
+                plugin.Update(gameTime);
 
             if (State == GameState.Game)
             {
