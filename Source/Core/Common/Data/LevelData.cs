@@ -31,7 +31,7 @@ namespace Bricklayer.Core.Common.Data
         /// <summary>
         /// The rating, from 0 to 5, of this level.
         /// </summary>
-        public double Rating { get; protected set; }
+        public int Rating { get; protected set; }
 
         /// <summary>
         /// The number of times this level has been played. (Non unique)
@@ -48,7 +48,7 @@ namespace Bricklayer.Core.Common.Data
         /// </summary>
         public PlayerData Creator { get; protected set; }
 
-        public LevelData(PlayerData creator, string name, Guid uuid, string description, int players, int plays, double rating)
+        public LevelData(PlayerData creator, string name, Guid uuid, string description, int players, int plays, int rating)
         {
             Creator = creator;
             Name = name;
@@ -67,7 +67,7 @@ namespace Bricklayer.Core.Common.Data
             Description = im.ReadString();
             Online = im.ReadByte();
             Plays = im.ReadInt16();
-            Rating = im.ReadDouble();
+            Rating = im.ReadInt32();
         }
 
 

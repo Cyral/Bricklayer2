@@ -333,10 +333,10 @@ namespace Bricklayer.Core.Server
             public class RatingEventArgs : BricklayerEventArgs
             {
                 public Guid Level { get; private set; }
-                public double Rating { get; private set; }
+                public int Rating { get; private set; }
                 public Player Sender { get; private set; }
 
-                public RatingEventArgs(Guid level, Player sender, double rating)
+                public RatingEventArgs(Guid level, Player sender, int rating)
                 {
                     Level = level;
                     Sender = sender;

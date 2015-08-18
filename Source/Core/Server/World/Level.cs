@@ -13,7 +13,7 @@ namespace Bricklayer.Core.Server.World
         /// </summary>
         public Server Server { get; internal set; }
 
-        public Level(Server server, PlayerData creator, string name, Guid uuid, string description, int plays, double rating) :
+        public Level(Server server, PlayerData creator, string name, Guid uuid, string description, int plays, int rating) :
             base(creator, name, uuid, description, plays, rating)
         {
             Server = server;

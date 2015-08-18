@@ -23,7 +23,7 @@ namespace Bricklayer.Core.Client.World
         /// </summary>
         public Client Client { get; internal set; }
 
-        public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating)
+        public Level(PlayerData creator, string name, Guid uuid, string description, int plays, int rating)
             : base(creator, name, uuid, description, plays, rating)
         {
             Tiles.BlockPlaced = BlockPlaced;

@@ -10,7 +10,7 @@ namespace Bricklayer.Core.Common.Net.Messages
     public class RatingMessage : IMessage
     {
         public Guid Level { get; set; }
-        public double Rating { get; set; }
+        public int Rating { get; set; }
 
         public RatingMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -18,7 +18,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public RatingMessage(Guid level, double rating)
+        public RatingMessage(Guid level, int rating)
         {
             Level = level;
             Rating = rating;
@@ -31,13 +31,13 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
-            Level = Guid.Parse(im.ReadString());
-            Rating = im.ReadDouble();
+            Level = im.ReadGuid();
+            Rating = im.ReadInt32();
         }
 
         public void Encode(NetOutgoingMessage om)
         {
-            om.Write(Level.ToString());
+            om.Write(Level);
             om.Write(Rating);
         }
 

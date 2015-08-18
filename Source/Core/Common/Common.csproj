@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Data\LevelData.cs" />
     <Compile Include="Data\PlayerData.cs" />
+    <Compile Include="Data\RatingsData.cs" />
     <Compile Include="Data\ServerData.cs" />
     <Compile Include="Entity\Direction.cs" />
     <Compile Include="Entity\EntityState.cs" />
