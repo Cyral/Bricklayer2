@@ -36,7 +36,7 @@ namespace Bricklayer.Core.Common.Data
         /// <summary>
         /// The number of times this level has been played. (Non unique)
         /// </summary>
-        public int Plays { get; protected set; }
+        public int Plays { get; set; }
 
         /// <summary>
         /// The unique ID of this level.

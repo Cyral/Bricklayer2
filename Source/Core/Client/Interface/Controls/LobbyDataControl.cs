@@ -62,7 +62,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 TextColor = new Color(160, 160, 160)
             };
             lblStats.Init();
-            lblStats.Text = $"Online: {data.Online}\nPlays: {"N/A"}";
+            lblStats.Text = $"Online: {data.Online}\nPlays: {Data.Plays}";
             Add(lblStats);
 
             // Add controls
