@@ -162,6 +162,14 @@ namespace Bricklayer.Core.Client.Components
             await Client.IO.WritePluginStatus(statuses);
         }
 
+        internal void ReloadContent()
+        {
+            foreach (var plugin in Plugins.Where(p => p.IsEnabled))
+            {
+                Client.Content.LoadPluginContent(plugin);
+            }
+        }
+
         private void RegisterPlugin(ClientPlugin plugin)
         {
             plugin.IsEnabled = true;

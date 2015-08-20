@@ -5,6 +5,7 @@ using Bricklayer.Core.Client.Interface;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using MonoForce.Controls;
 using EventArgs = System.EventArgs;
 using Level = Bricklayer.Core.Client.World.Level;
@@ -261,25 +262,42 @@ namespace Bricklayer.Core.Client
             UI.Add(Window);
             Window.SendToBack();
 
+            // Set block textures and create texture atlas when content is loaded.
+            Events.Game.ContentLoaded.AddHandler((args =>
+            {
+                SetBlockTexturesAndAtlas();
+            }));
+
             // Unlike the server, the clientside plugins must be loaded last.
+            await Plugins.Init();
+            Events.Game.ContentLoaded.Invoke(new EventManager.GameEvents.ContentLoadEventArgs(Content));
+
+            // Set block textures and create texture atlas when plugins are reloaded.
             Events.Game.PluginStatusChanged.AddHandler((args =>
             {
-                var items = BlockType.Blocks.Where(x => x.IsRenderable).ToArray();
-                // Create a texture atlas for blocks.
-                if (items.Length > 1)
-                {
-                    TextureAtlas.CreateAtlas(GraphicsDevice,
-                        Content.Textures.Where(x => x.Key.StartsWith("blocks")).Select(x => x.Value).ToList());
-                }
-                
-                foreach (var block in items)
-                {
-                    var str = "blocks\\" + (block.Pack != null ? block.Pack + "\\" : string.Empty) + block.Name;
-                    block.Image = Content[str];
-                }
+                SetBlockTexturesAndAtlas();
             }));
-            await Plugins.Init();
             base.LoadContent();
+        }
+
+        /// <summary>
+        /// Whenever new blocks are added, call this method to set their texture and create a texture atlas from the blocks.
+        /// </summary>
+        private void SetBlockTexturesAndAtlas()
+        {
+            var items = BlockType.Blocks.Where(x => x.IsRenderable).ToArray();
+            // Create a texture atlas for blocks.
+            if (items.Length > 1)
+            {
+                TextureAtlas.CreateAtlas(GraphicsDevice,
+                    Content.Textures.Where(x => x.Key.StartsWith("blocks")).Select(x => x.Value).ToList());
+            }
+
+            foreach (var block in items)
+            {
+                var str = "blocks\\" + (block.Pack != null ? block.Pack + "\\" : string.Empty) + block.Name;
+                block.Image = Content[str];
+            }
         }
 
         /// <summary>
@@ -295,16 +313,28 @@ namespace Bricklayer.Core.Client
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
-        protected override async void Update(GameTime gameTime)
+        protected override void Update(GameTime gameTime)
         {
             UI.Update(gameTime);
 
+            // Update plugin logic.
             foreach (var plugin in Plugins.Plugins)
                 plugin.Update(gameTime);
 
             if (State == GameState.Game)
-            {
+            { 
+                // Update level.
                 Level?.Update(gameTime);
+            }
+
+            // Reload content.
+            if (Input.WasKeyPressed(Keys.F3))
+            {
+                #pragma warning disable 4014
+                Content.Init();
+                #pragma warning restore 4014
+                Plugins.ReloadContent();
+                Events.Game.ContentLoaded.Invoke(new EventManager.GameEvents.ContentLoadEventArgs(Content));
             }
 
             base.Update(gameTime);

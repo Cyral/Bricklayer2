@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
+using Microsoft.Xna.Framework.Content;
 using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client
@@ -180,6 +182,16 @@ namespace Bricklayer.Core.Client
                 }
             }
 
+            public class ContentLoadEventArgs : BricklayerEventArgs
+            {
+                public ContentComponent Manager { get; private set; }
+
+                public ContentLoadEventArgs(ContentComponent manager)
+                {
+                    Manager = manager;
+                }
+            }
+
             #endregion
 
             // Events represent a collection of event handlers.
@@ -201,6 +213,11 @@ namespace Bricklayer.Core.Client
             /// When a plugin is loaded, enabled, or disabled.
             /// </summary>
             public Event<PluginStatusEventArgs> PluginStatusChanged { get; } = new Event<PluginStatusEventArgs>();
+
+            /// <summary>
+            /// When the game content is loaded or reloaded.
+            /// </summary>
+            public Event<ContentLoadEventArgs> ContentLoaded { get; } = new Event<ContentLoadEventArgs>();
 
             #endregion
         }
