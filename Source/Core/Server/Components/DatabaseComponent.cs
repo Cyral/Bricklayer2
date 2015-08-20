@@ -283,6 +283,21 @@ namespace Bricklayer.Core.Server.Components
             }
         }
 
+        internal async Task AddPlay(Guid level)
+        {
+            var command = providerFactory.CreateCommand();
+            if (command != null)
+            {
+                command.CommandText =
+                    "UPDATE Levels SET Plays=Plays+1 WHERE GUID=@guid";
+                AddParameters(command, new Dictionary<string, string>
+                {
+                    {"guid", level.ToString("N")}
+                });
+                await PerformOperation(connectionString, command);
+            }
+        }
+
         /// <summary>
         /// Performs an async operation on the specified database that does not return any results.
         /// </summary>

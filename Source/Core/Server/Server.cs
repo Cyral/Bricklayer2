@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Timers;
 using Bricklayer.Core.Common.Entity;
@@ -230,6 +231,10 @@ namespace Bricklayer.Core.Server
             await RemovePlayerFromLevels(sender);
             level.Players.Remove(sender);
             level.Players.Add(sender);
+
+            await Database.AddPlay(level.UUID);
+            level.Plays++;
+
 
             sender.Level = level;
 
