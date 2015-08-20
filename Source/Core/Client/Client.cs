@@ -94,7 +94,7 @@ namespace Bricklayer.Core.Client
             IsFixedTimeStep = false;
             Graphics.SynchronizeWithVerticalRetrace = false;
 
-            AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
+           AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
 
             // Create the manager for MonoForce UI
             UI = new Manager(this, "Bricklayer")
@@ -264,12 +264,18 @@ namespace Bricklayer.Core.Client
             // Unlike the server, the clientside plugins must be loaded last.
             Events.Game.PluginStatusChanged.AddHandler((args =>
             {
-                if (!args.Enabled) return;
-                // Set any block textures that need to be set.
-                foreach (var block in BlockType.Blocks.Where(x => x.IsRenderable && x.Texture == null))
+                var items = BlockType.Blocks.Where(x => x.IsRenderable).ToArray();
+                // Create a texture atlas for blocks.
+                if (items.Length > 1)
                 {
-                    var str = "blocks." + (block.Pack != null ? block.Pack + "." : string.Empty) + block.Name;
-                    block.Texture = Content[str];
+                    TextureAtlas.CreateAtlas(GraphicsDevice,
+                        Content.Textures.Where(x => x.Key.StartsWith("blocks")).Select(x => x.Value).ToList());
+                }
+                
+                foreach (var block in items)
+                {
+                    var str = "blocks\\" + (block.Pack != null ? block.Pack + "\\" : string.Empty) + block.Name;
+                    block.Image = Content[str];
                 }
             }));
             await Plugins.Init();

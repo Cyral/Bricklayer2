@@ -52,8 +52,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 renderer.Draw(screen.Client.Content["gui.blockoutline"], rect.X + 0, rect.Y + 0,
                     IsSelected ? Color.White : Color.Black);
                 if (Block.IsRenderable)
-                    renderer.Draw(Block.Texture, new Rectangle(rect.X + 1, rect.Y + 1, Tile.Width, Tile.Height),
-                        BlockType.SourceRect, Color.White);
+                    renderer.Draw(Block.Image, new Rectangle(rect.X + 1, rect.Y + 1, Tile.Width, Tile.Height),
+                        Block.SourceRect, Color.White);
                 //base.DrawControl(renderer, rect, gameTime);
             }
         }

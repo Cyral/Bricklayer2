@@ -79,7 +79,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 Top = 8
             };
             imgIcon.Init();
-            imgIcon.Image = Block.Texture;
+            imgIcon.Image = Block.Image;
+            imgIcon.SourceRect = Block.FullSourceRect;
             Add(imgIcon);
 
             Text = block.Name;

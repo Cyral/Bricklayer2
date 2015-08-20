@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Bricklayer.Core.Common;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Media;
 
 namespace Bricklayer.Core.Client.Components
 {
@@ -16,7 +19,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// All textures loaded into the game.
         /// </summary>
-        public Texture2D this[string name]
+        public Image this[string name]
         {
             get
             {
@@ -31,8 +34,8 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// List of all textures loaded into the game.
         /// </summary>
-        public Dictionary<string, Texture2D> Textures { get; } =
-            new Dictionary<string, Texture2D>(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, Image> Textures { get; } =
+            new Dictionary<string, Image>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// List of all effects loaded into the game.
@@ -142,6 +145,78 @@ namespace Bricklayer.Core.Client.Components
         {
             await LoadTextures(Path.Combine(plugin.Path, "Content", "Textures"));
             await LoadEffects(Path.Combine(plugin.Path, "Content", "Effects"));
+        }
+    }
+
+    /// <summary>
+    /// A collection of images within another texture. Texture atlases speed up rendering by not needing to switch textures.
+    /// </summary>
+    public class TextureAtlas : Texture2D
+    {
+        public List<Image> Images { get; internal set; }
+
+        public static TextureAtlas CreateAtlas(GraphicsDevice graphics, List<Image> images)
+        {
+            if (images.Count > 1)
+            {
+                // Pack the textures next to each other.
+                int h = 0, finalWidth = 0, finalHeight = 0, finalRowHeight = 0, rowWidth = 0;
+                var items = images.OrderByDescending(x => x.Texture.Width).ToArray();
+                for (int i = 0, row = 0; i < items.Length; i++, row++)
+                {
+                    var image = items[i];
+                    // TODO: Better algorithm.
+                    if (row > Math.Sqrt(items.Length))
+                    {
+                        h += finalRowHeight;
+                        finalWidth = Math.Max(finalWidth, rowWidth);
+                        row = rowWidth = finalRowHeight = 0;
+                    }
+                    image.SourceRect = new Rectangle(rowWidth, h, image.Texture.Width, image.Texture.Height);
+                    rowWidth += image.Texture.Width;
+                    if (image.Texture.Height > finalRowHeight)
+                        finalRowHeight += image.Texture.Height;
+                    finalHeight = h;
+                }
+                finalHeight += finalRowHeight;
+                return new TextureAtlas(graphics, images, finalWidth, finalHeight);
+            }
+            throw new InvalidOperationException("More than 1 image must be supplied.");
+        }
+
+        private TextureAtlas(GraphicsDevice graphicsDevice, List<Image> images, int width, int height) : base(graphicsDevice, width, height)
+        {
+            Images = images;
+            var spriteBatch = new SpriteBatch(graphicsDevice);
+
+            // Render all the textures to RenderTarget.
+            var renderTarget = new RenderTarget2D(graphicsDevice, width, height);
+     
+                var viewportBackup = graphicsDevice.Viewport;
+                graphicsDevice.SetRenderTarget(renderTarget);
+                graphicsDevice.Clear(Color.Transparent);
+
+                foreach (var image in Images)
+                {
+                    spriteBatch.Begin();
+                    spriteBatch.Draw(image, image.SourceRect, Color.White);
+                    spriteBatch.End();
+                }
+
+                // Release the GPU back to drawing to the screen
+                graphicsDevice.SetRenderTarget(null);
+                graphicsDevice.Viewport = viewportBackup;
+
+                // Store data from render target because the RenderTarget2D is volatile
+                var data = new Color[renderTarget.Width * renderTarget.Height];
+                renderTarget.GetData(data);
+                var texture = (Texture2D)renderTarget;
+                foreach (var image in Images)
+                    image.Texture = texture;
+
+                // Unset texture from graphic device and set modified data back to it
+                //graphicsDevice.Textures[0] = null;
+        
         }
     }
 }

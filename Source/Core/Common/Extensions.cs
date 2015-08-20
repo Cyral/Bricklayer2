@@ -160,6 +160,22 @@ namespace Bricklayer.Core.Common
         {
             return new Rectangle((int)Math.Round(v.X), (int)Math.Round(v.Y), width, height);
         }
+
+        /// <summary>
+        /// Creates a Vector2 from the X and Y component of the rectangle.
+        /// </summary>
+        public static Vector2 ToVector2(this Rectangle rectangle)
+        {
+            return new Vector2(rectangle.X, rectangle.Y);
+        }
+
+        /// <summary>
+        /// Creates a Point from the X and Y component of the rectangle.
+        /// </summary>
+        public static Point ToPoint(this Rectangle rectangle)
+        {
+            return new Point(rectangle.X, rectangle.Y);
+        }
     }
 
     public static class Vector2Extensions

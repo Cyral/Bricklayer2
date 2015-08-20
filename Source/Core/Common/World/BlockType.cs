@@ -11,6 +11,8 @@ namespace Bricklayer.Core.Common.World
     /// </summary>
     public class BlockType
     {
+        private Image image;
+
         /// <summary>
         /// List of all block types. Blocks must be added as soon as plugins are loaded.
         /// </summary>
@@ -36,17 +38,26 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// Defines if this block is a background or foreground.
         /// </summary>
-        public Layer Layer { get; private set; }
+        public Layer Layer { get; set; }
 
         /// <summary>
         /// Name of the block.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; }
 
         /// <summary>
         /// The texture of this block. (Null on serverside)
         /// </summary>
-        public Texture2D Texture { get; set; }
+        public Image Image
+        {
+            get { return image; }
+            set
+            {
+                image = value;
+                SourceRect = new Rectangle(image.SourceRect.X, image.SourceRect.Y + (Tile.FullWidth - Tile.Width), Tile.Width, Tile.Height);
+                FullSourceRect = new Rectangle(image.SourceRect.X, image.SourceRect.Y, Tile.FullWidth, Tile.FullHeight);
+            }
+        }
 
         /// <summary>
         /// The function to draw this block.
@@ -73,12 +84,12 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// Source rectangle for the face of a tile. (Not the 2.5d part)
         /// </summary>
-        public static Rectangle SourceRect { get; } = new Rectangle(0, 4, Tile.Width, Tile.Height);
+        public Rectangle SourceRect { get; private set; }
 
         /// <summary>
         /// Source rectangle for the tile, including all faces. (2.5d)
         /// </summary>
-        public static Rectangle FullSourceRect { get; } = new Rectangle(0, 0, Tile.FullWidth, Tile.FullHeight);
+        public Rectangle FullSourceRect { get; private set; }
 
         static BlockType()
         {
@@ -115,12 +126,12 @@ namespace Bricklayer.Core.Common.World
                 {
                     // If a foreground block is being drawn on the backgrount, make it darker automatically.
                     if (tile.Type.Layer.HasFlag(Layer.Foreground))
-                        batch.Draw(Texture, new Vector2((x*Tile.Width) + (Tile.FullWidth - Tile.Width), y*Tile.Height), SourceRect, Color.Gray);
+                        batch.Draw(Image, new Vector2((x*Tile.Width) + (Tile.FullWidth - Tile.Width), y*Tile.Height), SourceRect, Color.Gray);
                     else
-                        batch.Draw(Texture, new Vector2((x*Tile.Width) + (Tile.FullHeight - Tile.Height), y*Tile.Height), sourceRectangle: SourceRect);
+                        batch.Draw(Image, new Vector2((x*Tile.Width) + (Tile.FullHeight - Tile.Height), y*Tile.Height), sourceRectangle: SourceRect);
                 }
                 else
-                    batch.Draw(Texture, new Vector2(x*Tile.Width, y*Tile.Height));
+                    batch.Draw(Image, new Vector2(x*Tile.Width, y*Tile.Height), sourceRectangle: FullSourceRect);
             };
             Blocks.Add(this);
         }
@@ -150,27 +161,15 @@ namespace Bricklayer.Core.Common.World
         /// Implicitly convert BlockType to Tile for convenience, as setting a tile requires: Tiles[x, y] = new Tile(type) without
         /// this.
         /// </summary>
-        public static implicit operator Tile(BlockType type)
-        {
-            return new Tile(type);
-        }
+        public static implicit operator Tile(BlockType type) => new Tile(type);
 
         /// <summary>
         /// Implicity convert Tile to BlockType for convenience, meaning Tile.Type is not neccessary.
         /// </summary>
-        public static implicit operator BlockType(Tile tile)
-        {
-            return tile.Type;
-        }
+        public static implicit operator BlockType(Tile tile) => tile.Type;
 
-        public static bool operator ==(BlockType type, Tile tile)
-        {
-            return type != null && tile.Type.ID == type.ID;
-        }
+        public static bool operator ==(BlockType type, Tile tile) => type != null && tile.Type.ID == type.ID;
 
-        public static bool operator !=(BlockType type, Tile tile)
-        {
-            return !(type == tile);
-        }
+        public static bool operator !=(BlockType type, Tile tile) => !(type == tile);
     }
 }
