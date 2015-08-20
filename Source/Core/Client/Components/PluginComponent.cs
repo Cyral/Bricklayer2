@@ -195,7 +195,7 @@ namespace Bricklayer.Core.Client.Components
 
                 if (icon != null)
                 {
-                    var texture = await Client.IO.LoadTexture(icon.FullName);
+                    var texture = Client.IO.LoadTexture(icon.FullName);
                     if (texture.Height <= 64 && texture.Width <= 64)
                         pluginData.Icon = texture;
                     else

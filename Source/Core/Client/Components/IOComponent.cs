@@ -108,9 +108,9 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Load a Texture2D from path.
         /// </summary>
-        public async Task<Texture2D> LoadTexture(string path)
+        public Texture2D LoadTexture(string path)
         {
-            return await textureLoader.FromFile(path);
+            return textureLoader.FromFile(path);
         }
 
         /// <summary>

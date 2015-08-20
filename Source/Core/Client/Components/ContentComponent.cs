@@ -71,7 +71,7 @@ namespace Bricklayer.Core.Client.Components
                             : Path.Combine(directoryName.Remove(0, path.Length + 1),
                                 Path.GetFileNameWithoutExtension(file));
 
-                        var texture = await Client.IO.LoadTexture(file);
+                        var texture = Client.IO.LoadTexture(file);
 
                         // Add it to the dictionary
                         Textures[name] = texture;

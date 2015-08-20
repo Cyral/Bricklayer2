@@ -41,12 +41,10 @@ namespace Bricklayer.Core.Client
             spriteBatch = new SpriteBatch(graphicsDevice);
         }
 
-        public async Task<Texture2D> FromFile(string path, bool preMultiplyAlpha = true)
+        public Texture2D FromFile(string path, bool preMultiplyAlpha = true)
         {
-   
                 using (Stream fileStream = File.OpenRead(path))
                     return FromStream(fileStream, preMultiplyAlpha);
-            
         }
 
         public Texture2D FromStream(Stream stream, bool preMultiplyAlpha = true)
