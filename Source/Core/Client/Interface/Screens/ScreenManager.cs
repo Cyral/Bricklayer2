@@ -9,7 +9,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
     /// </summary>
     public class ScreenManager
     {
-        private const float FadeSpeed = 2f;
+        private const float FadeSpeed = 3f;
 
         /// <summary>
         /// The current screen playing
