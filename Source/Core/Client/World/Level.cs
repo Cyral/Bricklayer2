@@ -10,8 +10,8 @@ namespace Bricklayer.Core.Client.World
 {
     public class Level : Common.World.Level
     {
-        private static readonly float cameraSpeed = .18f;
-        private static readonly float cameraParallax = .9f;
+        //private static readonly float cameraSpeed = .18f;
+        //private static readonly float cameraParallax = .9f;
 
         /// <summary>
         /// The main camera to follow the player.

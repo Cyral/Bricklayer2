@@ -11,8 +11,6 @@ namespace Bricklayer.Core.Common.Data
     /// </remarks>
     public class LevelData
     {
-        private NetIncomingMessage im;
-
         /// <summary>
         /// The name of this level.
         /// </summary>

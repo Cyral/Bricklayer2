@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net.Messages;
+using Microsoft.Xna.Framework.Graphics;
 
 /* 
 Plugin System Explanation:
@@ -102,10 +103,10 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Loads all plugins that are not already loaded.
         /// </summary>
-        internal async void LoadPlugins()
+        internal void LoadPlugins()
         {
             // Load list of enabled/disabled plugins.
-            var statuses = await Client.IO.ReadPluginStatus();
+            var statuses = Client.IO.ReadPluginStatus();
 
             // Get a list of all the .dlls in the directory.
             List<PluginData> files = null;
@@ -159,7 +160,7 @@ namespace Bricklayer.Core.Client.Components
             // Write updated statuses.
             statuses = new Dictionary<string, bool>();
             Plugins.ForEach(f => statuses.Add(f.Identifier, f.IsEnabled));
-            await Client.IO.WritePluginStatus(statuses);
+            Client.IO.WritePluginStatus(statuses);
         }
 
         internal void ReloadContent()
@@ -188,7 +189,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Load icon for plugin.
         /// </summary>
-        private async void LoadIcon(ClientPlugin pluginData)
+        private void LoadIcon(ClientPlugin pluginData)
         {
             if (Directory.Exists(pluginData.Path))
             {
@@ -217,7 +218,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Disables a plugin and updates the statuses file.
         /// </summary>
-        public async Task DisablePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
+        internal void DisablePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
         {
             if (plugin != null)
             {
@@ -226,7 +227,7 @@ namespace Bricklayer.Core.Client.Components
                         "Other plugins depend on this plugin and must be disabled first.");
                 // Set enabled status to false.
                 pluginStatuses[plugin.Identifier] = plugin.IsEnabled = false;
-                await Client.IO.WritePluginStatus(pluginStatuses);
+                Client.IO.WritePluginStatus(pluginStatuses);
 
                 // Remove all event handlers which match the main type name.
                 // See explanation at top of file.
@@ -245,7 +246,7 @@ namespace Bricklayer.Core.Client.Components
         /// Enables a disabled plugin and updates the statuses file.
         /// </summary>
         /// <returns>The new plugin, if it was loaded from a FakePlugin for the first time.</returns>
-        public async Task<ClientPlugin> EnablePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
+        internal ClientPlugin EnablePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
         {
             if (plugin != null)
             {
@@ -253,13 +254,19 @@ namespace Bricklayer.Core.Client.Components
                 {
                     // Set enabled status to true.
                     pluginStatuses[plugin.Identifier] = plugin.IsEnabled = true;
-                    await Client.IO.WritePluginStatus(pluginStatuses);
+                    Client.IO.WritePluginStatus(pluginStatuses);
 
                     // Create new instance and call plugin load method.
                     loadingPlugin = plugin.Path;
                     if (Plugins.Contains(plugin))
                         Plugins.Remove(plugin);
+                    Texture2D icon = null;
+                    if (plugin.Icon != null)
+                        icon = plugin.Icon;
                     var newPlugin = IOHelper.CreatePluginInstance<ClientPlugin>(assemblies[plugin.Identifier], Client, plugin);
+                    Client.Content.LoadPluginContent(newPlugin);
+                    if (icon != null)
+                        newPlugin.Icon = icon;
                     newPlugin.Load();
                     Plugins.Add(newPlugin);
                     Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
@@ -281,7 +288,7 @@ namespace Bricklayer.Core.Client.Components
                     var retPlugin = IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, plugin);
                     RegisterPlugin(retPlugin);
                     pluginStatuses[retPlugin.Identifier] = true;
-                    await Client.IO.WritePluginStatus(pluginStatuses);
+                    Client.IO.WritePluginStatus(pluginStatuses);
                     return retPlugin;
                 }
             }
@@ -291,14 +298,14 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Removes a plugin from the status list, deletes its directory, and calls its unload method.
         /// </summary>
-        public async Task DeletePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
+        internal void DeletePlugin(ClientPlugin plugin, Dictionary<string, bool> pluginStatuses)
         {
             if (plugin != null)
             {
                 // Remove from status list.
                 pluginStatuses.Remove(plugin.Identifier);
                 plugin.IsEnabled = false;
-                await Client.IO.WritePluginStatus(pluginStatuses);
+                Client.IO.WritePluginStatus(pluginStatuses);
                 try
                 {
                     // Delete directory.

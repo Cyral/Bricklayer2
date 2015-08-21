@@ -49,7 +49,7 @@ namespace Bricklayer.Core.Client
             while (count > 1)
             {
                 --count;
-                int index = random.Next(count + 1);
+                var index = random.Next(count + 1);
                 var obj = list[index];
                 list[index] = list[count];
                 list[count] = obj;
@@ -60,8 +60,7 @@ namespace Bricklayer.Core.Client
     /// <summary>
     /// Encrypts and decrypts string for saving password configs for example
     /// </summary>
-    /// <see
-    ///     cref="https://stackoverflow.com/questions/8871337/how-can-i-encrypt-user-settings-such-as-passwords-in-my-application" />
+    /// <see cref="https://stackoverflow.com/questions/8871337/how-can-i-encrypt-user-settings-such-as-passwords-in-my-application" />
     internal static class ProtectString
     {
         // TODO: Replace this with something better.

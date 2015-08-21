@@ -31,6 +31,11 @@ namespace Bricklayer.Core.Common
 
         private Texture2D texture;
 
+        /// <summary>
+        /// In the case of a texture atlas, this is the original (single) texture.
+        /// </summary>
+        internal Texture2D OriginalTexture { get; set; }
+
         private Image(Texture2D texture)
         {
             Texture = texture;

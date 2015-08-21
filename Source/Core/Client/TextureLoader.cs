@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -14,6 +13,11 @@ namespace Bricklayer.Core.Client
     /// </summary>
     internal class TextureLoader : IDisposable
     {
+        private static readonly BlendState blendColorBlendState;
+        private static readonly BlendState blendAlphaBlendState;
+        private readonly GraphicsDevice graphicsDevice;
+        private readonly SpriteBatch spriteBatch;
+
         static TextureLoader()
         {
             blendColorBlendState = new BlendState
@@ -41,10 +45,15 @@ namespace Bricklayer.Core.Client
             spriteBatch = new SpriteBatch(graphicsDevice);
         }
 
+        public void Dispose()
+        {
+            spriteBatch.Dispose();
+        }
+
         public Texture2D FromFile(string path, bool preMultiplyAlpha = true)
         {
-                using (Stream fileStream = File.OpenRead(path))
-                    return FromStream(fileStream, preMultiplyAlpha);
+            using (Stream fileStream = File.OpenRead(path))
+                return FromStream(fileStream, preMultiplyAlpha);
         }
 
         public Texture2D FromStream(Stream stream, bool preMultiplyAlpha = true)
@@ -75,28 +84,16 @@ namespace Bricklayer.Core.Client
                     graphicsDevice.Viewport = viewportBackup;
 
                     // Store data from render target because the RenderTarget2D is volatile
-                    var data = new Color[texture.Width * texture.Height];
+                    var data = new Color[texture.Width*texture.Height];
                     renderTarget.GetData(data);
 
                     // Unset texture from graphic device and set modified data back to it
                     graphicsDevice.Textures[0] = null;
                     texture.SetData(data);
                 }
-
             }
 
             return texture;
-        }
-
-        private static readonly BlendState blendColorBlendState;
-        private static readonly BlendState blendAlphaBlendState;
-
-        private readonly GraphicsDevice graphicsDevice;
-        private readonly SpriteBatch spriteBatch;
-
-        public void Dispose()
-        {
-            spriteBatch.Dispose();
         }
     }
 }

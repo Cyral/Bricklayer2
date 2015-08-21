@@ -43,20 +43,28 @@ namespace Bricklayer.Core.Client.Components
         public Dictionary<string, Effect> Effects { get; } =
             new Dictionary<string, Effect>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// List of all texture atlases.
+        /// </summary>
+        public Dictionary<string, TextureAtlas> Atlases { get; } =
+            new Dictionary<string, TextureAtlas>(StringComparer.OrdinalIgnoreCase);
+
         public ContentComponent(Client client) : base(client)
         {
         }
 
+#pragma warning disable 1998
         public override async Task Init()
+#pragma warning restore 1998
         {
-            await LoadTextures(Path.Combine(Client.IO.Directories["Content"], "Textures"));
+            LoadTextures(Path.Combine(Client.IO.Directories["Content"], "Textures"));
             await LoadEffects(Path.Combine(Client.IO.Directories["Content"], "Effects"));
         }
 
         /// <summary>
         /// Load textures for a given path.
         /// </summary>
-        private async Task LoadTextures(string path)
+        private void LoadTextures(string path)
         {
             if (Directory.Exists(path))
             {
@@ -143,7 +151,7 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         internal async void LoadPluginContent(ClientPlugin plugin)
         {
-            await LoadTextures(Path.Combine(plugin.Path, "Content", "Textures"));
+            LoadTextures(Path.Combine(plugin.Path, "Content", "Textures"));
             await LoadEffects(Path.Combine(plugin.Path, "Content", "Effects"));
         }
     }
@@ -165,6 +173,8 @@ namespace Bricklayer.Core.Client.Components
                 for (int i = 0, row = 0; i < items.Length; i++, row++)
                 {
                     var image = items[i];
+                    if (image.OriginalTexture != null)
+                        image.Texture = image.OriginalTexture;
                     // TODO: Better algorithm.
                     if (row > Math.Sqrt(items.Length))
                     {
@@ -190,8 +200,10 @@ namespace Bricklayer.Core.Client.Components
             var spriteBatch = new SpriteBatch(graphicsDevice);
 
             // Render all the textures to RenderTarget.
-            var renderTarget = new RenderTarget2D(graphicsDevice, width, height);
-     
+            lock (graphicsDevice)
+            {
+                var renderTarget = new RenderTarget2D(graphicsDevice, width, height);
+
                 var viewportBackup = graphicsDevice.Viewport;
                 graphicsDevice.SetRenderTarget(renderTarget);
                 graphicsDevice.Clear(Color.Transparent);
@@ -207,16 +219,13 @@ namespace Bricklayer.Core.Client.Components
                 graphicsDevice.SetRenderTarget(null);
                 graphicsDevice.Viewport = viewportBackup;
 
-                // Store data from render target because the RenderTarget2D is volatile
-                var data = new Color[renderTarget.Width * renderTarget.Height];
-                renderTarget.GetData(data);
-                var texture = (Texture2D)renderTarget;
+                var texture = (Texture2D) renderTarget;
                 foreach (var image in Images)
+                {
+                    image.OriginalTexture = image.Texture;
                     image.Texture = texture;
-
-                // Unset texture from graphic device and set modified data back to it
-                //graphicsDevice.Textures[0] = null;
-        
+                }
+            }
         }
     }
 }

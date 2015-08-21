@@ -118,6 +118,7 @@ namespace Bricklayer.Core.Client
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
         protected override void Draw(GameTime gameTime)
         {
+            if (UI == null || GraphicsDevice == null) return;
             UI.BeginDraw(gameTime);
             GraphicsDevice.Clear(Color.Black);
 
@@ -275,7 +276,11 @@ namespace Bricklayer.Core.Client
             // Set block textures and create texture atlas when plugins are reloaded.
             Events.Game.PluginStatusChanged.AddHandler((args =>
             {
-                SetBlockTexturesAndAtlas();
+                if (args.Enabled)
+                {
+                    SetBlockTexturesAndAtlas();
+                    Window.Invalidate();
+                }
             }));
             base.LoadContent();
         }
@@ -289,7 +294,7 @@ namespace Bricklayer.Core.Client
             // Create a texture atlas for blocks.
             if (items.Length > 1)
             {
-                TextureAtlas.CreateAtlas(GraphicsDevice,
+                Content.Atlases["blocks"] = TextureAtlas.CreateAtlas(GraphicsDevice,
                     Content.Textures.Where(x => x.Key.StartsWith("blocks")).Select(x => x.Value).ToList());
             }
 
@@ -330,9 +335,9 @@ namespace Bricklayer.Core.Client
             // Reload content.
             if (Input.WasKeyPressed(Keys.F3))
             {
-                #pragma warning disable 4014
+#pragma warning disable 4014
                 Content.Init();
-                #pragma warning restore 4014
+#pragma warning restore 4014
                 Plugins.ReloadContent();
                 Events.Game.ContentLoaded.Invoke(new EventManager.GameEvents.ContentLoadEventArgs(Content));
             }

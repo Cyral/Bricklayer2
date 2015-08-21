@@ -38,12 +38,12 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// Defines if this block is a background or foreground.
         /// </summary>
-        public Layer Layer { get; set; }
+        public Layer Layer { get; }
 
         /// <summary>
         /// Name of the block.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// The texture of this block. (Null on serverside)
@@ -171,5 +171,25 @@ namespace Bricklayer.Core.Common.World
         public static bool operator ==(BlockType type, Tile tile) => type != null && tile.Type.ID == type.ID;
 
         public static bool operator !=(BlockType type, Tile tile) => !(type == tile);
+
+        protected bool Equals(BlockType other)
+        {
+            return ID == other.ID && string.Equals(Name, other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((BlockType)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (ID.GetHashCode() * 397) ^ Name.GetHashCode();
+            }
+        }
     }
 }

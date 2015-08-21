@@ -49,14 +49,14 @@ namespace Bricklayer.Core.Client.Components
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".Bricklayer");
 
         /// <summary>
-        /// File containing list of servers
-        /// </summary>
-        private readonly string serverFile;
-
-        /// <summary>
         /// File containing list of plugin statuses (Whether or not they are enabled or disabled)
         /// </summary>
         private readonly string pluginsFile;
+
+        /// <summary>
+        /// File containing list of servers
+        /// </summary>
+        private readonly string serverFile;
 
         /// <summary>
         /// Loader to load textures properly without the content pipeline.
@@ -157,7 +157,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Reads and returns collection of enabled and disabled plugins.
         /// </summary>
-        public async Task<Dictionary<string, bool>> ReadPluginStatus()
+        public Dictionary<string, bool> ReadPluginStatus()
         {
             var plugins = new Dictionary<string, bool>();
             var fileName = pluginsFile;
@@ -166,7 +166,7 @@ namespace Bricklayer.Core.Client.Components
             {
                 // If plugin config doesn't exist, create it.
                 Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Identifier, true));
-                json = await WritePluginStatus(plugins);
+                json = WritePluginStatus(plugins);
             }
             else
                 json = File.ReadAllText(fileName);
@@ -174,7 +174,7 @@ namespace Bricklayer.Core.Client.Components
             {
                 // If file is empty, create the contents.
                 Client.Plugins.Plugins.ForEach(p => plugins.Add(p.Identifier, true));
-                json = await WritePluginStatus(plugins);
+                json = WritePluginStatus(plugins);
             }
             return JsonConvert.DeserializeObject<Dictionary<string, bool>>(json);
         }
@@ -182,20 +182,17 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Save plugin statuses into a configurable json file.
         /// </summary>
-        public async Task<string> WritePluginStatus(Dictionary<string, bool> plugins)
+        public string WritePluginStatus(Dictionary<string, bool> plugins)
         {
-            return await Task.Factory.StartNew(() =>
+            var fileName = pluginsFile;
+            if (!File.Exists(fileName))
             {
-                var fileName = pluginsFile;
-                if (!File.Exists(fileName))
-                {
-                    var str = File.Create(fileName);
-                    str.Close();
-                }
-                var json = JsonConvert.SerializeObject(plugins, SerializationSettings);
-                File.WriteAllText(fileName, json);
-                return json;
-            });
+                var str = File.Create(fileName);
+                str.Close();
+            }
+            var json = JsonConvert.SerializeObject(plugins, SerializationSettings);
+            File.WriteAllText(fileName, json);
+            return json;
         }
 
         /// <summary>

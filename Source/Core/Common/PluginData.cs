@@ -12,7 +12,7 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// The (preferably short) display name of the plugin.
         /// </summary>
-        public string Name { get; internal set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// The unique identification name of this plugin.
@@ -62,15 +62,24 @@ namespace Bricklayer.Core.Common
         [JsonIgnore]
         public string Path { get; internal set; }
 
+        private bool Equals(PluginData other)
+        {
+            return Version == other.Version && string.Equals(Identifier, other.Identifier);
+        }
+
         public override bool Equals(object obj)
         {
-            var item = obj as PluginData;
-            return item?.GetHashCode() == GetHashCode();
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((PluginData) obj);
         }
 
         public override int GetHashCode()
         {
-            return HashExtensions.Start.Hash(Identifier).Hash(Version);
+            unchecked
+            {
+                return (Version.GetHashCode()*397) ^ Name.GetHashCode();
+            }
         }
 
         /// <summary>

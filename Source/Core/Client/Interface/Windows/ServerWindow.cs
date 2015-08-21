@@ -11,7 +11,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
     /// <summary>
     /// The second window shown in Bricklayer, listing the servers and allowing the user to conenct to them.
     /// </summary>
-    internal sealed class ServerWindow : Dialog
+    public sealed class ServerWindow : Dialog
     {
         public Button BtnAdd { get; }
         public Button BtnEdit { get; }

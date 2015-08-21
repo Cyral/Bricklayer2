@@ -88,7 +88,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(BtnToggle);
 
             // If user enables or disables a plugin.
-            BtnToggle.Click += async (sender, args) =>
+            BtnToggle.Click += (sender, args) =>
             {
                 var identifier =  ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data.Identifier;
                 pluginStatuses[identifier] =
@@ -98,9 +98,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 try
                 {
                     if (!pluginStatuses[identifier])
-                        await screen.Client.Plugins.DisablePlugin(plugin, pluginStatuses);
+                        screen.Client.Plugins.DisablePlugin(plugin, pluginStatuses);
                     else
-                        plugin = await screen.Client.Plugins.EnablePlugin(plugin, pluginStatuses);
+                        plugin = screen.Client.Plugins.EnablePlugin(plugin, pluginStatuses);
                 }
                 catch (Exception e)
                 {
@@ -149,7 +149,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 msgBox.Init();
                 manager.Add(msgBox);
                 msgBox.ShowModal();
-                msgBox.Closed += async (closedSender, closedArgs) =>
+                msgBox.Closed += (closedSender, closedArgs) =>
                 {
                     var dialog = closedSender as Dialog;
                     if (dialog?.ModalResult != ModalResult.Yes)
@@ -161,7 +161,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
                     var plugin = screen.Client.Plugins.Plugins.FirstOrDefault(x => x.Identifier.Equals(data.Identifier));
                     if (plugin != null)
-                        await screen.Client.Plugins.DeletePlugin(plugin, pluginStatuses);
+                        screen.Client.Plugins.DeletePlugin(plugin, pluginStatuses);
 
                     LstPlugins.ItemIndex = 0;
                 };
@@ -220,11 +220,11 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// <summary>
         /// Refesh plugin list.
         /// </summary>
-        private async void RefreshList()
+        private void RefreshList()
         {
             if (!pluginScreen.Client.Plugins.Initialized) return;
 
-            pluginStatuses = await pluginScreen.Client.IO.ReadPluginStatus();
+            pluginStatuses = pluginScreen.Client.IO.ReadPluginStatus();
             LstPlugins.Items.Clear();
 
             foreach (var plugin in pluginScreen.Client.Plugins.Plugins.OrderBy(x => !x.IsEnabled).ThenBy(x => x.Name))

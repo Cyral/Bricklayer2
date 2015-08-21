@@ -13,7 +13,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
     /// <summary>
     /// A control for displaying a servers name, players online, motd, etc in the serverlist
     /// </summary>
-    internal sealed class ServerDataControl : Control
+    public sealed class ServerDataControl : Control
     {
         /// <summary>
         /// Label for server description or error message.

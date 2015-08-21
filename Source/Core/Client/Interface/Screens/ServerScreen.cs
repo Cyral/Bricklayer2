@@ -6,38 +6,40 @@ namespace Bricklayer.Core.Client.Interface.Screens
     public class ServerScreen : Screen
     {
         public override GameState State => GameState.Server;
-        private Button btnPlugins;
-        private ImageBox imgBackground;
-        // Controls
-        private ServerWindow wndServer;
+        public ImageBox ImgBackground { get; set; }
+
+        /// <summary>
+        /// Window with server list and buttons.
+        /// </summary>
+        public ServerWindow WndServer { get; set; }
 
         public override void Add(ScreenManager screenManager)
         {
             base.Add(screenManager);
             Client.State = GameState.Lobby;
 
-            imgBackground = new ImageBox(Manager)
+            ImgBackground = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.background"],
                 SizeMode = SizeMode.Stretched
             };
-            imgBackground.SetSize(Window.Width, Window.Height);
-            imgBackground.SetPosition(0, 0);
-            imgBackground.Init();
-            Window.Add(imgBackground);
+            ImgBackground.SetSize(Window.Width, Window.Height);
+            ImgBackground.SetPosition(0, 0);
+            ImgBackground.Init();
+            Window.Add(ImgBackground);
 
             // Add the server window
-            wndServer = new ServerWindow(Manager, this);
-            wndServer.Init();
-            Window.Add(wndServer);
-            wndServer.Show();
+            WndServer = new ServerWindow(Manager, this);
+            WndServer.Init();
+            Window.Add(WndServer);
+            WndServer.Show();
         }
 
         public override void Remove()
         {
-            Window.Remove(wndServer);
-            wndServer.Dispose();
-            Window.Remove(imgBackground);
+            Window.Remove(WndServer);
+            WndServer.Dispose();
+            Window.Remove(ImgBackground);
         }
     }
 }
