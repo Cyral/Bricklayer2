@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Core\Client\Client.csproj", "{9749B258-EFAC-4384-8677-D7B2A2217356}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -38,6 +38,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Snake", "Snake", "{DFEBA794-9013-49DC-ABD1-4C505BC4CF82}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Snake", "Plugins\Snake\Snake.csproj", "{8326D058-A612-43F8-8F0C-7E125BA47560}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Permissions", "Plugins\Permissions\Permissions.csproj", "{7AF1B41C-6939-4040-B85F-445B4439DB69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -166,6 +168,18 @@ Global
 		{8326D058-A612-43F8-8F0C-7E125BA47560}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8326D058-A612-43F8-8F0C-7E125BA47560}.Release|x86.ActiveCfg = Release|Any CPU
 		{8326D058-A612-43F8-8F0C-7E125BA47560}.Release|x86.Build.0 = Release|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Debug|x86.Build.0 = Debug|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Mono|Any CPU.ActiveCfg = Release|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Mono|Any CPU.Build.0 = Release|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Mono|x86.ActiveCfg = Release|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Mono|x86.Build.0 = Release|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Release|x86.ActiveCfg = Release|Any CPU
+		{7AF1B41C-6939-4040-B85F-445B4439DB69}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -184,5 +198,6 @@ Global
 		{EA5F4A09-B8A8-4EEA-8CC7-1C58738E7FB0} = {CE1DEF9A-4DF1-4C4A-9E2A-4A3424F4737D}
 		{DFEBA794-9013-49DC-ABD1-4C505BC4CF82} = {4081D86C-BE24-4513-850A-B2BE0362D5CF}
 		{8326D058-A612-43F8-8F0C-7E125BA47560} = {DFEBA794-9013-49DC-ABD1-4C505BC4CF82}
+		{7AF1B41C-6939-4040-B85F-445B4439DB69} = {4081D86C-BE24-4513-850A-B2BE0362D5CF}
 	EndGlobalSection
 EndGlobal

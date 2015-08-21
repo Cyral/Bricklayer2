@@ -229,6 +229,11 @@ namespace Bricklayer.Core.Server.Net
                             new EventManager.NetEvents.RatingEventArgs(msg.Level, sender, msg.Rating));
                         break;
                     }
+                    case MessageTypes.PluginMessage:
+                    {
+                        Server.Events.Network.PluginMessageReceived.Invoke(new EventManager.NetEvents.PluginMessageEventArgs(inc));
+                        break;
+                    }
                 }
             }
         }

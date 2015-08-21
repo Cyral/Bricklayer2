@@ -5,9 +5,12 @@ using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
+using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework.Content;
+using Lidgren.Network;
+
 using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client
@@ -482,6 +485,24 @@ namespace Bricklayer.Core.Client
                     { }
                 }
 
+                public class PluginMessageEventArgs : BricklayerEventArgs
+                {
+                    public NetIncomingMessage IncomingMessage { get; private set; }
+                    public int Id { get; private set; }
+                    public string Identifier { get; private set; }
+                    public string Type { get; private set; }
+
+
+                    public PluginMessageEventArgs(NetIncomingMessage im)
+                    {
+                        IncomingMessage = im;
+                        Id = IncomingMessage.ReadInt32();
+                        Identifier = IncomingMessage.ReadString();
+                        Type = IncomingMessage.ReadString();
+
+                    }
+                }
+
 
                 #endregion
 
@@ -546,6 +567,11 @@ namespace Bricklayer.Core.Client
                 /// </summary>
                 public Event<BlockPlacedEventArgs> BlockPlaceMessageReceived { get; } =
                     new Event<BlockPlacedEventArgs>();
+
+                /// <summary>
+                /// When a plugin message is recieved
+                /// </summary>
+                public Event<PluginMessageEventArgs> PluginMessageReceived { get; } = new Event<PluginMessageEventArgs>();
 
                 #endregion
             }

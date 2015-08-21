@@ -33,7 +33,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// The server configuration
         /// </summary>
-        public NetPeerConfiguration Config { get; set; }
+        internal NetPeerConfiguration Config { get; set; }
 
         /// <summary>
         /// Indicates if the server has shut down, meaning there is no need to save maps.
@@ -43,12 +43,12 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// The message loop for handling messages
         /// </summary>
-        public MessageHandler MsgHandler { get; set; }
+        internal MessageHandler MsgHandler { get; set; }
 
         /// <summary>
         /// The underlying Lidgren server object
         /// </summary>
-        public NetServer NetServer { get; set; }
+        internal NetServer NetServer { get; set; }
 
         /// <summary>
         /// Net LogType
@@ -117,7 +117,7 @@ namespace Bricklayer.Core.Server.Components
                     pendingSessions[args.UUID].Approve(EncodeMessage(
                         new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
                             Server.IO.Config.Server.Intro, NetServer.ConnectionsCount,
-                            await Server.Database.GetAllLevels())));
+                            await Server.Database.GetAllLevels(), Server.Plugins.PluginMessages)));
                     Logger.WriteLine(LogType.Net,
                         $"Session valid for '{args.Username}'. (Allowed)");
                 }
@@ -137,7 +137,7 @@ namespace Bricklayer.Core.Server.Components
                 {
                     case MessageTypes.Init:
                         Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
-                            Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels()),
+                            Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels(), Server.Plugins.PluginMessages),
                             args.Sender);
                         break;
                     case MessageTypes.Banner:
@@ -260,7 +260,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="port">Port to run on</param>
         /// <param name="maxconnections">Maximum clients connectable</param>
-        public bool Start(int port, int maxconnections)
+        internal bool Start(int port, int maxconnections)
         {
             // Set up config
             Config = new NetPeerConfiguration(Globals.Strings.NetworkID)
@@ -306,7 +306,7 @@ namespace Bricklayer.Core.Server.Components
         /// Creates a NetOutgoingMessage from the interal Server object
         /// </summary>
         /// <returns>A new NetOutgoingMessage</returns>
-        public NetOutgoingMessage CreateMessage()
+        internal NetOutgoingMessage CreateMessage()
         {
             return NetServer.CreateMessage();
         }
@@ -315,7 +315,7 @@ namespace Bricklayer.Core.Server.Components
         /// Reads the latest message in the queue
         /// </summary>
         /// <returns>The latest message, ready for processing, null if no message waiting</returns>
-        public NetIncomingMessage ReadMessage()
+        internal NetIncomingMessage ReadMessage()
         {
             return NetServer.ReadMessage();
         }
@@ -339,7 +339,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="receiver"></param>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
-        public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
+        internal void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage); // Write packet ID and encode
             NetServer.SendUnconnectedMessage(message, receiver); // Send
@@ -415,12 +415,14 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="gameMessage">A message to encode</param>
         /// <returns>An encoded message as a NetOutgoingMessage</returns>
-        public NetOutgoingMessage EncodeMessage(IMessage gameMessage)
+        internal NetOutgoingMessage EncodeMessage(IMessage gameMessage)
         {
             gameMessage.Context = MessageContext.Server;
             var message = NetServer.CreateMessage();
             // Write packet type ID
             message.Write((byte)gameMessage.MessageType);
+            var pluginMessage = gameMessage as PluginMessage;
+            pluginMessage?.EncodeProperties(message);
             gameMessage.Encode(message);
             return message;
         }
@@ -429,7 +431,7 @@ namespace Bricklayer.Core.Server.Components
         /// Shuts down the server and disconnects clients
         /// </summary>
         /// <param name="reason">Reason for shutting down</param>
-        public void Shutdown(string reason = "Disconnected.")
+        internal void Shutdown(string reason = "Disconnected.")
         {
             IsShutdown = true;
             NetServer.Shutdown(reason);
@@ -439,7 +441,7 @@ namespace Bricklayer.Core.Server.Components
         /// Recycles a message after processing by reusing it, reducing GC load
         /// </summary>
         /// <param name="im">Message to recylce</param>
-        public void Recycle(NetIncomingMessage im)
+        internal void Recycle(NetIncomingMessage im)
         {
             if (im != null)
                 NetServer.Recycle(im);
@@ -448,7 +450,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Disposes the NetworkManager
         /// </summary>
-        public void Dispose()
+        internal void Dispose()
         {
             Dispose(true);
         }

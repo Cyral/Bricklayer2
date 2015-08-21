@@ -14,29 +14,29 @@ namespace Bricklayer.Core.Client.Components
     /// <summary>
     /// Manages network functions related to the server.
     /// </summary>
-    internal class NetworkManager : ClientComponent
+    public class NetworkManager : ClientComponent
     {
         private const NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
 
         /// <summary>
         /// Configuration options for Lidgren messages.
         /// </summary>
-        public NetPeerConfiguration Config { get; private set; }
+        internal NetPeerConfiguration Config { get; private set; }
 
         /// <summary>
         /// The message handler to handle incoming messages.
         /// </summary>
-        public MessageHandler Handler { get; private set; }
+        internal MessageHandler Handler { get; private set; }
 
         /// <summary>
         /// The underlying Lidgren NetClient.
         /// </summary>
-        public NetClient NetClient { get; private set; }
+        internal NetClient NetClient { get; private set; }
 
         /// <summary>
         /// Contains the 2 keys used for authentication
         /// </summary>
-        public Token TokenKeys { get; private set; }
+        internal Token TokenKeys { get; private set; }
 
         /// <summary>
         /// The IP of the auth server.
@@ -121,7 +121,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Sends login information to the authentication server.
         /// </summary>
-        public void ConnectToAuth(string username, string password)
+        internal void ConnectToAuth(string username, string password)
         {
             SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort,
                 new AuthLoginMessage(Constants.Version, username, password));
@@ -132,7 +132,7 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         /// <param name="host">Server hostname (IP or domain).</param>
         /// <param name="port">Server port.</param>
-        public void SendSessionRequest(string host, int port)
+        internal void SendSessionRequest(string host, int port)
         {
             this.host = host;
             this.port = port;
@@ -144,7 +144,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Sends a message once connected to join a server officially.
         /// </summary>
-        public async Task Join(string host, int port, string username, Guid uuid, byte[] publicKey)
+        internal async Task Join(string host, int port, string username, Guid uuid, byte[] publicKey)
         {
             await Task.Factory.StartNew(() =>
             {
@@ -158,7 +158,7 @@ namespace Bricklayer.Core.Client.Components
         /// Creates a NetOutgoingMessage from the interal client object.
         /// </summary>
         /// <returns>A new NetOutgoingMessage.</returns>
-        public NetOutgoingMessage CreateMessage()
+        internal NetOutgoingMessage CreateMessage()
         {
             return NetClient.CreateMessage();
         }
@@ -167,7 +167,7 @@ namespace Bricklayer.Core.Client.Components
         /// Reads the latest message in the queue.
         /// </summary>
         /// <returns>The latest NetIncomingMessage, ready for processing, null if no message waiting.</returns>
-        public NetIncomingMessage ReadMessage()
+        internal NetIncomingMessage ReadMessage()
         {
             return NetClient.ReadMessage();
         }
@@ -186,7 +186,7 @@ namespace Bricklayer.Core.Client.Components
         /// Sends an unconnected message to the endpoint
         /// </summary>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
-        public void SendUnconnected(string ip, int port, IMessage gameMessage)
+        internal void SendUnconnected(string ip, int port, IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage); // Write packet ID and encode
             var receiver = new IPEndPoint(NetUtility.Resolve(ip), port); // Auth Server info
@@ -197,7 +197,7 @@ namespace Bricklayer.Core.Client.Components
         /// Sends an unconnected message to the endpoint
         /// </summary>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
-        public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
+        internal void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage); // Write packet ID and encode
             NetClient.SendUnconnectedMessage(message, receiver); // Send
@@ -206,12 +206,14 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Writes an IMessage's packet ID and encodes it's data into a NetOutgoingMessage.
         /// </summary>
-        public NetOutgoingMessage EncodeMessage(IMessage gameMessage)
+        internal NetOutgoingMessage EncodeMessage(IMessage gameMessage)
         {
             gameMessage.Context = MessageContext.Client;
             var message = NetClient.CreateMessage();
             // Write packet type ID
             message.Write((byte) gameMessage.MessageType);
+            var pluginMessage = gameMessage as PluginMessage;
+            pluginMessage?.EncodeProperties(message);
             gameMessage.Encode(message);
             return message;
         }
@@ -219,7 +221,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Send ping message to auth server. (Usually used for letting it know it recieved a message)
         /// </summary>
-        public void PingAuthMessage(PingAuthMessage.PingResponse response, string info)
+        internal void PingAuthMessage(PingAuthMessage.PingResponse response, string info)
         {
             SendUnconnected(AuthEndpoint, new PingAuthMessage(response, info));
         }
@@ -228,7 +230,7 @@ namespace Bricklayer.Core.Client.Components
         /// Disconnects from the server.
         /// </summary>
         /// <param name="reason">Reason to tell the server for disconnecting.</param>
-        public void Disconnect(string reason = "Disconnected.")
+        internal void Disconnect(string reason = "Disconnected.")
         {
             NetClient?.Disconnect(reason);
         }
@@ -271,7 +273,7 @@ namespace Bricklayer.Core.Client.Components
         /// Recycles a message after processing by reusing it, reducing GC load
         /// </summary>
         /// <param name="im">Message to recylce</param>
-        public void Recycle(NetIncomingMessage im)
+        internal void Recycle(NetIncomingMessage im)
         {
             NetClient.Recycle(im);
         }
@@ -279,7 +281,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Disposes the Network
         /// </summary>
-        public void Dispose()
+        internal void Dispose()
         {
             Dispose(true);
         }

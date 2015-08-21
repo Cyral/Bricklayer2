@@ -301,7 +301,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Performs an async operation on the specified database that does not return any results.
         /// </summary>
-        private async Task PerformOperation(string connection, DbCommand command)
+        public async Task PerformOperation(string connection, DbCommand command)
         {
             await Task.Factory.StartNew(() =>
             {
@@ -340,7 +340,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Performs an async query on the specified database that returns a result to be handled as an action with a DbDataReader
         /// </summary>
-        private async Task PerformQuery(string connection, DbCommand command, Action<DbDataReader> action)
+        public async Task PerformQuery(string connection, DbCommand command, Action<DbDataReader> action)
         {
             await Task.Factory.StartNew(() =>
             {

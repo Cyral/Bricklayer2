@@ -18,6 +18,7 @@ namespace Bricklayer.Plugins.TestClientPlugin
 
         public override void Load()
         {
+            Client.Plugins.Pluginmessages.AddMessage("TestPluginMessage");
             // Demo window.
             window = new Window(Client.UI);
             window.Init();
@@ -33,6 +34,15 @@ namespace Bricklayer.Plugins.TestClientPlugin
             window.SetPosition(8,8);
 
             Client.UI.Add(window);
+
+            Client.Events.Game.ScreenChanged.AddHandler(args => {
+                var screen = args.NewScreen as LobbyScreen;
+                if (screen != null)
+                {
+                    Client.Network.Send(new TestPluginMessage("Hello! :)", this));
+                }
+            });
+
             Console.WriteLine("Test Plugin Loaded!");
         }
 

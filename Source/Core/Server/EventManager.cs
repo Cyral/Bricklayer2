@@ -389,6 +389,24 @@ namespace Bricklayer.Core.Server
                 { }
             }
 
+            public class PluginMessageEventArgs : BricklayerEventArgs
+            {
+                public NetIncomingMessage IncomingMessage { get; private set; }
+                public int Id { get; private set; }
+                public string Identifier { get; private set; }
+                public string Type { get; private set; }
+
+
+                public PluginMessageEventArgs(NetIncomingMessage im)
+                {
+                    IncomingMessage = im;
+                    Id = IncomingMessage.ReadInt32();
+                    Identifier = IncomingMessage.ReadString();
+                    Type = IncomingMessage.ReadString();
+
+                }
+            }
+
             #endregion
 
             // Events represent a collection of event handlers.
@@ -450,6 +468,11 @@ namespace Bricklayer.Core.Server
             /// When the server receives a rating for a level from a player
             /// </summary>
             public Event<RatingEventArgs> RatingMessageReceived { get; } = new Event<RatingEventArgs>();
+
+            /// <summary>
+            /// When a plugin message is recieved
+            /// </summary>
+            public Event<PluginMessageEventArgs> PluginMessageReceived { get; } = new Event<PluginMessageEventArgs>();
 
             #endregion
         }

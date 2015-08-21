@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Net;
 
 /*
 See PluginComponent in the Client project for full explanation on how the system works
@@ -23,15 +24,23 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public int PluginCount => Plugins.Count;
 
+        /// <summary>
+        /// Class contains a list of plugin messages. Server and Client plugins will use this
+        /// to recieve an id that both the server and the client knows for the plugin message.
+        /// </summary>
+        public PluginMessages PluginMessages;
+
         protected override LogType LogType => LogType.Plugin;
         internal List<ServerPlugin> Plugins { get; }
         private string loadingPlugin;
         private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
         private Dictionary<string, bool> pluginStatuses = new Dictionary<string, bool>();
+        
 
         public PluginComponent(Server server) : base(server)
         {
             Plugins = new List<ServerPlugin>();
+            PluginMessages = new PluginMessages();
         }
 
         public override async Task Init()

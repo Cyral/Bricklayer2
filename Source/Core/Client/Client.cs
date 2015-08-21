@@ -83,7 +83,7 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// Handles receiving and sending of game server network messages
         /// </summary>
-        internal NetworkManager Network { get; private set; }
+        public NetworkManager Network { get; private set; }
 
         private RenderTarget2D backgroundTarget, foregroundTarget, lightingTarget;
         private GameState state;

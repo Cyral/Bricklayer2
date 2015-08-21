@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Bricklayer.Core.Client.Interface.Windows;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -52,6 +53,12 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         public int PluginCount => Plugins.Count;
 
+        /// <summary>
+        /// Class contains a list of plugin messages. Server and Client plugins will use this
+        /// to recieve an id that both the server and the client knows for the plugin message.
+        /// </summary>
+        public PluginMessages Pluginmessages;
+
         internal List<ClientPlugin> Plugins { get; }
         private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
         private string loadingPlugin;
@@ -59,6 +66,7 @@ namespace Bricklayer.Core.Client.Components
         public PluginComponent(Client client) : base(client)
         {
             Plugins = new List<ClientPlugin>();
+            Pluginmessages = new PluginMessages();
         }
 
         public override async Task Init()

@@ -98,6 +98,12 @@ namespace Bricklayer.Core.Client.Net
                     }
                     break;
                 }
+                case MessageTypes.PluginMessage:
+                {
+                    networkManager.Client.Events.Network.Game.PluginMessageReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.PluginMessageEventArgs(im));
+                    break;
+                }
             }
         }
 

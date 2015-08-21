@@ -261,6 +261,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
 
         private void InitReceived(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
         {
+            lobbyScreen.Client.Plugins.Pluginmessages = args.Message.PluginMessages;
             lobbyScreen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
                 args.Message.Intro, args.Message.Online, args.Message.Levels));
         }

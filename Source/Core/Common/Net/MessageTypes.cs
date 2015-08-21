@@ -27,6 +27,7 @@
         PlayerLeave,
         PingUpdate,
         BlockPlace,
-        Rating
+        Rating,
+        PluginMessage
     }
 }
