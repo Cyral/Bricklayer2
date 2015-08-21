@@ -53,6 +53,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="ClientPlugin.cs" />
     <Compile Include="Components\ClientComponent.cs" />
@@ -136,15 +139,15 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>mkdir "$(TargetDir)Content"
+    <PostBuildEvent>mkdir "$(TargetDir)Content"
 xcopy /s /i /y "$(SolutionDir)..\Content" "$(TargetDir)Content"
 cd "$(TargetDir)Content"
 del /S *.bat
-del /S *.fx</PreBuildEvent>
+del /S *.fx</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
