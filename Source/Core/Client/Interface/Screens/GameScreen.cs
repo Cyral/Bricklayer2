@@ -70,9 +70,9 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// Setup the game UI.
         /// </summary>
-        public override void Add(ScreenManager screenManager)
+        public override void Setup(ScreenManager screenManager)
         {
-            base.Add(screenManager);
+            base.Setup(screenManager);
 
             // Status bar.
             SbStats = new StatusBar(Manager);
@@ -85,13 +85,13 @@ namespace Bricklayer.Core.Client.Interface.Screens
             LblStats.Init();
 
             SbStats.Add(LblStats);
-            Window.Add(SbStats);
+            AddControl(SbStats);
 
             // Inventory.
             Inventory = new InventoryControl(this, Manager);
             Inventory.Left = Manager.TargetWidth/2 - (Inventory.Width/2);
             Inventory.Init();
-            Window.Add(Inventory);
+            AddControl(Inventory);
 
             // Chat.
             TxtChat = new TextBox(Manager);
@@ -103,7 +103,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             TxtChat.Visible = false;
             TxtChat.Passive = true;
             TxtChat.MaxLength = ChatMessage.MaxChatLength;
-            Window.Add(TxtChat);
+            AddControl(TxtChat);
 
             LstChats = new ControlList<ChatDataControl>(Manager)
             {
@@ -117,7 +117,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             LstChats.Passive = true;
             LstChats.HideScrollbars = true;
             LstChats.Top = TxtChat.Top - LstChats.Height;
-            Window.Add(LstChats);
+            AddControl(LstChats);
 
             // Tablist.
             LstPlayers = new ControlList<PlayerListDataControl>(Manager)
@@ -131,7 +131,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             LstPlayers.Passive = true;
             LstPlayers.HideScrollbars = true;
             LstPlayers.Visible = false;
-            Window.Add(LstPlayers);
+            AddControl(LstPlayers);
 
             foreach (var player in Level.Players)
                 LstPlayers.Items.Add(new PlayerListDataControl(player, Manager, LstPlayers));
@@ -139,35 +139,47 @@ namespace Bricklayer.Core.Client.Interface.Screens
 
             // Listen for later player joins.
             Client.Events.Network.Game.PlayerJoinReceived.AddHandler(
-                args => { LstPlayers.Items.Add(new PlayerListDataControl(args.Player, Manager, LstPlayers)); });
+                PlayerJoined);
 
             // Listen for ping updates for players.
-            Client.Events.Network.Game.PingUpdateReceived.AddHandler(args =>
-            {
-                foreach (var ping in args.Pings)
-                {
-                    var control =
-                        (PlayerListDataControl)
-                            LstPlayers.Items.FirstOrDefault(i => ((PlayerListDataControl) i).User.UUID == ping.Key);
-                    if (control != null) control.Ping = ping.Value;
-                }
-            });
+            Client.Events.Network.Game.PingUpdateReceived.AddHandler(PingUpdated);
 
 
             // Hackish way to get chats to start at the bottom.
             for (var i = 0; i < (Manager.TargetHeight*0.25f)/18; i++)
                 LstChats.Items.Add(new ChatDataControl("", Manager, LstChats, this));
 
-            Client.Events.Network.Game.ChatReceived.AddHandler(args => { AddChat(args.Message); });
+            Client.Events.Network.Game.ChatReceived.AddHandler(ChatReceived);
 
             // Level event handlers.
-            Client.Events.Game.Level.BlockPlaced.AddHandler(args =>
+            Client.Events.Game.Level.BlockPlaced.AddHandler(BlockPlaced);
+        }
+
+        private void BlockPlaced(EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs args)
+        {
+            // Directly access the tile array, as we don't want to send two BlockPlaced events, as the tile indexer will
+            // automatically call the event and send a network message.
+            if (args.Level != null)
+                args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = args.Type;
+        }
+
+        private void ChatReceived(EventManager.NetEvents.GameServerEvents.ChatEventArgs args)
+        {
+            AddChat(args.Message);
+        }
+
+        private void PingUpdated(EventManager.NetEvents.GameServerEvents.PingUpdateEventArgs args)
+        {
+            foreach (var ping in args.Pings)
             {
-                // Directly access the tile array, as we don't want to send two BlockPlaced events, as the tile indexer will
-                // automatically call the event and send a network message.
-                if (args.Level != null)
-                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = args.Type;
-            });
+                var control = (PlayerListDataControl) LstPlayers.Items.FirstOrDefault(i => ((PlayerListDataControl) i).User.UUID == ping.Key);
+                if (control != null) control.Ping = ping.Value;
+            }
+        }
+
+        private void PlayerJoined(EventManager.NetEvents.GameServerEvents.PlayerJoinEventArgs args)
+        {
+            LstPlayers.Items.Add(new PlayerListDataControl(args.Player, Manager, LstPlayers));
         }
 
         public override void Update(GameTime gameTime)
@@ -283,16 +295,15 @@ namespace Bricklayer.Core.Client.Interface.Screens
         public bool IsChatOpen() => TxtChat.Visible;
 
         /// <summary>
-        /// Removes the game UI.
+        /// Removes the game UI and handlers.
         /// </summary>
-        public override void Remove()
+        public override void Clear()
         {
-            Manager.Remove(SbStats);
-            Manager.Remove(LblStats);
-            Manager.Remove(LstChats);
-            Manager.Remove(LstPlayers);
-            Manager.Remove(TxtChat);
-            Manager.Remove(Inventory);
+            Client.Events.Network.Game.PlayerJoinReceived.RemoveHandler(PlayerJoined);
+            Client.Events.Network.Game.PingUpdateReceived.RemoveHandler(PingUpdated);
+            Client.Events.Network.Game.ChatReceived.RemoveHandler(ChatReceived);
+            Client.Events.Game.Level.BlockPlaced.RemoveHandler(BlockPlaced);
+            base.Clear();
         }
     }
 }

@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Bricklayer.Core.Client
 {
@@ -14,10 +16,17 @@ namespace Bricklayer.Core.Client
     internal static class Extensions
     {
         private static readonly Random random;
+        private static Texture2D pixel;
 
         static Extensions()
         {
             random = new Random();
+        }
+
+        internal static void Setup(GraphicsDevice graphics)
+        {
+            pixel = new Texture2D(graphics, 1, 1);
+            pixel.SetData(new[] { Color.White });
         }
 
         /// <summary>
@@ -54,6 +63,22 @@ namespace Bricklayer.Core.Client
                 list[index] = list[count];
                 list[count] = obj;
             }
+        }
+
+        /// <summary>
+        /// Draws a solid color rectangle.
+        /// </summary>
+        public static void DrawRectangle(this SpriteBatch spriteBatch, Rectangle targetRectangle, Color color)
+        {
+            spriteBatch.Draw(pixel, targetRectangle, color);
+        }
+
+        /// <summary>
+        /// Draws a solid color rectangle.
+        /// </summary>
+        public static void DrawRectangle(this SpriteBatch spriteBatch, Rectangle targetRectangle)
+        {
+            spriteBatch.Draw(pixel, targetRectangle, Color.White);
         }
     }
 

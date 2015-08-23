@@ -27,8 +27,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// </summary>
         public MainWindow Window { get; set; }
 
-        private readonly ImageBox fadeImage;
-        private readonly Texture2D fadeTexture;
         private float fadeAlpha = 1;
         private Screen fadeTo;
         private FadeState state = FadeState.In;
@@ -37,28 +35,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
         {
             Window = window;
             Manager = window.Manager;
-
-            // Setup a solid black image to use for fading
-            fadeTexture = new Texture2D(Manager.GraphicsDevice, 1, 1);
-            fadeTexture.SetData(new[] {Color.Black});
-
-            fadeImage = new ImageBox(Manager)
-            {
-                Passive = true,
-                Left = 0,
-                Top = 0,
-                Width = Window.Width,
-                Height = Window.Height,
-                StayOnTop = true,
-                Image = fadeTexture,
-                SizeMode = SizeMode.Stretched
-            };
-            fadeImage.Init();
-            fadeImage.Image = fadeTexture;
-            fadeImage.Alpha = 0;
-            fadeImage.Color = Color.White*fadeImage.Alpha;
-            window.Add(fadeImage);
-            fadeImage.BringToFront();
         }
 
         /// <summary>
@@ -68,7 +44,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
         {
             fadeAlpha = 1;
             state = FadeState.In;
-            fadeImage.BringToFront();
         }
 
         /// <summary>
@@ -81,7 +56,12 @@ namespace Bricklayer.Core.Client.Interface.Screens
             // Set the new screen and start fading to it
             fadeTo = newScreen;
             state = FadeState.Out;
-            fadeImage.BringToFront();
+        }
+
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        {
+            Current.Draw(spriteBatch, gameTime);
+            spriteBatch.DrawRectangle(Window.ControlRect, Color.Black * fadeAlpha);
         }
 
         public void Update(GameTime gameTime)
@@ -92,8 +72,6 @@ namespace Bricklayer.Core.Client.Interface.Screens
             if (state == FadeState.In)
             {
                 fadeAlpha = MathHelper.Clamp(fadeAlpha - (elapsed*FadeSpeed), 0, 1);
-                fadeImage.Alpha = fadeAlpha;
-                fadeImage.Color = Color.White*fadeImage.Alpha;
                 if (fadeAlpha <= 0)
                 {
                     state = FadeState.Idle;
@@ -102,14 +80,14 @@ namespace Bricklayer.Core.Client.Interface.Screens
             else if (state == FadeState.Out)
             {
                 fadeAlpha = MathHelper.Clamp(fadeAlpha + (elapsed*FadeSpeed), 0, 1);
-                fadeImage.Alpha = fadeAlpha;
-                fadeImage.Color = Color.White*fadeImage.Alpha;
                 if (fadeAlpha >= 1) // Done fading to black, now set new screen and fade into it
                 {
                     // Destory objects from the first screen
                     if (Current != fadeTo)
                     {
-                        Current?.Remove();
+                        // Each screen should cleanup itself here.
+                        // Controls added through AddControl will also be removed.
+                        Current?.Clear();
                         // Automatically remove any dialogs or message boxes left over.
                         for (var i = Manager.Controls.Count() - 1; i >= 0; i--)
                         {
@@ -124,13 +102,12 @@ namespace Bricklayer.Core.Client.Interface.Screens
                             }
                         }
                         Current = fadeTo;
-                        Current.Add(this);
+                        Current.Setup(this);
                         Window.Client.State = Current.State;
                     }
                     Window.Client.Events.Game.ScreenChanged.Invoke(
                         new EventManager.GameEvents.GameScreenEventArgs(fadeTo, Current));
                     state = FadeState.In;
-                    fadeImage.BringToFront();
                 }
             }
 

@@ -112,7 +112,7 @@ namespace Bricklayer.Core.Common
         }
 
         /// <summary>
-        /// Load an IConfig from a JSON file.
+        /// Load an IConfig from a JSON file. If the config does not exist, it will be created.
         /// </summary>
         internal static async Task<T> LoadConfig<T>(string path) where T : IConfig, new()
         {

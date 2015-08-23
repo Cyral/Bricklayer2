@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface
 {
@@ -27,6 +29,11 @@ namespace Bricklayer.Core.Client.Interface
             // Update current screen
             ScreenManager.Update(gameTime);
 
+            base.Update(gameTime);
+        }
+
+        public new void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        {
             // Calculate FPS
             elapsedTime += gameTime.ElapsedGameTime;
             if (elapsedTime > second)
@@ -37,7 +44,8 @@ namespace Bricklayer.Core.Client.Interface
             }
             totalFrames++;
 
-            base.Update(gameTime);
+            // Draw current screen.
+            ScreenManager.Draw(spriteBatch, gameTime);
         }
 
         /// <summary>

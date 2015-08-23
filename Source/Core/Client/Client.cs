@@ -2,6 +2,7 @@
 using System.Linq;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface;
+using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -170,15 +171,9 @@ namespace Bricklayer.Core.Client
 
                 GraphicsDevice.SetRenderTarget(null);
                 SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-                SpriteBatch.Draw(backgroundTarget,
-                    new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth,
-                        GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                SpriteBatch.Draw(lightingTarget,
-                    new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth,
-                        GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                SpriteBatch.Draw(foregroundTarget,
-                    new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth,
-                        GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
+                SpriteBatch.Draw(backgroundTarget, Window.ControlRect, Color.White);
+                SpriteBatch.Draw(lightingTarget, Window.ControlRect, Color.White);
+                SpriteBatch.Draw(foregroundTarget, Window.ControlRect, Color.White);
                 SpriteBatch.End();
             }
 
@@ -187,8 +182,12 @@ namespace Bricklayer.Core.Client
             foreach (var plugin in Plugins.Plugins.Where(x => x.IsEnabled))
                 plugin.Draw(DrawPass.After, SpriteBatch, gameTime);
             SpriteBatch.End();
-
             UI.EndDraw();
+
+            // Draw parts of the screen manager (fade image) over everything else.
+            SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            Window.ScreenManager.Draw(SpriteBatch, gameTime);
+            SpriteBatch.End();
 
             base.Draw(gameTime);
         }
@@ -203,7 +202,8 @@ namespace Bricklayer.Core.Client
         {
             base.Initialize();
 
-            SpriteBatch = new SpriteBatch(Graphics.GraphicsDevice);
+            SpriteBatch = new SpriteBatch(GraphicsDevice);
+            Extensions.Setup(GraphicsDevice);
             Input = new InputHandler();
         }
 

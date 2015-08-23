@@ -1,0 +1,13 @@
+﻿{
+  "Name": "MultiAccounts",
+  "Identifier": "Bricklayer.Plugins.MultiAccounts",
+  "Description": "Makes it easy to login to multiple accounts for debugging purposes.",
+  "Authors": [ "Cyral" ],
+  "Dependencies": [ ],
+  "Version": {
+      "Major": 0,
+      "Minor": 1,
+      "Build": 0,
+      "Revision": 0
+  }
+}

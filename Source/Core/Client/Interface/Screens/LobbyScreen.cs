@@ -50,32 +50,28 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Levels = levels;
         }
 
-        public override void Add(ScreenManager screenManager)
+        public override void Setup(ScreenManager screenManager)
         {
-            base.Add(screenManager);
+            base.Setup(screenManager);
             Client.State = GameState.Lobby;
 
             ImgBackground = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.background"],
-                SizeMode = SizeMode.Stretched
+                SizeMode = SizeMode.Stretched,
+                CanFocus = false,
+                StayOnBack = true
             };
             ImgBackground.SetSize(Window.Width, Window.Height);
             ImgBackground.SetPosition(0, 0);
             ImgBackground.Init();
-            Window.Add(ImgBackground);
+            AddControl(ImgBackground);
 
             // Add the login window
             WndLobby = new LobbyWindow(Manager, this);
             WndLobby.Init();
-            Window.Add(WndLobby);
+            AddControl(WndLobby);
             WndLobby.Show();
-        }
-
-        public override void Remove()
-        {
-            Window.Remove(WndLobby);
-            Window.Remove(ImgBackground);
         }
     }
 }

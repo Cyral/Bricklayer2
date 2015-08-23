@@ -242,7 +242,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             if (!string.IsNullOrEmpty(TxtUsername.Text) && !string.IsNullOrEmpty(TxtPassword.Text) &&
                 TxtUsername.Text.Length < 100 && TxtPassword.Text.Length < 100)
             {
-                // Connect to Auth Server. Tempoary testing method for the auth server. Will be removed
+                // Connect to Auth Server.
                 screen.Client.Network.LoginToAuth(TxtUsername.Text, TxtPassword.Text);
                 BtnLoginAccount.Enabled = BtnLoginGuest.Enabled = false;
                 BtnLoginAccount.Text = "Signing In...";

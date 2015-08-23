@@ -50,27 +50,29 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// Setup the login screen content and controls. (Login window, logo, etc.)
         /// </summary>
-        public override void Add(ScreenManager screenManager)
+        public override void Setup(ScreenManager screenManager)
         {
-            base.Add(screenManager);
+            base.Setup(screenManager);
 
             // Set the background.
             ImgBackground = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.background"],
-                SizeMode = SizeMode.Stretched
+                SizeMode = SizeMode.Stretched,
+                CanFocus = false,
+                StayOnBack = true
             };
             ImgBackground.SetSize(Window.Width, Window.Height);
             ImgBackground.SetPosition(0, 0);
             ImgBackground.Init();
-            Window.Add(ImgBackground);
+            AddControl(ImgBackground);
 
             // Add the logo image.
             ImgLogo = new ImageBox(Manager) {Image = Client.Content["gui.logosmall"], SizeMode = SizeMode.Normal};
             ImgLogo.Init();
             ImgLogo.SetSize(ImgLogo.Image.Width, ImgLogo.Image.Height);
             ImgLogo.SetPosition((Window.Width/2) - (ImgLogo.Image.Width/2), 0);
-            Window.Add(ImgLogo);
+            AddControl(ImgLogo);
 
             // Add github contribute link.
             ImgGithub = new ImageBox(Manager)
@@ -87,7 +89,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             ImgGithub.MouseOver += (sender, args) => ImgGithub.Color = Color.White;
             ImgGithub.Click +=
                 (sender, args) => { if (Manager.Game.IsActive) Process.Start(Constants.Strings.GithubURL); };
-            Window.Add(ImgGithub);
+            AddControl(ImgGithub);
 
             // Add Pyratron link.
             ImgPyratron = new ImageBox(Manager)
@@ -105,7 +107,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             ImgPyratron.MouseOver += (sender, args) => ImgPyratron.Color = Color.White;
             ImgPyratron.Click +=
                 (sender, args) => { if (Manager.Game.IsActive) Process.Start(Constants.Strings.PyratronURL); };
-            Window.Add(ImgPyratron);
+            AddControl(ImgPyratron);
 
             // Add version tag.
             LblVersion = new Label(Manager) {Font = FontSize.Default14};
@@ -116,7 +118,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 (int)
                     Manager.Skin.Fonts[LblVersion.Font.ToString()].Resource.MeasureRichString(LblVersion.Text, Manager)
                         .X;
-            Window.Add(LblVersion);
+            AddControl(LblVersion);
 
             BtnManagePlugins = new Button(Manager)
             {
@@ -126,7 +128,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 Left = LblVersion.Right + 8
             };
             BtnManagePlugins.Init();
-            Window.Add(BtnManagePlugins);
+            AddControl(BtnManagePlugins);
             BtnManagePlugins.Click += (sender, args) => { ScreenManager.SwitchScreen(new PluginManagerScreen()); };
 
             WndLogin = new LoginWindow(Manager, this);
@@ -135,22 +137,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             // If the login window is overlapping the logo, push it down a bit. (For smaller screens)
             if (WndLogin.Top < ImgLogo.Top + ImgLogo.Height + 8)
                 WndLogin.Top = ImgLogo.Top + ImgLogo.Height + 24;
-            Window.Add(WndLogin);
-        }
-
-        /// <summary>
-        /// Remove the login screen content and controls.
-        /// </summary>
-        public override void Remove()
-        {
-            Window.Remove(ImgBackground);
-            Window.Remove(ImgLogo);
-            Window.Remove(ImgPyratron);
-            Window.Remove(ImgGithub);
-            Window.Remove(LblVersion);
-            Window.Remove(WndLogin);
-            Window.Remove(BtnManagePlugins);
-            WndLogin?.Dispose();
+            AddControl(WndLogin);
         }
     }
 }

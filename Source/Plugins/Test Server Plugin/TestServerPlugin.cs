@@ -11,7 +11,7 @@ namespace Bricklayer.Plugins.TestServerPlugin
 {
     /// <summary>
     /// A test server plugin.
-    /// </summary> what about these errors
+    /// </summary>
     public class TestServerPlugin : ServerPlugin
     {
         public TestServerPlugin(Server host) : base(host) {}

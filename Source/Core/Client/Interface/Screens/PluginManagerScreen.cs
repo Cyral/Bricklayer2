@@ -17,31 +17,26 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// </summary>
         public ImageBox ImgBackground { get; set; }
 
-        public override void Add(ScreenManager screenManager)
+        public override void Setup(ScreenManager screenManager)
         {
-            base.Add(screenManager);
+            base.Setup(screenManager);
 
             ImgBackground = new ImageBox(Manager)
             {
                 Image = Client.Content["gui.background"],
-                SizeMode = SizeMode.Stretched
+                SizeMode = SizeMode.Stretched,
+                CanFocus = false,
+                StayOnBack = true
             };
             ImgBackground.SetSize(Window.Width, Window.Height);
             ImgBackground.SetPosition(0, 0);
             ImgBackground.Init();
-            Window.Add(ImgBackground);
+            AddControl(ImgBackground);
 
             WndPlugins = new PluginManagerWindow(Manager, this);
             WndPlugins.Init();
-            Window.Add(WndPlugins);
+            AddControl(WndPlugins);
             WndPlugins.Show();
-        }
-
-        public override void Remove()
-        {
-            Window.Remove(WndPlugins);
-            Window.Remove(ImgBackground);
-            WndPlugins?.Dispose();
         }
     }
 }

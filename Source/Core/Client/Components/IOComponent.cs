@@ -196,22 +196,22 @@ namespace Bricklayer.Core.Client.Components
         }
 
         /// <summary>
-        /// Deserialize a JSON file into an IConfig.
+        /// Deserialize a JSON file into an IConfig. If the config does not exist, it will be created.
         /// </summary>
         /// <typeparam name="T">Config type.</typeparam>
         /// <param name="path">Full path to config file.</param>
-        public static async Task<T> LoadConfig<T>(string path) where T : IConfig, new()
+        public async Task<T> LoadConfig<T>(string path) where T : IConfig, new()
         {
             return await IOHelper.LoadConfig<T>(path);
         }
 
         /// <summary>
-        /// Deserialize a JSON file in the root of a plugin's directory into an IConfig.
+        /// Deserialize a JSON file in the root of a plugin's directory into an IConfig. If the config does not exist, it will be created.
         /// </summary>
         /// <typeparam name="T">Config type.</typeparam>
         /// <param name="file">File name relative to plugin root.</param>
         /// <param name="plugin">Plugin directory.</param>
-        public static async Task<T> LoadConfig<T>(PluginData plugin, string file) where T : IConfig, new()
+        public async Task<T> LoadConfig<T>(PluginData plugin, string file) where T : IConfig, new()
         {
             return await IOHelper.LoadConfig<T>(Path.Combine(plugin.Path, file));
         }
@@ -221,7 +221,7 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         /// <param name="config">Config instance.</param>
         /// <param name="path">Full path to file.</param>
-        public static async Task SaveConfig(IConfig config, string path)
+        public async Task SaveConfig(IConfig config, string path)
         {
             await IOHelper.SaveConfig(config, path);
         }
@@ -232,7 +232,7 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="config">Config instance.</param>
         /// <param name="plugin">Plugin directory.</param>
         /// <param name="file">File name relative to plugin root.</param>
-        public static async Task SaveConfig(IConfig config, PluginData plugin, string file)
+        public async Task SaveConfig(IConfig config, PluginData plugin, string file)
         {
             await IOHelper.SaveConfig(config, Path.Combine(plugin.Path, file));
         }
