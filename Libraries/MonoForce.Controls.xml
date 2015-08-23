@@ -4797,6 +4797,11 @@
             Draws the controls on their respective render targets.
             </summary>
         </member>
+        <member name="M:MonoForce.Controls.Manager.UnsetModal">
+            <summary>
+            Remove the modal status of the modal dialog.
+            </summary>
+        </member>
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Manager.Remove(MonoForce.Controls.Component)" -->
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Manager.SendToBack(MonoForce.Controls.Control)" -->
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Manager.SetSkin(System.String)" -->

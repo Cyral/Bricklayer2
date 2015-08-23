@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
 
@@ -109,6 +110,19 @@ namespace Bricklayer.Core.Client.Interface.Screens
                     if (Current != fadeTo)
                     {
                         Current?.Remove();
+                        // Automatically remove any dialogs or message boxes left over.
+                        for (var i = Manager.Controls.Count() - 1; i >= 0; i--)
+                        {
+                            var control = Manager.Controls.ElementAt(i);
+                            var dialog = control as Dialog;
+                            if (dialog != null)
+                            {
+                                Manager.UnsetModal();
+                                dialog.Dispose();
+                                Manager.Remove(dialog);
+                                i--;
+                            }
+                        }
                         Current = fadeTo;
                         Current.Add(this);
                         Window.Client.State = Current.State;

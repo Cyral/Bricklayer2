@@ -71,9 +71,9 @@ namespace Bricklayer.Core.Client.Interface.Windows
         public Button BtnJoin { get; }
 
         /// <summary>
-        /// Button to disconnect from server.
+        /// Button to go back to the server list.
         /// </summary>
-        public Button BtnDisconnect { get; }
+        public Button BtnBack { get; }
 
         /// <summary>
         /// Server's image/banner.
@@ -236,14 +236,15 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BtnJoin.Click += (sender, args) => { JoinLevel(LstLevels.ItemIndex); };
             BottomPanel.Add(BtnJoin);
 
-            BtnDisconnect = new Button(Manager) {Left = BtnCreate.Right + 8, Top = 8, Text = "Quit"};
-            BtnDisconnect.Init();
-            BtnDisconnect.Click += (sender, args) =>
+            BtnBack = new Button(Manager) {Left = BtnCreate.Right + 8, Top = 8, Text = "Back"};
+            BtnBack.Init();
+            BtnBack.ToolTip.Text = "Exit to server list.";
+            BtnBack.Click += (sender, args) =>
             {
                 lobbyScreen.Client.Network.NetClient.Disconnect("Left Lobby");
-                lobbyScreen.ScreenManager.SwitchScreen(new LoginScreen());
+                lobbyScreen.ScreenManager.SwitchScreen(new ServerScreen());
             };
-            BottomPanel.Add(BtnDisconnect);
+            BottomPanel.Add(BtnBack);
 
             // When client gets banner data from server
             screen.Client.Events.Network.Game.LobbyBannerReceived.AddHandler(LobbyBannerReceived);
@@ -306,9 +307,10 @@ namespace Bricklayer.Core.Client.Interface.Windows
         /// </summary>
         public void JoinLevel(int index)
         {
-            if (index < 0)
+            if (index < 0 || !BottomPanel.Enabled)
                 return;
             lobbyScreen.Client.Network.Send(new JoinLevelMessage(((LobbyDataControl) LstLevels.Items[index]).Data.UUID));
+            BottomPanel.Enabled = false;
         }
 
         private void FilterLevels()

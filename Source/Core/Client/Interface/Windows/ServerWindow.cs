@@ -4,6 +4,7 @@ using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Data;
+using Microsoft.Xna.Framework;
 using MonoForce.Controls;
 
 namespace Bricklayer.Core.Client.Interface.Windows
@@ -15,6 +16,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
     {
         public Button BtnAdd { get; }
         public Button BtnEdit { get; }
+        public Button BtnQuit { get; }
 
         /// <summary>
         /// Button to connect to the selected server.
@@ -44,8 +46,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             TopPanel.Visible = false;
             Movable = false;
             Resizable = false;
-            Width = 550;
-            Height = 500;
+            Width = (int)(Manager.ScreenWidth * .9);
+            Height = (int)(Manager.ScreenHeight * .9);
             Shadow = true;
             Center();
 
@@ -73,25 +75,41 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
 
             // Add controls to the bottom panel. (Add server, edit server, etc.)
-
-            BtnEdit = new Button(manager) {Text = "Edit", Top = 8, Width = 64};
-            BtnEdit.Init();
-            BtnEdit.Left = (Width/2) - (BtnEdit.Width/2);
-            BtnEdit.Click += (sender, args) =>
+            BtnJoin = new Button(manager) { Text = "Connect", Top = 8, Width = 100 };
+            BtnJoin.Init();
+            BtnJoin.Left = 8;
+            BtnJoin.Click += (sender, args) =>
             {
-                if (LstServers.Items.Count <= 0)
+                if (LstServers.ItemIndex < 0)
                     return;
 
-                var window = new AddServerDialog(Manager, this, LstServers.ItemIndex, true,
-                    servers[LstServers.ItemIndex].Name, servers[LstServers.ItemIndex].Host,
+                BtnJoin.Enabled = false;
+                BtnJoin.Text = "Connecting...";
+                this.screen.Client.Network.SendSessionRequest(servers[LstServers.ItemIndex].Host,
                     servers[LstServers.ItemIndex].Port);
-                window.Init();
-                Manager.Add(window);
-                window.ShowModal();
             };
-            BottomPanel.Add(BtnEdit);
+            BtnJoin.TextColor = Color.Lime;
+            BottomPanel.Add(BtnJoin);
 
-            BtnRemove = new Button(manager) {Text = "Remove", Left = BtnEdit.Right + 8, Top = 8, Width = 64};
+            BtnRefresh = new Button(manager) { Text = "", Left = BtnJoin.Right + 8, Top = 8 };
+            BtnRefresh.Init();
+            BtnRefresh.Width = 24;
+            BtnRefresh.Click += (sender, args) => { RefreshServerList(); };
+            BtnRefresh.Glyph = new Glyph(screen.Client.Content["gui.icons.refresh"]) { SizeMode = SizeMode.Centered };
+            BtnRefresh.ToolTip.Text = "Refresh";
+            BottomPanel.Add(BtnRefresh);
+
+            // Right buttons
+            BtnQuit = new Button(manager) { Text = "Sign Out", Width = 64, Top = 8};
+            BtnQuit.Init();
+            BtnQuit.Right = ClientWidth - 8;
+            BtnQuit.Click += (sender, args) =>
+            {
+                this.screen.ScreenManager.SwitchScreen(new LoginScreen());
+            };
+            BottomPanel.Add(BtnQuit);
+
+            BtnRemove = new Button(manager) {Text = "Remove", Top = 8, Width = 64, Right = BtnQuit.Left - 8 };
             BtnRemove.Init();
             BtnRemove.Click += (clickSender, clickArgs) =>
             {
@@ -119,9 +137,24 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             BottomPanel.Add(BtnRemove);
 
-            BtnAdd = new Button(manager) {Text = "Add", Top = 8, Width = 64};
+            BtnEdit = new Button(manager) { Text = "Edit", Top = 8, Width = 64, Right = BtnRemove.Left - 8 };
+            BtnEdit.Init();
+            BtnEdit.Click += (sender, args) =>
+            {
+                if (LstServers.Items.Count <= 0)
+                    return;
+
+                var window = new AddServerDialog(Manager, this, LstServers.ItemIndex, true,
+                    servers[LstServers.ItemIndex].Name, servers[LstServers.ItemIndex].Host,
+                    servers[LstServers.ItemIndex].Port);
+                window.Init();
+                Manager.Add(window);
+                window.ShowModal();
+            };
+            BottomPanel.Add(BtnEdit);
+
+            BtnAdd = new Button(manager) { Text = "Add", Top = 8, Width = 64, Right = BtnEdit.Left - 8 };
             BtnAdd.Init();
-            BtnAdd.Right = BtnEdit.Left - 8;
             BtnAdd.Click += (sender, args) =>
             {
                 // Show add server dialog
@@ -132,26 +165,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 window.ShowModal();
             };
             BottomPanel.Add(BtnAdd);
-
-            BtnJoin = new Button(manager) {Text = "Connect", Top = 8, Width = 100};
-            BtnJoin.Init();
-            BtnJoin.Right = BtnAdd.Left - 8;
-            BtnJoin.Click += (sender, args) =>
-            {
-                if (LstServers.ItemIndex < 0)
-                    return;
-
-                BtnJoin.Enabled = false;
-                BtnJoin.Text = "Connecting...";
-                this.screen.Client.Network.SendSessionRequest(servers[LstServers.ItemIndex].Host,
-                    servers[LstServers.ItemIndex].Port);
-            };
-            BottomPanel.Add(BtnJoin);
-
-            BtnRefresh = new Button(manager) {Text = "Refresh", Left = BtnRemove.Right + 8, Top = 8, Width = 64};
-            BtnRefresh.Init();
-            BtnRefresh.Click += (sender, args) => { RefreshServerList(); };
-            BottomPanel.Add(BtnRefresh);
 
             // Listen for when init message is recieved
             screen.Client.Events.Network.Game.InitReceived.AddHandler(OnInit);
