@@ -69,6 +69,39 @@ namespace Bricklayer.Core.Client
                 public Event<SelectedBlockChangedEventArgs> SelectedBlockChanged { get; } =
                     new Event<SelectedBlockChangedEventArgs>();
 
+                /// <summary>
+                /// When a player joins the room.
+                /// </summary>
+                public Event<PlayerJoinEventArgs> PlayerJoined { get; } = new Event<PlayerJoinEventArgs>();
+
+                /// <summary>
+                /// When a player leaves the room. (By joining another room, quitting, exiting to lobby, etc.)
+                /// </summary>
+                /// <remarks>
+                /// This is different than the Network.PlayerLeft event, as that only contains the known GUID.
+                /// </remarks>
+                public Event<PlayerLeaveEventArgs> PlayerLeft { get; } = new Event<PlayerLeaveEventArgs>();
+
+                public class PlayerJoinEventArgs : BricklayerEventArgs
+                {
+                    public Player Player { get; private set; }
+
+                    public PlayerJoinEventArgs(Player player)
+                    {
+                        Player = player;
+                    }
+                }
+
+                public class PlayerLeaveEventArgs : BricklayerEventArgs
+                {
+                    public Player Player { get; private set; }
+
+                    public PlayerLeaveEventArgs(Player player)
+                    {
+                        Player = player;
+                    }
+                }
+
                 public class SelectedBlockChangedEventArgs : BricklayerEventArgs
                 {
                     public BlockType NewBlock { get; private set; }
@@ -435,6 +468,16 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
+                public class PlayerLeaveEventArgs : BricklayerEventArgs
+                {
+                    public Guid Player { get; private set; }
+
+                    public PlayerLeaveEventArgs(Guid player)
+                    {
+                        Player = player;
+                    }
+                }
+
                 public class PingUpdateEventArgs : BricklayerEventArgs
                 {
                     public Dictionary<Guid, int> Pings { get; private set; }
@@ -553,9 +596,14 @@ namespace Bricklayer.Core.Client
                 public Event<ChatEventArgs> ChatReceived { get; } = new Event<ChatEventArgs>();
 
                 /// <summary>
-                /// When a player joins the level client is currently in
+                /// When a player join message is received.
                 /// </summary>
                 public Event<PlayerJoinEventArgs> PlayerJoinReceived { get; } = new Event<PlayerJoinEventArgs>();
+
+                /// <summary>
+                /// When a player leave message is received.
+                /// </summary>
+                public Event<PlayerLeaveEventArgs> PlayerLeaveReceived { get; } = new Event<PlayerLeaveEventArgs>();
 
                 /// <summary>
                 /// When pings for players in level are recieved

@@ -121,7 +121,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Sends login information to the authentication server.
         /// </summary>
-        internal void ConnectToAuth(string username, string password)
+        public void LoginToAuth(string username, string password)
         {
             SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort,
                 new AuthLoginMessage(Constants.Version, username, password));
@@ -132,7 +132,7 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         /// <param name="host">Server hostname (IP or domain).</param>
         /// <param name="port">Server port.</param>
-        internal void SendSessionRequest(string host, int port)
+        public void SendSessionRequest(string host, int port)
         {
             this.host = host;
             this.port = port;
@@ -144,7 +144,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Sends a message once connected to join a server officially.
         /// </summary>
-        internal async Task Join(string host, int port, string username, Guid uuid, byte[] publicKey)
+        public async Task Join(string host, int port, string username, Guid uuid, byte[] publicKey)
         {
             await Task.Factory.StartNew(() =>
             {
@@ -186,7 +186,7 @@ namespace Bricklayer.Core.Client.Components
         /// Sends an unconnected message to the endpoint
         /// </summary>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
-        internal void SendUnconnected(string ip, int port, IMessage gameMessage)
+        public void SendUnconnected(string ip, int port, IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage); // Write packet ID and encode
             var receiver = new IPEndPoint(NetUtility.Resolve(ip), port); // Auth Server info
@@ -197,7 +197,7 @@ namespace Bricklayer.Core.Client.Components
         /// Sends an unconnected message to the endpoint
         /// </summary>
         /// <param name="gameMessage">IMessage to write ID and send.</param>
-        internal void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
+        public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
         {
             var message = EncodeMessage(gameMessage); // Write packet ID and encode
             NetClient.SendUnconnectedMessage(message, receiver); // Send
@@ -249,24 +249,6 @@ namespace Bricklayer.Core.Client.Components
         public NetConnectionStatistics GetConnectionStats()
         {
             return NetClient.ServerConnection.Statistics;
-        }
-
-        /// <summary>
-        /// Gets the client status from the internal client
-        /// </summary>
-        /// <returns></returns>
-        public NetPeerStatus GetPeerStatus()
-        {
-            return NetClient.Status;
-        }
-
-        /// <summary>
-        /// Gets the client statistics from the internal client
-        /// </summary>
-        /// <returns></returns>
-        public NetPeerStatistics GetPeerStats()
-        {
-            return NetClient.Statistics;
         }
 
         /// <summary>

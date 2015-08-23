@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Data
@@ -34,14 +33,14 @@ namespace Bricklayer.Core.Common.Data
         internal PlayerData(NetIncomingMessage im)
         {
             IsGuest = im.ReadBoolean();
-            UUID = Guid.Parse(im.ReadString());
+            UUID = im.ReadGuid();
             Username = im.ReadString();
         }
 
         internal virtual void Encode(NetOutgoingMessage om)
         {
             om.Write(IsGuest);
-            om.Write(UUID.ToString());
+            om.Write(UUID);
             om.Write(Username);
         }
 

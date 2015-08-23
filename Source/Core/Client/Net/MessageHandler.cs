@@ -79,6 +79,13 @@ namespace Bricklayer.Core.Client.Net
                         new EventManager.NetEvents.GameServerEvents.PlayerJoinEventArgs(msg.Player));
                     break;
                 }
+                case MessageTypes.PlayerLeave:
+                    {
+                        var msg = new PlayerLeaveMessage(im, MessageContext.Client);
+                        networkManager.Client.Events.Network.Game.PlayerLeaveReceived.Invoke(
+                            new EventManager.NetEvents.GameServerEvents.PlayerLeaveEventArgs(msg.Player));
+                        break;
+                }
                 case MessageTypes.PingUpdate:
                 {
                     var msg = new PingUpdateMessage(im, MessageContext.Client);
@@ -197,7 +204,7 @@ namespace Bricklayer.Core.Client.Net
                         case NetIncomingMessageType.DebugMessage:
                         case NetIncomingMessageType.WarningMessage:
                         case NetIncomingMessageType.ErrorMessage:
-                            Debug.WriteLine(im.ToString());
+                            Console.WriteLine("Net: " + im);
                             break;
                         case NetIncomingMessageType.StatusChanged:
                         {

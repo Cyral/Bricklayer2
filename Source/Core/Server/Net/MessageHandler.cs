@@ -44,7 +44,7 @@ namespace Bricklayer.Core.Server.Net
                             case NetIncomingMessageType.ErrorMessage:
                             case NetIncomingMessageType.VerboseDebugMessage:
                             case NetIncomingMessageType.WarningMessage:
-                                Logger.WriteLine(LogType.Error, "MessageHandler Loop: " + inc.ReadString());
+                                Logger.WriteLine(LogType.Error, "Net: " + inc.ReadString());
                                 break;
                             // ConnectionApproval messages are sent when a client would like to connect to the server
                             case NetIncomingMessageType.ConnectionApproval:
@@ -53,13 +53,11 @@ namespace Bricklayer.Core.Server.Net
                                 if (inc.LengthBytes == 0)
                                 {
                                     inc.SenderConnection?.Deny("Invalid Hail Message");
-                                    break;
+                                    break; 
                                 }
 
-                                var type =
-                                    (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
                                 // Find message type
-                                switch (type)
+                                switch ((MessageTypes)inc.ReadByte())
                                 {
                                     // The connection should come with a public key to verify the client's session
                                     case MessageTypes.PublicKey:
@@ -110,7 +108,7 @@ namespace Bricklayer.Core.Server.Net
                             // Listen to unconnected data
                             case NetIncomingMessageType.UnconnectedData:
                             {
-                                var type = (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+                                var type = (MessageTypes)inc.ReadByte();
 
                                 // Handle messages from the auth server differently then ones from players (ping requests)
                                 if (Equals(inc.SenderEndPoint, NetManager.AuthEndpoint))
@@ -178,7 +176,7 @@ namespace Bricklayer.Core.Server.Net
         private void ProcessDataMessage(NetIncomingMessage inc)
         {
             // The type of message being recieved
-            var type = (MessageTypes) Enum.Parse(typeof (MessageTypes), inc.ReadByte().ToString());
+            var type = (MessageTypes) inc.ReadByte();
             // The user who sent the message
             var sender = Server.PlayerFromRUI(inc.SenderConnection.RemoteUniqueIdentifier);
             if (sender != null)

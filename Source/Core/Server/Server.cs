@@ -228,7 +228,7 @@ namespace Bricklayer.Core.Server
                 Levels.Add(level);
             }
 
-            await RemovePlayerFromLevels(sender);
+            RemovePlayerFromLevels(sender);
             level.Players.Remove(sender);
             level.Players.Add(sender);
 
@@ -237,6 +237,7 @@ namespace Bricklayer.Core.Server
 
 
             sender.Level = level;
+            Events.Game.Level.PlayerJoined.Invoke(new EventManager.GameEvents.LevelEvents.PlayerJoinEventArgs(sender, sender.Level));
 
             return level;
         }
@@ -250,7 +251,7 @@ namespace Bricklayer.Core.Server
         public async Task<Level> CreateLevel(Player sender, string name, string description)
         {
             var level = new Level(this, sender, name, Guid.NewGuid(), description, 0, 5);
-            await RemovePlayerFromLevels(sender);
+            RemovePlayerFromLevels(sender);
             level.Players.Add(sender);
 
             // Add the level to the database.
@@ -260,26 +261,23 @@ namespace Bricklayer.Core.Server
 
             Levels.Add(level);
             sender.Level = level;
+            Events.Game.Level.PlayerJoined.Invoke(new EventManager.GameEvents.LevelEvents.PlayerJoinEventArgs(sender, sender.Level));
 
             return level;
         }
 
         /// <summary>
-        /// Removes a player from any level they are currently in. (Does not send network message.)
+        /// Removes a player from any level they are currently in.
         /// </summary>
-        internal async Task RemovePlayerFromLevels(Player sender)
+        internal void RemovePlayerFromLevels(Player sender)
         {
             if (sender.Level != null)
             {
-                sender.Level.Players.Remove(sender);
-                if (sender.Level.Players.Count == 0)
-                {
-                    await CloseLevel(sender.Level.UUID); // Close level if nobody is in it.
-                }
+                Events.Game.Level.PlayerLeft.Invoke(new EventManager.GameEvents.LevelEvents.PlayerLeaveEventArgs(sender, sender.Level));
             }
         }
 
-        private async Task CloseLevel(Guid uuid)
+        internal async Task CloseLevel(Guid uuid)
         {
             var level = Levels.FirstOrDefault(r => r.UUID == uuid);
             if (level != null && level.Online == 0)

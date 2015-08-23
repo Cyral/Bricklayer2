@@ -175,12 +175,12 @@ namespace Bricklayer.Core.Server.Components
             Server.Events.Network.JoinLevelMessageRecieved.AddHandler(
                 async args =>
                 {
-                    // Create the new level
+                    // Join the level.
                     var level = await Server.JoinLevel(args.Sender, args.UUID);
                     Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {args.Sender.Username}");
                     Send(new LevelDataMessage(level), args.Sender);
-                    Broadcast(level, new PlayerJoinMessage(args.Sender));
-                    Broadcast(level, new ChatMessage("[color:Lime]" + args.Sender.Username + " has joined.[/color]"));
+                    BroadcastExcept(args.Sender, new PlayerJoinMessage(args.Sender));
+                    BroadcastExcept(args.Sender, new ChatMessage("[color:Lime]" + args.Sender.Username + " has joined.[/color]"));
 
                 }, EventPriority.InternalFinal);
 
@@ -193,6 +193,25 @@ namespace Bricklayer.Core.Server.Components
                             $"Level \"{args.Sender.Level.Name}\" - (Chat) \"{args.Sender.Username}\": \"{args.Message}\"");
                         Broadcast(args.Sender.Level, new ChatMessage(args.Sender.Username + ": " + args.Message));
                     }
+                }, EventPriority.InternalFinal);
+
+            // Handle player leaving and room closing in an event, so that is is cancelable.
+            Server.Events.Game.Level.PlayerLeft.AddHandler(
+                async args =>
+                {
+                    if (args.Level != null && args.Player != null)
+                    {
+                        args.Level.Players.Remove(args.Player);
+                        if (args.Level.Players.Count == 0)
+                        {
+                            await Server.CloseLevel(args.Level.UUID); // Close level if nobody is in it.
+                        }
+                        else
+                        {
+                            Broadcast(args.Level, new PlayerLeaveMessage(args.Player));
+                            Broadcast(args.Level, new ChatMessage("[color:Red]" + args.Player.Username + " has left.[/color]"));
+                        }
+                    }    
                 }, EventPriority.InternalFinal);
 
             // Block events.
@@ -223,10 +242,10 @@ namespace Bricklayer.Core.Server.Components
                 Logger.WriteLine(LogType.Normal, ConsoleColor.Green, $"Player \"{args.Player.Username}\" has connected.");
             }, EventPriority.InternalFinal);
 
-            Server.Events.Network.UserDisconnected.AddHandler(async args =>
+            Server.Events.Network.UserDisconnected.AddHandler(args =>
             {
                 Server.Players.Remove(args.Player);
-                await Server.RemovePlayerFromLevels(args.Player);
+                Server.RemovePlayerFromLevels(args.Player);
                 Logger.WriteLine(LogType.Normal, ConsoleColor.Red, $"Player \"{args.Player.Username}\" has disconnected.");
             }, EventPriority.InternalFinal);
         }

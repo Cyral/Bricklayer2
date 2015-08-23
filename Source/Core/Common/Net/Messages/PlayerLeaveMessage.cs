@@ -1,4 +1,5 @@
-﻿using Bricklayer.Core.Common.Entity;
+﻿using System;
+using Bricklayer.Core.Common.Data;
 using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
@@ -8,7 +9,7 @@ namespace Bricklayer.Core.Common.Net.Messages
     /// </summary>
     public class PlayerLeaveMessage : IMessage
     {
-        public Player Player { get; set; }
+        public Guid Player { get; private set; }
 
         public PlayerLeaveMessage(NetIncomingMessage im, MessageContext context)
         {
@@ -16,23 +17,22 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public PlayerLeaveMessage(Player player)
+        public PlayerLeaveMessage(PlayerData player)
         {
-            Player = player;
+            Player = player.UUID;
         }
 
         public MessageContext Context { get; set; }
-
-        public MessageTypes MessageType => MessageTypes.PlayerJoin;
+        public MessageTypes MessageType => MessageTypes.PlayerLeave;
 
         public void Decode(NetIncomingMessage im)
         {
-            Player = new Player(im);
+            Player = im.ReadGuid();
         }
 
         public void Encode(NetOutgoingMessage om)
         {
-            Player.Encode(om);
+            om.Write(Player);
         }
     }
 }

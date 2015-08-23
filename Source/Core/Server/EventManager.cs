@@ -53,6 +53,32 @@ namespace Bricklayer.Core.Server
             /// </summary>
             public sealed class LevelEvents
             {
+                public class PlayerJoinEventArgs : BricklayerEventArgs
+                {
+                    public Player Player { get; private set; }
+
+                    public Level Level { get; private set; }
+
+                    public PlayerJoinEventArgs(Player player, Level level)
+                    {
+                        Player = player;
+                        Level = level;
+                    }
+                }
+
+                public class PlayerLeaveEventArgs : BricklayerEventArgs
+                {
+                    public Player Player { get; private set; }
+
+                    public Level Level { get; private set; }
+
+                    public PlayerLeaveEventArgs(Player player, Level level)
+                    {
+                        Player = player;
+                        Level = level;
+                    }
+                }
+
                 public class CreateLevelEventArgs : BricklayerEventArgs
                 {
                     /// <summary>
@@ -126,6 +152,19 @@ namespace Bricklayer.Core.Server
                         : this(sender, x, y, (int)layer, newType, oldType)
                     { }
                 }
+
+                /// <summary>
+                /// When a player joins the room.
+                /// </summary>
+                public Event<PlayerJoinEventArgs> PlayerJoined { get; } = new Event<PlayerJoinEventArgs>();
+
+                /// <summary>
+                /// When a player leaves the room. (By joining another room, quitting, exiting to lobby, etc.)
+                /// </summary>
+                /// <remarks>
+                /// This is different than the Network.PlayerLeft event, as that only contains the known GUID.
+                /// </remarks>
+                public Event<PlayerLeaveEventArgs> PlayerLeft { get; } = new Event<PlayerLeaveEventArgs>();
 
                 /// <summary>
                 /// When a new level is created.
