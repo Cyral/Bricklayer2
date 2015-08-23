@@ -59,9 +59,9 @@ namespace Bricklayer.Core.Common.Data
 
         internal LevelData(NetIncomingMessage im)
         {
-            Creator = new PlayerData(im.ReadString(), Guid.Parse(im.ReadString()));
+            Creator = new PlayerData(im.ReadString(), im.ReadGuid());
             Name = im.ReadString();
-            UUID = Guid.Parse(im.ReadString());
+            UUID = im.ReadGuid();
             Description = im.ReadString();
             Online = im.ReadByte();
             Plays = im.ReadInt16();
@@ -75,9 +75,9 @@ namespace Bricklayer.Core.Common.Data
         internal virtual void Encode(NetOutgoingMessage om)
         {
             om.Write(Creator.Username);
-            om.Write(Creator.UUID.ToString());
+            om.Write(Creator.UUID);
             om.Write(Name);
-            om.Write(UUID.ToString());
+            om.Write(UUID);
             om.Write(Description);
             om.Write((byte)Online);
             om.Write((short)Plays);

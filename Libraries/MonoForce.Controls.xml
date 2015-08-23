@@ -4,7 +4,16 @@
         <name>MonoForce.Controls</name>
     </assembly>
     <members>
-        <!-- Badly formed XML comment ignored for member "T:MonoForce.Controls.ArchiveManager" -->
+        <member name="T:MonoForce.Controls.ArchiveManager">
+            <remarks>
+            This class is based on Nick Gravelyn's EasyZip library.
+            </remarks>
+            <summary>
+            Additionally it is capable of loading assets from a zip file.
+            content pipeline the same way like <see cref="T:Microsoft.Xna.Framework.Content.ContentManager" /> does.
+            Loads managed objects from the binary files produced by the design time
+            </summary>
+        </member>
         <member name="P:MonoForce.Controls.ArchiveManager.ArchivePath">
             <summary>
             Gets the path to the archive file associated with the manager.
@@ -2152,28 +2161,158 @@
             <param name="disposing"></param>
         </member>
         <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GetVirtualHeight" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GetVirtualWidth" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GetClippingRect(MonoForce.Controls.Control)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CreateRenderTarget(System.Int32,System.Int32)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.PrepareTexture(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.GameTime)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CheckDetached(MonoForce.Controls.Control)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.DrawChildControls(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.GameTime,System.Boolean)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.DrawControls(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.GameTime,System.Boolean)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.DrawDetached(MonoForce.Controls.Control,MonoForce.Controls.Renderer,Microsoft.Xna.Framework.GameTime)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Render(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.GameTime)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.DrawOutline(MonoForce.Controls.Renderer,System.Boolean)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.SetPosition(System.Int32,System.Int32)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.SetSize(System.Int32,System.Int32)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.SetAnchorMargins" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.ProcessAnchor(MonoForce.Controls.ResizeEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Init" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.InitSkin" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.SetDefaultSize(System.Int32,System.Int32)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.SetMinimumSize(System.Int32,System.Int32)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.OnDeviceSettingsChanged(MonoForce.Controls.DeviceEventArgs)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.DrawControl(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.GameTime)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.GetControl(System.String)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.Add(MonoForce.Controls.Control)" -->
+        <member name="M:MonoForce.Controls.Control.GetVirtualWidth">
+            <summary>
+            Gets the virtual width of the control. (Total scrollable width of the client area, not just the region being displayed.)
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:MonoForce.Controls.Control.GetClippingRect(MonoForce.Controls.Control)">
+            <summary>
+            Gets the controls clipping region.
+            </summary>
+            <param name="c">Control to get the clip rectangle of.</param>
+            <returns>Returns the specified control's clip rectangle.</returns>
+        </member>
+        <member name="M:MonoForce.Controls.Control.CreateRenderTarget(System.Int32,System.Int32)">
+            <summary>
+            Creates the render target for the control.
+            </summary>
+            <param name="width">Width of the render target.</param>
+            <param name="height">Height of the render target.</param>
+            <returns>Returns the render target of the specified dimensions.</returns>
+        </member>
+        <member name="M:MonoForce.Controls.Control.PrepareTexture(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.GameTime)">
+            <summary>
+            Draws the control on the render target.
+            </summary>
+            <param name="renderer">Render management object.</param>
+            <param name="gameTime">Snapshot of the application's timing values.</param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.CheckDetached(MonoForce.Controls.Control)">
+            <summary>
+            Determines if the control is detached.
+            </summary>
+            <param name="c">Control to check.</param>
+            <returns>Returns true if the control or one of its parent controls are detached; false otherwise.</returns>
+        </member>
+        <member name="M:MonoForce.Controls.Control.DrawChildControls(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.GameTime,System.Boolean)">
+            <summary>
+            Draws the child controls on the render target.
+            </summary>
+            <param name="renderer">Render management object.</param>
+            <param name="gameTime">Snapshot of the application's timing values.</param>
+            <param name="firstDetachedLevel"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.DrawControls(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.GameTime,System.Boolean)">
+            <summary>
+            </summary>
+            <param name="renderer"></param>
+            <param name="rect"></param>
+            <param name="gameTime"></param>
+            <param name="firstDetach"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.DrawDetached(MonoForce.Controls.Control,MonoForce.Controls.Renderer,Microsoft.Xna.Framework.GameTime)">
+            <summary>
+            </summary>
+            <param name="control"></param>
+            <param name="renderer"></param>
+            <param name="gameTime"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.Render(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.GameTime)">
+            <summary>
+            </summary>
+            <param name="renderer"></param>
+            <param name="gameTime"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.DrawOutline(MonoForce.Controls.Renderer,System.Boolean)">
+            <summary>
+            </summary>
+            <param name="renderer"></param>
+            <param name="child"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.SetPosition(System.Int32,System.Int32)">
+            <summary>
+            Sets the position of the control to the specified values.
+            </summary>
+            <param name="left">X position of the control.</param>
+            <param name="top">Y position of the control.</param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.SetSize(System.Int32,System.Int32)">
+            <summary>
+            Sets the size of the control to the specified dimensions.
+            </summary>
+            <param name="width">Width of the control.</param>
+            <param name="height">Height of the control.</param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.SetAnchorMargins">
+            <summary>
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.ProcessAnchor(MonoForce.Controls.ResizeEventArgs)">
+            <summary>
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.Init">
+            <summary>
+            Initializes the control.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.InitSkin">
+            <summary>
+            Initializes the control's skin.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Control.SetDefaultSize(System.Int32,System.Int32)">
+            <summary>
+            Sets the default size of the control.
+            </summary>
+            <param name="width">Default width of the control.</param>
+            <param name="height">Default height of the control.</param>
+            <remarks>
+            This method will only use the values specified if the control's
+            skin does not have default size values set.
+            </remarks>
+        </member>
+        <member name="M:MonoForce.Controls.Control.SetMinimumSize(System.Int32,System.Int32)">
+            <summary>
+            Sets the minimum size of the control.
+            </summary>
+            <param name="minimumWidth">Minimum width of the control.</param>
+            <param name="minimumHeight">Minimum height of the control.</param>
+            <remarks>
+            This method will only use the values specified if the control's
+            skin does not have minimum size values set.
+            </remarks>
+        </member>
+        <member name="M:MonoForce.Controls.Control.OnDeviceSettingsChanged(MonoForce.Controls.DeviceEventArgs)">
+            <summary>
+            Handler for when the graphics device's settings change.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.DrawControl(MonoForce.Controls.Renderer,Microsoft.Xna.Framework.Rectangle,Microsoft.Xna.Framework.GameTime)">
+            <summary>
+            Draws the control.
+            </summary>
+            <param name="renderer">Render management object.</param>
+            <param name="rect">Destination rectangle where the control will be drawn.</param>
+            <param name="gameTime">Snapshot of the application's timing values.</param>
+        </member>
+        <member name="M:MonoForce.Controls.Control.GetControl(System.String)">
+            <summary>
+            Gets a child control by name.
+            </summary>
+            <param name="name">Name of the control to search for.</param>
+            <returns>Returns the control with the specified name or null if not found.</returns>
+        </member>
+        <member name="M:MonoForce.Controls.Control.Add(MonoForce.Controls.Control)">
+            <summary>
+            Adds the specified control as a child to this control.
+            </summary>
+            <param name="control">Child control to add to the list.</param>
+        </member>
         <member name="M:MonoForce.Controls.Control.Remove(MonoForce.Controls.Control)">
             <summary>
             Removes the specified control from the child control list.
@@ -2311,7 +2450,12 @@
             <param name="pos">Position to test.</param>
             <returns>Returns true if "pos" if within the bounds of the control; false otherwise.</returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Control.CheckMovableArea(Microsoft.Xna.Framework.Point)" -->
+        <member name="M:MonoForce.Controls.Control.CheckMovableArea(Microsoft.Xna.Framework.Point)">
+            <summary>
+            </summary>
+            <param name="pos"></param>
+            <returns></returns>
+        </member>
         <member name="M:MonoForce.Controls.Control.CheckWidth(System.Int32@)">
             <summary>
             </summary>
@@ -3243,11 +3387,15 @@
             Initializes the exit dialog window.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Extensions.ToColor(System.String)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Extensions.ToHex(Microsoft.Xna.Framework.Color,System.Boolean)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Extensions.ToLowerFast(System.String)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Colors.ColorFromHSV(System.Double,System.Double,System.Double)" -->
-        <!-- Badly formed XML comment ignored for member "M:MonoForce.Controls.Colors.Clamp(System.Int32)" -->
+        <member name="M:MonoForce.Controls.Colors.ColorFromHSV(System.Double,System.Double,System.Double)">
+            <summary>
+            Convert HSV to RGB
+            h is from 0-360
+            s,v values are 0-1
+            r,g,b values are 0-255
+            Based upon http://ilab.usc.edu/wiki/index.php/HSV_And_H2SV_Color_Space#HSV_Transformation_C_.2F_C.2B.2B_Code_2
+            </summary>
+        </member>
         <member name="T:MonoForce.Controls.FileDialog">
             <summary>
             A file dialog
@@ -5248,6 +5396,11 @@
             <param name="texture">Image to draw.</param>
             <summary>
             Draws the texture at the specified location.
+            </summary>
+        </member>
+        <member name="M:MonoForce.Controls.Renderer.StripFormattedText(System.String)">
+            <summary>
+            Removes formatted (color) text from a string.
             </summary>
         </member>
         <member name="M:MonoForce.Controls.Renderer.DrawGlyph(MonoForce.Controls.Glyph,Microsoft.Xna.Framework.Rectangle)">
