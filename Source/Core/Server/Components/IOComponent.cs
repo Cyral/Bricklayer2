@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
@@ -60,15 +59,16 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Settings for the JSON.NET serializer
         /// </summary>
-        internal JsonSerializerSettings SerializationSettings { get; private set; }
+        internal static JsonSerializerSettings SerializationSettings => IOHelper.SerializerSettings;
+
+        private DateTime lastLog;
+        private StreamWriter logWriter;
 
         /// <summary>
         /// File containing list of plugin statuses (Whether or not they are enabled or disabled)
         /// </summary>
         private string pluginsFile;
 
-        private DateTime lastLog;
-        private StreamWriter logWriter;
         private StringBuilder sb;
 
         public IOComponent(Server server) : base(server)
@@ -77,6 +77,14 @@ namespace Bricklayer.Core.Server.Components
 
         public override async Task Init()
         {
+            // Set up JSON.net settings.
+            IOHelper.SerializerSettings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                // Use a custom contract resolver that can read private and internal properties
+                ContractResolver = new JsonContractResolver()
+            };
+
             // Paths.
             ServerDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (ServerDirectory != null)
@@ -98,65 +106,57 @@ namespace Bricklayer.Core.Server.Components
 
             sb = new StringBuilder();
 
-            // Set up JSON.net settings.
-            SerializationSettings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                // Use a custom contract resolver that can read private and internal properties
-                ContractResolver = new JsonContractResolver()
-            };
-
             // Log a message to the log file stating the startup time and version.
             LogMessage(
                 $"SERVER STARTUP:\n{Constants.Strings.ServerTitle} {Constants.VersionString}\n\nServer is starting now, on {DateTime.Now.ToString("U")}\n\n");
 
             // Load configuration.
-            await LoadConfig();
+            await LoadServerConfig();
             LoadBanner();
 
             await base.Init();
         }
 
         /// <summary>
-        /// Opens the server settings and loads them into the config
+        /// Deserialize a JSON file into an IConfig.
         /// </summary>
-        internal async Task LoadConfig()
+        /// <typeparam name="T">Config type.</typeparam>
+        /// <param name="path">Full path to config file.</param>
+        public static async Task<T> LoadConfig<T>(string path) where T : IConfig, new()
         {
-            try
-            {
-                // If server config does not exist, create it and write the default settings
-                if (!File.Exists(ConfigFile))
-                {
-                    Config = Config.GenerateDefaultConfig();
-                    await SaveConfig(Config);
-                    Log("Configuration created successfully. ({0})", ConfigFile);
-                    return;
-                }
+            return await IOHelper.LoadConfig<T>(path);
+        }
 
-                var json = string.Empty;
-                await Task.Run(() => json = File.ReadAllText(ConfigFile));
+        /// <summary>
+        /// Deserialize a JSON file in the root of a plugin's directory into an IConfig.
+        /// </summary>
+        /// <typeparam name="T">Config type.</typeparam>
+        /// <param name="file">File name relative to plugin root.</param>
+        /// <param name="plugin">Plugin directory.</param>
+        public static async Task<T> LoadConfig<T>(PluginData plugin, string file) where T : IConfig, new()
+        {
+            return await IOHelper.LoadConfig<T>(Path.Combine(plugin.Path, file));
+        }
 
-                // If config is empty, regenerate and read again
-                if (string.IsNullOrWhiteSpace(json))
-                {
-                    var config = Config.GenerateDefaultConfig();
-                    json = config.ToString();
-                    await SaveConfig(config);
-                }
+        /// <summary>
+        /// Save a config into a JSON file.
+        /// </summary>
+        /// <param name="config">Config instance.</param>
+        /// <param name="path">Full path to file.</param>
+        public static async Task SaveConfig(IConfig config, string path)
+        {
+            await IOHelper.SaveConfig(config, path);
+        }
 
-                Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings);
-
-                if (Config.Server.AutoSaveTime <= 0)
-                    //To prevent the timer from firing endlessly if value is 0 or less. (Config file corrupted, missing value, etc.)
-                    Config.Server.AutoSaveTime = Config.GenerateDefaultConfig().Server.AutoSaveTime;
-
-                Log("Configuration loaded. Port: {0}, Auto Save: {1}m", Config.Server.Port.ToString(),
-                    Config.Server.AutoSaveTime.ToString());
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteLine(LogType.Error, "IOComponent.LoadConfig - {0}", ex.ToString());
-            }
+        /// <summary>
+        /// Save a config to a JSON file in the plugin's root directory.
+        /// </summary>
+        /// <param name="config">Config instance.</param>
+        /// <param name="plugin">Plugin directory.</param>
+        /// <param name="file">File name relative to plugin root.</param>
+        public static async Task SaveConfig(IConfig config, PluginData plugin, string file)
+        {
+            await IOHelper.SaveConfig(config, Path.Combine(plugin.Path, file));
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace Bricklayer.Core.Server.Components
         {
             var plugins = new Dictionary<string, bool>();
             var fileName = pluginsFile;
-            var json = string.Empty;
+            string json;
             if (!File.Exists(fileName))
             {
                 // If plugin config doesn't exist, create it.
@@ -189,15 +189,37 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public string WritePluginStatus(Dictionary<string, bool> plugins)
         {
-                var fileName = pluginsFile;
-                if (!File.Exists(fileName))
-                {
-                    var str = File.Create(fileName);
-                    str.Close();
-                }
-                var json = JsonConvert.SerializeObject(plugins, SerializationSettings);
-                File.WriteAllText(fileName, json);
-                return json;
+            var fileName = pluginsFile;
+            if (!File.Exists(fileName))
+            {
+                var str = File.Create(fileName);
+                str.Close();
+            }
+            var json = JsonConvert.SerializeObject(plugins, SerializationSettings);
+            File.WriteAllText(fileName, json);
+            return json;
+        }
+
+        /// <summary>
+        /// Opens the server settings and loads them into the config.
+        /// </summary>
+        internal async Task LoadServerConfig()
+        {
+            try
+            {
+                Config = await IOHelper.LoadConfig<Config>(ConfigFile);
+
+                // To prevent the timer from firing endlessly if value is 0 or less. (Config file corrupted, missing value, etc.)
+                if (Config.Server.AutoSaveTime <= 0)
+                    Config.Server.AutoSaveTime = ((Config) new Config().GenerateDefaultConfig()).Server.AutoSaveTime;
+
+                Log("Configuration loaded. Port: {0}, Auto Save: {1}m", Config.Server.Port.ToString(),
+                    Config.Server.AutoSaveTime.ToString());
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteLine(LogType.Error, "IOComponent.LoadConfig - {0}", ex.ToString());
+            }
         }
 
         /// <summary>
@@ -276,61 +298,16 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// Saves server settings to the server config.
         /// </summary>
-        internal async Task SaveConfig(Config settings)
+        internal async Task SaveServerConfig(Config settings)
         {
             try
             {
-                await Task.Factory.StartNew(() =>
-                {
-                    // If server config does not exist, create it
-                    if (!File.Exists(ConfigFile))
-                    {
-                        var str = File.Create(ConfigFile);
-                        str.Close();
-                    }
-                    var json = JsonConvert.SerializeObject(settings, SerializationSettings);
-                    File.WriteAllText(ConfigFile, json);
-                });
+                await IOHelper.SaveConfig(settings, ConfigFile);
             }
             catch (Exception ex)
             {
                 Logger.WriteLine(LogType.Error, $"IOComponent.SaveConfig - {ex}");
             }
-        }
-
-        /// <summary>
-        /// Loads the banner JPEG or PNG.
-        /// </summary>
-        private void LoadBanner()
-        {
-            var path = string.Empty;
-
-            // Scan for possible names
-            var formats = new[] {"jpg", "jpeg", "png"};
-
-            foreach (var formatPath in
-                formats.Select(format => Path.Combine(ServerDirectory, "banner." + format)).Where(File.Exists))
-            {
-                path = formatPath;
-                break;
-            }
-
-            if (string.IsNullOrEmpty(path))
-                return;
-
-            var img = Image.FromFile(path);
-
-            if (img.Height <= Constants.MaxBannerHeight && img.Width <= Globals.Values.MaxBannerWidth)
-            {
-                using (var ms = new MemoryStream())
-                {
-                    img.Save(ms, ImageFormat.Png);
-                    Banner = ms.ToArray();
-                }
-            }
-            else
-                Logger.WriteLine(LogType.Error,
-                    $"Banner size exceeds the size limit of {Globals.Values.MaxBannerWidth}x{Constants.MaxBannerHeight}");
         }
 
         internal async Task SaveLevel(Level level)
@@ -379,6 +356,41 @@ namespace Bricklayer.Core.Server.Components
             else
                 Logger.WriteLine(LogType.Error, $"Level file \"{uuid.ToString("N")}\" not found.");
             return level;
+        }
+
+        /// <summary>
+        /// Loads the banner JPEG or PNG.
+        /// </summary>
+        private void LoadBanner()
+        {
+            var path = string.Empty;
+
+            // Scan for possible names
+            var formats = new[] {"jpg", "jpeg", "png"};
+
+            foreach (var formatPath in
+                formats.Select(format => Path.Combine(ServerDirectory, "banner." + format)).Where(File.Exists))
+            {
+                path = formatPath;
+                break;
+            }
+
+            if (string.IsNullOrEmpty(path))
+                return;
+
+            var img = Image.FromFile(path);
+
+            if (img.Height <= Constants.MaxBannerHeight && img.Width <= Globals.Values.MaxBannerWidth)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    img.Save(ms, ImageFormat.Png);
+                    Banner = ms.ToArray();
+                }
+            }
+            else
+                Logger.WriteLine(LogType.Error,
+                    $"Banner size exceeds the size limit of {Globals.Values.MaxBannerWidth}x{Constants.MaxBannerHeight}");
         }
     }
 }

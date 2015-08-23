@@ -6,18 +6,18 @@ namespace Bricklayer.Core.Client
     /// <summary>
     /// Represents a configuration for the server.
     /// </summary>
-    public sealed class Config
+    public sealed class Config : IConfig
     {
         /// <summary>
         /// The configuration for the client settings, such as username, smiley color, etc.
         /// </summary>
         public ClientConfig Client;
 
-        public static Config GenerateDefaultConfig()
+        public IConfig GenerateDefaultConfig()
         {
             return new Config
             {
-                Client = ClientConfig.GenerateDefaultConfig(),
+                Client = (ClientConfig)new ClientConfig().GenerateDefaultConfig(),
             };
         }
     }
@@ -25,7 +25,7 @@ namespace Bricklayer.Core.Client
     /// <summary>
     /// Represents the server specific configuration elements
     /// </summary>
-    public sealed class ClientConfig
+    public sealed class ClientConfig : IConfig
     {
         /// <summary>
         /// The resolution, in pixels, of the game window
@@ -62,7 +62,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public int AuthServerPort;
 
-        public static ClientConfig GenerateDefaultConfig()
+        public IConfig GenerateDefaultConfig()
         {
             return new ClientConfig
             {

@@ -216,7 +216,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             screen.Client.IO.Config.Client.Username = ChkRemember.Checked ? TxtUsername.Text : string.Empty;
             screen.Client.IO.Config.Client.RememberMe = ChkRemember.Checked;
             screen.Client.IO.Config.Client.Color = ChkRemember.Checked ? ColorPicker.Hue : 40;
-            await screen.Client.IO.SaveConfig(screen.Client.IO.Config);
+            await screen.Client.IO.SaveClientConfig(screen.Client.IO.Config);
         }
 
         protected override void Dispose(bool disposing)

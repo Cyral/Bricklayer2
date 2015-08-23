@@ -120,7 +120,7 @@ namespace Bricklayer.Core.Client.Components
             List<PluginData> files = null;
             try
             {
-                files = IOHelper.GetPlugins(Client.IO.Directories["Plugins"], Client.IO.SerializationSettings).ToList();
+                files = IOHelper.GetPlugins(Client.IO.Directories["Plugins"], IOComponent.SerializationSettings).ToList();
             }
             catch (Exception e)
             {

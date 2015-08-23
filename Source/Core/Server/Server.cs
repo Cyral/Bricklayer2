@@ -440,7 +440,7 @@ namespace Bricklayer.Core.Server
                 .Create("Reload")
                 .AddAlias("reload", "rm")
                 .SetDescription("Reloads config")
-                .SetAction(async delegate { await IO.LoadConfig(); }));
+                .SetAction(async delegate { await IO.LoadServerConfig(); }));
         }
 
         /// <summary>

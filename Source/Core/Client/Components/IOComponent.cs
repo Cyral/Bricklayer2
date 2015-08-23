@@ -29,7 +29,7 @@ namespace Bricklayer.Core.Client.Components
         /// <summary>
         /// Settings for the JSON.NET serializer
         /// </summary>
-        internal JsonSerializerSettings SerializationSettings { get; private set; }
+        internal static JsonSerializerSettings SerializationSettings => IOHelper.SerializerSettings;
 
         /// <summary>
         /// Directories relevant to the client, such as screenshots, content, etc.
@@ -72,7 +72,7 @@ namespace Bricklayer.Core.Client.Components
         public override async Task Init()
         {
             // Set up JSON.NET settings.
-            SerializationSettings = new JsonSerializerSettings
+            IOHelper.SerializerSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
                 ContractResolver = new JsonContractResolver()
@@ -92,7 +92,7 @@ namespace Bricklayer.Core.Client.Components
             Directories.Add("Screenshots", Path.Combine(MainDirectory, "Screenshots"));
 
             CheckFiles();
-            await LoadConfig();
+            await LoadClientConfig();
             await base.Init();
         }
 
@@ -196,6 +196,48 @@ namespace Bricklayer.Core.Client.Components
         }
 
         /// <summary>
+        /// Deserialize a JSON file into an IConfig.
+        /// </summary>
+        /// <typeparam name="T">Config type.</typeparam>
+        /// <param name="path">Full path to config file.</param>
+        public static async Task<T> LoadConfig<T>(string path) where T : IConfig, new()
+        {
+            return await IOHelper.LoadConfig<T>(path);
+        }
+
+        /// <summary>
+        /// Deserialize a JSON file in the root of a plugin's directory into an IConfig.
+        /// </summary>
+        /// <typeparam name="T">Config type.</typeparam>
+        /// <param name="file">File name relative to plugin root.</param>
+        /// <param name="plugin">Plugin directory.</param>
+        public static async Task<T> LoadConfig<T>(PluginData plugin, string file) where T : IConfig, new()
+        {
+            return await IOHelper.LoadConfig<T>(Path.Combine(plugin.Path, file));
+        }
+
+        /// <summary>
+        /// Save a config into a JSON file.
+        /// </summary>
+        /// <param name="config">Config instance.</param>
+        /// <param name="path">Full path to file.</param>
+        public static async Task SaveConfig(IConfig config, string path)
+        {
+            await IOHelper.SaveConfig(config, path);
+        }
+
+        /// <summary>
+        /// Save a config to a JSON file in the plugin's root directory.
+        /// </summary>
+        /// <param name="config">Config instance.</param>
+        /// <param name="plugin">Plugin directory.</param>
+        /// <param name="file">File name relative to plugin root.</param>
+        public static async Task SaveConfig(IConfig config, PluginData plugin, string file)
+        {
+            await IOHelper.SaveConfig(config, Path.Combine(plugin.Path, file));
+        }
+
+        /// <summary>
         /// Checks to make sure the application files are there, if not it will create them.
         /// </summary>
         internal void CheckFiles()
@@ -221,50 +263,11 @@ namespace Bricklayer.Core.Client.Components
         }
 
         /// <summary>
-        /// Opens the client settings and loads them into the config.
-        /// </summary>
-        internal async Task LoadConfig()
-        {
-            // If server config does not exist, create it and write the default settings
-            if (!File.Exists(ConfigFile))
-            {
-                Config = Config.GenerateDefaultConfig();
-                await SaveConfig(Config);
-                return;
-            }
-
-            var json = string.Empty;
-            await Task.Factory.StartNew(() => json = File.ReadAllText(ConfigFile));
-
-            // If config is empty, regenerate and read again
-            if (string.IsNullOrWhiteSpace(json))
-            {
-                var config = Config.GenerateDefaultConfig();
-                json = config.ToString();
-                await SaveConfig(config);
-            }
-
-            await
-                Task.Factory.StartNew(
-                    () => Config = JsonConvert.DeserializeObject<Config>(json, SerializationSettings));
-        }
-
-        /// <summary>
         /// Saves client settings to the client config.
         /// </summary>
-        internal async Task SaveConfig(Config settings)
+        internal async Task SaveClientConfig(Config settings)
         {
-            await Task.Factory.StartNew(() =>
-            {
-                // If server config does not exist, create it
-                if (!File.Exists(ConfigFile))
-                {
-                    var str = File.Create(ConfigFile);
-                    str.Close();
-                }
-                var json = JsonConvert.SerializeObject(settings, SerializationSettings);
-                File.WriteAllText(ConfigFile, json);
-            });
+            await IOHelper.SaveConfig(settings, ConfigFile);
         }
 
         /// <summary>
@@ -274,6 +277,14 @@ namespace Bricklayer.Core.Client.Components
         {
             using (var secureString = password.ToSecureString())
                 Config.Client.Password = secureString.EncryptString();
+        }
+
+        /// <summary>
+        /// Opens the server settings and loads them into the config.
+        /// </summary>
+        private async Task LoadClientConfig()
+        {
+            Config = await IOHelper.LoadConfig<Config>(ConfigFile);
         }
 
         private static ServerData CreateDefaultServer()

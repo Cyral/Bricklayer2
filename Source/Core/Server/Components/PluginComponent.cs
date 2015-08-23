@@ -80,7 +80,7 @@ namespace Bricklayer.Core.Server.Components
             {
                 // Load list of enabled/disabled plugins.
                 pluginStatuses = Server.IO.ReadPluginStatus();
-                files = IOHelper.GetPlugins(Server.IO.PluginsDirectory, Server.IO.SerializationSettings).ToList();
+                files = IOHelper.GetPlugins(Server.IO.PluginsDirectory, IOComponent.SerializationSettings).ToList();
             }
             catch (Exception e)
             {

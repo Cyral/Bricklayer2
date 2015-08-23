@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Bricklayer.Core.Common
@@ -14,6 +15,8 @@ namespace Bricklayer.Core.Common
     /// </summary>
     internal static class IOHelper
     {
+        public static JsonSerializerSettings SerializerSettings { get; set; }
+
         /// <summary>
         /// Creates an instance of a plugin from the specified assembly, if valid.
         /// </summary>
@@ -106,6 +109,54 @@ namespace Bricklayer.Core.Common
         {
             // Load the raw bytes of the file, to prevent locking it while the server is running, then load that into the assembly
             return domain.Load(File.ReadAllBytes(Path.Combine(path, "plugin.dll")));
+        }
+
+        /// <summary>
+        /// Load an IConfig from a JSON file.
+        /// </summary>
+        internal static async Task<T> LoadConfig<T>(string path) where T : IConfig, new()
+        {
+            // If config doesn't exist, create it using the default settings and write it.
+            IConfig config;
+            if (!File.Exists(path))
+            {
+                config = new T().GenerateDefaultConfig();
+                await SaveConfig((T)config, path);
+                return (T)config;
+            }
+
+            var json = string.Empty;
+            await Task.Run(() => json = File.ReadAllText(path));
+
+            // If config is empty, regenerate and read again
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                config = new T().GenerateDefaultConfig();
+                json = config.ToString();
+                await SaveConfig((T)config, path);
+            }
+
+            config = JsonConvert.DeserializeObject<T>(json, SerializerSettings);
+            return (T) config;
+        }
+
+        /// <summary>
+        /// Save an IConfig to a JSON file.
+        /// </summary>
+        internal static async Task SaveConfig(IConfig config, string path)
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                // If server config does not exist, create it
+                if (!File.Exists(path))
+                {
+                    var str = File.Create(path);
+                    str.Close();
+                    str.Dispose();
+                }
+                var json = JsonConvert.SerializeObject(config, SerializerSettings);
+                File.WriteAllText(path, json);
+            });
         }
     }
 }

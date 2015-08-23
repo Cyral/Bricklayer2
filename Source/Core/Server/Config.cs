@@ -5,7 +5,7 @@ namespace Bricklayer.Core.Server
     /// <summary>
     /// Represents a configuration for the server.
     /// </summary>
-    public sealed class Config
+    public sealed class Config : IConfig
     {
         /// <summary>
         /// The configuration for database settings. By default, SQLite is used (bundled with Bricklayer)
@@ -17,12 +17,12 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public ServerConfig Server;
 
-        public static Config GenerateDefaultConfig()
+        public IConfig GenerateDefaultConfig()
         {
             return new Config
             {
-                Server = ServerConfig.GenerateDefaultConfig(),
-                Database = DatabaseConfig.GenerateDefaultConfig()
+                Server = (ServerConfig)new ServerConfig().GenerateDefaultConfig(),
+                Database = (DatabaseConfig)new DatabaseConfig().GenerateDefaultConfig()
             };
         }
     }
@@ -30,7 +30,7 @@ namespace Bricklayer.Core.Server
     /// <summary>
     /// Represents the database specific configuration elements.
     /// </summary>
-    public sealed class DatabaseConfig
+    public sealed class DatabaseConfig : IConfig
     {
         /// <summary>
         /// The DB connection string used to connect to the DB.
@@ -47,7 +47,7 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public string Provider;
 
-        public static DatabaseConfig GenerateDefaultConfig()
+        public IConfig GenerateDefaultConfig()
         {
             return new DatabaseConfig
             {
@@ -61,7 +61,7 @@ namespace Bricklayer.Core.Server
     /// <summary>
     /// Represents the server specific configuration elements
     /// </summary>
-    public sealed class ServerConfig
+    public sealed class ServerConfig : IConfig
     {
         /// <summary>
         /// The server address to use for authentication.
@@ -103,7 +103,7 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public int AutoSaveTime;
 
-        public static ServerConfig GenerateDefaultConfig()
+        public IConfig GenerateDefaultConfig()
         {
             return new ServerConfig
             {
