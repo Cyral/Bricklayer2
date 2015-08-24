@@ -110,7 +110,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
                     state = FadeState.In;
                 }
             }
-
+            foreach (var control in Manager.Controls)
+                control.Invalidate();
             Current.Update(gameTime);
         }
 

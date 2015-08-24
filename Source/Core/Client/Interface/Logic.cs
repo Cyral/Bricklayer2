@@ -56,10 +56,8 @@ namespace Bricklayer.Core.Client.Interface
             var pos = Client.Input.MousePosition;
             var rect = new Rectangle(pos.X, pos.Y, 1, 1);
             return
-                Manager.Controls.First()
-                    .Controls.First()
-                    .Controls.Any(
-                        control => control.Visible && !control.Passive && control.AbsoluteRect.Intersects(rect));
+                Manager.Controls.Any(
+                        control => control.Visible && control != this && !control.Passive && control.AbsoluteRect.Intersects(rect));
         }
     }
 }

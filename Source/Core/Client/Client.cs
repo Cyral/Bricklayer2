@@ -186,7 +186,7 @@ namespace Bricklayer.Core.Client
 
             // Draw parts of the screen manager (fade image) over everything else.
             SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            Window.ScreenManager.Draw(SpriteBatch, gameTime);
+            Window.Draw(SpriteBatch, gameTime);
             SpriteBatch.End();
 
             base.Draw(gameTime);
