@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Server.World;
 using Newtonsoft.Json;
+using Pyratron.Frameworks.LogConsole;
 using Image = System.Drawing.Image;
 
 namespace Bricklayer.Core.Server.Components
@@ -49,7 +50,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public string ServerDirectory { get; private set; }
 
-        protected override LogType LogType => LogType.IO;
+        protected internal override LogType LogType { get; } = new LogType("IO", ConsoleColor.Cyan);
 
         /// <summary>
         /// Byte array of the image data for the lobby banner.
@@ -61,18 +62,25 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         internal static JsonSerializerSettings SerializationSettings => IOHelper.SerializerSettings;
 
-        private DateTime lastLog;
-        private StreamWriter logWriter;
-
         /// <summary>
         /// File containing list of plugin statuses (Whether or not they are enabled or disabled)
         /// </summary>
-        private string pluginsFile;
+        private readonly string pluginsFile;
 
         private StringBuilder sb;
 
         public IOComponent(Server server) : base(server)
         {
+            // Paths.
+            ServerDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (ServerDirectory != null)
+            {
+                LogDirectory = Path.Combine(ServerDirectory, "logs");
+                LevelsDirectory = Path.Combine(ServerDirectory, "levels");
+                PluginsDirectory = Path.Combine(ServerDirectory, "plugins");
+                ConfigFile = Path.Combine(ServerDirectory, "config.json");
+                pluginsFile = Path.Combine(ServerDirectory, "plugins.json");
+            }
         }
 
         public override async Task Init()
@@ -85,17 +93,6 @@ namespace Bricklayer.Core.Server.Components
                 ContractResolver = new JsonContractResolver()
             };
 
-            // Paths.
-            ServerDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (ServerDirectory != null)
-            {
-                LogDirectory = Path.Combine(ServerDirectory, "logs");
-                LevelsDirectory = Path.Combine(ServerDirectory, "levels");
-                PluginsDirectory = Path.Combine(ServerDirectory, "plugins");
-                ConfigFile = Path.Combine(ServerDirectory, "config.json");
-                pluginsFile = Path.Combine(ServerDirectory, "plugins.json");
-            }
-
             // Create directories that don't exist.
             if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
@@ -105,10 +102,6 @@ namespace Bricklayer.Core.Server.Components
                 Directory.CreateDirectory(PluginsDirectory);
 
             sb = new StringBuilder();
-
-            // Log a message to the log file stating the startup time and version.
-            LogMessage(
-                $"SERVER STARTUP:\n{Constants.Strings.ServerTitle} {Constants.VersionString}\n\nServer is starting now, on {DateTime.Now.ToString("U")}\n\n");
 
             // Load configuration.
             await LoadServerConfig();
@@ -213,88 +206,15 @@ namespace Bricklayer.Core.Server.Components
                 if (Config.Server.AutoSaveTime <= 0)
                     Config.Server.AutoSaveTime = ((Config) new Config().GenerateDefaultConfig()).Server.AutoSaveTime;
 
-                Log("Configuration loaded. Port: {0}, Auto Save: {1}m", Config.Server.Port.ToString(),
+                Logger.Log(LogType, "Configuration loaded. Port: {0}, Auto Save: {1}m", Config.Server.Port.ToString(),
                     Config.Server.AutoSaveTime.ToString());
             }
             catch (Exception ex)
             {
-                Logger.WriteLine(LogType.Error, "IOComponent.LoadConfig - {0}", ex.ToString());
+                Logger.Error(LogType, "Error loading config: {0}", ex.ToString());
             }
         }
-
-        /// <summary>
-        /// Logs a message to the server log for the day.
-        /// Each day a new log file is created.
-        /// </summary>
-        internal async void LogMessage(string message)
-        {
-#if !MONO
-            try
-            {
-                message = message.Replace("\n", Environment.NewLine);
-                var date = DateTime.Now;
-                if (logWriter == null || date.Date != lastLog.Date)
-                {
-                    var path = Path.Combine(LogDirectory, date.ToString("MM-dd-yyyy") + ".txt");
-                    if (logWriter != null) // On day change, make a new stream/file
-                    {
-                        logWriter.Close();
-                        logWriter.Dispose();
-                    }
-                    logWriter = new StreamWriter(new FileStream(path, FileMode.Append, FileAccess.Write), Encoding.UTF8,
-                        4096, true);
-                }
-
-                if (sb != null)
-                    await logWriter.WriteLineAsync(
-                        sb.Clear().Append('[').Append(date.ToString("G")).Append("] ").Append(message).ToString());
-
-                lastLog = date;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("LOGGING ERROR! " + e);
-            }
-            finally
-            {
-                logWriter?.Close();
-            }
-#endif
-            // Logging errors occur on MONO, this fixes it (Although the performance increase on the Windows version (less file opening) is not present)
-#if MONO
-            try
-            {
-                message = message.Replace("\n", Environment.NewLine);
-                var date = DateTime.Now;
-                var path = Path.Combine(LogDirectory, date.ToString("MM-dd-yyyy") + ".txt");
-                using (var monoWriter = File.AppendText(path))
-                {
-                    monoWriter.WriteLine(
-                        sb.Clear().Append('[').Append(date.ToString("G")).Append("] ").Append(message).ToString());
-                }
-
-                lastLog = date;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("LOGGING ERROR! " + e);
-            }
-            finally
-            {
-                if (logWriter != null) logWriter.Close();
-            }
-#endif
-        }
-
-        /// <summary>
-        /// Logs a message to the server log. (Which is created in a new file once per day)
-        /// Use the logger class if you wish to provide console output.
-        /// </summary>
-        internal void LogMessage(LogType logType, string message)
-        {
-            LogMessage(sb.Clear().Append(logType.Prefix).Append(": ").Append(message).ToString());
-        }
-
+       
         /// <summary>
         /// Saves server settings to the server config.
         /// </summary>
@@ -306,7 +226,7 @@ namespace Bricklayer.Core.Server.Components
             }
             catch (Exception ex)
             {
-                Logger.WriteLine(LogType.Error, $"IOComponent.SaveConfig - {ex}");
+                Logger.Error(LogType, "Error loading config: {0}", ex.ToString());
             }
         }
 
@@ -354,7 +274,7 @@ namespace Bricklayer.Core.Server.Components
                 });
             }
             else
-                Logger.WriteLine(LogType.Error, $"Level file \"{uuid.ToString("N")}\" not found.");
+                Logger.Error(LogType, $"Level file \"{uuid.ToString("N")}\" not found.");
             return level;
         }
 
@@ -389,7 +309,7 @@ namespace Bricklayer.Core.Server.Components
                 }
             }
             else
-                Logger.WriteLine(LogType.Error,
+                Logger.Warn(LogType,
                     $"Banner size exceeds the size limit of {Globals.Values.MaxBannerWidth}x{Constants.MaxBannerHeight}");
         }
     }

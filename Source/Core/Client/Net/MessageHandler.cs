@@ -123,7 +123,7 @@ namespace Bricklayer.Core.Client.Net
 
             // Make sure the unconnected message is coming from the real auth server.
             if (Equals(im.SenderEndPoint, networkManager.AuthEndpoint) &&
-                im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
+                im.SenderEndPoint.Port == networkManager.Client.IO.Config.Client.AuthServerPort)
             {
                 var messageType = (MessageTypes) im.ReadByte(); // Find the type of data message sent
                 switch (messageType)

@@ -25,7 +25,7 @@ namespace Bricklayer.Core.Common.World
         public BlockType Type
         {
             get { return FromID(type); }
-            set { type = value.ID; }
+            private set { type = value.ID; }
         }
 
         /// <summary>

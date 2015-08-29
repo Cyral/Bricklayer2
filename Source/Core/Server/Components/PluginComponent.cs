@@ -7,9 +7,10 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
+using Pyratron.Frameworks.LogConsole;
 
 /*
-See PluginComponent in the Client project for full explanation on how the system works
+ * See PluginComponent in the Client project for full explanation on how the system works.
 */
 
 namespace Bricklayer.Core.Server.Components
@@ -24,18 +25,19 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public int PluginCount => Plugins.Count;
 
+        protected internal override LogType LogType { get; } = new LogType("Plugin", ConsoleColor.Green);
+        internal List<ServerPlugin> Plugins { get; }
+        private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
+        private string loadingPlugin;
+
         /// <summary>
         /// Class contains a list of plugin messages. Server and Client plugins will use this
         /// to recieve an id that both the server and the client knows for the plugin message.
         /// </summary>
-        public PluginMessages PluginMessages;
+        public PluginMessages PluginMessages { get; private set; }
 
-        protected override LogType LogType => LogType.Plugin;
-        internal List<ServerPlugin> Plugins { get; }
-        private string loadingPlugin;
-        private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
         private Dictionary<string, bool> pluginStatuses = new Dictionary<string, bool>();
-        
+
 
         public PluginComponent(Server server) : base(server)
         {
@@ -58,89 +60,13 @@ namespace Bricklayer.Core.Server.Components
                 if (File.Exists(path))
                     return Assembly.LoadFile(path);
                 path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe");
-                    // Try to load a .exe if .dll doesn't exist
-                if (File.Exists(path))
-                    return Assembly.LoadFile(path);
-                return null;
+                // Try to load a .exe if .dll doesn't exist
+                return File.Exists(path) ? Assembly.LoadFile(path) : null;
             };
 
             LoadPlugins();
 
             await base.Init();
-        }
-
-        /// <summary>
-        /// Loads all plugins that are not already loaded.
-        /// </summary>
-        internal void LoadPlugins()
-        {
-            // Get a list of all the .dlls in the directory
-            List<PluginData> files = null;
-            try
-            {
-                // Load list of enabled/disabled plugins.
-                pluginStatuses = Server.IO.ReadPluginStatus();
-                files = IOHelper.GetPlugins(Server.IO.PluginsDirectory, IOComponent.SerializationSettings).ToList();
-            }
-            catch (Exception e)
-            {
-                Logger.WriteLine(LogType.Error, e.Message);
-            }
-            if (files == null)
-                return;
-
-            foreach (var file in files.Where(file => !Plugins.Contains(file)))
-            {
-                // TODO: Use AppDomains for security
-                // Load the assembly
-                try
-                {
-                    // If plugin is enabled.
-                    if (!pluginStatuses.ContainsKey(file.Identifier) || pluginStatuses[file.Identifier])
-                    {
-                        // Make sure dependencies are met.
-                        if (file.Dependencies.Count > 0)
-                        {
-                            // ReSharper disable once PossibleMultipleEnumeration
-                            foreach (
-                                var dep in
-                                    file.Dependencies.Where(dep => files.All(plugin => plugin.Identifier != dep)))
-                                throw new FileNotFoundException(
-                                    $"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
-                        }
-                        // Load plugin
-                        pluginStatuses[file.Identifier] = true;
-                        loadingPlugin = file.Path;
-                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
-                        assemblies[file.Identifier] = asm;
-                        var loadedPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, file);
-                        RegisterPlugin(loadedPlugin);
-                        Log($"Loaded {loadedPlugin.GetInfoString()}");
-                    }
-                    else
-                    {
-                        // Create plugin instance with no actual assembly, to be displayed in the plugin manager list.
-                        var pluginData = new FakePlugin(Server, file);
-                        Plugins.Add(pluginData);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.WriteLine(LogType.Error, e.Message);
-                }
-            }
-            // Write updated statuses.
-            pluginStatuses = new Dictionary<string, bool>();
-            Plugins.ForEach(f => pluginStatuses.Add(f.Identifier, f.IsEnabled));
-            Server.IO.WritePluginStatus(pluginStatuses);
-        }
-
-        private void RegisterPlugin(ServerPlugin plugin)
-        {
-            Plugins.Add(plugin);
-            plugin.Load();
-            Server.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
-            Debug.WriteLine($"Loaded {plugin.GetInfoString()}");
         }
 
         /// <summary>
@@ -188,10 +114,12 @@ namespace Bricklayer.Core.Server.Components
                     loadingPlugin = plugin.Path;
                     if (Plugins.Contains(plugin))
                         Plugins.Remove(plugin);
-                    var newPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(assemblies[plugin.Identifier], Server, plugin);
+                    var newPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(assemblies[plugin.Identifier], Server,
+                        plugin);
                     newPlugin.Load();
                     Plugins.Add(newPlugin);
-                    Server.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
+                    Server.Events.Game.PluginStatusChanged.Invoke(
+                        new EventManager.GameEvents.PluginStatusEventArgs(plugin));
                     Debug.WriteLine($"Plugin: Enabled {plugin.GetInfoString()}");
                 }
                 else
@@ -204,17 +132,109 @@ namespace Bricklayer.Core.Server.Components
                             plugin.Dependencies.Where(dep => Plugins.All(p => p.Identifier != dep)))
                             throw new FileNotFoundException(
                                 $"Dependency \"{dep}\" for plugin \"{plugin.Name}\" not loaded or enabled.");
-                    var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, plugin.Path);
-                    assemblies[plugin.Identifier] = asm;
-                    loadingPlugin = plugin.Path;
-                    var retPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, plugin);
+                    ServerPlugin retPlugin = null;
+                    try
+                    {
+                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, plugin.Path);
+                        assemblies[plugin.Identifier] = asm;
+                        loadingPlugin = plugin.Path;
+                        retPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, plugin);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error(LogType, $"Error creating instance of {plugin.Identifier}: {e}");
+                    }
                     RegisterPlugin(retPlugin);
-                    pluginStatuses[retPlugin.Identifier] = true;
-                    Server.IO.WritePluginStatus(pluginStatuses);
-                    return retPlugin;
+                    if (retPlugin != null)
+                    {
+                        pluginStatuses[retPlugin.Identifier] = true;
+                        Server.IO.WritePluginStatus(pluginStatuses);
+                        return retPlugin;
+                    }
                 }
             }
             return plugin;
+        }
+
+        /// <summary>
+        /// Loads all plugins that are not already loaded.
+        /// </summary>
+        internal void LoadPlugins()
+        {
+            // Get a list of all the .dlls in the directory
+            List<PluginData> files = null;
+            try
+            {
+                // Load list of enabled/disabled plugins.
+                pluginStatuses = Server.IO.ReadPluginStatus();
+                files = IOHelper.GetPlugins(Server.IO.PluginsDirectory, IOComponent.SerializationSettings).ToList();
+            }
+            catch (Exception e)
+            {
+                Logger.Error(LogType, e.Message);
+            }
+            if (files == null)
+                return;
+
+            foreach (var file in files.Where(file => !Plugins.Contains(file)))
+            {
+                // TODO: Use AppDomains for security
+                // Load the assembly
+                try
+                {
+                    // If plugin is enabled.
+                    if (!pluginStatuses.ContainsKey(file.Identifier) || pluginStatuses[file.Identifier])
+                    {
+                        // Make sure dependencies are met.
+                        if (file.Dependencies.Count > 0)
+                        {
+                            // ReSharper disable once PossibleMultipleEnumeration
+                            foreach (
+                                var dep in
+                                    file.Dependencies.Where(dep => files.All(plugin => plugin.Identifier != dep)))
+                                throw new FileNotFoundException(
+                                    $"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
+                        }
+                        // Load plugin
+                        pluginStatuses[file.Identifier] = true;
+                        loadingPlugin = file.Path;
+                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                        assemblies[file.Identifier] = asm;
+                        var loadedPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, file);
+                        RegisterPlugin(loadedPlugin);
+                        Logger.Log(LogType, $"Loaded {loadedPlugin.GetInfoString()}");
+                    }
+                    else
+                    {
+                        // Create plugin instance with no actual assembly, to be displayed in the plugin manager list.
+                        var pluginData = new FakePlugin(Server, file);
+                        Plugins.Add(pluginData);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(LogType, $"Error creating instance of {file.Identifier}: {e}");
+                }
+            }
+            // Write updated statuses.
+            pluginStatuses = new Dictionary<string, bool>();
+            Plugins.ForEach(f => pluginStatuses.Add(f.Identifier, f.IsEnabled));
+            Server.IO.WritePluginStatus(pluginStatuses);
+        }
+
+        private void RegisterPlugin(ServerPlugin plugin)
+        {
+            try
+            {
+                Plugins.Add(plugin);
+                plugin.Load();
+                Server.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
+                Debug.WriteLine($"Loaded {plugin.GetInfoString()}");
+            }
+            catch (Exception e)
+            {
+                Logger.Error(LogType, $"Error calling Load on {plugin.Identifier}: {e}");
+            }
         }
 
         /// <summary>

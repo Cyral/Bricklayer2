@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Timers;
-using Bricklayer.Core.Common.Net.Messages;
-using Bricklayer.Core.Common.World;
-using Bricklayer.Core.Server;
-using Bricklayer.Plugins.DefaultBlocks.Common;
-using Pyratron.Frameworks.Commands.Parser;
 using Bricklayer.Core.Common.Net;
+using Bricklayer.Core.Server;
+using Pyratron.Frameworks.Commands.Parser;
+using Pyratron.Frameworks.LogConsole;
 
 namespace Bricklayer.Plugins.TestServerPlugin
 {
@@ -14,7 +11,9 @@ namespace Bricklayer.Plugins.TestServerPlugin
     /// </summary>
     public class TestServerPlugin : ServerPlugin
     {
-        public TestServerPlugin(Server host) : base(host) {}
+        public TestServerPlugin(Server host) : base(host)
+        {
+        }
 
         public override void Load()
         {
@@ -27,25 +26,26 @@ namespace Bricklayer.Plugins.TestServerPlugin
             Server.Events.Network.PluginMessageReceived.AddHandler(args =>
             {
                 var plugin = args.Identifier;
-                
-                switch(Server.Plugins.PluginMessages.GetType(args.Id)) {
+
+                switch (Server.Plugins.PluginMessages.GetType(args.Id))
+                {
                     case "TestPluginMessage":
                     {
-                            var msg = new TestPluginMessage(args.IncomingMessage, MessageContext.Server);
-                            Logger.WriteLine($"Message Recieved from {plugin}: {msg.Test}");
-                            break;
+                        var msg = new TestPluginMessage(args.IncomingMessage, MessageContext.Server);
+                        Logger.Log($"Message Recieved from {plugin}: {msg.Test}");
+                        break;
                     }
                 }
             });
 
-            Logger.WriteLine(LogType.Plugin, "Test Plugin Loaded!");
+            Logger.Log("Test Plugin Loaded!");
         }
 
         public override void Unload()
         {
             Server.Commands.Commands.RemoveAll(c => c.Name.Equals("Test"));
 
-            Logger.WriteLine(LogType.Plugin, "Test Plugin Unloaded!");
+            Logger.Log("Test Plugin Unloaded!");
         }
     }
 }

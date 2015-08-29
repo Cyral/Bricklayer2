@@ -4,6 +4,7 @@ using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Server.Components;
 using Lidgren.Network;
+using Pyratron.Frameworks.LogConsole;
 
 namespace Bricklayer.Core.Server.Net
 {
@@ -15,6 +16,8 @@ namespace Bricklayer.Core.Server.Net
         private NetworkComponent NetManager => Server.Net;
         private Server Server { get; }
         private Thread networkThread;
+
+        protected LogType LogType { get; } = new LogType("Net Message Handler:", ConsoleColor.Magenta);
 
         public MessageHandler(Server server)
         {
@@ -40,11 +43,15 @@ namespace Bricklayer.Core.Server.Net
                         switch (inc.MessageType)
                         {
                             case NetIncomingMessageType.Error:
-                            case NetIncomingMessageType.DebugMessage:
                             case NetIncomingMessageType.ErrorMessage:
+                                Logger.Error(LogType, inc.ReadString());
+                                break;
+                            case NetIncomingMessageType.DebugMessage:
                             case NetIncomingMessageType.VerboseDebugMessage:
+                                Logger.Debug(LogType, inc.ReadString());
+                                break;
                             case NetIncomingMessageType.WarningMessage:
-                                Logger.WriteLine(LogType.Error, "Net: " + inc.ReadString());
+                                Logger.Warn(LogType, inc.ReadString());
                                 break;
                             // ConnectionApproval messages are sent when a client would like to connect to the server
                             case NetIncomingMessageType.ConnectionApproval:
@@ -53,6 +60,7 @@ namespace Bricklayer.Core.Server.Net
                                 if (inc.LengthBytes == 0)
                                 {
                                     inc.SenderConnection?.Deny("Invalid Hail Message");
+                                    Logger.Warn(LogType, "Invalid hail message from " + inc.SenderConnection.RemoteEndPoint);
                                     break; 
                                 }
 
@@ -151,7 +159,7 @@ namespace Bricklayer.Core.Server.Net
                 }
                 catch (Exception e)
                 {
-                    Logger.WriteLine(LogType.Error, e.ToString());
+                    Logger.Error(LogType, e.ToString());
                 }
             }
         }

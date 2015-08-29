@@ -47,9 +47,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\Lidgren.Network.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Pyratron.Frameworks.Commands.Parser, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Libraries\Pyratron.Frameworks.Commands.Parser.dll</HintPath>
+    </Reference>
+    <Reference Include="Pyratron.Frameworks.LogConsole">
+      <HintPath>..\..\..\Libraries\Pyratron.Frameworks.LogConsole.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

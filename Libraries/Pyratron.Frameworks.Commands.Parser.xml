@@ -152,11 +152,11 @@
         </member>
         <member name="M:Pyratron.Frameworks.Commands.Parser.Command.Execute(Pyratron.Frameworks.Commands.Parser.Argument[],System.Object)">
             <summary>
-            Executes a command with the specified input and an optional access level.
+            Executes this command with the specified arguments.
             If CanExecute returns false, the command is not run.
             </summary>
             <param name="arguments">The parsed input</param>
-            <param name="data">Optional ata to be passed to the command.</param>
+            <param name="data">Optional data to be passed to the command.</param>
         </member>
         <member name="M:Pyratron.Frameworks.Commands.Parser.Command.SetExecutePredicate(System.Func{Pyratron.Frameworks.Commands.Parser.Command,System.String})">
             <summary>

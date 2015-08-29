@@ -14,6 +14,7 @@ using Bricklayer.Core.Common.World;
 using Bricklayer.Core.Server.Net;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
+using Pyratron.Frameworks.LogConsole;
 using static Bricklayer.Core.Server.EventManager;
 
 namespace Bricklayer.Core.Server.Components
@@ -27,11 +28,11 @@ namespace Bricklayer.Core.Server.Components
     /// </summary>
     public class NetworkComponent : ServerComponent
     {
+        // Message delivery method
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
-            // Message delivery method
 
         /// <summary>
-        /// The server configuration
+        /// The server configuration.
         /// </summary>
         internal NetPeerConfiguration Config { get; set; }
 
@@ -41,19 +42,29 @@ namespace Bricklayer.Core.Server.Components
         public bool IsShutdown { get; set; }
 
         /// <summary>
-        /// The message loop for handling messages
+        /// The message loop for handling messages.
         /// </summary>
         internal MessageHandler MsgHandler { get; set; }
 
         /// <summary>
-        /// The underlying Lidgren server object
+        /// The underlying Lidgren server object.
         /// </summary>
         internal NetServer NetServer { get; set; }
 
         /// <summary>
-        /// Net LogType
+        /// Net LogType.
         /// </summary>
-        protected override LogType LogType => LogType.Net;
+        protected internal override LogType LogType { get; } = new LogType("Net", ConsoleColor.Magenta);
+
+        /// <summary>
+        /// Level LogType.
+        /// </summary>
+        protected internal static LogType LevelLogType { get; } = new LogType("Level", ConsoleColor.Red);
+
+        /// <summary>
+        /// Chat LogType.
+        /// </summary>
+        protected LogType ChatLogType { get; } = new LogType("Chat", ConsoleColor.DarkGray);
 
         /// <summary>
         /// The IP of the auth server.
@@ -85,13 +96,13 @@ namespace Bricklayer.Core.Server.Components
             {
                 if (Server.Players.Any(p => p.UUID == args.UUID))
                 {
-                    Logger.WriteLine(LogType.Net,
+                    Logger.Log(LogType,
                         args.Username + " already connected. (Denied)");
                     args.Connection.Deny("You are already connected.");
                     return;
                 }
 
-                Logger.WriteLine(LogType.Net,
+                Logger.Log(LogType,
                     args.Username + " requesting to join. Verifying public key with auth server.");
                 if (pendingSessions.ContainsKey(args.UUID))
                     pendingSessions.Remove(args.UUID);
@@ -107,7 +118,7 @@ namespace Bricklayer.Core.Server.Components
             {
                 if (!pendingSessions.ContainsKey(args.UUID))
                 {
-                    Logger.WriteLine(LogType.Error, $"Pending session for UUID \"{args.UUID}\" not found.");
+                    Logger.Warn(LogType, $"Pending session for UUID \"{args.UUID}\" not found.");
                     return;
                 }
                 if (args.Valid)
@@ -118,13 +129,13 @@ namespace Bricklayer.Core.Server.Components
                         new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
                             Server.IO.Config.Server.Intro, NetServer.ConnectionsCount,
                             await Server.Database.GetAllLevels(), Server.Plugins.PluginMessages)));
-                    Logger.WriteLine(LogType.Net,
+                    Logger.Log(LogType,
                         $"Session valid for '{args.Username}'. (Allowed)");
                 }
                 else
                 {
                     pendingSessions[args.UUID].Deny("Invalid or expired session.");
-                    Logger.WriteLine(LogType.Net,
+                    Logger.Log(LogType,
                         $"Session invalid for '{args.Username}'. (Denied)");
                 }
                 pendingSessions.Remove(args.UUID);
@@ -162,7 +173,7 @@ namespace Bricklayer.Core.Server.Components
                 {
                     // Create the new level
                     var level = await Server.CreateLevel(args.Sender, args.Name, args.Description);
-                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" created by {level.Creator.Username}");
+                    Logger.Log(LevelLogType, $"{args.Sender.Username} created \"{level.Name}\"");
 
                     // Fire another event with the newly created level, so that plugins can access it.
                     // (As the current event is only from the network message)
@@ -177,7 +188,7 @@ namespace Bricklayer.Core.Server.Components
                 {
                     // Join the level.
                     var level = await Server.JoinLevel(args.Sender, args.UUID);
-                    Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {args.Sender.Username}");
+                    Logger.Log(LevelLogType, $"{args.Sender.Username} joined \"{level.Name}\"");
                     Send(new LevelDataMessage(level), args.Sender);
                     BroadcastExcept(args.Sender, new PlayerJoinMessage(args.Sender));
                     BroadcastExcept(args.Sender, new ChatMessage("[color:Lime]" + args.Sender.Username + " has joined.[/color]"));
@@ -189,8 +200,8 @@ namespace Bricklayer.Core.Server.Components
                 {
                     if (args.Sender.Level != null)
                     {
-                        Logger.WriteLine(LogType.Normal,
-                            $"Level \"{args.Sender.Level.Name}\" - (Chat) \"{args.Sender.Username}\": \"{args.Message}\"");
+                        Logger.Log(ChatLogType, ConsoleColor.DarkGray,
+                            $"(\"{args.Sender.Level.Name}\") {args.Sender.Username}: {args.Message}");
                         Broadcast(args.Sender.Level, new ChatMessage(args.Sender.Username + ": " + args.Message));
                     }
                 }, EventPriority.InternalFinal);
@@ -239,14 +250,14 @@ namespace Bricklayer.Core.Server.Components
             // Logging events.
             Server.Events.Network.UserConnected.AddHandler(args =>
             {
-                Logger.WriteLine(LogType.Normal, ConsoleColor.Green, $"Player \"{args.Player.Username}\" has connected.");
+                Logger.Log(LogType, ConsoleColor.Green, $"Player \"{args.Player.Username}\" has connected.");
             }, EventPriority.InternalFinal);
 
             Server.Events.Network.UserDisconnected.AddHandler(args =>
             {
                 Server.Players.Remove(args.Player);
                 Server.RemovePlayerFromLevels(args.Player);
-                Logger.WriteLine(LogType.Normal, ConsoleColor.Red, $"Player \"{args.Player.Username}\" has disconnected.");
+                Logger.Log(LogType, ConsoleColor.Red, $"Player \"{args.Player.Username}\" has disconnected.");
             }, EventPriority.InternalFinal);
         }
 
@@ -267,7 +278,7 @@ namespace Bricklayer.Core.Server.Components
             var result = Start(Server.IO.Config.Server.Port, Server.IO.Config.Server.MaxPlayers);
             if (!result)
             {
-                Log("Aborting startup.");
+                Logger.Fatal(LogType, "Aborting startup.");
                 Environment.Exit(0);
             }
 
@@ -302,21 +313,19 @@ namespace Bricklayer.Core.Server.Components
             {
                 NetServer.Start();
             }
-                // ReSharper disable once RedundantCatchClause
+            // ReSharper disable once RedundantCatchClause
             catch (SocketException ex)
             {
-                Logger.WriteLine(LogType.Error, ex.Message);
-                Server.IO.LogMessage(
-                    $"SERVER EXIT: The server has exited because of an error on {DateTime.Now.ToString("U")}");
+                Logger.Error(LogType, ex.ToString());
                 return false;
             }
-            Log("Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(),
+            Logger.Log(LogType, "Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(),
                 Config.MaximumConnections.ToString());
 
             // Start message handler
             MsgHandler = new MessageHandler(Server);
             MsgHandler.Start();
-            Log("Message handler started.");
+            Logger.Log(LogType, "Message handler started.");
 
             return true; // No error
         }

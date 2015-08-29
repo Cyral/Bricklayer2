@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Pyratron.Frameworks.LogConsole</name>
+    </assembly>
+    <members>
+        <member name="T:Pyratron.Frameworks.LogConsole.Logger">
+            <summary>
+            Provides console logging support.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.Logger.LogFormat">
+            <summary>
+            Defines the format messages should be logged in.
+            </summary>
+            <example>
+            The following variables can be used:
+            %timestamp
+            %level
+            %type
+            %messages
+            The following colors can be used:
+            @Hex for console colors. (Ex: 0F or 7A)
+            @XL for level color.
+            @XT for type color.
+            @XR to reset color.
+            Color list: https://www.pyratron.com/assets/consolehex.png
+            </example>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.Logger.LogFileFormat">
+            <summary>
+            Format for log file names.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.Logger.Cursor">
+            <summary>
+            Character to be displayed at the start of the command prompt.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.Logger.HistoryCount">
+            <summary>
+            Maximum lines of history to be stored that can be scrolled through with the arrow keys.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.Logger.CursorColor">
+            <summary>
+            Color of the console cursor.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.Logger.TimestampFormat">
+            <summary>
+            Defines the DateTime format messages are logged with.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.GetTimestamp">
+            <summary>
+            Gets the current time using the <c>TimestampFormat</c>
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Log(System.String,System.Object[])">
+            <summary>
+            Log an informational message. (Same as <c>Info</c>).
+            See https://www.pyratron.com/assets/consolehex.png for hex codes that can be used in the message.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Log(Pyratron.Frameworks.LogConsole.LogLevel,Pyratron.Frameworks.LogConsole.LogType,System.String,System.Object[])">
+            <summary>
+            Log a message with the specified level and type.
+            See https://www.pyratron.com/assets/consolehex.png for hex codes that can be used in the message.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Log(Pyratron.Frameworks.LogConsole.LogLevel,Pyratron.Frameworks.LogConsole.LogType,System.ConsoleColor,System.String,System.Object[])">
+            <summary>
+            Log a message with the specified level, type, and color.
+            See https://www.pyratron.com/assets/consolehex.png for hex codes that can be used in the message.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Log(Pyratron.Frameworks.LogConsole.LogLevel,System.String,System.Object[])">
+            <summary>
+            Log a message with the specified level.
+            See https://www.pyratron.com/assets/consolehex.png for hex codes that can be used in the message.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Log(Pyratron.Frameworks.LogConsole.LogType,System.String,System.Object[])">
+            <summary>
+            Log a message with the specified type.
+            See https://www.pyratron.com/assets/consolehex.png for hex codes that can be used in the message.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Log(Pyratron.Frameworks.LogConsole.LogType,System.ConsoleColor,System.String,System.Object[])">
+            <summary>
+            Log a message with the specified type and color.
+            See https://www.pyratron.com/assets/consolehex.png for hex codes that can be used in the message.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Log(Pyratron.Frameworks.LogConsole.LogLevel,System.ConsoleColor,System.String,System.Object[])">
+            <summary>
+            Log a message with the specified level and color.
+            See https://www.pyratron.com/assets/consolehex.png for hex codes that can be used in the message.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Log(System.ConsoleColor,System.String,System.Object[])">
+            <summary>
+            Log a message with the specified foreground color.
+            See https://www.pyratron.com/assets/consolehex.png for hex codes that can be used in the message.
+            </summary>
+        </member>
+        <member name="E:Pyratron.Frameworks.LogConsole.Logger.MessageLogged">
+            <summary>
+            When any message is logged.
+            </summary>
+        </member>
+        <member name="E:Pyratron.Frameworks.LogConsole.Logger.InputEntered">
+            <summary>
+            When the user inputs a console command.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.Wait">
+            <summary>
+            Enter a constant loop that checks for input and emulates console behavior.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.WriteCommandCursor">
+            <summary>
+            Writes the command cursor.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.LogToFile(System.String,System.String)">
+            <summary>
+            Logs a message to the log file for the day.
+            Each day a new log file is created.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.WriteBreak">
+            <summary>
+            Writes a line break/new line to the console.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.WriteCenteredText(System.String)">
+            <summary>
+            Helper method to write centered text.
+            </summary>
+        </member>
+        <member name="M:Pyratron.Frameworks.LogConsole.Logger.FixBuffer">
+            <summary>
+            Due to issues with the console implementation on mono, if the screen size changes, an error can occur.
+            (CursorTop being more than buffer height) To fix this, if the screen size changes, it will be cleared.
+            (Simply setting the CursorTop to 0 without clearing will result in text be written over old text).
+            </summary>
+        </member>
+        <member name="T:Pyratron.Frameworks.LogConsole.LogLevel">
+            <summary>
+            Various severity levels for logging.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.LogLevel.Name">
+            <summary>
+            Display name.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.LogLevel.FG">
+            <summary>
+            Foreground color of the name.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.LogLevel.BG">
+            <summary>
+            Background color of the name.
+            </summary>
+        </member>
+        <member name="T:Pyratron.Frameworks.LogConsole.LogType">
+            <summary>
+            A category for logging messages.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.LogType.None">
+            <summary>
+            A log type with no display name.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.LogType.Name">
+            <summary>
+            Display name.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.LogType.FG">
+            <summary>
+            Foreground color of the name.
+            </summary>
+        </member>
+        <member name="P:Pyratron.Frameworks.LogConsole.LogType.BG">
+            <summary>
+            Background color of the name.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -52,8 +52,8 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         public override async Task Init()
         {
-            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress),
-                Globals.Values.DefaultAuthPort); // Find the address of the auth server
+            AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Client.IO.Config.Client.AuthServerAddress),
+                Client.IO.Config.Client.AuthServerPort); // Find the address of the auth server
             TokenKeys = new Token();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
@@ -123,7 +123,7 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         public void LoginToAuth(string username, string password)
         {
-            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort,
+            SendUnconnected(Client.IO.Config.Client.AuthServerAddress, Client.IO.Config.Client.AuthServerPort,
                 new AuthLoginMessage(Constants.Version, username, password));
         }
 
@@ -136,7 +136,7 @@ namespace Bricklayer.Core.Client.Components
         {
             this.host = host;
             this.port = port;
-            SendUnconnected(Globals.Values.DefaultAuthAddress, Globals.Values.DefaultAuthPort,
+            SendUnconnected(Client.IO.Config.Client.AuthServerAddress, Client.IO.Config.Client.AuthServerPort,
                 new SessionMessage(TokenKeys.Username, TokenKeys.UUID, TokenKeys.PrivateKey, NetUtility.Resolve(host),
                     port));
         }

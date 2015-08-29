@@ -60,6 +60,9 @@
     <Reference Include="Pyratron.Frameworks.Commands.Parser">
       <HintPath>..\..\..\Libraries\Pyratron.Frameworks.Commands.Parser.dll</HintPath>
     </Reference>
+    <Reference Include="Pyratron.Frameworks.LogConsole">
+      <HintPath>..\..\..\Libraries\Pyratron.Frameworks.LogConsole.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -92,7 +95,6 @@
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="EventManager.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="Net\MessageHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

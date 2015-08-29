@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Pyratron.Frameworks.LogConsole;
 
 namespace Bricklayer.Core.Server.Components
 {
@@ -16,7 +17,7 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// The type of log message associated with this component.
         /// </summary>
-        protected virtual LogType LogType { get; private set; }
+        protected internal virtual LogType LogType { get; }
 
         /// <summary>
         /// The server object controlling this component.
@@ -36,40 +37,7 @@ namespace Bricklayer.Core.Server.Components
         #pragma warning restore 1998
         {
             Initialized = true;
-            Logger.WriteLine(LogType ?? LogType.Normal, "Intialized.");
-        }
-
-        /// <summary>
-        /// Logs a message using the component's log type.
-        /// </summary>
-        protected virtual void Log(string message)
-        {
-            Logger.WriteLine(LogType ?? LogType.Normal, message);
-        }
-
-        /// <summary>
-        /// Logs a message with parameters using string.Format.
-        /// </summary>
-        protected virtual void Log(string message, params object[] args)
-        {
-            Logger.WriteLine(LogType ?? LogType.Normal, string.Format(message, args));
-        }
-
-        /// <summary>
-        /// Logs a message with a color.
-        /// </summary>
-        protected virtual void Log(string message, ConsoleColor color)
-        {
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Logger.WriteLine(LogType ?? LogType.Normal, color, message);
-        }
-
-        /// <summary>
-        /// Logs a message with a color and parameters using string.Format.
-        /// </summary>
-        protected virtual void Log(string message, ConsoleColor color, params object[] args)
-        {
-            Logger.WriteLine(LogType ?? LogType.Normal, color, string.Format(message, args));
+            Logger.Log(LogType, "Intialized.");
         }
     }
 }

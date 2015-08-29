@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Data;
+using Pyratron.Frameworks.LogConsole;
 
 namespace Bricklayer.Core.Server.Components
 {
@@ -15,7 +16,7 @@ namespace Bricklayer.Core.Server.Components
     /// </summary>
     public class DatabaseComponent : ServerComponent
     {
-        protected override LogType LogType => LogType.Database;
+        protected internal override LogType LogType { get; } = new LogType("Database", ConsoleColor.Yellow);
         private string connectionString;
         private DbProviderFactory providerFactory;
 
@@ -203,14 +204,14 @@ namespace Bricklayer.Core.Server.Components
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
 
-            Log($"Using provider {Server.IO.Config.Database.Provider}");
+            Logger.Log(LogType, $"Using provider {Server.IO.Config.Database.Provider}");
 
             // Create provider from provider string.
             connectionString = Server.IO.Config.Database.Connection;
             providerFactory = DbProviderFactories.GetFactory(Server.IO.Config.Database.Provider);
 
             if (!(await TestConnection(connectionString)))
-                Log(
+                Logger.Fatal(LogType, 
                     "Could not connect to database. Database services will be non functional.");
 
             // Create initial tables if they don't exist
@@ -325,7 +326,7 @@ namespace Bricklayer.Core.Server.Components
                 catch (Exception ex) // Catch any errors connecting to database
                 {
                     if (ex is DbException || ex is SocketException)
-                        Logger.WriteLine(LogType.Error, ex.ToString());
+                        Logger.Error(LogType, ex.ToString());
 #if DEBUG
                     throw;
 #endif
@@ -367,7 +368,7 @@ namespace Bricklayer.Core.Server.Components
                 catch (Exception ex) // Catch any errors connecting to database
                 {
                     if (ex is DbException || ex is SocketException)
-                        Logger.WriteLine(LogType.Error, ex.ToString());
+                        Logger.Error(LogType, ex.ToString());
 #if DEBUG
                     throw;
 #endif
@@ -395,16 +396,16 @@ namespace Bricklayer.Core.Server.Components
                         if (con != null)
                         {
                             con.ConnectionString = conn;
-                            Log("Testing connection to database \"{0}\"", con.Database);
+                            Logger.Debug(LogType, "Testing connection to database \"{0}\"", con.Database);
                             con.Open();
                         }
                     }
-                    Log("Success", ConsoleColor.Green);
+                    Logger.Debug(LogType, "Success", ConsoleColor.Green);
                     return true;
                 }
                 catch (Exception)
                 {
-                    Log("Failure", ConsoleColor.Red);
+                    Logger.Debug(LogType, "Failure", ConsoleColor.Red);
                     return false;
                 }
             });
