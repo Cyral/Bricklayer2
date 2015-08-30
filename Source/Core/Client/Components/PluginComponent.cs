@@ -365,5 +365,13 @@ namespace Bricklayer.Core.Client.Components
             {
             }
         }
+
+        internal void Unload()
+        {
+            foreach (var plugin in Plugins)
+            {
+                plugin.Unload();
+            }
+        }
     }
 }

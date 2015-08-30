@@ -80,6 +80,8 @@ namespace Bricklayer.Core.Server.Components
             if (ServerDirectory != null)
             {
                 LogDirectory = Path.Combine(ServerDirectory, "logs");
+                if (!Directory.Exists(LogDirectory))
+                    Directory.CreateDirectory(LogDirectory);
                 LevelsDirectory = Path.Combine(ServerDirectory, "levels");
                 PluginsDirectory = Path.Combine(ServerDirectory, "plugins");
                 ConfigFile = Path.Combine(ServerDirectory, "config.json");
@@ -98,8 +100,6 @@ namespace Bricklayer.Core.Server.Components
             };
 
             // Create directories that don't exist.
-            if (!Directory.Exists(LogDirectory))
-                Directory.CreateDirectory(LogDirectory);
             if (!Directory.Exists(LevelsDirectory))
                 Directory.CreateDirectory(LevelsDirectory);
             if (!Directory.Exists(PluginsDirectory))

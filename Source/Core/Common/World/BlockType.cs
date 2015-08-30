@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,6 +12,11 @@ namespace Bricklayer.Core.Common.World
     /// </summary>
     public class BlockType
     {
+        /// <summary>
+        /// The color that foreground blocks will be tinted when drawn on the background.
+        /// </summary>
+        public static readonly Color BackgroundTint = Color.Gray;
+
         private Image image;
 
         /// <summary>
@@ -24,7 +30,7 @@ namespace Bricklayer.Core.Common.World
         public BlockCollision Collision { get; set; }
 
         /// <summary>
-        /// The average color of the tile to appear on the minimap.
+        /// The average color of the tile. (Useful for minimap plugins)
         /// </summary>
         public Color Color { get; set; }
 
@@ -54,8 +60,18 @@ namespace Bricklayer.Core.Common.World
             set
             {
                 image = value;
-                SourceRect = new Rectangle(image.SourceRect.X, image.SourceRect.Y + (Tile.FullWidth - Tile.Width), Tile.Width, Tile.Height);
-                FullSourceRect = new Rectangle(image.SourceRect.X, image.SourceRect.Y, Tile.FullWidth, Tile.FullHeight);
+                if (Layer == Layer.Background)
+                {
+                    FullSourceRect = SourceRect = new Rectangle(image.SourceRect.X, image.SourceRect.Y, Tile.Width,
+                        Tile.Height);
+                }
+                else
+                {
+                    SourceRect = new Rectangle(image.SourceRect.X, image.SourceRect.Y + (Tile.FullWidth - Tile.Width),
+                        Tile.Width, Tile.Height);
+                    FullSourceRect = new Rectangle(image.SourceRect.X, image.SourceRect.Y, Tile.FullWidth,
+                        Tile.FullHeight);
+                }
             }
         }
 
@@ -126,7 +142,7 @@ namespace Bricklayer.Core.Common.World
                 {
                     // If a foreground block is being drawn on the backgrount, make it darker automatically.
                     if (tile.Type.Layer.HasFlag(Layer.Foreground))
-                        batch.Draw(Image, new Vector2((x*Tile.Width) + (Tile.FullWidth - Tile.Width), y*Tile.Height), SourceRect, Color.Gray);
+                        batch.Draw(Image, new Vector2((x*Tile.Width) + (Tile.FullWidth - Tile.Width), y*Tile.Height), SourceRect, BackgroundTint);
                     else
                         batch.Draw(Image, new Vector2((x*Tile.Width) + (Tile.FullHeight - Tile.Height), y*Tile.Height), sourceRectangle: SourceRect);
                 }

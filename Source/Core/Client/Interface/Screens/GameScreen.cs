@@ -33,7 +33,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
         }
 
         public override GameState State => GameState.Game;
-        private Level Level => Client.Level;
+
+        /// <summary>
+        /// The current level.
+        /// </summary>
+        public Level Level => Client.Level;
 
         /// <summary>
         /// Stats label showing FPS.

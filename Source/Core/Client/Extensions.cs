@@ -80,6 +80,35 @@ namespace Bricklayer.Core.Client
         {
             spriteBatch.Draw(pixel, targetRectangle, Color.White);
         }
+
+        /// <summary>
+        /// Returns the average color of a texture. (Or part of it)
+        /// </summary>
+        public static Color AverageColor(this Texture2D texture, Rectangle source)
+        {
+            var data = new Color[texture.Width * texture.Height];
+            int r = 0, g = 0, b = 0, amount = 0;
+            texture.GetData(data);
+            for (var c = 0; c < data.Length; c++) //Foreach colored pixel; Get RGB values
+            {
+                var x = c % texture.Width;
+                var y = (c - x) / texture.Width;
+
+                if (source.Contains(new Point(x, y)))
+                {
+                    var color = data[c];
+                    if (color.A > 0)
+                    {
+                        r += color.R;
+                        g += color.G;
+                        b += color.B;
+                        amount++;
+                    }
+                }
+            }
+
+            return amount > 0 ? new Color(r / amount, g / amount, b / amount) : Color.Transparent;
+        }
     }
 
     /// <summary>

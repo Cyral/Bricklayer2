@@ -156,6 +156,7 @@ namespace Bricklayer.Core.Common
                 }
                 var json = JsonConvert.SerializeObject(config, SerializerSettings);
                 File.WriteAllText(path, json);
+                Console.WriteLine("Wrote: " + json  + " to: " + path);
             });
         }
     }

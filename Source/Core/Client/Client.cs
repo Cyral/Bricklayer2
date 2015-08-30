@@ -2,7 +2,6 @@
 using System.Linq;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.Interface;
-using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -96,7 +95,7 @@ namespace Bricklayer.Core.Client
             IsFixedTimeStep = false;
             Graphics.SynchronizeWithVerticalRetrace = false;
 
-           AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
 
             // Create the manager for MonoForce UI
             UI = new Manager(this, "Bricklayer")
@@ -106,11 +105,6 @@ namespace Bricklayer.Core.Client
                 LogUnhandledExceptions = false,
                 ShowSoftwareCursor = true
             };
-        }
-
-        private void LogUnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            // TODO: Save to a file (not important until later)
         }
 
         /// <summary>
@@ -123,13 +117,14 @@ namespace Bricklayer.Core.Client
             UI.BeginDraw(gameTime);
             GraphicsDevice.Clear(Color.Black);
 
-            if (State == GameState.Game)
+            if (State == GameState.Game && Level != null)
             {
                 GraphicsDevice.SetRenderTarget(backgroundTarget);
                 GraphicsDevice.Clear(Color.Transparent);
 
                 // Draw level background.
-                SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null,
+                    null, Level.Camera.GetViewMatrix(Vector2.One));
                 // Draw plugins before anything is drawn.
                 foreach (var plugin in Plugins.Plugins.Where(x => x.IsEnabled))
                     plugin.Draw(DrawPass.Before, SpriteBatch, gameTime);
@@ -143,7 +138,8 @@ namespace Bricklayer.Core.Client
                 // Draw level foreground.
                 GraphicsDevice.SetRenderTarget(foregroundTarget);
                 GraphicsDevice.Clear(Color.Transparent);
-                SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null,
+                    null, Level.Camera.GetViewMatrix(Vector2.One));
                 Level?.DrawForeground(SpriteBatch, gameTime);
 
                 // Draw plugins after the foreground layer has been drawn.
@@ -156,8 +152,8 @@ namespace Bricklayer.Core.Client
                 GraphicsDevice.SetRenderTarget(lightingTarget);
                 GraphicsDevice.Clear(Color.Transparent);
 
-
-                SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null,
+                    null, Level.Camera.GetViewMatrix(Vector2.One));
                 Content.Effects["blur"].CurrentTechnique.Passes[0].Apply();
                 Content.Effects["blur"].Parameters["Resolution"]?.SetValue(
                     new Vector2(GraphicsDevice.PresentationParameters.BackBufferWidth,
@@ -166,7 +162,6 @@ namespace Bricklayer.Core.Client
                 SpriteBatch.Draw(foregroundTarget,
                     new Rectangle(0, 2, GraphicsDevice.PresentationParameters.BackBufferWidth,
                         GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
-                //SpriteBatch.Draw(Content["gui.background"], new Rectangle(0, 0, GraphicsDevice.PresentationParameters.BackBufferWidth, GraphicsDevice.PresentationParameters.BackBufferHeight), Color.White);
                 SpriteBatch.End();
 
                 GraphicsDevice.SetRenderTarget(null);
@@ -264,10 +259,7 @@ namespace Bricklayer.Core.Client
             Window.SendToBack();
 
             // Set block textures and create texture atlas when content is loaded.
-            Events.Game.ContentLoaded.AddHandler((args =>
-            {
-                SetBlockTexturesAndAtlas();
-            }));
+            Events.Game.ContentLoaded.AddHandler((args => { SetBlockTexturesAndAtlas(); }));
 
             // Unlike the server, the clientside plugins must be loaded last.
             await Plugins.Init();
@@ -283,26 +275,6 @@ namespace Bricklayer.Core.Client
                 }
             }));
             base.LoadContent();
-        }
-
-        /// <summary>
-        /// Whenever new blocks are added, call this method to set their texture and create a texture atlas from the blocks.
-        /// </summary>
-        private void SetBlockTexturesAndAtlas()
-        {
-            var items = BlockType.Blocks.Where(x => x.IsRenderable).ToArray();
-            // Create a texture atlas for blocks.
-            if (items.Length > 1)
-            {
-                Content.Atlases["blocks"] = TextureAtlas.CreateAtlas(GraphicsDevice,
-                    Content.Textures.Where(x => x.Key.StartsWith("blocks")).Select(x => x.Value).ToList());
-            }
-
-            foreach (var block in items)
-            {
-                var str = "blocks\\" + (block.Pack != null ? block.Pack + "\\" : string.Empty) + block.Name;
-                block.Image = Content[str];
-            }
         }
 
         /// <summary>
@@ -327,7 +299,7 @@ namespace Bricklayer.Core.Client
                 plugin.Update(gameTime);
 
             if (State == GameState.Game)
-            { 
+            {
                 // Update level.
                 Level?.Update(gameTime);
             }
@@ -348,7 +320,38 @@ namespace Bricklayer.Core.Client
         protected override void OnExiting(object sender, EventArgs args)
         {
             Network.Disconnect("Exited game.");
+            Plugins.Unload();
             base.OnExiting(sender, args);
+        }
+
+        private void LogUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            // TODO: Save to a file (not important until later)
+        }
+
+        /// <summary>
+        /// Whenever new blocks are added, call this method to set their texture and create a texture atlas from the blocks.
+        /// </summary>
+        private void SetBlockTexturesAndAtlas()
+        {
+            var items = BlockType.Blocks.Where(x => x.IsRenderable).ToArray();
+            // Create a texture atlas for blocks.
+            if (items.Length > 1)
+            {
+                Content.Atlases["blocks"] = TextureAtlas.CreateAtlas(GraphicsDevice,
+                    Content.Textures.Where(x => x.Key.StartsWith("blocks")).Select(x => x.Value).ToList());
+            }
+
+            foreach (var block in items)
+            {
+                var str = "blocks\\" + (block.Pack != null ? block.Pack + "\\" : string.Empty) + block.Name;
+                block.Image = Content[str];
+
+                //Set the block's average color based on the average color of the tile.
+                block.Color = block.Image.Texture.AverageColor(block.SourceRect);
+            }
+            foreach (var block in BlockType.Blocks.Where(x => !x.IsRenderable))
+                block.Color = Color.Black;
         }
     }
 }

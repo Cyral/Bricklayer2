@@ -151,7 +151,7 @@ namespace Bricklayer.Core.Common.World
         }
 
         /// <summary>
-        /// Determines if a grid position is in the bounds of the map array.
+        /// Determines if a grid position is in the bounds of the map array. (The map, but not the border)
         /// </summary>
         public bool InBounds(int x, int y, int z = 1)
         {
@@ -159,7 +159,7 @@ namespace Bricklayer.Core.Common.World
         }
 
         /// <summary>
-        /// Determines if a grid position is in the bounds of the drawing area (The map, but not the border)
+        /// Determines if a grid position is in the bounds of the drawing area.
         /// </summary>
         public bool InDrawBounds(int x, int y)
         {
