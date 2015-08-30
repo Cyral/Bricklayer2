@@ -33,7 +33,11 @@ namespace Bricklayer.Core.Server.Components
         /// <summary>
         /// The path to the logging directory, where a file is created each day for logging.
         /// </summary>
-        public string LogDirectory { get; private set; }
+        public string LogDirectory
+        {
+            get { return logDirectory; }
+            private set { logDirectory = Logger.LogDirectory = value; }
+        }
 
         /// <summary>
         /// The path to the plugins directory, which contains the plugin .dlls
@@ -67,7 +71,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         private readonly string pluginsFile;
 
-        private StringBuilder sb;
+        private string logDirectory;
 
         public IOComponent(Server server) : base(server)
         {
@@ -100,8 +104,6 @@ namespace Bricklayer.Core.Server.Components
                 Directory.CreateDirectory(LevelsDirectory);
             if (!Directory.Exists(PluginsDirectory))
                 Directory.CreateDirectory(PluginsDirectory);
-
-            sb = new StringBuilder();
 
             // Load configuration.
             await LoadServerConfig();

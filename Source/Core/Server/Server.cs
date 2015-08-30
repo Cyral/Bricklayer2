@@ -87,7 +87,7 @@ namespace Bricklayer.Core.Server
 
             Logger.InputEntered += input => Commands.Parse(input);
             Logger.MessageLogged +=
-                (message, level, type, time, fullmessage) => Logger.LogToFile(IO.LogDirectory, fullmessage);
+                (message, level, type, time, fullmessage) => Logger.LogToFile(fullmessage);
             Logger.Log($"Server is starting now, on {DateTime.Now.ToString("U", new CultureInfo("en-US"))}");
 
 
@@ -356,6 +356,7 @@ namespace Bricklayer.Core.Server
             Net.Shutdown("The server has shut down. This may be a quick restart, or regular maintenance.");
             await SaveAll();
             Logger.Log($"Server Exit: The server has gracefully exited on {DateTime.Now.ToString("U")}\n");
+            Logger.FlushLog();
             Environment.Exit(0);
         }
 

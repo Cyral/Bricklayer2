@@ -1,4 +1,5 @@
 ﻿using System;
+using Pyratron.Frameworks.LogConsole;
 
 namespace Bricklayer.Core.Server
 {
@@ -13,6 +14,7 @@ namespace Bricklayer.Core.Server
 
             // Create an instance of the server and run it.
             new Server().Start().Wait();
+            Logger.FlushLog();
         }
     }
 }
