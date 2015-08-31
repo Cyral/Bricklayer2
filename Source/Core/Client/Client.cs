@@ -152,8 +152,7 @@ namespace Bricklayer.Core.Client
                 GraphicsDevice.SetRenderTarget(lightingTarget);
                 GraphicsDevice.Clear(Color.Transparent);
 
-                SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, null, null,
-                    null, Level.Camera.GetViewMatrix(Vector2.One));
+                SpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
                 Content.Effects["blur"].CurrentTechnique.Passes[0].Apply();
                 Content.Effects["blur"].Parameters["Resolution"]?.SetValue(
                     new Vector2(GraphicsDevice.PresentationParameters.BackBufferWidth,

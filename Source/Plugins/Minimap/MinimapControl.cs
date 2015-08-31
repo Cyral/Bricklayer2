@@ -46,6 +46,7 @@ namespace Bricklayer.Plugins.Minimap
         /// </summary>
         public void ChangePixel(int x, int y, Color color)
         {
+            if (!level.InDrawBounds(x, y)) return;
             if (texture == null)
                 texture = new Texture2D(Manager.GraphicsDevice, level.Width, level.Height);
 

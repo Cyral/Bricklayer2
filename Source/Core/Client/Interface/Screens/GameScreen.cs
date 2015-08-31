@@ -140,6 +140,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             foreach (var player in Level.Players)
                 LstPlayers.Items.Add(new PlayerListDataControl(player, Manager, LstPlayers));
 
+            Client.Input.Level = Level;
 
             // Listen for later player joins.
             Client.Events.Network.Game.PlayerJoinReceived.AddHandler(
@@ -226,8 +227,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 LstChats.Passive = false;
                 LstChats.Items.ForEach(x => ((ChatDataControl) x).Show());
             }
+            // Close or send chat.
             else if ((Client.Input.IsKeyPressed(Keys.Enter) && TxtChat.Visible) || Client.Input.IsKeyPressed(Keys.Escape))
-                // Close or send chat.
             {
                 // If there's characters in chatbox, send chat.
                 // Cancel out of chat if player clicks escape.
@@ -243,7 +244,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 LstChats.Passive = true;
                 LstChats.Items.ForEach(x => ((ChatDataControl) x).Hide());
             }
-            else if (Client.Input.IsKeyPressed(Keys.E) && !IsChatOpen()) // Open or close inventory.
+            // Open or close inventory.
+            else if (Client.Input.IsKeyPressed(Keys.E) && !IsChatOpen())
             {
                 if (!Inventory.SizeChanging)
                 {
@@ -251,6 +253,10 @@ namespace Bricklayer.Core.Client.Interface.Screens
                     Inventory.SizeChanging = true;
                 }
             }
+            // Move camera
+            var direction = Client.Input.GetDirection();
+            var speed = 2f;
+            Level?.Camera.Move(direction * speed);
             LstPlayers.Visible = Client.Input.IsKeyDown(Keys.Tab);
         }
 

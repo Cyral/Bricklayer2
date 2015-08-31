@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Bricklayer.Core.Common;
+using Microsoft.Xna.Framework;
 using static Microsoft.Xna.Framework.Matrix;
 using static Microsoft.Xna.Framework.Vector2;
 
@@ -89,11 +90,11 @@ namespace Bricklayer.Core.Client.World
         /// </summary>
         public Matrix GetViewMatrix(Vector2 parallax)
         {
-            return CreateTranslation(new Vector3(-Position * parallax, 0.0f)) *
-                   CreateTranslation(new Vector3(-Origin, 0.0f)) *
+            return CreateTranslation(new Vector3((-Position * parallax).Round(), 0.0f)) *
+                   CreateTranslation(new Vector3(-Origin.Round(), 0.0f)) *
                    CreateRotationZ(Rotation) *
                    CreateScale(Zoom, Zoom, 1) *
-                   CreateTranslation(new Vector3(Origin, 0.0f));
+                   CreateTranslation(new Vector3(Origin.Round(), 0.0f));
         }
 
         /// <summary>

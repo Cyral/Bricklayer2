@@ -4,6 +4,7 @@ using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client
 {
@@ -25,16 +26,9 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// Returns the position of the mouse, in (foreground) world/grid coordinates.
         /// </summary>
-        public Point MouseGridPosition
-        {
-            get
-            {
-                var pos = CurrentMouseState.GetPositionPoint();
-                return new Point((int) Math.Floor(pos.X/(float) Tile.Width),
-                    (int) Math.Floor((pos.Y - (Tile.FullHeight - Tile.Height) /* Account for 4px top side */)/
-                                     (float) Tile.Height));
-            }
-        }
+        public Point MouseGridPosition => GetMouseGridPositon(Layer.Foreground);
+
+        internal Level Level { get; set; }
 
         /// <summary>
         /// Creats a new InputHandler.
@@ -45,19 +39,19 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Returns the position of the mouse in world/grid coordinates. This differs between each layer as the block perspective
+        /// Returns the position of the mouse in world/grid coordinates, transformed by the level camera. This differs between each layer as the block perspective
         /// causes the foreground and background layers to be slightly off.
         /// </summary>
         public Point GetMouseGridPositon(Layer layer)
         {
-            var pos = CurrentMouseState.GetPositionPoint();
+            var pos = Level?.Camera?.ScreenToWorld(CurrentMouseState.GetPositionVector()).ToPoint() ?? CurrentMouseState.GetPositionPoint();
             if (layer.HasFlag(Layer.Foreground))
-                return new Point((int) Math.Floor(pos.X/(float) Tile.Width),
-                    (int) Math.Floor((pos.Y - (Tile.FullHeight - Tile.Height))/
-                                     (float) Tile.Height));
-            return new Point((int) Math.Floor((pos.X - (Tile.FullWidth - Tile.Width)) / (float)Tile.Width),
-                (int) Math.Floor(pos.Y/
-                                 (float) Tile.Height));
+            {
+                return new Point((int) Math.Floor(pos.X / (float) Tile.Width),
+                    (int) Math.Floor((pos.Y - (Tile.FullHeight - Tile.Height)) / (float) Tile.Height));
+            }
+            return new Point((int) Math.Floor((pos.X - (Tile.FullWidth - Tile.Width)) / (float) Tile.Width),
+                    (int) Math.Floor(pos.Y / (float) Tile.Height));
         }
 
         /// <summary>
@@ -236,6 +230,26 @@ namespace Bricklayer.Core.Client
 
             // D0 is 9, D1 is 0, D2 is 1, and so on...
             return pressedDigitKeys[0] == Keys.D0 ? 0 : ((int) pressedDigitKeys[0]) - 48;
+        }
+
+        /// <summary>
+        /// Returns a direction from WASD or arrow keys.
+        /// </summary>
+        public Vector2 GetDirection()
+        {
+            int x = 0, y = 0;
+            if (IsKeyDown(Keys.A) || IsKeyDown(Keys.Left))
+                x -= 1;
+            if (IsKeyDown(Keys.D) || IsKeyDown(Keys.Right))
+                x += 1;
+            if (IsKeyDown(Keys.W) || IsKeyDown(Keys.Up))
+                y -= 1;
+            if (IsKeyDown(Keys.S) || IsKeyDown(Keys.Down))
+                y += 1;
+            var vector = new Vector2(x, y);
+            if (vector == Vector2.Zero) return Vector2.Zero;
+            vector.Normalize();
+            return vector;
         }
     }
 }
