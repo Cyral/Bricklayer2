@@ -6,6 +6,9 @@ using Microsoft.Xna.Framework;
 
 namespace Bricklayer.Plugins.Minimap
 {
+    /// <summary>
+    /// Level minimap plugin.
+    /// </summary>
     public class Minimap : ClientPlugin
     {
         private static readonly string configFile = "config.json";
@@ -27,7 +30,7 @@ namespace Bricklayer.Plugins.Minimap
                 var screen = args.NewScreen as GameScreen;
                 if (screen != null)
                 {
-                    minimap = new MinimapControl(Client.UI, screen.Level);
+                    minimap = new MinimapControl(Client.UI, screen.Level, config.RegionAlpha);
                     minimap.Init();
                     minimap.Alpha = config.Alpha * 255;
                     minimap.Left = config.X;

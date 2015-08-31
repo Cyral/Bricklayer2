@@ -1,24 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bricklayer.Core.Client;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.World;
 using Bricklayer.Plugins.DefaultBlocks.Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoForce.Controls;
+using MonoGame.Utilities;
 using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Plugins.Minimap
 {
+    /// <summary>
+    /// A control that displays the minimap texture.
+    /// </summary>
     public class MinimapControl : Control
     {
         private readonly Level level;
         private readonly Queue<Tuple<int, int, Color>> pixels = new Queue<Tuple<int, int, Color>>();
         private Texture2D texture;
+        private readonly float regionAlpha;
 
-        public MinimapControl(Manager manager, Level level) : base(manager)
+        public MinimapControl(Manager manager, Level level, float regionAlpha) : base(manager)
         {
             this.level = level;
+            this.regionAlpha = regionAlpha;
             Resizable = true;
             Passive = false;
             Movable = true;
@@ -37,7 +44,14 @@ namespace Bricklayer.Plugins.Minimap
                     var pixel = pixels.Dequeue();
                     SetPixel(pixel.Item1, pixel.Item2, pixel.Item3);
                 }
+                // Draw minimap texture.
                 renderer.Draw(texture, 0, 0, Color.White * (Alpha / 255f));
+
+                // Draw camera region.
+                // TODO: Take into account rotation, zoom, and origin of camera if it is ever used.
+                var bounds = level.Camera.TileBounds;
+                bounds = new Rectangle(rect.X + bounds.X, rect.Y + bounds.Y, bounds.Width, bounds.Height);
+                renderer.SpriteBatch.DrawRectangle(bounds, Color.White * regionAlpha);
             }
         }
 

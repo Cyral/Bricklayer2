@@ -13,7 +13,7 @@ namespace Bricklayer.Core.Client
     /// <summary>
     /// Client specific extension methods.
     /// </summary>
-    internal static class Extensions
+    public static class Extensions
     {
         private static readonly Random random;
         private static Texture2D pixel;

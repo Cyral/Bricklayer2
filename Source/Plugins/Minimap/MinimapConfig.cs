@@ -32,6 +32,11 @@ namespace Bricklayer.Plugins.Minimap
         /// </summary>
         public float Alpha;
 
+        /// <summary>
+        /// Transparency of the camera region. (0 to 1)
+        /// </summary>
+        public float RegionAlpha;
+
         public IConfig GenerateDefaultConfig()
         {
             return new MinimapConfig
@@ -41,6 +46,7 @@ namespace Bricklayer.Plugins.Minimap
                 X = 8,
                 Y = 8,
                 Alpha = .95f,
+                RegionAlpha = .05f,
             };
         }
     }

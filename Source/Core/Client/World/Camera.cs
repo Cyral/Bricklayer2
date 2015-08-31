@@ -1,4 +1,6 @@
-﻿using Bricklayer.Core.Common;
+﻿using System;
+using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using static Microsoft.Xna.Framework.Matrix;
 using static Microsoft.Xna.Framework.Vector2;
@@ -63,6 +65,32 @@ namespace Bricklayer.Core.Client.World
         public float Right => Position.X + size.X;
 
         /// <summary>
+        /// The width of the camera, determined from right - left.
+        /// </summary>
+        public float Width => Right - Left;
+
+        /// <summary>
+        /// The height of the camera, determined from bottom - top.
+        /// </summary>
+        public float Height => Bottom - Top;
+
+        /// <summary>
+        /// The rectangular bounds of the camera, determined by the top, left, width, and height.
+        /// </summary>
+        public Rectangle Bounds
+            => new Rectangle((int) Math.Round(Left), (int) Math.Round(Top), (int) Math.Round(Width),
+                (int) Math.Round(Height));
+
+        /// <summary>
+        /// The rectangular bounds of the camera, in tile coordinates (divided by tile width and height).
+        /// </summary>
+        public Rectangle TileBounds
+            => new Rectangle((int) Math.Round(Bounds.Left / (float) Tile.Width),
+                (int) Math.Round(Bounds.Top / (float) Tile.Height),
+                (int) Math.Round(Bounds.Width / (float) Tile.Width),
+                (int) Math.Round(Bounds.Height / (float) Tile.Height));
+
+        /// <summary>
         /// The maximum position the camera can travel to (Using the bottom right position).
         /// </summary>
         public Vector2 MaxBounds { get; set; }
@@ -72,8 +100,9 @@ namespace Bricklayer.Core.Client.World
         /// </summary>
         public Vector2 MinBounds { get; set; }
 
-        private Vector2 size;
         private Vector2 position;
+
+        private Vector2 size;
 
         /// <summary>
         /// Creates a new camera with the specified size.
