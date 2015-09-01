@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Threading;
 using Bricklayer.Core.Client;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace Bricklayer.Plugins.Minimap
 {
@@ -35,23 +37,30 @@ namespace Bricklayer.Plugins.Minimap
                     minimap.Alpha = config.Alpha * 255;
                     minimap.Left = config.X;
                     minimap.Top = config.Y;
+                    minimap.Visible = false;
                     minimap.Width = Math.Min(config.Width, screen.Level.Width);
                     minimap.Height = Math.Min(config.Height, screen.Level.Height);
                     screen.AddControl(minimap);
+                    minimap.StayOnBack = true;
 
-                    // Set the initial color data.
-                    var colors = new Color[screen.Level.Height * screen.Level.Width];
-                    for (var y = 0; y < screen.Level.Height; y++)
+                    // Use thread as the initial color data can take a while to fill for large maps.
+                    new Thread(() =>
                     {
-                        for (var x = 0; x < screen.Level.Width; x++)
+                        // Set the initial color data.
+                        var colors = new Color[screen.Level.Height * screen.Level.Width];
+                        for (var y = 0; y < screen.Level.Height; y++)
                         {
-                            var foreground = screen.Level.Tiles[x, y, 1];
-                            var background = screen.Level.Tiles[x, y, 0];
+                            for (var x = 0; x < screen.Level.Width; x++)
+                            {
+                                var foreground = screen.Level.Tiles[x, y, 1];
+                                var background = screen.Level.Tiles[x, y, 0];
 
-                            colors[x + y * screen.Level.Width] = minimap.GetColor(foreground, background);
+                                colors[x + y * screen.Level.Width] = minimap.GetColor(foreground, background);
+                            }
                         }
-                    }
-                    minimap?.SetData(colors);
+                        minimap?.SetData(colors);
+                        minimap.Visible = true;
+                    }).Start();
                 }
             });
 
@@ -63,6 +72,16 @@ namespace Bricklayer.Plugins.Minimap
                         minimap.GetColor(args.Level.Tiles[args.X, args.Y],
                             args.Level.Tiles[args.X, args.Y, Layer.Background]));
                 });
+        }
+
+        public override void Update(GameTime delta)
+        {
+            if (Client.Input.IsKeyPressed(Keys.M))
+            {
+                minimap.Visible = !minimap.Visible;
+                minimap.SendToBack();
+            }
+            base.Update(delta);
         }
 
         public override async void Unload()

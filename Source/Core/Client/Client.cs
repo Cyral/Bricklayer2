@@ -92,12 +92,25 @@ namespace Bricklayer.Core.Client
         {
             Events = new EventManager();
             Graphics = new GraphicsDeviceManager(this);
+            // Un-cap FPS.
             IsFixedTimeStep = false;
             Graphics.SynchronizeWithVerticalRetrace = false;
 
             AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
 
-            // Create the manager for MonoForce UI
+            // Set initial size.
+            Graphics.PreferredBackBufferWidth = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width * .9);
+            Graphics.PreferredBackBufferHeight =
+                (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * .8);
+            Graphics.ApplyChanges();
+            base.Window.Position =
+                new Point(
+                    (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width - Graphics.PreferredBackBufferWidth) /
+                    2,
+                    (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - Graphics.PreferredBackBufferHeight) /
+                    2);
+
+            // Create the manager for MonoForce UI.
             UI = new Manager(this, "Bricklayer")
             {
                 TargetFrames = 10000,
@@ -194,6 +207,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         protected override void Initialize()
         {
+         
             base.Initialize();
 
             SpriteBatch = new SpriteBatch(GraphicsDevice);
@@ -209,34 +223,29 @@ namespace Bricklayer.Core.Client
         {
             // Initialize components.
             IO = new IOComponent(this);
-            Content = new ContentComponent(this);
-            Plugins = new PluginComponent(this);
-            Network = new NetworkManager(this);
 
             await IO.Init();
-            await Network.Init();
 
             // Set resolution.
-            if (IO.Config.Client.Resolution.X == 0 && IO.Config.Client.Resolution.Y == 0)
-            {
-                Graphics.PreferredBackBufferWidth = (int) (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width*.9);
-                Graphics.PreferredBackBufferHeight =
-                    (int) (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height*.8);
-                Graphics.ApplyChanges();
-                base.Window.Position =
-                    new Point(
-                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width - Graphics.PreferredBackBufferWidth)/
-                        2,
-                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - Graphics.PreferredBackBufferHeight)/
-                        2);
-            }
-            else
+            if (IO.Config.Client.Resolution.X != 0 && IO.Config.Client.Resolution.Y != 0)
             {
                 Graphics.PreferredBackBufferWidth = IO.Config.Client.Resolution.X;
                 Graphics.PreferredBackBufferHeight = IO.Config.Client.Resolution.Y;
                 Graphics.ApplyChanges();
+                base.Window.Position =
+                    new Point(
+                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width - Graphics.PreferredBackBufferWidth) /
+                        2,
+                        (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - Graphics.PreferredBackBufferHeight) /
+                        2);
             }
 
+
+            Content = new ContentComponent(this);
+            Plugins = new PluginComponent(this);
+            Network = new NetworkManager(this);
+
+            await Network.Init();
             await Content.Init();
 
             // Initialize MonoForce after loading skins.

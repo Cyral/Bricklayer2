@@ -16,7 +16,7 @@ namespace Bricklayer.Core.Client.World
         /// <summary>
         /// The main camera to follow the player.
         /// </summary>
-        public Camera Camera { get; private set; }
+        public Camera Camera { get; }
 
         /// <summary>
         /// The game client.
@@ -45,41 +45,20 @@ namespace Bricklayer.Core.Client.World
             Spawn = level.Spawn;
             Client = client;
 
-            Camera =
-                new Camera(new Vector2(Client.GraphicsDevice.Viewport.Width, Client.GraphicsDevice.Viewport.Height - 24))
-                {
-                    MinBounds =
-                        new Vector2(-Client.GraphicsDevice.Viewport.Width, -Client.GraphicsDevice.Viewport.Height),
-                    MaxBounds =
-                        new Vector2((Width*Tile.Width) + Client.GraphicsDevice.Viewport.Width,
-                            (Height*Tile.Height) + Client.GraphicsDevice.Viewport.Height)
-                };
+            Camera = new Camera(new Vector2(Client.UI.ScreenWidth, Client.UI.ScreenHeight - 24))
+            {
+                MinBounds =
+                    new Vector2(-Client.UI.ScreenWidth, -Client.UI.ScreenHeight),
+                MaxBounds =
+                    new Vector2((Width * Tile.Width) + Client.UI.ScreenWidth,
+                        (Height * Tile.Height) + Client.UI.ScreenHeight)
+            };
 
             Tiles.BlockPlaced = BlockPlaced;
-        }
-
-        /// <summary>
-        /// Action to be run when a tile is changed.
-        /// This is called by the tilemap array indexer.
-        /// </summary>
-        private void BlockPlaced(int x, int y, int z, Tile newTile, Tile oldTile)
-        {
-            // Send message to server.
-            Client.Network.Send(new BlockPlaceMessage(x, y, z, newTile));
-
-            //Fire event so plugins are aware of the block placement.
-            Client.Events.Game.Level.BlockPlaced.Invoke(
-                new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile, oldTile));
         }
 
         public void Update(GameTime delta)
         {
-        }
-
-        internal override void DecodeTiles(BinaryReader reader)
-        {
-            base.DecodeTiles(reader);
-            Tiles.BlockPlaced = BlockPlaced;
         }
 
         /// <summary>
@@ -88,9 +67,9 @@ namespace Bricklayer.Core.Client.World
         public void DrawBackground(SpriteBatch batch, GameTime delta)
         {
             // Draw background blocks.
-            for (var x = (int)Camera.Left / Tile.Width; x <= (int)Camera.Right / Tile.Width; x++)
+            for (var x = (int) Camera.Left / Tile.Width; x <= (int) Camera.Right / Tile.Width; x++)
             {
-                for (var y = ((int)Camera.Bottom / Tile.Height); y >= (int)Camera.Top / Tile.Height; y--)
+                for (var y = ((int) Camera.Bottom / Tile.Height); y >= (int) Camera.Top / Tile.Height; y--)
                 {
                     //TODO: Don't draw backgrounds that are covered by a foreground block. (Alpha value of texture must be found)
                     if (!InDrawBounds(x, y)) continue;
@@ -108,9 +87,9 @@ namespace Bricklayer.Core.Client.World
         public void DrawForeground(SpriteBatch batch, GameTime delta)
         {
             // Draw foreground blocks.
-            for (var x = (int) Camera.Left/Tile.Width; x <= (int) Camera.Right/Tile.Width; x++)
+            for (var x = (int) Camera.Left / Tile.Width; x <= (int) Camera.Right / Tile.Width; x++)
             {
-                for (var y = ((int) Camera.Bottom/Tile.Height); y >= (int) Camera.Top/Tile.Height; y--)
+                for (var y = ((int) Camera.Bottom / Tile.Height); y >= (int) Camera.Top / Tile.Height; y--)
                 {
                     if (!InDrawBounds(x, y)) continue;
                     var tile = Tiles[x, y, 1];
@@ -118,6 +97,26 @@ namespace Bricklayer.Core.Client.World
                         tile.Type.Draw(batch, tile, x, y, Layer.Foreground);
                 }
             }
+        }
+
+        internal override void DecodeTiles(BinaryReader reader)
+        {
+            base.DecodeTiles(reader);
+            Tiles.BlockPlaced = BlockPlaced;
+        }
+
+        /// <summary>
+        /// Action to be run when a tile is changed.
+        /// This is called by the tilemap array indexer.
+        /// </summary>
+        private void BlockPlaced(int x, int y, int z, Tile newTile, Tile oldTile)
+        {
+            // Send message to server.
+            Client.Network.Send(new BlockPlaceMessage(x, y, z, newTile));
+
+            //Fire event so plugins are aware of the block placement.
+            Client.Events.Game.Level.BlockPlaced.Invoke(
+                new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile, oldTile));
         }
     }
 }

@@ -56,7 +56,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         public bool IsDragging { get; private set; }
 
         private readonly StatusBar gradient;
-        private readonly int normalHeight = Tile.Height + 7;
+        private readonly int normalHeight = Tile.Height + 8;
         private readonly int normalWidth, extendedWidth, extendedHeight;
         private readonly GameScreen screen;
         private int lastBlock;
@@ -74,14 +74,13 @@ namespace Bricklayer.Core.Client.Interface.Controls
             var packLabels = new Label[BlockPack.Packs.Count];
 
             // Find width of normal inventory size, and set an expanded target size.
-            normalWidth = inventorySlots* (Tile.Width + 4) + 6;
+            normalWidth = inventorySlots* (Tile.Width + 4) + 4;
             extendedWidth = (int) (normalWidth*2.5f);
 
             realWidth = Width = normalWidth;
-            realHeight = Height = normalHeight;
+            realHeight = ClientHeight = normalHeight;
             Left = Manager.TargetWidth/2 - (Width/2);
             Top = 0;
-            Height += 2;
 
             // Background "gradient" image
             // TODO: Make an actual control. not a statusbar
@@ -95,7 +94,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
             CursorBlock = new InventoryBlockControl(Manager, null, screen) {Visible = false};
             CursorBlock.Init();
             CursorBlock.Passive = true;
-            Manager.Add(CursorBlock);
+            screen.AddControl(CursorBlock);
+            CursorBlock.StayOnTop = true;
 
             // Create main blocks.
             for (var i = 0; i < BlockControls.Length; i++)
@@ -192,6 +192,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             }
             extendedHeight = TabControl.Top + maxY + 40 + Tile.Height;
             SelectBlock(0);
+            CursorBlock.BringToFront();
         }
 
         private void DragBlock(BlockType block)
@@ -201,6 +202,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
             CursorBlock.Block = block;
             CursorBlock.Visible = true;
             CursorBlock.Passive = true;
+            CursorBlock.BringToFront();
         }
 
         /// <summary>
@@ -328,6 +330,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 if (Width >= extendedWidth && Height >= extendedHeight)
                 {
                     SizeChanging = false;
+                    Width = extendedWidth;
+                    Height = extendedHeight;
                 }
             }
             else
@@ -355,6 +359,8 @@ namespace Bricklayer.Core.Client.Interface.Controls
                 if (Width <= normalWidth && Height <= normalHeight)
                 {
                     SizeChanging = false;
+                    Width = normalWidth;
+                    Height = normalHeight;
                 }
             }
 

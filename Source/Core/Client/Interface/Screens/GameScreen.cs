@@ -191,7 +191,8 @@ namespace Bricklayer.Core.Client.Interface.Screens
         {
             LblStats.Text = "FPS: " + Window.FPS;
 
-            HandleInput();
+            var delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            HandleInput(delta);
 
             base.Update(gameTime);
         }
@@ -199,7 +200,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
         /// <summary>
         /// Handle input related to the game screen.
         /// </summary>
-        private void HandleInput()
+        private void HandleInput(float delta)
         {
             // Mouse Input.
             if (Client.Input.IsLeftDown() && Level != null)
@@ -255,7 +256,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             }
             // Move camera
             var direction = Client.Input.GetDirection();
-            var speed = 2f;
+            var speed = 750f * delta;
             Level?.Camera.Move(direction * speed);
             LstPlayers.Visible = Client.Input.IsKeyDown(Keys.Tab);
         }
