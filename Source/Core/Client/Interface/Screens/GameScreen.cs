@@ -96,6 +96,7 @@ namespace Bricklayer.Core.Client.Interface.Screens
             Inventory.Left = Manager.TargetWidth/2 - (Inventory.Width/2);
             Inventory.Init();
             AddControl(Inventory);
+            Inventory.StayOnTop = true;
 
             // Chat.
             TxtChat = new TextBox(Manager);

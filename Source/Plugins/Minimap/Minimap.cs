@@ -41,7 +41,6 @@ namespace Bricklayer.Plugins.Minimap
                     minimap.Width = Math.Min(config.Width, screen.Level.Width);
                     minimap.Height = Math.Min(config.Height, screen.Level.Height);
                     screen.AddControl(minimap);
-                    minimap.StayOnBack = true;
 
                     // Use thread as the initial color data can take a while to fill for large maps.
                     new Thread(() =>
@@ -79,7 +78,6 @@ namespace Bricklayer.Plugins.Minimap
             if (Client.Input.IsKeyPressed(Keys.M))
             {
                 minimap.Visible = !minimap.Visible;
-                minimap.SendToBack();
             }
             base.Update(delta);
         }
