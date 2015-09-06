@@ -52,6 +52,11 @@ namespace Bricklayer.Core.Common.World
         public string Name { get; }
 
         /// <summary>
+        /// Metadata available for the block.
+        /// </summary>
+        public Dictionary<string, Type> Metadata { get; private set; }
+
+        /// <summary>
         /// The texture of this block. (Null on serverside)
         /// </summary>
         public Image Image
@@ -135,6 +140,7 @@ namespace Bricklayer.Core.Common.World
             Pack = pack;
             ID = (ushort) Blocks.Count();
             IsRenderable = true;
+            Metadata = new Dictionary<string, Type>();
 
             Draw = (batch, tile, x, y, z) =>
             {
@@ -150,6 +156,22 @@ namespace Bricklayer.Core.Common.World
                     batch.Draw(Image, new Vector2(x*Tile.Width, y*Tile.Height), sourceRectangle: FullSourceRect);
             };
             Blocks.Add(this);
+        }
+
+        /// <summary>
+        /// Adds metadata to the block definition.
+        /// Metadata is "data about itself", essentially properties about the block.
+        /// </summary>
+        /// <param name="name">Name of the property</param>
+        /// <param name="type">Type of the property</param>
+        public void AddMetadata(string name, Type type)
+        {
+            Metadata.Add(name, type);
+        }
+
+        public object GetData(ExtendedTile tile, string name)
+        {
+            return tile.Metadata[name];
         }
 
         /// <summary>
