@@ -46,8 +46,8 @@ namespace Bricklayer.Core.Client.Interface.Windows
             TopPanel.Visible = false;
             Movable = false;
             Resizable = false;
-            Width = (int)(Manager.ScreenWidth * .9);
-            Height = (int)(Manager.ScreenHeight * .9);
+            Width = (int) (Manager.ScreenWidth * .9);
+            Height = (int) (Manager.ScreenHeight * .9);
             Shadow = true;
             Center();
 
@@ -67,15 +67,12 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 if (LstServers.ItemIndex < 0)
                     return;
 
-                var sdc = (ServerDataControl) LstServers.Items[LstServers.ItemIndex];
-                // Make sure the user clicks the item and not the empty space in the list
-                if (sdc.CheckPositionMouse(((MouseEventArgs) args).Position - LstServers.AbsoluteRect.Location))
-                    this.screen.Client.Network.SendSessionRequest(servers[LstServers.ItemIndex].Host,
-                        servers[LstServers.ItemIndex].Port);
+                this.screen.Client.Network.SendSessionRequest(servers[LstServers.ItemIndex].Host,
+                    servers[LstServers.ItemIndex].Port);
             };
 
             // Add controls to the bottom panel. (Add server, edit server, etc.)
-            BtnJoin = new Button(manager) { Text = "Connect", Top = 8, Width = 100 };
+            BtnJoin = new Button(manager) {Text = "Connect", Top = 8, Width = 100};
             BtnJoin.Init();
             BtnJoin.Left = 8;
             BtnJoin.Click += (sender, args) =>
@@ -91,25 +88,22 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BtnJoin.TextColor = Color.Lime;
             BottomPanel.Add(BtnJoin);
 
-            BtnRefresh = new Button(manager) { Text = "", Left = BtnJoin.Right + 8, Top = 8 };
+            BtnRefresh = new Button(manager) {Text = "", Left = BtnJoin.Right + 8, Top = 8};
             BtnRefresh.Init();
             BtnRefresh.Width = 24;
             BtnRefresh.Click += (sender, args) => { RefreshServerList(); };
-            BtnRefresh.Glyph = new Glyph(screen.Client.Content["gui.icons.refresh"]) { SizeMode = SizeMode.Centered };
+            BtnRefresh.Glyph = new Glyph(screen.Client.Content["gui.icons.refresh"]) {SizeMode = SizeMode.Centered};
             BtnRefresh.ToolTip.Text = "Refresh";
             BottomPanel.Add(BtnRefresh);
 
             // Right buttons
-            BtnQuit = new Button(manager) { Text = "Sign Out", Width = 64, Top = 8};
+            BtnQuit = new Button(manager) {Text = "Sign Out", Width = 64, Top = 8};
             BtnQuit.Init();
             BtnQuit.Right = ClientWidth - 8;
-            BtnQuit.Click += (sender, args) =>
-            {
-                this.screen.ScreenManager.SwitchScreen(new LoginScreen());
-            };
+            BtnQuit.Click += (sender, args) => { this.screen.ScreenManager.SwitchScreen(new LoginScreen()); };
             BottomPanel.Add(BtnQuit);
 
-            BtnRemove = new Button(manager) {Text = "Remove", Top = 8, Width = 64, Right = BtnQuit.Left - 8 };
+            BtnRemove = new Button(manager) {Text = "Remove", Top = 8, Width = 64, Right = BtnQuit.Left - 8};
             BtnRemove.Init();
             BtnRemove.Click += (clickSender, clickArgs) =>
             {
@@ -137,7 +131,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             BottomPanel.Add(BtnRemove);
 
-            BtnEdit = new Button(manager) { Text = "Edit", Top = 8, Width = 64, Right = BtnRemove.Left - 8 };
+            BtnEdit = new Button(manager) {Text = "Edit", Top = 8, Width = 64, Right = BtnRemove.Left - 8};
             BtnEdit.Init();
             BtnEdit.Click += (sender, args) =>
             {
@@ -153,7 +147,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             };
             BottomPanel.Add(BtnEdit);
 
-            BtnAdd = new Button(manager) { Text = "Add", Top = 8, Width = 64, Right = BtnEdit.Left - 8 };
+            BtnAdd = new Button(manager) {Text = "Add", Top = 8, Width = 64, Right = BtnEdit.Left - 8};
             BtnAdd.Init();
             BtnAdd.Click += (sender, args) =>
             {
@@ -173,6 +167,27 @@ namespace Bricklayer.Core.Client.Interface.Windows
             screen.Client.Events.Network.Game.Disconnected.AddHandler(OnDisconnect);
         }
 
+        public async void AddServer(ServerData server)
+        {
+            servers.Add(server);
+            await screen.Client.IO.WriteServers(servers);
+            RefreshServerList();
+        }
+
+        public async void EditServer(int index, ServerData server)
+        {
+            servers[index] = server;
+            await screen.Client.IO.WriteServers(servers);
+            RefreshServerList();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            screen.Client.Events.Network.Game.InitReceived.RemoveHandler(OnInit);
+            screen.Client.Events.Network.Game.Disconnected.RemoveHandler(OnDisconnect);
+            base.Dispose(disposing);
+        }
+
         private void OnInit(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
         {
             screen.Client.Plugins.Pluginmessages = args.Message.PluginMessages;
@@ -188,27 +203,6 @@ namespace Bricklayer.Core.Client.Interface.Windows
             msgBox.Init();
             screen.ScreenManager.Manager.Add(msgBox);
             msgBox.ShowModal();
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            screen.Client.Events.Network.Game.InitReceived.RemoveHandler(OnInit);
-            screen.Client.Events.Network.Game.Disconnected.RemoveHandler(OnDisconnect);
-            base.Dispose(disposing);
-        }
-
-        public async void AddServer(ServerData server)
-        {
-            servers.Add(server);
-            await screen.Client.IO.WriteServers(servers);
-            RefreshServerList();
-        }
-
-        public async void EditServer(int index, ServerData server)
-        {
-            servers[index] = server;
-            await screen.Client.IO.WriteServers(servers);
-            RefreshServerList();
         }
 
         private async void RefreshServerList()

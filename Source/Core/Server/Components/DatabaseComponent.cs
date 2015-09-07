@@ -313,7 +313,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public async Task PerformOperation(string connection, DbCommand command)
         {
-            await Task.Factory.StartNew(() =>
+            await Task.Run(() =>
             {
                 try
                 {
@@ -352,7 +352,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         public async Task PerformQuery(string connection, DbCommand command, Action<DbDataReader> action)
         {
-            await Task.Factory.StartNew(() =>
+            await Task.Run(() =>
             {
                 try
                 {
@@ -394,7 +394,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         private async Task<bool> TestConnection(string conn)
         {
-            return await Task.Factory.StartNew(() =>
+            return await Task.Run(() =>
             {
                 try
                 {

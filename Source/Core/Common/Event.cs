@@ -47,7 +47,7 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// All events.
         /// </summary>
-        internal static List<BaseEvent> Events = new List<BaseEvent>(); 
+        internal static readonly List<BaseEvent> Events = new List<BaseEvent>(); 
 
         internal virtual void RemoveHandlers(string mainTypeName)
         {

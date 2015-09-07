@@ -174,10 +174,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 if (LstLevels.ItemIndex < 0)
                     return;
 
-                var ldc = (LobbyDataControl) LstLevels.Items[LstLevels.ItemIndex];
-                // Make sure the user clicks the item and not the empty space in the list
-                if (ldc.CheckPositionMouse(((MouseEventArgs) args).Position - LstLevels.AbsoluteRect.Location))
-                    JoinLevel(LstLevels.ItemIndex);
+                JoinLevel(LstLevels.ItemIndex);
             };
 
             GrpLobby.Add(LstLevels);

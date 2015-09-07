@@ -206,7 +206,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             BottomPanel.Add(BtnGetPlugins);
 
             // When user clicks plugin on list, update text.
-            LstPlugins.MouseUp += (sender, args) =>
+            LstPlugins.ItemIndexChanged += (sender, args) =>
             {
                 var data = ((PluginDataControl) LstPlugins.Items[LstPlugins.ItemIndex]).Data;
                 BtnToggle.Text = (pluginStatuses[data.Identifier] ? "Disable " : "Enable ") + " Plugin";

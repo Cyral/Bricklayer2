@@ -55,7 +55,6 @@ namespace Bricklayer.Core.Client.Interface.Controls
         /// </summary>
         public bool ResolvedHost { get; private set; }
 
-        private readonly Manager manager;
         private readonly Color offlineColor = Color.Red, onlineColor = Color.Lime;
         private readonly ServerScreen screen;
         private Timer pingTimer;
@@ -64,13 +63,11 @@ namespace Bricklayer.Core.Client.Interface.Controls
             : base(manager)
         {
             this.screen = screen;
-            this.manager = manager;
 
             // Setup
             Passive = false;
             Height = 76;
             Data = server;
-
             Width = parent.Width + 8;
             // Background "gradient" image
             // TODO: Make an actual control. not a statusbar
