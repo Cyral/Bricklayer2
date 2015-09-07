@@ -42,7 +42,8 @@ namespace Bricklayer.Plugins.Minimap
                 while (pixels.Count > 0)
                 {
                     var pixel = pixels.Dequeue();
-                    SetPixel(pixel.Item1, pixel.Item2, pixel.Item3);
+                    if (pixel != null)
+                        SetPixel(pixel.Item1, pixel.Item2, pixel.Item3);
                 }
                 // Draw minimap texture.
                 renderer.Draw(texture, 0, 0, Color.White * (Alpha / 255f));
@@ -66,7 +67,6 @@ namespace Bricklayer.Plugins.Minimap
 
             // All pixels will be processed when drawn.
             pixels.Enqueue(new Tuple<int, int, Color>(x, y, color));
-            Invalidate();
         }
 
         /// <summary>

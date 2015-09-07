@@ -230,11 +230,11 @@ namespace Bricklayer.Core.Client.Interface.Screens
                 LstChats.Items.ForEach(x => ((ChatDataControl) x).Show());
             }
             // Close or send chat.
-            else if ((Client.Input.IsKeyPressed(Keys.Enter) && TxtChat.Visible) || Client.Input.IsKeyPressed(Keys.Escape))
+            else if ((Client.Input.IsKeyPressed(Keys.Enter, true) && TxtChat.Visible) || Client.Input.IsKeyPressed(Keys.Escape, true))
             {
                 // If there's characters in chatbox, send chat.
                 // Cancel out of chat if player clicks escape.
-                if (!string.IsNullOrWhiteSpace(TxtChat.Text) && !Client.Input.IsKeyPressed(Keys.Escape))
+                if (!string.IsNullOrWhiteSpace(TxtChat.Text) && !Client.Input.IsKeyPressed(Keys.Escape, true))
                 {
                     Client.Network.Send(new ChatMessage(TxtChat.Text.Trim()));
                     TxtChat.Text = string.Empty;

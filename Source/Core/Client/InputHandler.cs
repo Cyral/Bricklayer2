@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Bricklayer.Core.Client.Interface;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
@@ -30,6 +31,8 @@ namespace Bricklayer.Core.Client
 
         internal Level Level { get; set; }
 
+        internal MainWindow Window { get; set; }
+
         /// <summary>
         /// Creats a new InputHandler.
         /// </summary>
@@ -39,19 +42,21 @@ namespace Bricklayer.Core.Client
         }
 
         /// <summary>
-        /// Returns the position of the mouse in world/grid coordinates, transformed by the level camera. This differs between each layer as the block perspective
+        /// Returns the position of the mouse in world/grid coordinates, transformed by the level camera. This differs between each
+        /// layer as the block perspective
         /// causes the foreground and background layers to be slightly off.
         /// </summary>
         public Point GetMouseGridPositon(Layer layer)
         {
-            var pos = Level?.Camera?.ScreenToWorld(CurrentMouseState.GetPositionVector()).ToPoint() ?? CurrentMouseState.GetPositionPoint();
+            var pos = Level?.Camera?.ScreenToWorld(CurrentMouseState.GetPositionVector()).ToPoint() ??
+                      CurrentMouseState.GetPositionPoint();
             if (layer.HasFlag(Layer.Foreground))
             {
                 return new Point((int) Math.Floor(pos.X / (float) Tile.Width),
                     (int) Math.Floor((pos.Y - (Tile.FullHeight - Tile.Height)) / (float) Tile.Height));
             }
             return new Point((int) Math.Floor((pos.X - (Tile.FullWidth - Tile.Width)) / (float) Tile.Width),
-                    (int) Math.Floor(pos.Y / (float) Tile.Height));
+                (int) Math.Floor(pos.Y / (float) Tile.Height));
         }
 
         /// <summary>
@@ -69,156 +74,169 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// Checks if any of the keys specified are pressed/toggled.
         /// </summary>
-        public bool AnyKeysPressed(params Keys[] keys)
-        {
-            return keys.Any(k => CurrentKeyboardState.IsKeyUp(k) && PreviousKeyboardState.IsKeyDown(k));
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool AnyKeysPressed(bool ignoreUI = false, params Keys[] keys)
+            =>
+                (!Window.IsUIFocused() || ignoreUI) &&
+                keys.Any(k => CurrentKeyboardState.IsKeyUp(k) && PreviousKeyboardState.IsKeyDown(k));
 
         /// <summary>
         /// Checks if any of the keys specified are down.
         /// </summary>
-        public bool AnyKeysDown(params Keys[] keys)
-        {
-            return keys.Any(k => CurrentKeyboardState.IsKeyDown(k));
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool AnyKeysDown(bool ignoreUI = false, params Keys[] keys)
+            => (!Window.IsUIFocused() || ignoreUI) && keys.Any(k => CurrentKeyboardState.IsKeyDown(k));
 
         /// <summary>
         /// Checks if any of the keys specified were down last frame.
         /// </summary>
-        public bool WasAnyKeysDown(params Keys[] keys)
-        {
-            return keys.Any(k => PreviousKeyboardState.IsKeyDown(k));
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool WasAnyKeysDown(bool ignoreUI = false, params Keys[] keys)
+            => (!Window.IsUIFocused() || ignoreUI) && keys.Any(k => PreviousKeyboardState.IsKeyDown(k));
 
         /// <summary>
         /// Checks if all of the keys specified were up last frame.
         /// </summary>
-        public bool WasAllKeysUp(params Keys[] keys)
-        {
-            return keys.All(k => PreviousKeyboardState.IsKeyUp(k));
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool WasAllKeysUp(bool ignoreUI = false, params Keys[] keys)
+            => (!Window.IsUIFocused() || ignoreUI) && keys.All(k => PreviousKeyboardState.IsKeyUp(k));
 
         /// <summary>
         /// Checks if any of the keys specified were up the last frame.
         /// </summary>
-        public bool WereAnyKeysUp(params Keys[] keys)
-        {
-            return keys.Any(k => PreviousKeyboardState.IsKeyUp(k));
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool WereAnyKeysUp(bool ignoreUI = false, params Keys[] keys)
+            => (!Window.IsUIFocused() || ignoreUI) && keys.Any(k => PreviousKeyboardState.IsKeyUp(k));
 
         /// <summary>
         /// Checks if all of the keys specified are down.
         /// </summary>
-        public bool AllKeysDown(params Keys[] keys)
-        {
-            return keys.All(k => CurrentKeyboardState.IsKeyDown(k));
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool AllKeysDown(bool ignoreUI = false, params Keys[] keys)
+            => (!Window.IsUIFocused() || ignoreUI) && keys.All(k => CurrentKeyboardState.IsKeyDown(k));
 
         /// <summary>
         /// Checks if a given key is currently down.
         /// </summary>
-        public bool IsKeyDown(Keys key)
-        {
-            return CurrentKeyboardState.IsKeyDown(key);
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool IsKeyDown(Keys key, bool ignoreUI = false)
+            => (!Window.IsUIFocused() || ignoreUI) && CurrentKeyboardState.IsKeyDown(key);
 
         /// <summary>
         /// Checks if a given key is currently up.
         /// </summary>
-        public bool IsKeyUp(Keys key)
-        {
-            return CurrentKeyboardState.IsKeyUp(key);
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool IsKeyUp(Keys key, bool ignoreUI = false)
+            => (!Window.IsUIFocused() || ignoreUI) && CurrentKeyboardState.IsKeyUp(key);
 
         /// <summary>
         /// Checks if a given key is was down last frame.
         /// </summary>
-        public bool WasKeyDown(Keys key)
-        {
-            return PreviousKeyboardState.IsKeyDown(key);
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool WasKeyDown(Keys key, bool ignoreUI = false)
+            => (!Window.IsUIFocused() || ignoreUI) && PreviousKeyboardState.IsKeyDown(key);
 
         /// <summary>
         /// Checks if a given key is was up last frame.
         /// </summary>
-        public bool WasKeyUp(Keys key)
-        {
-            return PreviousKeyboardState.IsKeyUp(key);
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool WasKeyUp(Keys key, bool ignoreUI = false)
+            => (!Window.IsUIFocused() || ignoreUI) && PreviousKeyboardState.IsKeyUp(key);
 
         /// <summary>
         /// Checks if a given key is currently being pressed (Was not pressed last state, but now is).
         /// </summary>
-        public bool IsKeyPressed(Keys key)
-        {
-            return CurrentKeyboardState.IsKeyDown(key) && PreviousKeyboardState.IsKeyUp(key);
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool IsKeyPressed(Keys key, bool ignoreUI = false) => (!Window.IsUIFocused() || ignoreUI) &&
+                                                                     (CurrentKeyboardState.IsKeyDown(key) &&
+                                                                      PreviousKeyboardState.IsKeyUp(key));
 
         /// <summary>
         /// Checks if a given key has been toggled (Was pressed last state, but now isn't).
         /// </summary>
-        public bool WasKeyPressed(Keys key)
-        {
-            return CurrentKeyboardState.IsKeyUp(key) && PreviousKeyboardState.IsKeyDown(key);
-        }
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public bool WasKeyPressed(Keys key, bool ignoreUI = false) => (!Window.IsUIFocused() || ignoreUI) &&
+                                                              (CurrentKeyboardState.IsKeyUp(key) &&
+                                                               PreviousKeyboardState.IsKeyDown(key));
 
         /// <summary>
         /// Checks if the right button is being held down.
         /// </summary>
-        public bool IsRightDown()
-        {
-            return CurrentMouseState.RightButton == ButtonState.Pressed;
-        }
+        public bool IsRightDown() => CurrentMouseState.RightButton == ButtonState.Pressed;
 
         /// <summary>
         /// Checks if the left button is being held down.
         /// </summary>
-        public bool IsLeftDown()
-        {
-            return CurrentMouseState.LeftButton == ButtonState.Pressed;
-        }
+        public bool IsLeftDown() => CurrentMouseState.LeftButton == ButtonState.Pressed;
 
         /// <summary>
         /// Checks if the right button is currently up.
         /// </summary>
-        public bool IsRightUp()
-        {
-            return CurrentMouseState.RightButton == ButtonState.Released;
-        }
+        public bool IsRightUp() => CurrentMouseState.RightButton == ButtonState.Released;
 
         /// <summary>
         /// Checks if the left button is currently up.
         /// </summary>
-        public bool IsLeftUp()
-        {
-            return CurrentMouseState.LeftButton == ButtonState.Released;
-        }
+        public bool IsLeftUp() => CurrentMouseState.LeftButton == ButtonState.Released;
 
         /// <summary>
         /// Checks if the left button is being clicked (Currently is down, wasn't last frame).
         /// </summary>
-        /// <returns></returns>
-        public bool IsLeftClicked()
-        {
-            return CurrentMouseState.LeftButton == ButtonState.Pressed &&
-                   PreviousMouseState.LeftButton == ButtonState.Released;
-        }
+        public bool IsLeftClicked() => (CurrentMouseState.LeftButton == ButtonState.Pressed &&
+                                        PreviousMouseState.LeftButton == ButtonState.Released);
 
         /// <summary>
         /// Checks if the right button is being clicked (Currently is down, wasn't last frame).
         /// </summary>
-        /// <returns></returns>
-        public bool IsRightClicked()
-        {
-            return CurrentMouseState.RightButton == ButtonState.Pressed &&
-                   PreviousMouseState.RightButton == ButtonState.Released;
-        }
+        public bool IsRightClicked() => (CurrentMouseState.RightButton == ButtonState.Pressed &&
+                                         PreviousMouseState.RightButton == ButtonState.Released);
 
         /// <summary>
         /// Gets the current number key pressed, returns -1 if none.
         /// </summary>
-        public int GetDigitPressed()
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public int GetDigitPressed(bool ignoreUI = false)
         {
+            if (Window.IsUIFocused()) return -1;
             var pressedDigitKeys = CurrentKeyboardState.GetPressedKeys()
                 // Select those that are within D0 and D9
                 .Where(x => x >= Keys.D0 && x <= Keys.D9)
@@ -235,8 +253,13 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// Returns a direction from WASD or arrow keys.
         /// </summary>
-        public Vector2 GetDirection()
+        /// <param name="ignoreUI">
+        /// If an interactive UI element, such as a textbox is selected, false will always be returned
+        /// unless ignoreUI is true.
+        /// </param>
+        public Vector2 GetDirection(bool ignoreUI = false)
         {
+            if (Window.IsUIFocused()) return Vector2.Zero;
             int x = 0, y = 0;
             if (IsKeyDown(Keys.A) || IsKeyDown(Keys.Left))
                 x -= 1;

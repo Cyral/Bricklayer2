@@ -126,7 +126,7 @@ namespace Bricklayer.Core.Client
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
         protected override void Draw(GameTime gameTime)
         {
-            if (UI == null || GraphicsDevice == null) return;
+            if (UI == null || GraphicsDevice == null || Window == null) return;
             UI.BeginDraw(gameTime);
             GraphicsDevice.Clear(Color.Black);
 
@@ -300,6 +300,7 @@ namespace Bricklayer.Core.Client
         /// <param name="gameTime">Provides a snapshot of timing values. (Delta time)</param>
         protected override void Update(GameTime gameTime)
         {
+            if (UI == null || Window == null) return;
             UI.Update(gameTime);
 
             // Update plugin logic.

@@ -21,6 +21,7 @@ namespace Bricklayer.Core.Client.Interface
         public MainWindow(Manager manager, Client client) : base(manager)
         {
             Client = client;
+            Client.Input.Window = this;
 
             // Make the window full size, without any border, disallow resize and move, etc., to use the entire screen size.
             ClearBackground = true;

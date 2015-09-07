@@ -59,5 +59,16 @@ namespace Bricklayer.Core.Client.Interface
                 Manager.Controls.Any(
                         control => control.Visible && control != this && !control.Passive && control.AbsoluteRect.Intersects(rect));
         }
+
+        /// <summary>
+        /// Returns true if a TextBox or other control requiring input is focused. If any controls requiring input are focused, 
+        /// any keypresses entered should not be registered to the rest of the game. (For example, pressing W, A, S or D inside the
+        /// chat box shouldn't move the player.)
+        /// </summary>
+        /// <returns></returns>
+        public bool IsUIFocused()
+        {
+            return Manager.FocusedControl is TextBox || Manager.FocusedControl is ListBox;
+        }
     }
 }
