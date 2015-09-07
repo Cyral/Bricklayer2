@@ -4,7 +4,6 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Data;
@@ -20,6 +19,7 @@ namespace Bricklayer.Core.Server.Components
         protected internal override LogType LogType { get; } = new LogType("Database", ConsoleColor.Yellow);
         private string connectionString;
         private DbProviderFactory providerFactory;
+        private bool isMySql => Server.IO.Config.Database.Provider.IndexOf("MySql", StringComparison.OrdinalIgnoreCase) >= 0;
 
         public DatabaseComponent(Server server) : base(server)
         {
@@ -171,7 +171,7 @@ namespace Bricklayer.Core.Server.Components
                     var ratings = rating.Select(x => x.Rating).ToList();
                     data = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
                         reader.GetGuid(0), reader.GetString(2), 0,
-                        reader.GetInt32(3), ratings.Count != 0 ? (int)Math.Round(ratings.Average()) : 5);
+                        reader.GetInt32(3), ratings.Count != 0 ? (int) Math.Round(ratings.Average()) : 5);
                 }
             });
 
@@ -218,7 +218,7 @@ namespace Bricklayer.Core.Server.Components
             providerFactory = DbProviderFactories.GetFactory(Server.IO.Config.Database.Provider);
 
             if (!(await TestConnection(connectionString)))
-                Logger.Fatal(LogType, 
+                Logger.Fatal(LogType,
                     "Could not connect to database. Database services will be non functional.");
 
             // Create initial tables if they don't exist
@@ -226,9 +226,9 @@ namespace Bricklayer.Core.Server.Components
             if (initialCommand != null)
             {
                 initialCommand.CommandText =
-                    "CREATE TABLE IF NOT EXISTS Levels (GUID GUID PRIMARY KEY,Name TEXT,Description TEXT,Plays INTEGER, Creator GUID);" +
-                    "CREATE TABLE IF NOT EXISTS Players (Username Text UNIQUE,GUID GUID PRIMARY KEY);" +
-                    "CREATE TABLE IF NOT EXISTS Ratings (User GUID,Level GUID,Rating TINYINT,CONSTRAINT user_level UNIQUE (User, Level))";
+                    "CREATE TABLE IF NOT EXISTS Levels (GUID CHAR(36) PRIMARY KEY,Name TEXT,Description TEXT,Plays INTEGER, Creator CHAR(36));" +
+                    "CREATE TABLE IF NOT EXISTS Players (Username VARCHAR(32) UNIQUE,GUID CHAR(36) PRIMARY KEY);" +
+                    "CREATE TABLE IF NOT EXISTS Ratings (User CHAR(36),Level CHAR(36),Rating TINYINT,CONSTRAINT user_level UNIQUE (User, Level))";
 
                 await PerformOperation(connectionString, initialCommand);
             }
@@ -239,8 +239,9 @@ namespace Bricklayer.Core.Server.Components
                 var insertCommand = providerFactory.CreateCommand();
                 if (insertCommand != null)
                 {
-                    insertCommand.CommandText =
-                        "INSERT OR IGNORE INTO Players (Username, GUID) VALUES (@username, @uuid);";
+                    insertCommand.CommandText = isMySql ?
+                        "INSERT INTO Players (Username, GUID) VALUES (@username, @uuid) ON DUPLICATE KEY Update GUID = @uuid;"
+                        : "INSERT OR REPLACE INTO Players (Username, GUID) VALUES (@username, @uuid);";
                     AddParameters(insertCommand,
                         new Dictionary<string, string>
                         {
@@ -257,7 +258,8 @@ namespace Bricklayer.Core.Server.Components
                 var insertCommand = providerFactory.CreateCommand();
                 if (insertCommand != null)
                 {
-                    insertCommand.CommandText =
+                    insertCommand.CommandText = isMySql ?
+                        "INSERT INTO Ratings (User, Level, Rating) VALUES (@user,@level,@rating) ON DUPLICATE KEY Update Rating = @rating" :
                         "INSERT OR REPLACE INTO Ratings (User, Level, Rating) VALUES (@user,@level,@rating)";
                     AddParameters(insertCommand,
                         new Dictionary<string, string>
@@ -279,7 +281,7 @@ namespace Bricklayer.Core.Server.Components
             if (command != null)
             {
                 command.CommandText =
-                    "INSERT INTO Levels (GUID,Name,Description, Plays, Creator) VALUES(@guid, @name, @desc, 0, @creator)";
+                    "INSERT INTO Levels (GUID,Name,Description, Plays, Creator) VALUES (@guid, @name, @desc, 0, @creator)";
                 AddParameters(command, new Dictionary<string, string>
                 {
                     {"guid", data.UUID.ToString("N")},

@@ -1,0 +1,1 @@
+These libraries are not actual references by any project, but are copied to the output folder of the server. See the Bricklayer documentation on database providers.
