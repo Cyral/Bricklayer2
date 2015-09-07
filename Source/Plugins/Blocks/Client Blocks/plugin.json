@@ -1,6 +1,6 @@
 ﻿{
   "Name": "Default Blocks",
-  "Identifier": "Bricklayer.Plugins.DefaultBlocks",
+  "Identifier": "Bricklayer.Plugins.DefaultBlocks.Client",
   "Description": "Provides the default block packs and block categories.",
   "Authors": [ "Cyral" ],
   "Dependencies": [],

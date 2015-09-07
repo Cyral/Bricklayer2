@@ -18,13 +18,14 @@ Any dependencies are checked for, and referenced .dlls are resolved with Assembl
 Each plugin is loaded using Activator.CreateInstance. If a plugin is disabled (plugins.config), it
 is not loaded, but a 'FakePlugin' class instance is created. This FakePlugin has all of the details
 (name, authors, etc.), but no loaded assembly. This is used so the plugin manager can list disabled plugins.
+The plugin's JSON config file will specify a unique identifier which must correspond to the assembly's name.
 
 In my research, it seems references (in this case, to the Client or Server), cannot be shared across AppDomains.
 This makes it impossible to use AppDomains to sandbox plugins (which we would like to do).
 
 Plugin reloading was decided not to be included, but disabling/enabling a plugin will call the plugin's Load or
 Unload method, respectively. It is up to the plugin author to implement functionality to completely reset a plugin.
-However, any events registered by the plugin's main assembly (plugin.dll) will automatically be unregistered.
+However, any events registered by the plugin's main assembly will automatically be unregistered.
 (When an event is added, the event manager tries to find the executing plugin using reflection. When a plugin
 is disabled, it finds all events that have the plugin assembly's FullName, and removes them.) To keep a list of all
 of these events, Event<TArgs> derives from BaseEvent, which has a static list of events and a method that is overloaded
@@ -39,6 +40,7 @@ Note: Any .zip files in the plugin folder will be extracted at runtime.
 Plugins can also automatically be installed (on the client) by using the plugin database on the website. The install button
 on the website sends a message to the auth server, which tells the client to download the plugin (in the case of it recently
 being online), if it doesn't get a response back from the client, it will queue the download for next time the user is online.
+
 */
 
 namespace Bricklayer.Core.Client.Components
@@ -53,15 +55,15 @@ namespace Bricklayer.Core.Client.Components
         /// </summary>
         public int PluginCount => Plugins.Count;
 
+        internal List<ClientPlugin> Plugins { get; }
+        private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
+        private string loadingPlugin;
+
         /// <summary>
         /// Class contains a list of plugin messages. Server and Client plugins will use this
         /// to recieve an id that both the server and the client knows for the plugin message.
         /// </summary>
         public PluginMessages Pluginmessages;
-
-        internal List<ClientPlugin> Plugins { get; }
-        private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
-        private string loadingPlugin;
 
         public PluginComponent(Client client) : base(client)
         {
@@ -77,8 +79,8 @@ namespace Bricklayer.Core.Client.Components
             AppDomain.CurrentDomain.AssemblyResolve +=
                 (sender, args) =>
                 {
-                    // If a plugin.dll is trying to load a referenced assembly.
-                    if (args.RequestingAssembly.FullName.Split(',')[0] != "plugin")
+                    // If a plugin is trying to load a referenced assembly.
+                    if (string.IsNullOrWhiteSpace(loadingPlugin))
                         return null;
                     var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
                     if (File.Exists(path))
@@ -120,7 +122,8 @@ namespace Bricklayer.Core.Client.Components
             List<PluginData> files = null;
             try
             {
-                files = IOHelper.GetPlugins(Client.IO.Directories["Plugins"], IOComponent.SerializationSettings).ToList();
+                files =
+                    IOHelper.GetPlugins(Client.IO.Directories["Plugins"], IOComponent.SerializationSettings).ToList();
             }
             catch (Exception e)
             {
@@ -130,7 +133,7 @@ namespace Bricklayer.Core.Client.Components
             if (files == null)
                 return;
 
-            foreach (var file in files.Where(file => !Plugins.Contains(file)))
+            foreach (var file in files.Where(file => !Plugins.Contains(file)).OrderBy(x => x.Dependencies.Count))
             {
                 // TODO: Use AppDomains for security (Ask Cyral)
                 // Load the assembly.
@@ -146,7 +149,7 @@ namespace Bricklayer.Core.Client.Components
                                 throw new FileNotFoundException(
                                     $"Dependency \"{dep}\" for plugin \"{file.Name}\" not found.");
                         statuses[file.Identifier] = true;
-                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                        var asm = IOHelper.LoadPlugin(Path.Combine(file.Path, file.Identifier + ".dll"));
                         assemblies[file.Identifier] = asm;
                         loadingPlugin = file.Path;
                         RegisterPlugin(IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, file));
@@ -158,6 +161,7 @@ namespace Bricklayer.Core.Client.Components
                         LoadIcon(pluginData);
                         Plugins.Add(pluginData);
                     }
+                    loadingPlugin = string.Empty;
                 }
                 catch (Exception e)
                 {
@@ -177,50 +181,6 @@ namespace Bricklayer.Core.Client.Components
             {
                 Client.Content.LoadPluginContent(plugin);
             }
-        }
-
-        private void RegisterPlugin(ClientPlugin plugin)
-        {
-            plugin.IsEnabled = true;
-            LoadIcon(plugin);
-            Plugins.Add(plugin);
-
-            // Load plugin content.
-            Client.Content.LoadPluginContent(plugin);
-
-            // Load plugin.
-            plugin.Load();
-            Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
-            Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
-        }
-
-        /// <summary>
-        /// Load icon for plugin.
-        /// </summary>
-        private void LoadIcon(ClientPlugin pluginData)
-        {
-            if (Directory.Exists(pluginData.Path))
-            {
-                var dir = new DirectoryInfo(pluginData.Path);
-
-                string[] extensions = {".jpg", ".jpeg", ".png"};
-
-                var icon =
-                    dir.GetFiles()
-                        .FirstOrDefault(
-                            f => f.Extension.EqualsAny(extensions) && Path.GetFileNameWithoutExtension(f.Name) == "icon");
-
-                if (icon != null)
-                {
-                    var texture = Client.IO.LoadTexture(icon.FullName);
-                    if (texture.Height <= 64 && texture.Width <= 64)
-                        pluginData.Icon = texture;
-                    else
-                        Console.WriteLine($"Plugin icon is bigger than the size limit of 64x64. Not loading icon.");
-                }
-            }
-            else
-                Console.WriteLine($"Directory {pluginData} does not exist.");
         }
 
         /// <summary>
@@ -271,13 +231,16 @@ namespace Bricklayer.Core.Client.Components
                     Texture2D icon = null;
                     if (plugin.Icon != null)
                         icon = plugin.Icon;
-                    var newPlugin = IOHelper.CreatePluginInstance<ClientPlugin>(assemblies[plugin.Identifier], Client, plugin);
+                    var newPlugin = IOHelper.CreatePluginInstance<ClientPlugin>(assemblies[plugin.Identifier], Client,
+                        plugin);
                     Client.Content.LoadPluginContent(newPlugin);
                     if (icon != null)
                         newPlugin.Icon = icon;
                     newPlugin.Load();
+                    loadingPlugin = string.Empty;
                     Plugins.Add(newPlugin);
-                    Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
+                    Client.Events.Game.PluginStatusChanged.Invoke(
+                        new EventManager.GameEvents.PluginStatusEventArgs(plugin));
                     Console.WriteLine($"Plugin: Enabled {plugin.GetInfoString()}");
                 }
                 else
@@ -290,11 +253,12 @@ namespace Bricklayer.Core.Client.Components
                             plugin.Dependencies.Where(dep => Plugins.All(p => p.Identifier != dep)))
                             throw new FileNotFoundException(
                                 $"Dependency \"{dep}\" for plugin \"{plugin.Name}\" not loaded or enabled.");
-                    var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, plugin.Path);
+                    var asm = IOHelper.LoadPlugin(Path.Combine(plugin.Path, $"{plugin.Identifier}.dll"));
                     assemblies[plugin.Identifier] = asm;
                     loadingPlugin = plugin.Path;
                     var retPlugin = IOHelper.CreatePluginInstance<ClientPlugin>(asm, Client, plugin);
                     RegisterPlugin(retPlugin);
+                    loadingPlugin = string.Empty;
                     pluginStatuses[retPlugin.Identifier] = true;
                     Client.IO.WritePluginStatus(pluginStatuses);
                     return retPlugin;
@@ -339,6 +303,58 @@ namespace Bricklayer.Core.Client.Components
             }
         }
 
+        internal void Unload()
+        {
+            foreach (var plugin in Plugins)
+            {
+                plugin.Unload();
+            }
+        }
+
+        private void RegisterPlugin(ClientPlugin plugin)
+        {
+            plugin.IsEnabled = true;
+            LoadIcon(plugin);
+            Plugins.Add(plugin);
+
+            // Load plugin content.
+            Client.Content.LoadPluginContent(plugin);
+
+            // Load plugin.
+            plugin.Load();
+            Client.Events.Game.PluginStatusChanged.Invoke(new EventManager.GameEvents.PluginStatusEventArgs(plugin));
+            Console.WriteLine($"Plugin: Loaded {plugin.GetInfoString()}");
+        }
+
+        /// <summary>
+        /// Load icon for plugin.
+        /// </summary>
+        private void LoadIcon(ClientPlugin pluginData)
+        {
+            if (Directory.Exists(pluginData.Path))
+            {
+                var dir = new DirectoryInfo(pluginData.Path);
+
+                string[] extensions = {".jpg", ".jpeg", ".png"};
+
+                var icon =
+                    dir.GetFiles()
+                        .FirstOrDefault(
+                            f => f.Extension.EqualsAny(extensions) && Path.GetFileNameWithoutExtension(f.Name) == "icon");
+
+                if (icon != null)
+                {
+                    var texture = Client.IO.LoadTexture(icon.FullName);
+                    if (texture.Height <= 64 && texture.Width <= 64)
+                        pluginData.Icon = texture;
+                    else
+                        Console.WriteLine($"Plugin icon is bigger than the size limit of 64x64. Not loading icon.");
+                }
+            }
+            else
+                Console.WriteLine($"Directory {pluginData} does not exist.");
+        }
+
         /// <summary>
         /// Dummy class for disabled plugins, as an instance is needed to display in the plugin manager.
         /// </summary>
@@ -363,14 +379,6 @@ namespace Bricklayer.Core.Client.Components
 
             public override void Unload()
             {
-            }
-        }
-
-        internal void Unload()
-        {
-            foreach (var plugin in Plugins)
-            {
-                plugin.Unload();
             }
         }
     }

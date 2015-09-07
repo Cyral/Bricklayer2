@@ -1,7 +1,7 @@
 ﻿{
-  // Plugin display name
+  // Plugin display name.
   "Name": "Test Server Plugin",
-  // Unique identifier (Can be namespace, domain, anything unique)
+  // Unique identifier that matches the namespace of the assembly.
   "Identifier": "Bricklayer.Plugins.TestServerPlugin",
   "Description": "An Example Server Plugin",
   "Authors": [ "Cyral" ],

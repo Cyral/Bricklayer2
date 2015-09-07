@@ -1,13 +1,15 @@
 ﻿{
+  // Plugin display name.
   "Name": "Test Client Plugin",
+  // Unique identifier that matches the namespace of the assembly.
   "Identifier": "Bricklayer.Plugins.TestClientPlugin",
   "Description": "An Example Client Plugin",
   "Authors": [ "Cyral" ],
-  "Dependencies": [],
+  "Dependencies": [ ],
   "Version": {
-      "Major": 0,
-      "Minor": 1,
-      "Build": 0,
-      "Revision": 0
+    "Major": 0,
+    "Minor": 1,
+    "Build": 0,
+    "Revision": 0
   }
 }

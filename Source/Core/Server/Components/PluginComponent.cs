@@ -27,14 +27,15 @@ namespace Bricklayer.Core.Server.Components
 
         protected internal override LogType LogType { get; } = new LogType("Plugin", ConsoleColor.Green);
         internal List<ServerPlugin> Plugins { get; }
-        private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
-        private string loadingPlugin;
 
         /// <summary>
         /// Class contains a list of plugin messages. Server and Client plugins will use this
         /// to recieve an id that both the server and the client knows for the plugin message.
         /// </summary>
         public PluginMessages PluginMessages { get; private set; }
+
+        private readonly Dictionary<string, Assembly> assemblies = new Dictionary<string, Assembly>();
+        private string loadingPlugin;
 
         private Dictionary<string, bool> pluginStatuses = new Dictionary<string, bool>();
 
@@ -52,16 +53,27 @@ namespace Bricklayer.Core.Server.Components
             // Resolve assembly references for plugins. 
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
-                // If a plugin.dll is trying to load a referenced assembly
-                if (args.RequestingAssembly.FullName.Split(',')[0] != "plugin")
-                    return null;
+                try
+                {
+                    // If a plugin is trying to load a referenced assembly
+                    if (string.IsNullOrWhiteSpace(loadingPlugin))
+                        return null;
 
-                var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
-                if (File.Exists(path))
-                    return Assembly.LoadFile(path);
-                path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe");
-                // Try to load a .exe if .dll doesn't exist
-                return File.Exists(path) ? Assembly.LoadFile(path) : null;
+                    var path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".dll");
+                    if (File.Exists(path))
+                        return Assembly.LoadFile(path);
+                    path = Path.Combine(loadingPlugin, args.Name.Split(',')[0] + ".exe");
+                    // Try to load a .exe if .dll doesn't exist
+                    return File.Exists(path) ? Assembly.LoadFile(path) : null;
+                }
+                catch
+                {
+                    // Because we added this handler, we may get exceptions from .NET stuff trying to load.
+#if DEBUG
+                    Logger.Trace("Error loading: " + args.Name);
+#endif
+                    return null;
+                }
             };
 
             LoadPlugins();
@@ -117,6 +129,7 @@ namespace Bricklayer.Core.Server.Components
                     var newPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(assemblies[plugin.Identifier], Server,
                         plugin);
                     newPlugin.Load();
+                    loadingPlugin = string.Empty;
                     Plugins.Add(newPlugin);
                     Server.Events.Game.PluginStatusChanged.Invoke(
                         new EventManager.GameEvents.PluginStatusEventArgs(plugin));
@@ -135,7 +148,7 @@ namespace Bricklayer.Core.Server.Components
                     ServerPlugin retPlugin = null;
                     try
                     {
-                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, plugin.Path);
+                        var asm = IOHelper.LoadPlugin(Path.Combine(plugin.Path, plugin.Identifier + ".dll"));
                         assemblies[plugin.Identifier] = asm;
                         loadingPlugin = plugin.Path;
                         retPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, plugin);
@@ -145,6 +158,7 @@ namespace Bricklayer.Core.Server.Components
                         Logger.Error(LogType, $"Error creating instance of {plugin.Identifier}: {e}");
                     }
                     RegisterPlugin(retPlugin);
+                    loadingPlugin = string.Empty;
                     if (retPlugin != null)
                     {
                         pluginStatuses[retPlugin.Identifier] = true;
@@ -176,7 +190,7 @@ namespace Bricklayer.Core.Server.Components
             if (files == null)
                 return;
 
-            foreach (var file in files.Where(file => !Plugins.Contains(file)))
+            foreach (var file in files.Where(file => !Plugins.Contains(file)).OrderBy(x => x.Dependencies.Count))
             {
                 // TODO: Use AppDomains for security
                 // Load the assembly
@@ -198,7 +212,7 @@ namespace Bricklayer.Core.Server.Components
                         // Load plugin
                         pluginStatuses[file.Identifier] = true;
                         loadingPlugin = file.Path;
-                        var asm = IOHelper.LoadPlugin(AppDomain.CurrentDomain, file.Path);
+                        var asm = IOHelper.LoadPlugin(Path.Combine(file.Path, file.Identifier + ".dll"));
                         assemblies[file.Identifier] = asm;
                         var loadedPlugin = IOHelper.CreatePluginInstance<ServerPlugin>(asm, Server, file);
                         RegisterPlugin(loadedPlugin);
@@ -210,6 +224,7 @@ namespace Bricklayer.Core.Server.Components
                         var pluginData = new FakePlugin(Server, file);
                         Plugins.Add(pluginData);
                     }
+                    loadingPlugin = string.Empty;
                 }
                 catch (Exception e)
                 {

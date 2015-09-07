@@ -270,7 +270,7 @@ namespace Bricklayer.Core.Server
                                 x.Identifier.Equals(args.FromName("identifier_or_name"),
                                     StringComparison.OrdinalIgnoreCase)
                                 ||
-                                x.Name.Equals(args.FromName("identifier_or_namee"),
+                                x.Name.Equals(args.FromName("identifier_or_name"),
                                     StringComparison.OrdinalIgnoreCase));
                     if (plugin != null)
                     {

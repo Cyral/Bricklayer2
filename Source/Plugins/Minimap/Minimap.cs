@@ -75,7 +75,7 @@ namespace Bricklayer.Plugins.Minimap
 
         public override void Update(GameTime delta)
         {
-            if (Client.Input.IsKeyPressed(Keys.M))
+            if (Client.State == GameState.Game && Client.Input.IsKeyPressed(Keys.M) && minimap != null)
             {
                 minimap.Visible = !minimap.Visible;
             }

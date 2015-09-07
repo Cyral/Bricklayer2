@@ -24,7 +24,7 @@ namespace Bricklayer.Core.Common
         public static T CreatePluginInstance<T>(Assembly asm, object arguments, PluginData plugin) where T : Plugin
         {
             // Search for a type of 'T : Plugin' to use
-            Type mainType = null;
+            Type mainType;
             try
             {
                 var types = asm.GetTypes();
@@ -89,14 +89,15 @@ namespace Bricklayer.Core.Common
                 // Make sure there is a plugin metadata file in this folder
                 if (!File.Exists(Path.Combine(dir, "plugin.json")))
                     throw new InvalidOperationException(
-                        $"Plugin directory '{new DirectoryInfo(dir).Name}' does not contain a plugin.json");
-                // Make sure there is a plugin in this folder
-                if (!File.Exists(Path.Combine(dir, "plugin.dll")))
-                    throw new FileNotFoundException(
-                        $"Plugin directory '{new DirectoryInfo(dir).Name}' does not contain a plugin.dll");
+                        $"Plugin directory \"{new DirectoryInfo(dir).Name}\" does not contain a plugin.json");
                 var metadata = File.ReadAllText(Path.Combine(dir, "plugin.json"));
                 var data = JsonConvert.DeserializeObject<PluginData>(metadata, serializationSettings);
                 data.Path = dir;
+                // Make sure there is a plugin in the folder.
+                // The name of the plugin is <plugin-identifier>.dll.
+                if (!File.Exists(Path.Combine(dir, $"{data.Identifier}.dll")))
+                    throw new FileNotFoundException(
+                        $"Plugin directory \"{new DirectoryInfo(dir).Name}\" does not contain an assembly (.dll) that matches its identifer. ({data.Identifier})");
                 plugins.Add(data);
             }
             return plugins;
@@ -105,10 +106,14 @@ namespace Bricklayer.Core.Common
         /// <summary>
         /// Loads a plugin from the specified path.
         /// </summary>
-        public static Assembly LoadPlugin(AppDomain domain, string path)
+        public static Assembly LoadPlugin(string path)
         {
-            // Load the raw bytes of the file, to prevent locking it while the server is running, then load that into the assembly
-            return domain.Load(File.ReadAllBytes(Path.Combine(path, "plugin.dll")));
+            // Load the raw bytes of the file, to prevent locking it while the server is running, then load that into the assembly.
+            // Note: Previously Bricklayer loaded plugins that were named plugin.dll. Assembly.Load seems to have an issue on mono
+            // (https://bugzilla.xamarin.com/show_bug.cgi?id=33728)
+            // that makes it so each assembly must be named different, so now we want each plugin's assembly name to be based off its
+            // identifier/namespace.
+            return Assembly.Load(File.ReadAllBytes(path));
         }
 
         /// <summary>

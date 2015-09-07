@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Bricklayer.Plugins.TestClientPlugin</RootNamespace>
-    <AssemblyName>plugin</AssemblyName>
+    <AssemblyName>Bricklayer.Plugins.TestClientPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -110,8 +110,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "%appdata%\.Bricklayer\Plugins\$(ProjectName)\plugin.dll"
-echo F|xcopy /y "$(TargetDir)plugin.json" "%appdata%\.Bricklayer\Plugins\$(ProjectName)\plugin.json"</PostBuildEvent>
+    <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\$(TargetFileName)"
+echo F|xcopy /y "$(TargetDir)plugin.json" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.json"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

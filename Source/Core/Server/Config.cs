@@ -45,14 +45,21 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The database provider/system used.
         /// </summary>
+        /// <remarks>
+        /// MySQL:
+        ///   - MySql.Data.SqliteClient
+        /// SQLite:
+        ///   - Mono (Windows & Linux): Mono.Data.Sqlite (Default)
+        ///   - System.Data.Sqlite
+        /// </remarks>
         public string Provider;
 
         public IConfig GenerateDefaultConfig()
         {
             return new DatabaseConfig
             {
-                // Bricklayer uses SQLite by default
-                Provider = "System.Data.SQLite",
+                // Bricklayer uses SQLite by default.
+                Provider = "Mono.Data.Sqlite",
                 Connection = "Data Source = database.sqlite; Version = 3"
             };
         }

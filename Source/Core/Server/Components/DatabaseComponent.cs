@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Net.Sockets;
@@ -204,6 +205,12 @@ namespace Bricklayer.Core.Server.Components
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
 
+            var factories = DbProviderFactories.GetFactoryClasses();
+            var invariants =
+                factories.Rows.Cast<DataRow>()
+                    .Where(row => factories.Columns.Contains("InvariantName"))
+                    .Select(x => x["InvariantName"]);
+            Logger.Log(LogLevel.Debug, LogType, "Available providers: " + string.Join(", ", invariants));
             Logger.Log(LogType, $"Using provider {Server.IO.Config.Database.Provider}");
 
             // Create provider from provider string.
@@ -320,7 +327,7 @@ namespace Bricklayer.Core.Server.Components
                         // Execute command
                         command.Connection = con;
                         command.ExecuteNonQuery();
-                        con.Close();
+                        command.Dispose();
                     }
                 }
                 catch (Exception ex) // Catch any errors connecting to database
@@ -362,7 +369,7 @@ namespace Bricklayer.Core.Server.Components
                         // Perform command and handle the result
                         using (var reader = command.ExecuteReader())
                             action(reader); // Let caller handle logic
-                        con.Close();
+                        command.Dispose();
                     }
                 }
                 catch (Exception ex) // Catch any errors connecting to database

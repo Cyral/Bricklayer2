@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Bricklayer.Plugins.MultiAccounts</RootNamespace>
-    <AssemblyName>plugin</AssemblyName>
+    <AssemblyName>Bricklayer.Plugins.MultiAccounts</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -69,7 +69,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.dll"
+    <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\$(TargetFileName)"
 echo F|xcopy /y "$(TargetDir)plugin.json" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.json"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -304,7 +304,7 @@ namespace Bricklayer.Core.Client
 
             // Update plugin logic.
             foreach (var plugin in Plugins.Plugins)
-                plugin.Update(gameTime);
+                plugin?.Update(gameTime);
 
             if (State == GameState.Game)
             {
