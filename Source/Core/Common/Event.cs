@@ -108,20 +108,19 @@ namespace Bricklayer.Core.Common
         {
             // Attempt to find the calling plugin. 
             // This is used when a plugin is unloaded, to automatically remove any events.
-            // TODO: Only issue is, the event must be registered from the main assembly (plugin.dll)
             // I (Cyral) have tried reflection and a bunch of ideas, but decided that it is best to try
             // and remove the events we can. In certain cases the author will manually have to remove events however.
             var callerTypeName = string.Empty;
-            if (asm.FullName.Split(',')[0].Equals("plugin"))
+            // Don't bother looking up the server and client as they are obviously not plugins.
+            if (!asm.FullName.StartsWith("Bricklayer Server") && !asm.FullName.StartsWith("Bricklayer Client"))
             {
                 // If found, find the main type name that inherits from the plugin class.
                 var types = asm.GetTypes();
-                var pluginType = typeof(Plugin);
+                var pluginType = typeof (Plugin);
                 var mainType = types.FirstOrDefault(type => pluginType.IsAssignableFrom(type));
                 if (mainType != null)
                     callerTypeName = mainType.FullName;
             }
-
             handlers.Add(new PrioritizedEventHandler<TArgs>(handler, priority, ignoreCancel, callerTypeName));
             handlers.Sort((a, b) => ((int)a.Priority).CompareTo(b.Priority)); // Sort by priority
         }

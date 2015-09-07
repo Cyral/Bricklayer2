@@ -73,10 +73,16 @@
       <Name>Common Blocks</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo F|xcopy /y "$(TargetPath)" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\$(TargetFileName)"
-echo F|xcopy /y "$(TargetDir)plugin.json" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.json"</PostBuildEvent>
+echo F|xcopy /y "$(TargetDir)plugin.json" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\plugin.json"
+echo F|xcopy /y "$(TargetDir)icon.png" "%25appdata%25\.Bricklayer\Plugins\$(ProjectName)\icon.png"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
