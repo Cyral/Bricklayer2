@@ -1,0 +1,13 @@
+﻿{
+  "Name": "Default Permissions",
+  "Identifier": "Bricklayer.Plugins.Permissions.Client",
+  "Description": "Provides a default permissions system.",
+  "Authors": [ "Pugmatt" ],
+  "Dependencies": [],
+  "Version": {
+      "Major": 0,
+      "Minor": 1,
+      "Build": 0,
+      "Revision": 0
+  }
+}
