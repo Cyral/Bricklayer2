@@ -139,6 +139,10 @@ namespace Bricklayer.Plugins.Permissions.Server
             Nodes.Add(node);
         }
 
+        /// <summary>
+        /// Get player permissions
+        /// </summary>
+        /// <returns></returns>
         public List<PermissionsNode> GetPlayerPermissions(PlayerData player)
         {
             return PlayerPermissions[player];
