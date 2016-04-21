@@ -9,7 +9,9 @@ Bricklayer is a multiplayer, two-dimensional building game where users can build
 
 ###Links:
  - [Game Design Document](https://docs.google.com/document/d/1CJTgZs1hhppzcEBHDBMLm7rMit3nmDtlJRfGPJ-XjMo/)
- - [Official Forums](https://community.pyratron.com/)
- - [Pyratron Website](https://pyratron.com/bricklayer)
+ - [Official Forums](https://www.pyratron.com/community)
+ - [Pyratron Website](https://www.pyratron.com/bricklayer)
+ - [Documentation](https://www.pyratron.com/docs/bricklayer)
+ - [Issues Board (waffle.io)](https://waffle.io/Pyratron/Bricklayer)
 
-If you have found a bug or issue, you may report it here on GitHub or on our forums. Check out our [contributing guide](https://community.pyratron.com/viewtopic.php?f=6&t=11) and the [game design document](https://docs.google.com/document/d/1CJTgZs1hhppzcEBHDBMLm7rMit3nmDtlJRfGPJ-XjMo/) to get involved with development!
+If you have found a bug or issue, you may report it here on GitHub or on our forums. Check out our [contributing guide](https://www.pyratron.com/community/bricklayer/10-contributing-to-bricklayer-pull-requests) and the [game design document](https://docs.google.com/document/d/1CJTgZs1hhppzcEBHDBMLm7rMit3nmDtlJRfGPJ-XjMo/) to get involved with development!

@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using MonoForce.Controls;
 
-namespace Bricklayer.Client.Interface
+namespace Bricklayer.Core.Client.Interface
 {
     /// <summary>
     /// Handles the logical updating of UI elements
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public sealed partial class MainWindow
     {
         private static readonly TimeSpan second = TimeSpan.FromSeconds(1);
 
@@ -21,12 +20,13 @@ namespace Bricklayer.Client.Interface
 
         protected override void Update(GameTime gameTime)
         {
-            Client.Input.Update();
+            if (Client.IsActive) //Pause input updates if window isn't active.
+                Client.Input.Update();
 
-            //Update current screen
+            // Update current screen
             ScreenManager.Update(gameTime);
 
-            //Calculate FPS
+            // Calculate FPS
             elapsedTime += gameTime.ElapsedGameTime;
             if (elapsedTime > second)
             {

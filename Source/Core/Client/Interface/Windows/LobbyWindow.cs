@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Bricklayer.Client.Interface;
 using Bricklayer.Core.Client.Interface.Controls;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
-using Bricklayer.Core.Common.Data;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
 using Microsoft.Xna.Framework.Graphics;
@@ -42,7 +40,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
             Shadow = true;
             Center();
 
-            //Group panels
+            // Group panels
             grpServer = new GroupPanel(Manager)
             {
                 Left = ClientWidth - Globals.Values.MaxBannerWidth - 1,
@@ -171,7 +169,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
                 var window = new CreateLevelDialog(manager, screen);
                 window.Init();
                 Manager.Add(window);
-                window.Show();
+                window.ShowModal();
             };
             BottomPanel.Add(btnCreate);
 
@@ -195,9 +193,18 @@ namespace Bricklayer.Core.Client.Interface.Windows
             // When client receives level data after joining/creating a level
             screen.Client.Events.Network.Game.LevelDataReceived.AddHandler(LevelDataReceived);
 
+            // When the lobby data is received (after connecting or on reload)
+            screen.Client.Events.Network.Game.InitReceived.AddHandler(InitReceived);
+
             LoadLevels();
 
             screen.Client.Network.Send(new RequestMessage(MessageTypes.Banner));
+        }
+
+        private void InitReceived(EventManager.NetEvents.GameServerEvents.InitEventArgs args)
+        {
+            lobbyScreen.ScreenManager.SwitchScreen(new LobbyScreen(args.Message.Description, args.Message.ServerName,
+               args.Message.Intro, args.Message.Online, args.Message.Levels));
         }
 
         private void LevelDataReceived(EventManager.NetEvents.GameServerEvents.LevelDataEventArgs args)
@@ -231,6 +238,7 @@ namespace Bricklayer.Core.Client.Interface.Windows
         {
             lobbyScreen.Client.Events.Network.Game.LobbyBannerReceived.RemoveHandler(LobbyBannerReceived);
             lobbyScreen.Client.Events.Network.Game.LevelDataReceived.RemoveHandler(LevelDataReceived);
+            lobbyScreen.Client.Events.Network.Game.InitReceived.RemoveHandler(InitReceived);
             base.Dispose(disposing);
         }
 

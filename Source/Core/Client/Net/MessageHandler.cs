@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net;
 using System.Threading;
 using Bricklayer.Core.Client.Components;
 using Bricklayer.Core.Client.World;
@@ -38,45 +37,63 @@ namespace Bricklayer.Core.Client.Net
         {
             if (im == null) throw new ArgumentNullException(nameof(im));
 
-            var type = (MessageTypes)im.ReadByte();
+            var type = (MessageTypes) im.ReadByte();
 
             switch (type)
             {
                 case MessageTypes.Init:
                 {
                     var msg = new InitMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.InitReceived.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
+                    networkManager.Client.Events.Network.Game.InitReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
                     break;
                 }
                 case MessageTypes.Banner:
                 {
                     var msg = new BannerMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.LobbyBannerReceived.Invoke(new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
+                    networkManager.Client.Events.Network.Game.LobbyBannerReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.BannerEventArgs(msg.Banner));
                     break;
                 }
                 case MessageTypes.LevelData:
                 {
                     var msg = new LevelDataMessage(im, MessageContext.Client);
                     networkManager.Client.Events.Network.Game.LevelDataReceived.Invoke(
-                        new EventManager.NetEvents.GameServerEvents.LevelDataEventArgs(new Level(msg.Level)));
+                        new EventManager.NetEvents.GameServerEvents.LevelDataEventArgs(new Level(msg.Level,
+                            networkManager.Client)));
                     break;
                 }
                 case MessageTypes.Chat:
                 {
                     var msg = new ChatMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.ChatReceived.Invoke(new EventManager.NetEvents.GameServerEvents.ChatEventArgs(msg.Message));
+                    networkManager.Client.Events.Network.Game.ChatReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.ChatEventArgs(msg.Message));
                     break;
                 }
                 case MessageTypes.PlayerJoin:
                 {
                     var msg = new PlayerJoinMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.PlayerJoinReceived.Invoke(new EventManager.NetEvents.GameServerEvents.PlayerJoinEventArgs(msg.Player));
+                    networkManager.Client.Events.Network.Game.PlayerJoinReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.PlayerJoinEventArgs(msg.Player));
                     break;
                 }
                 case MessageTypes.PingUpdate:
                 {
                     var msg = new PingUpdateMessage(im, MessageContext.Client);
-                    networkManager.Client.Events.Network.Game.PingUpdateReceived.Invoke(new EventManager.NetEvents.GameServerEvents.PingUpdateEventArgs(msg.Pings));
+                    networkManager.Client.Events.Network.Game.PingUpdateReceived.Invoke(
+                        new EventManager.NetEvents.GameServerEvents.PingUpdateEventArgs(msg.Pings));
+                    break;
+                }
+                case MessageTypes.BlockPlace:
+                {
+                    if (networkManager.Client.Level != null)
+                    {
+                        var msg = new BlockPlaceMessage(im, MessageContext.Client);
+                        networkManager.Client.Events.Network.Game.BlockPlaceMessageReceived.Invoke(
+                            new EventManager.NetEvents.GameServerEvents.BlockPlacedEventArgs(networkManager.Client.Level,
+                                msg.Point.X,
+                                msg.Point.Y, msg.Layer, msg.Type));
+                    }
                     break;
                 }
             }
@@ -89,11 +106,11 @@ namespace Bricklayer.Core.Client.Net
         {
             if (im == null) throw new ArgumentNullException(nameof(im));
 
-            //Make sure the unconnected message is coming from the real auth server.
+            // Make sure the unconnected message is coming from the real auth server.
             if (Equals(im.SenderEndPoint, networkManager.AuthEndpoint) &&
                 im.SenderEndPoint.Port == Globals.Values.DefaultAuthPort)
             {
-                var messageType = (MessageTypes) im.ReadByte(); //Find the type of data message sent
+                var messageType = (MessageTypes) im.ReadByte(); // Find the type of data message sent
                 switch (messageType)
                 {
                     case MessageTypes.AuthInit:
@@ -128,9 +145,9 @@ namespace Bricklayer.Core.Client.Net
                     }
                 }
             }
-            else //Message not from auth server, instead from a game server
+            else // Message not from auth server, instead from a game server
             {
-                var messageType = (MessageTypes) im.ReadByte(); //Find the type of data message sent
+                var messageType = (MessageTypes) im.ReadByte(); // Find the type of data message sent
                 switch (messageType)
                 {
                     case MessageTypes.ServerInfo:
@@ -142,7 +159,6 @@ namespace Bricklayer.Core.Client.Net
                                 msg.MaxPlayers, im.SenderEndPoint));
                         break;
                     }
-
                 }
             }
         }
@@ -154,83 +170,84 @@ namespace Bricklayer.Core.Client.Net
         {
             while (networkManager.NetClient.Status == NetPeerStatus.Running)
             {
-                if (networkManager.NetClient != null)
-                {
-                    //Block thread until next message
-                    networkManager.NetClient.MessageReceivedEvent.WaitOne();
+                if (networkManager.NetClient == null)
+                    continue;
 
-                    NetIncomingMessage im; //Holder for the incoming message
-                    while ((im = networkManager.ReadMessage()) != null)
+                // Block thread until next message
+                networkManager.NetClient.MessageReceivedEvent.WaitOne();
+
+                NetIncomingMessage im; // Holder for the incoming message
+                while ((im = networkManager.ReadMessage()) != null)
+                {
+                    switch (im.MessageType)
                     {
-                        switch (im.MessageType)
+                        case NetIncomingMessageType.ConnectionLatencyUpdated:
+                            networkManager.Client.Events.Network.Game.LatencyUpdated.Invoke(
+                                new EventManager.NetEvents.GameServerEvents.LatencyUpdatedEventArgs(im.ReadSingle()));
+                            break;
+                        case NetIncomingMessageType.VerboseDebugMessage:
+                        case NetIncomingMessageType.DebugMessage:
+                        case NetIncomingMessageType.WarningMessage:
+                        case NetIncomingMessageType.ErrorMessage:
+                            Debug.WriteLine(im.ToString());
+                            break;
+                        case NetIncomingMessageType.StatusChanged:
                         {
-                            case NetIncomingMessageType.ConnectionLatencyUpdated:
-                                networkManager.Client.Events.Network.Game.LatencyUpdated.Invoke(
-                                    new EventManager.NetEvents.GameServerEvents.LatencyUpdatedEventArgs(im.ReadSingle()));
-                                break;
-                            case NetIncomingMessageType.VerboseDebugMessage:
-                            case NetIncomingMessageType.DebugMessage:
-                            case NetIncomingMessageType.WarningMessage:
-                            case NetIncomingMessageType.ErrorMessage:
-                                Debug.WriteLine(im.ToString());
-                                break;
-                            case NetIncomingMessageType.StatusChanged:
+                            var status = (NetConnectionStatus) im.ReadByte();
+                            switch (status)
                             {
-                                var status = (NetConnectionStatus)im.ReadByte();
-                                switch (status)
+                                case NetConnectionStatus.None:
                                 {
-                                    case NetConnectionStatus.None:
-                                    {
-                                        networkManager.Client.Events.Network.Game.Disconnected.Invoke(
-                                            new EventManager.NetEvents.GameServerEvents.DisconnectEventArgs(
-                                                "Error connecting to the server."));
-                                        break;
-                                    }
-                                    //When connected to the server
-                                    case NetConnectionStatus.Connected:
-                                    {
-                                        //Must read the first byte of the hail message, which should correspond to the byte of the Init type
-                                        im.SenderConnection.RemoteHailMessage.ReadByte(); //Throw it away
-                                        var msg = new InitMessage(im.SenderConnection.RemoteHailMessage,
-                                            MessageContext.Client);
-                                        //Fire connect event
-                                        networkManager.Client.Events.Network.Game.Connected.Invoke(
-                                            new EventManager.NetEvents.GameServerEvents.ConnectEventArgs());
-                                        //And init message with actual data
-                                        networkManager.Client.Events.Network.Game.InitReceived.Invoke(new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
-                                        break;
-                                    }
-                                    //When disconnected from the server
-                                    case NetConnectionStatus.Disconnected:
-                                    {
-                                        var reason = im.ReadString();
-                                        networkManager.Client.Events.Network.Game.Disconnected.Invoke(
-                                            new EventManager.NetEvents.GameServerEvents.DisconnectEventArgs(reason));
-                                        break;
-                                    }
-                                    case NetConnectionStatus.RespondedAwaitingApproval:
-                                    {
-                                        im.SenderConnection.Approve();
-                                        break;
-                                    }
+                                    networkManager.Client.Events.Network.Game.Disconnected.Invoke(
+                                        new EventManager.NetEvents.GameServerEvents.DisconnectEventArgs(
+                                            "Error connecting to the server."));
+                                    break;
                                 }
-                                break;
+                                // When connected to the server
+                                case NetConnectionStatus.Connected:
+                                {
+                                    // Must read the first byte of the hail message, which should correspond to the byte of the Init type
+                                    im.SenderConnection.RemoteHailMessage.ReadByte(); // Throw it away
+                                    var msg = new InitMessage(im.SenderConnection.RemoteHailMessage,
+                                        MessageContext.Client);
+                                    // Fire connect event
+                                    networkManager.Client.Events.Network.Game.Connected.Invoke(
+                                        new EventManager.NetEvents.GameServerEvents.ConnectEventArgs());
+                                    // And init message with actual data
+                                    networkManager.Client.Events.Network.Game.InitReceived.Invoke(
+                                        new EventManager.NetEvents.GameServerEvents.InitEventArgs(msg));
+                                    break;
+                                }
+                                // When disconnected from the server
+                                case NetConnectionStatus.Disconnected:
+                                {
+                                    var reason = im.ReadString();
+                                    networkManager.Client.Events.Network.Game.Disconnected.Invoke(
+                                        new EventManager.NetEvents.GameServerEvents.DisconnectEventArgs(reason));
+                                    break;
+                                }
+                                case NetConnectionStatus.RespondedAwaitingApproval:
+                                {
+                                    im.SenderConnection.Approve();
+                                    break;
+                                }
                             }
-                            //Data messages are sent by a connected server. (Such as a game server)
-                            case NetIncomingMessageType.Data:
-                            {
-                                HandleDataMessage(im);
-                                break;
-                            }
-                            //Unconnected messages are sent by a server, without creating a full connection. (Used for the auth server)
-                            case NetIncomingMessageType.UnconnectedData:
-                            {
-                                HandleUnconnectedMessage(im);
-                                break;
-                            }
+                            break;
                         }
-                        networkManager.Recycle(im);
+                        // Data messages are sent by a connected server. (Such as a game server)
+                        case NetIncomingMessageType.Data:
+                        {
+                            HandleDataMessage(im);
+                            break;
+                        }
+                        // Unconnected messages are sent by a server, without creating a full connection. (Used for the auth server)
+                        case NetIncomingMessageType.UnconnectedData:
+                        {
+                            HandleUnconnectedMessage(im);
+                            break;
+                        }
                     }
+                    networkManager.Recycle(im);
                 }
             }
         }

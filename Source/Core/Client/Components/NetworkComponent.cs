@@ -6,6 +6,7 @@ using Bricklayer.Core.Client.Net;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Net;
 using Bricklayer.Core.Common.Net.Messages;
+using Bricklayer.Core.Common.World;
 using Lidgren.Network;
 
 namespace Bricklayer.Core.Client.Components
@@ -15,8 +16,7 @@ namespace Bricklayer.Core.Client.Components
     /// </summary>
     internal class NetworkManager : ClientComponent
     {
-        //Message delivery method
-        private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
+        private const NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
 
         /// <summary>
         /// Configuration options for Lidgren messages.
@@ -53,13 +53,13 @@ namespace Bricklayer.Core.Client.Components
         public override async Task Init()
         {
             AuthEndpoint = new IPEndPoint(NetUtility.Resolve(Globals.Values.DefaultAuthAddress),
-                Globals.Values.DefaultAuthPort); //Find the address of the auth server
+                Globals.Values.DefaultAuthPort); // Find the address of the auth server
             TokenKeys = new Token();
 
             // Create new instance of configs. Parameter is "application Id". It has to be same on client and server.
             Config = new NetPeerConfiguration(Globals.Strings.NetworkID);
 
-            //Create message handler (So events are initialized, but don't start it)
+            // Create message handler (So events are initialized, but don't start it)
             Handler = new MessageHandler(this);
 
             // Create new client, with previously created configs
@@ -74,9 +74,8 @@ namespace Bricklayer.Core.Client.Components
                                      | NetIncomingMessageType.ConnectionLatencyUpdated
                                      | NetIncomingMessageType.StatusChanged
                                      | NetIncomingMessageType.UnconnectedData);
-            // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
-            //Listen for init response from auth server containing token keys
+            // Listen for init response from auth server containing token keys
             Client.Events.Network.Auth.InitReceived.AddHandler(args =>
             {
                 TokenKeys.Username = args.Username;
@@ -97,6 +96,25 @@ namespace Bricklayer.Core.Client.Components
                 else
                     Debug.WriteLine("Session verification failed");
             });
+
+            // Block place received message is invoked when the network message is received.
+            // If it is cancelled, it will not call the block placed message.
+            Client.Events.Network.Game.BlockPlaceMessageReceived.AddHandler(
+                args =>
+                {
+                    Client.Events.Game.Level.BlockPlaced.Invoke(
+                        new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(args.Level, args.X, args.Y, args.Z,
+                            args.Type, args.Level.Tiles[args.X, args.Y, args.Z].Type));
+                }, EventPriority.InternalFinal);
+
+            Client.Events.Game.Level.BlockPlaced.AddHandler(args =>
+            {
+                if (args.Level != null)
+                {
+                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+                }
+            });
+
             await base.Init();
         }
 
@@ -110,10 +128,10 @@ namespace Bricklayer.Core.Client.Components
         }
 
         /// <summary>
-        /// Send request to auth server for request to server
+        /// Send request to auth server to join a server.
         /// </summary>
-        /// <param name="host"></param>
-        /// <param name="port"></param>
+        /// <param name="host">Server hostname (IP or domain).</param>
+        /// <param name="port">Server port.</param>
         public void SendSessionRequest(string host, int port)
         {
             this.host = host;
@@ -160,8 +178,8 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void Send(IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            NetClient.SendMessage(message, deliveryMethod); //Send
+            var message = EncodeMessage(gameMessage); // Write packet ID and encode
+            NetClient.SendMessage(message, deliveryMethod); // Send
         }
 
         /// <summary>
@@ -170,9 +188,9 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void SendUnconnected(string ip, int port, IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage); //Write packet ID and encode
+            var message = EncodeMessage(gameMessage); // Write packet ID and encode
             var receiver = new IPEndPoint(NetUtility.Resolve(ip), port); // Auth Server info
-            NetClient.SendUnconnectedMessage(message, receiver); //Send
+            NetClient.SendUnconnectedMessage(message, receiver); // Send
         }
 
         /// <summary>
@@ -181,8 +199,8 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            NetClient.SendUnconnectedMessage(message, receiver); //Send
+            var message = EncodeMessage(gameMessage); // Write packet ID and encode
+            NetClient.SendUnconnectedMessage(message, receiver); // Send
         }
 
         /// <summary>
@@ -192,12 +210,12 @@ namespace Bricklayer.Core.Client.Components
         {
             gameMessage.Context = MessageContext.Client;
             var message = NetClient.CreateMessage();
-            //Write packet type ID
-            message.Write((byte)gameMessage.MessageType);
+            // Write packet type ID
+            message.Write((byte) gameMessage.MessageType);
             gameMessage.Encode(message);
             return message;
         }
-        
+
         /// <summary>
         /// Send ping message to auth server. (Usually used for letting it know it recieved a message)
         /// </summary>
@@ -212,7 +230,7 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="reason">Reason to tell the server for disconnecting.</param>
         public void Disconnect(string reason = "Disconnected.")
         {
-            if (NetClient != null) NetClient.Disconnect(reason);
+            NetClient?.Disconnect(reason);
         }
 
         /// <summary>
@@ -272,12 +290,12 @@ namespace Bricklayer.Core.Client.Components
         /// <param name="disposing">Disconnect?</param>
         private void Dispose(bool disposing)
         {
-            if (!isDisposed)
-            {
-                if (disposing)
-                    Disconnect();
-                isDisposed = true;
-            }
+            if (isDisposed)
+                return;
+
+            if (disposing)
+                Disconnect();
+            isDisposed = true;
         }
 
         public NetworkManager(Client client) : base(client)

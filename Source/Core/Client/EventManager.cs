@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using Bricklayer.Core.Client.Interface.Screens;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
-using MonoForce.Controls;
+using Level = Bricklayer.Core.Client.World.Level;
 
 namespace Bricklayer.Core.Client
 {
@@ -26,12 +25,123 @@ namespace Bricklayer.Core.Client
         /// </summary>
         public NetEvents Network { get; }
 
+        internal EventManager()
+        {
+            Game = new GameEvents();
+            Network = new NetEvents();
+        }
+
         /// <summary>
         /// Events related to the main game client.
         /// </summary>
         public sealed class GameEvents
         {
-            //Arguments define what values are passed to the event handler(s).
+            /// <summary>
+            /// Events related to level management.
+            /// </summary>
+            public LevelEvents Level { get; }
+
+            internal GameEvents()
+            {
+                Level = new LevelEvents();
+            }
+
+            #region Nested type: Class
+
+            /// <summary>
+            /// Events related to level management.
+            /// </summary>
+            public sealed class LevelEvents
+            {
+                /// <summary>
+                /// When a block is placed.
+                /// </summary>
+                public Event<BlockPlacedEventArgs> BlockPlaced { get; } = new Event<BlockPlacedEventArgs>();
+
+                /// <summary>
+                /// When the user's selected block is changed.
+                /// </summary>
+                public Event<SelectedBlockChangedEventArgs> SelectedBlockChanged { get; } =
+                    new Event<SelectedBlockChangedEventArgs>();
+
+                public class SelectedBlockChangedEventArgs : BricklayerEventArgs
+                {
+                    public BlockType NewBlock { get; private set; }
+                    public BlockType OldBlock { get; private set; }
+
+                    public SelectedBlockChangedEventArgs(BlockType newBlock, BlockType oldBlock)
+                    {
+                        NewBlock = newBlock;
+                        OldBlock = oldBlock;
+                    }
+                }
+
+                public class BlockPlacedEventArgs : BricklayerEventArgs
+                {
+                    /// <summary>
+                    /// The type of block placed.
+                    /// </summary>
+                    public BlockType Type { get; private set; }
+
+                    /// <summary>
+                    /// Previous type of block.
+                    /// </summary>
+                    public BlockType OldType { get; private set; }
+
+                    /// <summary>
+                    /// X grid coordinate.
+                    /// </summary>
+                    public int X { get; private set; }
+
+                    /// <summary>
+                    /// Y grid coordinate.
+                    /// </summary>
+                    public int Y { get; private set; }
+
+                    public Layer Layer { get; private set; }
+
+                    /// <summary>
+                    /// Z grid coordinate. (Layer)
+                    /// </summary>
+                    public int Z => (int)Layer;
+
+                    /// <summary>
+                    /// Player who placed block. Null if placed by plugin or game.
+                    /// </summary>
+                    public Player Sender { get; private set; }
+
+                    public Level Level { get; }
+
+                    public BlockPlacedEventArgs(Player sender, int x, int y, int z, BlockType newType, BlockType oldType) : this(x, y, z, newType, oldType)
+                    {
+                        Sender = sender;
+                        Level = (Level) sender.Level;
+                    }
+
+                    public BlockPlacedEventArgs(Level level, int x, int y, int z, BlockType newType, BlockType oldType) : this(x, y, z, newType, oldType)
+                    {
+                        Level = level;
+                    }
+
+                    private BlockPlacedEventArgs(int x, int y, int z, BlockType newType, BlockType oldType)
+                    {
+                        X = x;
+                        Y = y;
+                        Layer = (Layer)z;
+                        Type = newType;
+                        OldType = oldType;
+                    }
+
+                    public BlockPlacedEventArgs(Player sender, int x, int y, Layer layer, BlockType newType, BlockType oldType)
+                        : this(sender, x, y, (int)layer, newType, oldType)
+                    { }
+                }
+            }
+
+            #endregion
+
+            // Arguments define what values are passed to the event handler(s).
+
             #region Arguments
 
             public class GameStateEventArgs : BricklayerEventArgs
@@ -57,10 +167,11 @@ namespace Bricklayer.Core.Client
                     OldScreen = oldScreen;
                 }
             }
+
             #endregion
 
-            //Events represent a collection of event handlers.
-            //(Note: These are not standard .NET events, see the Event class)
+            // Events represent a collection of event handlers.
+            // (Note: These are not standard .NET events, see the Event class)
 
             #region Events
 
@@ -73,6 +184,7 @@ namespace Bricklayer.Core.Client
             /// When the current UI screen of the game is changed. (Example: From login to in-game)
             /// </summary>
             public Event<GameScreenEventArgs> ScreenChanged { get; } = new Event<GameScreenEventArgs>();
+
             #endregion
         }
 
@@ -91,13 +203,19 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public GameServerEvents Game { get; }
 
+            internal NetEvents()
+            {
+                Game = new GameServerEvents();
+                Auth = new AuthServerEvents();
+            }
 
             /// <summary>
             /// Events related to the authentication server and proccess.
             /// </summary>
             public sealed class AuthServerEvents
             {
-                //Arguments define what values are passed to the event handler(s).
+                // Arguments define what values are passed to the event handler(s).
+
                 #region Arguments
 
                 public class InitEventArgs : BricklayerEventArgs
@@ -145,10 +263,11 @@ namespace Bricklayer.Core.Client
                         Message = message;
                     }
                 }
+
                 #endregion
 
-                //Events represent a collection of event handlers.
-                //(Note: These are not standard .NET events, see the Event class)
+                // Events represent a collection of event handlers.
+                // (Note: These are not standard .NET events, see the Event class)
 
                 #region Events
 
@@ -173,8 +292,8 @@ namespace Bricklayer.Core.Client
                 /// <summary>
                 /// When the auth server tells the client to download a mod. (From the install button on the website)
                 /// </summary>
-                public Event<PluginDownloadEventArgs> PluginDownloadRequested { get; } = new Event<PluginDownloadEventArgs>();
-
+                public Event<PluginDownloadEventArgs> PluginDownloadRequested { get; } =
+                    new Event<PluginDownloadEventArgs>();
 
                 #endregion
             }
@@ -184,7 +303,7 @@ namespace Bricklayer.Core.Client
             /// </summary>
             public sealed class GameServerEvents
             {
-                //Arguments define what values are passed to the event handler(s).
+                // Arguments define what values are passed to the event handler(s).
 
                 #region Arguments
 
@@ -204,11 +323,12 @@ namespace Bricklayer.Core.Client
 
                 public class LevelDataEventArgs : BricklayerEventArgs
                 {
-                    public World.Level Level { get; private set; }
+                    public Level Level { get; private set; }
 
-                    public LevelDataEventArgs(World.Level level)
+                    public LevelDataEventArgs(Level level)
                     {
                         Level = level;
+                        Level.Tiles.Generated = true;
                     }
                 }
 
@@ -248,7 +368,6 @@ namespace Bricklayer.Core.Client
                     }
                 }
 
-
                 public class LatencyUpdatedEventArgs : BricklayerEventArgs
                 {
                     public float Ping { get; private set; }
@@ -258,7 +377,6 @@ namespace Bricklayer.Core.Client
                         Ping = ping;
                     }
                 }
-
 
                 public class ChatEventArgs : BricklayerEventArgs
                 {
@@ -289,10 +407,52 @@ namespace Bricklayer.Core.Client
                         Pings = pings;
                     }
                 }
+
+                public class BlockPlacedEventArgs : BricklayerEventArgs
+                {
+                    /// <summary>
+                    /// The type of block placed.
+                    /// </summary>
+                    public BlockType Type { get; private set; }
+
+                    /// <summary>
+                    /// X grid coordinate.
+                    /// </summary>
+                    public int X { get; private set; }
+
+                    /// <summary>
+                    /// Y grid coordinate.
+                    /// </summary>
+                    public int Y { get; private set; }
+
+                    public Layer Layer { get; }
+
+                    /// <summary>
+                    /// Z grid coordinate. (Layer)
+                    /// </summary>
+                    public int Z => (int) Layer;
+
+                    public Level Level { get; }
+
+                    public BlockPlacedEventArgs(Level level, int x, int y, int z, BlockType type)
+                    {
+                        Level = level;
+                        X = x;
+                        Y = y;
+                        Layer = (Layer)z;
+                        Type = type;
+                    }
+
+                    public BlockPlacedEventArgs(Level level, int x, int y, Layer layer, BlockType type)
+                        : this(level, x, y, (int)layer, type)
+                    { }
+                }
+
+
                 #endregion
 
-                //Events represent a collection of event handlers.
-                //(Note: These are not standard .NET events, see the Event class)
+                // Events represent a collection of event handlers.
+                // (Note: These are not standard .NET events, see the Event class)
 
                 #region Events
 
@@ -307,7 +467,8 @@ namespace Bricklayer.Core.Client
                 public Event<ConnectEventArgs> Connected { get; } = new Event<ConnectEventArgs>();
 
                 /// <summary>
-                /// When an init message is recieved, containing list of levels and server info. (On connect and when reload button is pressed)
+                /// When an init message is recieved, containing list of levels and server info. (On connect and when reload button is
+                /// pressed)
                 /// </summary>
                 public Event<InitEventArgs> InitReceived { get; } = new Event<InitEventArgs>();
 
@@ -346,21 +507,14 @@ namespace Bricklayer.Core.Client
                 /// </summary>
                 public Event<PingUpdateEventArgs> PingUpdateReceived { get; } = new Event<PingUpdateEventArgs>();
 
+                /// <summary>
+                /// When the server receives a block place message.
+                /// </summary>
+                public Event<BlockPlacedEventArgs> BlockPlaceMessageReceived { get; } =
+                    new Event<BlockPlacedEventArgs>();
+
                 #endregion
             }
-
-
-            internal NetEvents()
-            {
-                Game = new GameServerEvents();
-                Auth = new AuthServerEvents();
-            }
-        }
-
-        internal EventManager()
-        {
-            Game = new GameEvents();
-            Network = new NetEvents();
         }
     }
 }

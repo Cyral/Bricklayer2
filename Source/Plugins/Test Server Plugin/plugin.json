@@ -1,7 +1,7 @@
 ﻿{
-  //Plugin display name
+  // Plugin display name
   "Name": "Test Server Plugin",
-  //Unique identifier (Can be namespace, domain, anything unique)
+  // Unique identifier (Can be namespace, domain, anything unique)
   "Identifier": "Bricklayer.Plugins.TestServerPlugin",
   "Description": "An Example Server Plugin",
   "Authors": [ "Cyral" ],

@@ -69,6 +69,10 @@
       <Project>{67934705-6fc7-4b1b-bff6-22d98ba135a7}</Project>
       <Name>Server</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Blocks\Common Blocks\Common Blocks.csproj">
+      <Project>{a0e7ab06-82f9-4548-835b-bfa5e7e0d615}</Project>
+      <Name>Common Blocks</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="plugin.json">

@@ -17,9 +17,7 @@ namespace Bricklayer.Core.Server.Components
         private string connectionString;
         private DbProviderFactory providerFactory;
 
-        public DatabaseComponent(Server server) : base(server)
-        {
-        }
+        public DatabaseComponent(Server server) : base(server) {}
 
         /// <summary>
         /// Adds the specified named parameters to the command.
@@ -42,27 +40,26 @@ namespace Bricklayer.Core.Server.Components
         {
             var levels = new List<LevelData>();
             var command = providerFactory.CreateCommand();
-            if (command != null)
+            if (command == null)
+                return levels;
+            // Select the level data (name, description, plays, etc.), and find the name of the creator
+            command.CommandText =
+                "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator";
+            // Query the database and add all resulting levels to the level list
+            await PerformQuery(connectionString, command, reader =>
             {
-                //Select the level data (name, description, plays, etc.), and find the name of the creator
-                command.CommandText =
-                    "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator";
-                //Query the database and add all resulting levels to the level list
-                await PerformQuery(connectionString, command, reader =>
+                if (!reader.HasRows)
+                    return;
+
+                while (reader.Read())
                 {
-                    if (reader.HasRows)
-                    {
-                        while (reader.Read())
-                        {
-                            // Create and add each level data to the list
-                            var briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
-                                reader.GetGuid(0), reader.GetString(2), 0,
-                                reader.GetInt32(3), 3.5d);
-                            levels.Add(briefing);
-                        }
-                    }
-                });
-            }
+                    // Create and add each level data to the list
+                    var briefing = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
+                        reader.GetGuid(0), reader.GetString(2), 0,
+                        reader.GetInt32(3), 3.5d);
+                    levels.Add(briefing);
+                }
+            });
 
             return levels;
         }
@@ -74,25 +71,24 @@ namespace Bricklayer.Core.Server.Components
         {
             LevelData data = null;
             var command = providerFactory.CreateCommand();
-            if (command != null)
+            if (command == null)
+                return data;
+            // Select the level data (name, description, plays, etc.), and find the name of the creator
+            command.CommandText =
+                "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator WHERE Level.Guid = @uuid";
+            AddParamaters(command, new Dictionary<string, string>
             {
-                //Select the level data (name, description, plays, etc.), and find the name of the creator
-                command.CommandText =
-                    "SELECT Level.GUID, Level.Name, Level.Description, Level.Plays, Level.Creator, Player.Username FROM Levels Level JOIN Players Player ON Player.GUID = Level.Creator WHERE Level.Guid = @uuid";
-                AddParamaters(command, new Dictionary<string, string>
+                {"uuid", uuid.ToString("N")}
+            });
+            await PerformQuery(connectionString, command, reader =>
+            {
+                if (reader.Read())
                 {
-                    {"uuid", uuid.ToString("N")}
-                });
-                await PerformQuery(connectionString, command, reader =>
-                {
-                    if (reader.Read())
-                    {
-                        data = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
-                            reader.GetGuid(0), reader.GetString(2), 0,
-                            reader.GetInt32(3), 3.5d);
-                    }
-                });
-            }
+                    data = new LevelData(new PlayerData(reader.GetString(5), reader.GetGuid(4)), reader.GetString(1),
+                        reader.GetGuid(0), reader.GetString(2), 0,
+                        reader.GetInt32(3), 3.5d);
+                }
+            });
 
             return data;
         }
@@ -111,9 +107,7 @@ namespace Bricklayer.Core.Server.Components
                 await PerformQuery(connectionString, command, reader =>
                 {
                     if (reader.Read())
-                    {
                         player = new PlayerData(reader.GetString(0), uuid);
-                    }
                 });
             }
             if (player != null)
@@ -128,7 +122,7 @@ namespace Bricklayer.Core.Server.Components
 
             Log($"Using provider {Server.IO.Config.Database.Provider}");
 
-            //Create provider from provider string.
+            // Create provider from provider string.
             connectionString = Server.IO.Config.Database.Connection;
             providerFactory = DbProviderFactories.GetFactory(Server.IO.Config.Database.Provider);
 
@@ -136,7 +130,7 @@ namespace Bricklayer.Core.Server.Components
                 Log(
                     "Could not connect to database. Database services will be non functional.");
 
-            //Create initial tables if they don't exist
+            // Create initial tables if they don't exist
             var initialCommand = providerFactory.CreateCommand();
             if (initialCommand != null)
             {
@@ -146,7 +140,7 @@ namespace Bricklayer.Core.Server.Components
                 await PerformOperation(connectionString, initialCommand);
             }
 
-            //When a (new) user connects, add them to the database.
+            // When a (new) user connects, add them to the database.
             Server.Events.Network.UserConnected.AddHandler(async args =>
             {
                 var insertCommand = providerFactory.CreateCommand();
@@ -196,20 +190,20 @@ namespace Bricklayer.Core.Server.Components
                 {
                     using (var con = providerFactory.CreateConnection())
                     {
-                        //Open the connection and connect to database
-                        if (con != null)
-                        {
-                            con.ConnectionString = connection;
-                            con.Open();
+                        // Open the connection and connect to database
+                        if (con == null)
+                            return;
 
-                            //Execute command
-                            command.Connection = con;
-                            command.ExecuteNonQuery();
-                            con.Close();
-                        }
+                        con.ConnectionString = connection;
+                        con.Open();
+
+                        // Execute command
+                        command.Connection = con;
+                        command.ExecuteNonQuery();
+                        con.Close();
                     }
                 }
-                catch (Exception ex) //Catch any errors connecting to database
+                catch (Exception ex) // Catch any errors connecting to database
                 {
                     if (ex is DbException || ex is SocketException)
                         Logger.WriteLine(LogType.Error, ex.ToString());
@@ -217,7 +211,7 @@ namespace Bricklayer.Core.Server.Components
                     throw;
 #endif
                 }
-                finally //Make sure the connection is closed
+                finally // Make sure the connection is closed
                 {
                     command.Dispose();
                 }
@@ -233,27 +227,25 @@ namespace Bricklayer.Core.Server.Components
             {
                 try
                 {
-                    //Use a DbProviderFactory to create the connection so that different providers can be used
-                    //eg, MySql or SQLite
+                    // Use a DbProviderFactory to create the connection so that different providers can be used
+                    // eg, MySql or SQLite
                     using (var con = providerFactory.CreateConnection())
                     {
-                        //Connect
-                        if (con != null)
-                        {
-                            con.ConnectionString = connection;
-                            con.Open();
-                            command.Connection = con;
+                        // Connect
+                        if (con == null)
+                            return;
 
-                            //Perform command and handle the result
-                            using (var reader = command.ExecuteReader())
-                            {
-                                action(reader); //Let caller handle logic
-                            }
-                            con.Close();
-                        }
+                        con.ConnectionString = connection;
+                        con.Open();
+                        command.Connection = con;
+
+                        // Perform command and handle the result
+                        using (var reader = command.ExecuteReader())
+                            action(reader); // Let caller handle logic
+                        con.Close();
                     }
                 }
-                catch (Exception ex) //Catch any errors connecting to database
+                catch (Exception ex) // Catch any errors connecting to database
                 {
                     if (ex is DbException || ex is SocketException)
                         Logger.WriteLine(LogType.Error, ex.ToString());
@@ -261,7 +253,7 @@ namespace Bricklayer.Core.Server.Components
                     throw;
 #endif
                 }
-                finally //Make sure the connection is closed
+                finally // Make sure the connection is closed
                 {
                     command.Dispose();
                 }
@@ -279,6 +271,8 @@ namespace Bricklayer.Core.Server.Components
                 {
                     using (var con = providerFactory.CreateConnection())
                     {
+                        // I'm sorry Resharper, I'm afraid I can't do that
+                        // ReSharper disable once InvertIf
                         if (con != null)
                         {
                             con.ConnectionString = conn;

@@ -1,5 +1,4 @@
 ﻿using System;
-using Bricklayer.Core.Common;
 
 namespace Bricklayer.Core.Server
 {
@@ -12,7 +11,7 @@ namespace Bricklayer.Core.Server
         {
             Console.Title = Constants.Strings.ServerTitle;
 
-            //Create an instance of the server and run it.
+            // Create an instance of the server and run it.
             new Server().Start().Wait();
         }
     }

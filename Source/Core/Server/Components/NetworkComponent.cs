@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Remoting.Channels;
 using System.Threading.Tasks;
+using System.Timers;
 using Bricklayer.Core.Common;
 using Bricklayer.Core.Common.Entity;
 using Bricklayer.Core.Common.Net;
@@ -13,7 +15,6 @@ using Bricklayer.Core.Server.Net;
 using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using static Bricklayer.Core.Server.EventManager;
-using Timer = System.Timers.Timer;
 
 namespace Bricklayer.Core.Server.Components
 {
@@ -27,7 +28,7 @@ namespace Bricklayer.Core.Server.Components
     public class NetworkComponent : ServerComponent
     {
         private static readonly NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableOrdered;
-            //Message delivery method
+            // Message delivery method
 
         /// <summary>
         /// The server configuration
@@ -65,7 +66,7 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         private readonly Dictionary<Guid, NetConnection> pendingSessions = new Dictionary<Guid, NetConnection>();
 
-        private bool isDisposed; //Is the instance disposed?
+        private bool isDisposed; // Is the instance disposed?
 
         public NetworkComponent(Server server) : base(server)
         {
@@ -79,9 +80,17 @@ namespace Bricklayer.Core.Server.Components
             };
             timer.Start();
 
-            //When a user requests to join, verify their account is valid with the auth server.
+            // When a user requests to join, verify their account is valid with the auth server.
             Server.Events.Network.UserLoginRequested.AddHandler(args =>
             {
+                if (Server.Players.Any(p => p.UUID == args.UUID))
+                {
+                    Logger.WriteLine(LogType.Net,
+                        args.Username + " already connected. (Denied)");
+                    args.Connection.Deny("You are already connected.");
+                    return;
+                }
+
                 Logger.WriteLine(LogType.Net,
                     args.Username + " requesting to join. Verifying public key with auth server.");
                 if (pendingSessions.ContainsKey(args.UUID))
@@ -89,11 +98,11 @@ namespace Bricklayer.Core.Server.Components
                 pendingSessions.Add(args.UUID, args.Connection);
                 var message = EncodeMessage(new PublicKeyMessage(args.Username, args.UUID, args.PublicKey));
 
-                //Send public key to auth server to verify if session is valid
+                // Send public key to auth server to verify if session is valid
                 NetServer.SendUnconnectedMessage(message, AuthEndpoint);
             });
 
-            //If the response from the auth server is valid, approve their connection request and finalize the connection process.
+            // If the response from the auth server is valid, approve their connection request and finalize the connection process.
             Server.Events.Network.SessionValidated.AddHandler(async args =>
             {
                 if (!pendingSessions.ContainsKey(args.UUID))
@@ -123,21 +132,22 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Network.MessageRequested.AddHandler(async args =>
             {
-                //When the client request an init message (refreshing the lobby)
-                if (args.Type == MessageTypes.Init)
+                // When the client request an init message (refreshing the lobby)
+                switch (args.Type)
                 {
-                    Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
-                        Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels()),
-                        args.Sender);
-                }
-                else if (args.Type == MessageTypes.Banner)
-                {
-                    if (Server.IO.Banner != null)
-                        Send(new BannerMessage(Server.IO.Banner), args.Sender);
+                    case MessageTypes.Init:
+                        Send(new InitMessage(Server.IO.Config.Server.Name, Server.IO.Config.Server.Decription,
+                            Server.IO.Config.Server.Intro, NetServer.ConnectionsCount, await Server.Database.GetAllLevels()),
+                            args.Sender);
+                        break;
+                    case MessageTypes.Banner:
+                        if (Server.IO.Banner != null)
+                            Send(new BannerMessage(Server.IO.Banner), args.Sender);
+                        break;
                 }
             });
 
-            //When a client loads their server list and requests server information, such as description, players online, etc.
+            // When a client loads their server list and requests server information, such as description, players online, etc.
             Server.Events.Network.InfoRequested.AddHandler(
                 args =>
                 {
@@ -146,29 +156,31 @@ namespace Bricklayer.Core.Server.Components
                             Server.IO.Config.Server.MaxPlayers));
                 });
 
+            // Level events.
             Server.Events.Network.CreateLevelMessageRecieved.AddHandler(
                 async args =>
                 {
-                    //Create the new level
+                    // Create the new level
                     var level = await Server.CreateLevel(args.Sender, args.Name, args.Description);
                     Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" created by {level.Creator.Username}");
+
+                    // Fire another event with the newly created level, so that plugins can access it.
+                    // (As the current event is only from the network message)
+                    Server.Events.Game.Level.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
+
+                    level.Tiles.Generated = true; //Level has been generated, all future block placements will be broadcasted.
                     Send(new LevelDataMessage(level), args.Sender);
-                    //Fire another event with the newly created level, so that plugins can access it.
-                    //(As the current event is only from the network message)
-                    Server.Events.Game.Levels.LevelCreated.Invoke(new GameEvents.LevelEvents.CreateLevelEventArgs(level));
-
-
-                }, EventPriority.InternalFinal); //Must be the last event called as it fires another event
+                }, EventPriority.InternalFinal); // Must be the last event called as it fires another event
 
             Server.Events.Network.JoinLevelMessageRecieved.AddHandler(
                 async args =>
                 {
-                    //Create the new level
+                    // Create the new level
                     var level = await Server.JoinLevel(args.Sender, args.UUID);
                     Logger.WriteLine(LogType.Normal, $"Level \"{level.Name}\" joined by {args.Sender.Username}");
                     Send(new LevelDataMessage(level), args.Sender);
                     Broadcast(level, new PlayerJoinMessage(args.Sender));
-                    Broadcast(level, new ChatMessage("[color:Green]" + args.Sender.Username + " has joined.[/color]"));
+                    Broadcast(level, new ChatMessage("[color:Lime]" + args.Sender.Username + " has joined.[/color]"));
 
                 }, EventPriority.InternalFinal);
 
@@ -183,6 +195,29 @@ namespace Bricklayer.Core.Server.Components
                     }
                 }, EventPriority.InternalFinal);
 
+            // Block events.
+            Server.Events.Network.BlockPlaceMessageReceived.AddHandler(
+                args =>
+                {
+                    Server.Events.Game.Level.BlockPlaced.Invoke(
+                        new GameEvents.LevelEvents.BlockPlacedEventArgs(args.Sender, args.X, args.Y, args.Z, args.Type,
+                            args.Level.Tiles[args.X, args.Y, args.Z].Type));
+                }, EventPriority.InternalFinal);
+
+            Server.Events.Game.Level.BlockPlaced.AddHandler(args =>
+            {
+                if (args.Sender != null) //Blocks changed by plugins (not players) will be handled by the tilemap array indexer actions.
+                {
+                    //TODO: If permission was denied (event cancelled), tell the client to revert the block
+
+                    //Directly access the tile array, as we don't want to send two BlockPlaced events, as the tile indexer will
+                    //automatically call the event and send a network message.
+                    args.Level.Tiles.Tiles[args.X, args.Y, args.Z] = new Tile(args.Type);
+                    Server.Net.BroadcastExcept(args.Sender, new BlockPlaceMessage(args.X, args.Y, args.Z, args.Type));
+                }
+            });
+
+            // Logging events.
             Server.Events.Network.UserConnected.AddHandler(args =>
             {
                 Logger.WriteLine(LogType.Normal, ConsoleColor.Green, $"Player \"{args.Player.Username}\" has connected.");
@@ -190,6 +225,7 @@ namespace Bricklayer.Core.Server.Components
 
             Server.Events.Network.UserDisconnected.AddHandler(args =>
             {
+                Server.Players.Remove(args.Player);
                 Logger.WriteLine(LogType.Normal, ConsoleColor.Red, $"Player \"{args.Player.Username}\" has disconnected.");
             }, EventPriority.InternalFinal);
         }
@@ -199,7 +235,7 @@ namespace Bricklayer.Core.Server.Components
             if (!Server.IO.Initialized)
                 throw new InvalidOperationException("The IO component must be initialized first.");
 
-            //Find the address of the auth server
+            // Find the address of the auth server
             await
                 Task.Factory.StartNew(
                     () =>
@@ -225,7 +261,7 @@ namespace Bricklayer.Core.Server.Components
         /// <param name="maxconnections">Maximum clients connectable</param>
         public bool Start(int port, int maxconnections)
         {
-            //Set up config
+            // Set up config
             Config = new NetPeerConfiguration(Globals.Strings.NetworkID)
             {
                 Port = port,
@@ -239,9 +275,8 @@ namespace Bricklayer.Core.Server.Components
                                      | NetIncomingMessageType.Data
                                      | NetIncomingMessageType.StatusChanged
                                      | NetIncomingMessageType.UnconnectedData);
-            // ReSharper enable BitwiseOperatorOnEnumWithoutFlags
 
-            //Start Lidgren server
+            // Start Lidgren server
             NetServer = new NetServer(Config);
             try
             {
@@ -258,12 +293,12 @@ namespace Bricklayer.Core.Server.Components
             Log("Lidgren NetServer started. Port: {0}, Max. Connections: {1}", Config.Port.ToString(),
                 Config.MaximumConnections.ToString());
 
-            //Start message handler
+            // Start message handler
             MsgHandler = new MessageHandler(Server);
             MsgHandler.Start();
             Log("Message handler started.");
 
-            return true; //No error
+            return true; // No error
         }
 
         /// <summary>
@@ -305,8 +340,8 @@ namespace Bricklayer.Core.Server.Components
         /// <param name="gameMessage">IMessage to write ID and send.</param>
         public void SendUnconnected(IPEndPoint receiver, IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage); //Write packet ID and encode
-            NetServer.SendUnconnectedMessage(message, receiver); //Send
+            var message = EncodeMessage(gameMessage); // Write packet ID and encode
+            NetServer.SendUnconnectedMessage(message, receiver); // Send
         }
 
         /// <summary>
@@ -325,9 +360,9 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
         /// <param name="player">Sender NOT to send to</param>
-        public void BroadcastExcept(IMessage gameMessage, Player player)
+        public void BroadcastExcept(Player player, IMessage gameMessage)
         {
-            BroadcastExcept(gameMessage, player.Connection);
+            BroadcastExcept(player.Connection, gameMessage);
         }
 
         /// <summary>
@@ -335,15 +370,17 @@ namespace Bricklayer.Core.Server.Components
         /// </summary>
         /// <param name="gameMessage">IMessage to send</param>
         /// <param name="recipient">Client NOT to send to</param>
-        public void BroadcastExcept(IMessage gameMessage, NetConnection recipient)
+        public void BroadcastExcept(NetConnection recipient, IMessage gameMessage)
         {
-            var message = EncodeMessage(gameMessage);
-
-            //Search for recipients
+            // Search for recipients
             var recipients = NetServer.Connections.Where(x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true)?.Connection.RemoteUniqueIdentifier != recipient.RemoteUniqueIdentifier).ToList();
 
-            if (recipients.Count > 0) //Send to recipients found
+            if (recipients.Count > 0) // Send to recipients found
+            {
+                var message = EncodeMessage(gameMessage);
+
                 NetServer.SendMessage(message, recipients, deliveryMethod, 0);
+            }
         }
 
         /// <summary>
@@ -355,11 +392,11 @@ namespace Bricklayer.Core.Server.Components
         {
             var message = EncodeMessage(gameMessage);
 
-            //Search for recipients
+            // Search for recipients
             var recipients =
                 NetServer.Connections.Where(x => Server.PlayerFromRUI(x.RemoteUniqueIdentifier, true)?.Level == level).ToList();
 
-            if (recipients.Count > 0) //Send to recipients found
+            if (recipients.Count > 0) // Send to recipients found
                 NetServer.SendMessage(message, recipients, deliveryMethod, 0);
         }
 
@@ -369,7 +406,7 @@ namespace Bricklayer.Core.Server.Components
         /// <param name="gameMessage">IMessage to send</param>
         public void Global(IMessage gameMessage)
         {
-            NetServer.SendToAll(EncodeMessage(gameMessage), deliveryMethod); //Send
+            NetServer.SendToAll(EncodeMessage(gameMessage), deliveryMethod); // Send
         }
 
         /// <summary>
@@ -381,7 +418,7 @@ namespace Bricklayer.Core.Server.Components
         {
             gameMessage.Context = MessageContext.Server;
             var message = NetServer.CreateMessage();
-            //Write packet type ID
+            // Write packet type ID
             message.Write((byte)gameMessage.MessageType);
             gameMessage.Encode(message);
             return message;

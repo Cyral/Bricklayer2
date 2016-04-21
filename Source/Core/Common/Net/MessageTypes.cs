@@ -5,7 +5,7 @@
     /// </summary>
     public enum MessageTypes : byte
     {
-        //Ordering matters, don't change the order of these!
+        // Ordering matters, don't change the order of these!
         AuthLogin,
         AuthInit,
         FailedLogin,
@@ -24,6 +24,8 @@
         JoinLevel,
         Chat,
         PlayerJoin,
-        PingUpdate
+        PlayerLeave,
+        PingUpdate,
+        BlockPlace,
     }
 }

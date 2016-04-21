@@ -39,11 +39,11 @@ namespace Bricklayer.Core.Server
             /// <summary>
             /// Events related to level management.
             /// </summary>
-            public LevelEvents Levels { get; }
+            public LevelEvents Level { get; }
 
             internal GameEvents()
             {
-                Levels = new LevelEvents();
+                Level = new LevelEvents();
             }
 
             #region Nested type: Class
@@ -58,12 +58,72 @@ namespace Bricklayer.Core.Server
                     /// <summary>
                     /// The level that was created.
                     /// </summary>
-                    public Level Level { get; internal set; }
+                    public Level Level { get; private set; }
 
                     public CreateLevelEventArgs(Level level)
                     {
                         Level = level;
                     }
+                }
+
+                public class BlockPlacedEventArgs : BricklayerEventArgs
+                {
+                    /// <summary>
+                    /// The type of block placed.
+                    /// </summary>
+                    public BlockType Type { get; private set; }
+
+                    /// <summary>
+                    /// Previous type of block.
+                    /// </summary>
+                    public BlockType OldType { get; private set; }
+
+                    /// <summary>
+                    /// X grid coordinate.
+                    /// </summary>
+                    public int X { get; private set; }
+
+                    /// <summary>
+                    /// Y grid coordinate.
+                    /// </summary>
+                    public int Y { get; private set; }
+
+                    public Layer Layer { get; private set; }
+
+                    /// <summary>
+                    /// Z grid coordinate. (Layer)
+                    /// </summary>
+                    public int Z => (int) Layer;
+
+                    /// <summary>
+                    /// Player who placed block. Null if placed by plugin or game.
+                    /// </summary>
+                    public Player Sender { get; private set; }
+
+                    public Level Level { get; }
+
+                    public BlockPlacedEventArgs(Player sender, int x, int y, int z, BlockType newType, BlockType oldType) : this(x, y, z, newType, oldType)
+                    {
+                        Sender = sender;
+                        Level = sender.Level;
+                    }
+
+                    public BlockPlacedEventArgs(Level level, int x, int y, int z, BlockType newType, BlockType oldType) : this(x, y,z, newType, oldType)
+                    {
+                        Level = level;
+                    }
+
+                    private BlockPlacedEventArgs(int x, int y, int z, BlockType newType, BlockType oldType)
+                    {
+                        X = x;
+                        Y = y;
+                        Layer = (Layer)z;
+                        Type = newType;
+                        OldType = oldType;
+                    }
+
+                    public BlockPlacedEventArgs(Player sender, int x, int y, Layer layer, BlockType newType, BlockType oldType)
+                        : this(sender, x, y, (int) layer, newType, oldType) { } 
                 }
 
                 /// <summary>
@@ -73,6 +133,11 @@ namespace Bricklayer.Core.Server
                 /// For when a new level is requested to be made, see the corresponding Network event.
                 /// </remarks>
                 public Event<CreateLevelEventArgs> LevelCreated { get; } = new Event<CreateLevelEventArgs>();
+
+                /// <summary>
+                /// When a block is placed.
+                /// </summary>
+                public Event<BlockPlacedEventArgs> BlockPlaced { get; } = new Event<BlockPlacedEventArgs>(); 
             }
 
             #endregion
@@ -87,7 +152,7 @@ namespace Bricklayer.Core.Server
         /// </summary>
         public sealed class NetEvents
         {
-            //Arguments define what values are passed to the event handler(s).
+            // Arguments define what values are passed to the event handler(s).
 
             #region Arguments
 
@@ -239,10 +304,55 @@ namespace Bricklayer.Core.Server
                 }
             }
 
+            public class BlockPlacedEventArgs : BricklayerEventArgs
+            {
+                /// <summary>
+                /// The type of block placed.
+                /// </summary>
+                public BlockType Type { get; private set; }
+
+                /// <summary>
+                /// X grid coordinate.
+                /// </summary>
+                public int X { get; private set; }
+
+                /// <summary>
+                /// Y grid coordinate.
+                /// </summary>
+                public int Y { get; private set; }
+
+                public Layer Layer { get; private set; }
+
+                /// <summary>
+                /// Z grid coordinate. (Layer)
+                /// </summary>
+                public int Z => (int)Layer;
+
+                /// <summary>
+                /// Player who placed block. Null if placed by plugin or game.
+                /// </summary>
+                public Player Sender { get; private set; }
+
+                public Level Level => Sender.Level;
+
+                public BlockPlacedEventArgs(Player sender, int x, int y, int z, BlockType type)
+                {
+                    Sender = sender;
+                    X = x;
+                    Y = y;
+                    Layer = (Layer)z;
+                    Type = type;
+                }
+
+                public BlockPlacedEventArgs(Player sender, int x, int y, Layer layer, BlockType type)
+                    : this(sender, x, y, (int)layer, type)
+                { }
+            }
+
             #endregion
 
-            //Events represent a collection of event handlers.
-            //(Note: These are not standard .NET events, see the Event class)
+            // Events represent a collection of event handlers.
+            // (Note: These are not standard .NET events, see the Event class)
 
             #region Events
 
@@ -287,9 +397,14 @@ namespace Bricklayer.Core.Server
             public Event<CreateLevelEventArgs> CreateLevelMessageRecieved { get; } = new Event<CreateLevelEventArgs>();
 
             /// <summary>
-            /// When the server receives a chat message
+            /// When the server receives a chat message.
             /// </summary>
             public Event<ChatEventArgs> ChatMessageReceived { get; } = new Event<ChatEventArgs>();
+
+            /// <summary>
+            /// When the server receives a block place message.
+            /// </summary>
+            public Event<BlockPlacedEventArgs> BlockPlaceMessageReceived { get; } = new Event<BlockPlacedEventArgs>();
 
             #endregion
         }

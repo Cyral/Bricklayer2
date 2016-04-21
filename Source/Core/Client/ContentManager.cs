@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bricklayer.Core.Client.Components;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Bricklayer.Core.Client
@@ -33,7 +30,7 @@ namespace Bricklayer.Core.Client
         /// <summary>
         /// List of all textures loaded into the game.
         /// </summary>
-        private Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>();
+        private Dictionary<string, Texture2D> Textures { get; } = new Dictionary<string, Texture2D>(StringComparer.OrdinalIgnoreCase);
 
         public int Count => Textures.Count;
 
@@ -46,10 +43,10 @@ namespace Bricklayer.Core.Client
             {
                 var files = DirSearch(path, ".png", ".jpeg", ".jpg");
 
-                //For each file name, load it from disk.
+                // For each file name, load it from disk.
                 foreach (var file in files)
                 {
-                    //Remove the full path to return the name of the file
+                    // Remove the full path to return the name of the file
                     var directoryName = Path.GetDirectoryName(file);
                     if (directoryName != null)
                     {
@@ -58,7 +55,7 @@ namespace Bricklayer.Core.Client
 
                         var texture = client.TextureLoader.FromFile(file);
 
-                        //Add it to the dictionary
+                        // Add it to the dictionary
                         Textures[name] = texture;
                     }
                 }

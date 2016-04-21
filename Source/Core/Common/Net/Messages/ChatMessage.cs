@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Lidgren.Network;
+﻿using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
+    /// <summary>
+    /// Chat message.
+    /// </summary>
     public class ChatMessage : IMessage
     {
         /// <summary>
-        /// Chat message 
+        /// Message text.
         /// </summary>
-        public string Message { get; set; }
+        public string Message { get; private set; }
 
         public ChatMessage(NetIncomingMessage im, MessageContext context)
         {

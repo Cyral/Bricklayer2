@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
 using Bricklayer.Core.Common;
+using Bricklayer.Core.Common.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -17,7 +14,6 @@ namespace Bricklayer.Core.Client
     {
         public MouseState CurrentMouseState { get; set; }
         public MouseState PreviousMouseState { get; set; }
-
         public KeyboardState CurrentKeyboardState { get; set; }
         public KeyboardState PreviousKeyboardState { get; set; }
 
@@ -33,8 +29,11 @@ namespace Bricklayer.Core.Client
         {
             get
             {
-                var position = CurrentMouseState.GetPositionPoint();
-                return new Point(position.X / Common.World.Tile.Width, Common.World.Tile.Height);
+                var pos = CurrentMouseState.GetPositionPoint();
+                return new Point((int) Math.Floor(pos.X/(float) Tile.Width),
+                    (int)
+                        Math.Floor((pos.Y - (Tile.FullHeight - Tile.Height) /* Account for 4px top side */ )/
+                                   (float) Tile.Height));
             }
         }
 
@@ -43,7 +42,7 @@ namespace Bricklayer.Core.Client
         /// </summary>
         internal InputHandler()
         {
-            //Initialize
+            // Initialize
         }
 
         /// <summary>
@@ -81,6 +80,7 @@ namespace Bricklayer.Core.Client
         {
             return keys.Any(k => PreviousKeyboardState.IsKeyDown(k));
         }
+
         /// <summary>
         /// Checks if all of the keys specified were up last frame
         /// </summary>
@@ -88,6 +88,7 @@ namespace Bricklayer.Core.Client
         {
             return keys.All(k => PreviousKeyboardState.IsKeyUp(k));
         }
+
         /// <summary>
         /// Checks if any of the keys specified were up the last frame
         /// </summary>
@@ -160,7 +161,6 @@ namespace Bricklayer.Core.Client
             return CurrentMouseState.RightButton == ButtonState.Pressed;
         }
 
-
         /// <summary>
         /// Checks if the left button is being held down
         /// </summary>
@@ -177,7 +177,6 @@ namespace Bricklayer.Core.Client
             return CurrentMouseState.RightButton == ButtonState.Released;
         }
 
-
         /// <summary>
         /// Checks if the left button is currently up
         /// </summary>
@@ -192,7 +191,8 @@ namespace Bricklayer.Core.Client
         /// <returns></returns>
         public bool IsLeftClicked()
         {
-            return CurrentMouseState.LeftButton == ButtonState.Pressed && PreviousMouseState.LeftButton == ButtonState.Released;
+            return CurrentMouseState.LeftButton == ButtonState.Pressed &&
+                   PreviousMouseState.LeftButton == ButtonState.Released;
         }
 
         /// <summary>
@@ -201,7 +201,8 @@ namespace Bricklayer.Core.Client
         /// <returns></returns>
         public bool IsRightClicked()
         {
-            return CurrentMouseState.RightButton == ButtonState.Pressed && PreviousMouseState.RightButton == ButtonState.Released;
+            return CurrentMouseState.RightButton == ButtonState.Pressed &&
+                   PreviousMouseState.RightButton == ButtonState.Released;
         }
 
         /// <summary>
@@ -219,7 +220,7 @@ namespace Bricklayer.Core.Client
                 return -1;
 
             // D0 is 9, D1 is 0, D2 is 1, and so on...
-            return pressedDigitKeys[0] == Keys.D0 ? 9 : ((int)pressedDigitKeys[0]) - 49;
+            return pressedDigitKeys[0] == Keys.D0 ? 0 : ((int) pressedDigitKeys[0]) - 48;
         }
     }
 }

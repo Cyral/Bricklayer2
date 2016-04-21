@@ -15,11 +15,6 @@ namespace Bricklayer.Core.Common.World
     public class Level : LevelData
     {
         /// <summary>
-        /// The height, in blocks, of the map
-        /// </summary>
-        public virtual int Height { get; protected set; }
-
-        /// <summary>
         /// The number of players currently online this level.
         /// </summary>
         public override int Online => Players.Count;
@@ -27,24 +22,33 @@ namespace Bricklayer.Core.Common.World
         /// <summary>
         /// The list of players currently in the map, synced with the server
         /// </summary>
-        public List<Player> Players { get; set; }
+        public List<Player> Players { get; internal set; }
 
         /// <summary>
         /// The spawn point new players will originate from
         /// </summary>
-        public virtual Vector2 Spawn { get; set; }
+        public Vector2 Spawn { get; internal set; }
 
         /// <summary>
         /// The tile array for the map, containing all tiles and tile data [X, Y, Layer/Z]
         /// Layer 0 = Background
         /// Layer 1 = Foreground
         /// </summary>
-        public virtual Tile[,,] Tiles { get; protected set; }
+        /// <remarks>
+        /// An indexer is used to provide custom logic to the array.
+        /// Messages and events will be sent/raised automatically on any tiles modified after world generation.
+        /// </remarks>
+        public TileMap Tiles { get; internal set; }
 
         /// <summary>
         /// The width, in blocks, of the map
         /// </summary>
-        public virtual int Width { get; protected set; }
+        public int Width => Tiles.Width;
+
+        /// <summary>
+        /// The height, in blocks, of the map
+        /// </summary>
+        public int Height => Tiles.Height;
 
         protected Random random;
 
@@ -57,9 +61,7 @@ namespace Bricklayer.Core.Common.World
             : base(level.Creator, level.Name, level.UUID, level.Description, 0, level.Plays, level.Rating)
         {
             Players = new List<Player>();
-            Width = 1000;
-            Height = 500;
-            Tiles = new Tile[Width, Height, 2];
+            Tiles = new TileMap(1000, 500);
             Spawn = new Vector2(Tile.Width, Tile.Height);
             random = new Random();
         }
@@ -71,23 +73,17 @@ namespace Bricklayer.Core.Common.World
             random = new Random();
 
             // Read player data
-            int playersLength = im.ReadInt32();
+            var playersLength = im.ReadInt32();
 
             for (var i = 0; i < playersLength; i++)
                 Players.Add(new Player(im));
 
-            //Read the tile data
+            // Read the tile data
             var memLength = im.ReadInt32();
             using (var memory = new MemoryStream(im.ReadBytes(memLength)))
-            {
-                using (var gzip = new GZipStream(memory, CompressionMode.Decompress, true))
-                {
-                    using (var reader = new BinaryReader(gzip))
-                    { 
-                        DecodeTiles(reader);
-                    }
-                }
-            }
+            using (var gzip = new GZipStream(memory, CompressionMode.Decompress, true))
+            using (var reader = new BinaryReader(gzip))
+                DecodeTiles(reader);
         }
 
         /// <summary>
@@ -95,17 +91,16 @@ namespace Bricklayer.Core.Common.World
         /// </summary>
         internal void DecodeTiles(BinaryReader reader)
         {
-            Width = reader.ReadInt32();
-            Height = reader.ReadInt32();
-            Tiles = new Tile[Width, Height, 2];
-            //Read the background layer, then foreground layer.
+            Tiles = new TileMap(reader.ReadInt32(), reader.ReadInt32());
+
+            // Read the background layer, then foreground layer.
             for (var layer = 0; layer < 2; layer++)
             {
                 for (var y = 0; y < Height; y++)
                 {
                     for (var x = 0; x < Width; x++)
                     {
-                        Tiles[x, y, layer] = new Tile(BlockType.FromID(reader.ReadInt16()));
+                        Tiles[x, y, layer] = new Tile(BlockType.FromID(reader.ReadUInt16()));
                     }
                 }
             }
@@ -113,7 +108,7 @@ namespace Bricklayer.Core.Common.World
 
         internal override void Encode(NetOutgoingMessage om)
         {
-            //Write the data such as name, description, etc.
+            // Write the data such as name, description, etc.
             base.Encode(om);
 
 
@@ -122,17 +117,15 @@ namespace Bricklayer.Core.Common.World
             foreach (var player in Players)
                 player.Encode(om);
 
-            //Write the tile data
+            // Write the tile data
             using (var memory = new MemoryStream())
             {
-                //Use Gzip to compress the data
-                //Note: In Bricklayer v1, RLE was used, Gzip is simpler to use and results in better compression hower.
+                // Use Gzip to compress the data
+                // Note: In Bricklayer v1, RLE was used, Gzip is simpler to use and results in better compression hower.
                 using (var gzip = new GZipStream(memory, CompressionMode.Compress, true))
                 {
                     using (var writer = new BinaryWriter(gzip))
-                    {
                         EncodeTiles(writer);
-                    }
                     var memArr = memory.ToArray();
                     om.Write(memArr.Length);
                     om.Write(memArr);
@@ -144,7 +137,7 @@ namespace Bricklayer.Core.Common.World
         {
             writer.Write(Width);
             writer.Write(Height);
-            //Write the background layer, then foreground layer, so values that are the same are written next to each other
+            // Write the background layer, then foreground layer, so values that are the same are written next to each other
             for (var layer = 0; layer < 2; layer++)
             {
                 for (var y = 0; y < Height; y++)

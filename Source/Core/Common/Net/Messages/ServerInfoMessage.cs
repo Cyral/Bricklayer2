@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Lidgren.Network;
+﻿using Lidgren.Network;
 
 namespace Bricklayer.Core.Common.Net.Messages
 {
@@ -25,10 +20,7 @@ namespace Bricklayer.Core.Common.Net.Messages
             Decode(im);
         }
 
-        public ServerInfoMessage()
-        {
-            
-        }
+        public ServerInfoMessage() {}
 
         public ServerInfoMessage(string description, int players, int maxPlayers)
         {
@@ -45,7 +37,7 @@ namespace Bricklayer.Core.Common.Net.Messages
 
         public void Decode(NetIncomingMessage im)
         {
-            //Actual data is only sent from server to client
+            // Actual data is only sent from server to client
             if (Context == MessageContext.Client)
             {
                 Description = im.ReadString();

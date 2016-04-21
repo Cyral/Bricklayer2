@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Bricklayer.Core.Client.Interface.Screens;
-using Microsoft.Xna.Framework;
+﻿using Bricklayer.Core.Client.Interface.Screens;
 using MonoForce.Controls;
-using Bricklayer.Core.Client;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace Bricklayer.Client.Interface
+namespace Bricklayer.Core.Client.Interface
 {
     /// <summary>
     /// Handles the layout aspects of the window
@@ -18,7 +11,7 @@ namespace Bricklayer.Client.Interface
         /// <summary>
         /// The game instance this window belongs to.
         /// </summary>
-        public Core.Client.Client Client { get; }
+        public Client Client { get; }
 
         /// <summary>
         /// The main <c>ScreenManager</c> that handles control adding/removing.
@@ -26,12 +19,11 @@ namespace Bricklayer.Client.Interface
         public static ScreenManager ScreenManager { get; private set; }
 
 
-        public MainWindow(Manager manager, Core.Client.Client client)
-            : base(manager)
+        public MainWindow(Manager manager, Client client) : base(manager)
         {
             Client = client;
 
-            //Make the window full size, without any border, disallow resize and move, etc., to use the entire screen size.
+            // Make the window full size, without any border, disallow resize and move, etc., to use the entire screen size.
             ClearBackground = true;
             Resizable = false;
             Movable = false;
@@ -43,7 +35,7 @@ namespace Bricklayer.Client.Interface
             Width = manager.Graphics.PreferredBackBufferWidth;
             Height = manager.Graphics.PreferredBackBufferHeight;
 
-            //Set up the ScreenManager which will handle all of the controls from here
+            // Set up the ScreenManager which will handle all of the controls from here
             ScreenManager = new ScreenManager(this);
             ScreenManager.SwitchScreen(new LoginScreen());
 

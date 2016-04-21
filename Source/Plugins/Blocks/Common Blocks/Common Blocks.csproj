@@ -7,7 +7,7 @@
     <ProjectGuid>{A0E7AB06-82F9-4548-835B-BFA5E7E0D615}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bricklayer.Plugins.Blocks.Common</RootNamespace>
+    <RootNamespace>Bricklayer.Plugins.DefaultBlocks.Common</RootNamespace>
     <AssemblyName>Common Blocks</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blocks.cs" />
+    <Compile Include="Categories.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

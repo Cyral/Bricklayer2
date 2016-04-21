@@ -3359,6 +3359,11 @@
             </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "P:MonoForce.Controls.Label.Bold" -->
+        <member name="P:MonoForce.Controls.Label.Shadow">
+            <summary>
+            Indicates if a shadow should be rendered.
+            </summary>
+        </member>
         <!-- Badly formed XML comment ignored for member "P:MonoForce.Controls.Label.Font" -->
         <member name="M:MonoForce.Controls.Label.Init">
             <summary>

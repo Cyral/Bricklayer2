@@ -1,0 +1,13 @@
+﻿{
+  "Name": "Snake",
+  "Identifier": "Bricklayer.Plugins.Snake",
+  "Description": "Snake Minigame",
+  "Authors": [ "Cyral" ],
+  "Dependencies": [ "Bricklayer.Plugins.DefaultBlocks.Server" ],
+  "Version": {
+      "Major": 0,
+      "Minor": 1,
+      "Build": 0,
+      "Revision": 0
+  }
+}

@@ -152,7 +152,7 @@ namespace Bricklayer.Core.Server
         /// Used for error messages. All messages from any log types are written to disk, so the error is retrievable if the server
         /// crashes.
         /// </summary>
-        internal static LogType Error { get; private set; }
+        public static LogType Error { get; private set; }
 
         /// <summary>
         /// Used for IOComponent notifications, such as reading from the disk.
@@ -178,7 +178,7 @@ namespace Bricklayer.Core.Server
         {
             sb = new StringBuilder();
 
-            //Types
+            // Types
             Normal = new LogType("Server", ConsoleColor.White);
             IO = new LogType("IO", ConsoleColor.Cyan);
             Net = new LogType("Net", ConsoleColor.Magenta);

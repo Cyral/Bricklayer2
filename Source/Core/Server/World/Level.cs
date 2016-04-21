@@ -1,38 +1,42 @@
 ﻿using System;
 using Bricklayer.Core.Common.Data;
+using Bricklayer.Core.Common.Net.Messages;
 using Bricklayer.Core.Common.World;
 
 namespace Bricklayer.Core.Server.World
 {
     public class Level : Common.World.Level
     {
-        public Level(PlayerData creator, string name, Guid uuid, string description, int plays, double rating) :
+        /// <summary>
+        /// The game server.
+        /// </summary>
+        public Server Server { get; internal set; }
+
+        public Level(Server server, PlayerData creator, string name, Guid uuid, string description, int plays, double rating) :
             base(creator, name, uuid, description, plays, rating)
         {
-            Generate();
+            Server = server;
+            Tiles.BlockPlaced = BlockPlaced; 
         }
 
-        public Level(LevelData level) : base(level)
+        public Level(Server server, LevelData level) : base(level)
         {
-            
+            Server = server;
+            Tiles.BlockPlaced = BlockPlaced;
         }
 
         /// <summary>
-        /// Populates the tile array with empty tiles and a border around the level.
+        /// Action to be run when a tile is changed after the world is generated.
+        /// This is called by the tilemap array indexer.
         /// </summary>
-        private void Generate()
+        private void BlockPlaced(int x, int y, int z, Tile newTile, Tile oldTile)
         {
-            for (var x = 0; x < Width; x++)
-            {
-                for (var y = 0; y < Height; y++)
-                {
-                    if (x == 0 || y == 0 || x == Width - 1 || y == Height - 1)
-                        Tiles[x, y, 1] = new Tile(BlockType.Blocks[0]);
-                    else
-                        Tiles[x, y, 1] = new Tile(BlockType.Blocks[1]);
-                    Tiles[x, y, 0] = new Tile(BlockType.Blocks[0]);
-                }
-            }
+            //Send block placed message to all users in this level.
+            Server.Net.Broadcast(this, new BlockPlaceMessage(x, y, z, newTile.Type));
+
+            //Fire event so plugins are aware of the block placement.
+            //Blocks placed by players are handled by the network component and do not flow through this method.
+            Server.Events.Game.Level.BlockPlaced.Invoke(new EventManager.GameEvents.LevelEvents.BlockPlacedEventArgs(this, x, y, z, newTile.Type, oldTile.Type));
         }
     }
 }

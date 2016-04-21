@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Timers;
+using Bricklayer.Core.Common.Net.Messages;
+using Bricklayer.Core.Common.World;
 using Bricklayer.Core.Server;
+using Bricklayer.Plugins.DefaultBlocks.Common;
 using Pyratron.Frameworks.Commands.Parser;
 
 namespace Bricklayer.Plugins.TestServerPlugin
@@ -9,9 +13,9 @@ namespace Bricklayer.Plugins.TestServerPlugin
     /// </summary>
     public class TestServerPlugin : ServerPlugin
     {
-        public TestServerPlugin(Server host) : base(host)
-        {
-        }
+        public TestServerPlugin(Server host) : base(host) {}
+
+        private Random random = new Random();
 
         public override void Load()
         {

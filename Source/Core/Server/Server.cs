@@ -4,13 +4,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Bricklayer.Core.Common.Data;
+using System.Timers;
 using Bricklayer.Core.Common.Entity;
-using Bricklayer.Core.Common.World;
-using Bricklayer.Core.Server.World;
 using Bricklayer.Core.Server.Components;
+using Bricklayer.Core.Server.World;
 using Pyratron.Frameworks.Commands.Parser;
-using Level = Bricklayer.Core.Server.World.Level;
 
 namespace Bricklayer.Core.Server
 {
@@ -22,12 +20,12 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Command parser for commmands ran in the console or by users.
         /// </summary>
-        public CommandParser Commands { get; set; }
+        public CommandParser Commands { get; private set; }
 
         /// <summary>
         /// The DatabaseComponent for handling database operations.
         /// </summary>
-        public DatabaseComponent Database { get; set; }
+        public DatabaseComponent Database { get; private set; }
 
         /// <summary>
         /// Manages and lists all server events.
@@ -37,7 +35,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// IOComponent handles disk operations.
         /// </summary>
-        public IOComponent IO { get; set; }
+        public IOComponent IO { get; private set; }
 
         /// <summary>
         /// List of levels currently open.
@@ -47,7 +45,7 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The NetworkComponent for handling recieving, sending, etc.
         /// </summary>
-        public NetworkComponent Net { get; set; }
+        public NetworkComponent Net { get; private set; }
 
         /// <summary>
         /// List of users online the server.
@@ -57,11 +55,12 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// The PluginComponent for loading and managing plugins.
         /// </summary>
-        public PluginComponent Plugins { get; set; }
+        public PluginComponent Plugins { get; internal set; }
 
         private string clear, input;
         private bool showHeader;
         private DateTime start;
+        private Timer saveTimer;
 
         internal async Task Start()
         {
@@ -70,7 +69,7 @@ namespace Bricklayer.Core.Server
             Players = new List<Player>();
             Levels = new List<Level>();
 
-            //Setup server
+            // Setup server
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Clear();
             start = DateTime.Now;
@@ -80,11 +79,11 @@ namespace Bricklayer.Core.Server
             Logger.WriteLine($"{Constants.Strings.ServerTitle}");
             Logger.WriteLine($"Server is starting now, on {DateTime.Now.ToString("U", new CultureInfo("en-US"))}");
 
-            //Initialize Properties
+            // Initialize Properties
             Commands = CommandParser.CreateNew().UsePrefix(string.Empty).OnError(OnParseError);
             RegisterCommands();
 
-            //Initialize Components
+            // Initialize Components
             IO = new IOComponent(this);
             Plugins = new PluginComponent(this);
             Database = new DatabaseComponent(this);
@@ -94,19 +93,25 @@ namespace Bricklayer.Core.Server
             await Plugins.Init();
             await Database.Init();
             await Net.Init();
+
+            // Create save timer
+            saveTimer = new Timer(IO.Config.Server.AutoSaveTime * 1000 * 60);
+            saveTimer.Elapsed += async (sender, args) => await SaveAll();
+            saveTimer.Start();
+
             stopwatch.Stop();
             Logger.WriteBreak();
-            Logger.WriteLine("Ready. ({0}s) Type /help for commands.",
-                Math.Round(stopwatch.Elapsed.TotalSeconds, 2));
+            Logger.WriteLine("Ready. ({0}s) Type /help for commands.", Math.Round(stopwatch.Elapsed.TotalSeconds, 2));
             Logger.WriteBreak();
 
             WriteHeader();
 
-            while (true) //Parse commands now that messaging has been handed off to another thread
+            while (true) // Parse commands now that messaging has been handed off to another thread
             {
                 input = string.Empty;
                 WriteCommandCursor();
-                //Read input and parse command
+
+                // Read input and parse commands
                 while (true)
                 {
                     var key = Console.ReadKey(true);
@@ -130,14 +135,12 @@ namespace Bricklayer.Core.Server
                     Console.Write(key.KeyChar);
                 }
 
-
                 Commands.Parse(input.Trim());
 
                 WriteHeader();
             }
             // ReSharper disable once FunctionNeverReturns
         }
-
 
         /// <summary>
         /// Makes a player join the level with the specified UUID. If the level is not open, it will be loaded.
@@ -147,7 +150,7 @@ namespace Bricklayer.Core.Server
         /// </remarks>
         public async Task<Level> JoinLevel(Player sender, Guid uuid)
         {
-            Level level = Levels.FirstOrDefault(x => x.UUID == uuid);
+            var level = Levels.FirstOrDefault(x => x.UUID == uuid);
             if (level == null)
             {
                 level = await IO.LoadLevel(uuid);
@@ -171,12 +174,14 @@ namespace Bricklayer.Core.Server
         /// </remarks>
         public async Task<Level> CreateLevel(Player sender, string name, string description)
         {
-            var level = new Level(sender, name, Guid.NewGuid(), description, 0, 2.5);
+            var level = new Level(this, sender, name, Guid.NewGuid(), description, 0, 2.5);
             await RemovePlayerFromLevels(sender);
             level.Players.Add(sender);
 
-            //Add the level to the database
+            // Add the level to the database.
             await Database.CreateLevel(level);
+            // Save initial level.
+            await IO.SaveLevel(level);
 
             Levels.Add(level);
             sender.Level = level;
@@ -194,7 +199,7 @@ namespace Bricklayer.Core.Server
                 sender.Level.Players.Remove(sender);
                 if (sender.Level.Players.Count == 0)
                 {
-                    await CloseLevel(sender.Level.UUID); //Close level is nobody is in it
+                    await CloseLevel(sender.Level.UUID); // Close level if nobody is in it.
                 }
             }
         }
@@ -249,8 +254,7 @@ namespace Bricklayer.Core.Server
                 .SetDescription("Saves all levels.")
                 .SetAction(async delegate
                 {
-                    foreach (var level in Levels)
-                        await IO.SaveLevel(level);
+                    await SaveAll();
                 }));
 
             Commands.AddCommand(Command
@@ -267,15 +271,29 @@ namespace Bricklayer.Core.Server
         }
 
         /// <summary>
+        /// Save all levels.
+        /// </summary>
+        internal async Task SaveAll()
+        {
+            if (Levels.Count > 0)
+            {
+                Logger.WriteLine("Saving all levels. ({0})", Levels.Count);
+                foreach (var level in Levels)
+                    await IO.SaveLevel(level);
+            }
+        }
+
+        /// <summary>
         /// Gracefully exits, saving all everything and broadcasting an exit message.
         /// </summary>
-        private void SafeExit()
+        private async void SafeExit()
         {
             Logger.WriteLine("\nSERVER SAFE EXIT:");
             Logger.WriteLine("Network disconnected.");
             Net.Shutdown("The server has shut down. This may be a quick restart, or regular maintenance");
+            await SaveAll();
             IO.LogMessage($"SERVER EXIT: The server has gracefully exited on {DateTime.Now.ToString("U")}\n");
-            Environment.Exit(0); //Peace out dudes and dudettes <3 Yay to the woo
+            Environment.Exit(0);
         }
 
         /// <summary>
@@ -322,7 +340,7 @@ namespace Bricklayer.Core.Server
         private void WriteStats()
         {
             string stats =
-                $"Sent: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.SentBytes / 1024d / 1024, 1))}MB | Recieved: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.ReceivedBytes / 1024d / 1024, 1))}MB | Uptime: {(DateTime.Now - start).ToString("d\\:hh\\:mm")}";
+                $"Sent: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.SentBytes/1024d/1024, 1))}MB | Recieved: {(Net == null ? 0 : Math.Round(Net.NetServer.Statistics.ReceivedBytes/1024d/1024, 1))}MB | Uptime: {(DateTime.Now - start).ToString("d\\:hh\\:mm")}";
 
             WriteCenteredText(stats);
         }
@@ -348,19 +366,19 @@ namespace Bricklayer.Core.Server
         /// <summary>
         /// Helper method to write centered text.
         /// </summary>
-        private void WriteCenteredText(string message)
+        private static void WriteCenteredText(string message)
         {
             if (Console.WindowWidth - message.Length > 0)
             {
-                Console.Write(new string(' ', (Console.WindowWidth - message.Length) / 2));
+                Console.Write(new string(' ', (Console.WindowWidth - message.Length)/2));
                 Console.Write(message);
-                Console.WriteLine(new string(' ', (Console.WindowWidth - message.Length + 1) / 2));
+                Console.WriteLine(new string(' ', (Console.WindowWidth - message.Length + 1)/2));
             }
             else
                 Console.Write(message);
         }
 
-        private void OnParseError(object sender, string message)
+        private static void OnParseError(object sender, string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(message);

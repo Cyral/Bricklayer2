@@ -17,7 +17,7 @@ namespace Bricklayer.Core.Client.Interface.Controls
         {
             User = user;
             Height = 16;
-            Width = parent.Width - 24; //-24 due to scrollbar, TODO: remove scrollbar completely
+            Width = parent.Width - 24; // -24 due to scrollbar, TODO: remove scrollbar completely
 
             lblName = new Label(manager)
             {

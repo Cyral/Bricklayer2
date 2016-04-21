@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -135,7 +133,7 @@ namespace Bricklayer.Core.Common
     public static class PointExtensions
     {
         /// <summary>
-        /// Creates a new Point from a Vector2
+        /// Creates a new Point from a Vector2.
         /// </summary>
         public static Point FromPoint(Vector2 vector)
         {
@@ -143,7 +141,7 @@ namespace Bricklayer.Core.Common
         }
 
         /// <summary>
-        /// Transforms a Point into a Vector2
+        /// Transforms a Point into a Vector2.
         /// </summary>
         public static Vector2 ToVector2(this Point p)
         {
